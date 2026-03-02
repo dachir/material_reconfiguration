@@ -1,0 +1,24 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Purchase Receipt",
+  "enabled": 1,
+  "modified": "2026-02-26 15:47:43.263253",
+  "module": "Material Reconfiguration",
+  "name": "Purchase request required dimensions",
+  "script": "frappe.ui.form.on(\"Purchase Receipt Item\", {\r\n  item_code(frm, cdt, cdn) {\r\n    const row = locals[cdt][cdn];\r\n    if (!row.item_code) return;\r\n\r\n    frappe.db.get_value(\"Item\", row.item_code, \"custom_is_reconfigurable\")\r\n      .then(r => {\r\n        const is_reconf = (r.message && r.message.custom_is_reconfigurable) ? 1 : 0;\r\n        \r\n        frappe.db.get_value(\"Item\", row.item_code, \"custom_sheet_length_mm\")\r\n        .then(r => {\r\n          \r\n          frappe.model.set_value(cdt, cdn, \"custom_sheet_length_mm\", r.message.custom_sheet_length_mm);\r\n          \r\n        });\r\n        frappe.db.get_value(\"Item\", row.item_code, \"custom_sheet_width_mm\")\r\n        .then(r => {\r\n          \r\n          frappe.model.set_value(cdt, cdn, \"custom_sheet_width_mm\", r.message.custom_sheet_width_mm);\r\n          \r\n        });\r\n\r\n      });\r\n  }\r\n});\r\n\r\nfrappe.ui.form.on(\"Purchase Receipt\", {\r\n  validate(frm) {\r\n    (frm.doc.items || []).forEach(row => {\r\n      if (!row.item_code) return;\r\n\r\n      // Quick client-side check; server-side will enforce strictly\r\n      // (avoid async call here).\r\n      if (row.custom_sheet_length_mm && row.custom_sheet_width_mm) return;\r\n    });\r\n  }\r\n});",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Order",
+  "enabled": 1,
+  "modified": "2026-02-26 15:51:29.025059",
+  "module": "Material Reconfiguration",
+  "name": "Report des lignes de Quotation",
+  "script": "frappe.ui.form.on('Sales Order', {\n\trefresh(frm) {\n\t\t// your code here\n\t}\n});\n\nfrappe.ui.form.on(\"Sales Order Item\", {\n  item_code(frm, cdt, cdn) {\n    const row = locals[cdt][cdn];\n    if (!row.item_code) return;\n\n    frappe.db.get_value(\"Item\", row.item_code, \"custom_requires_dimensions\")\n      .then(r => {\n        const needs_dim = (r.message && r.message.custom_requires_dimensions) ? 1 : 0;\n        if (!needs_dim) return;\n\n        if (!row.custom_client_length_mm) {\n          frappe.db.get_value(\"Item\", row.item_code, \"custom_client_length_mm\")\n            .then(r => {\n              frappe.model.set_value(cdt, cdn, \"custom_client_length_mm\", r.message.custom_client_length_mm);\n            });\n        }\n\n        if (!row.custom_client_width_mm) {\n          frappe.db.get_value(\"Item\", row.item_code, \"custom_client_width_mm\")\n            .then(r => {\n              frappe.model.set_value(cdt, cdn, \"custom_client_width_mm\", r.message.custom_client_width_mm);\n            });\n        }\n      });\n  }\n});",
+  "view": "Form"
+ }
+]

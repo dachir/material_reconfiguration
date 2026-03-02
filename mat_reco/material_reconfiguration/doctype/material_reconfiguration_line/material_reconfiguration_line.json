@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-26 00:33:30.726446",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "line_type",
+  "categorie",
+  "serial_no",
+  "length_mm",
+  "width_mm",
+  "quality_rating",
+  "material_status",
+  "planned_pieces",
+  "related_input_serial_no",
+  "serial_bundle"
+ ],
+ "fields": [
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "label": "Serial No",
+   "options": "Serial No"
+  },
+  {
+   "fetch_from": "serial_no.custom_dimension_length_mm",
+   "fieldname": "length_mm",
+   "fieldtype": "Float",
+   "label": "Longueur"
+  },
+  {
+   "fetch_from": "serial_no.custom_dimension_width_mm",
+   "fieldname": "width_mm",
+   "fieldtype": "Float",
+   "label": "Largeur"
+  },
+  {
+   "fetch_from": "serial_no.custom_quality_rating",
+   "fieldname": "quality_rating",
+   "fieldtype": "Rating",
+   "label": "Quality Rating"
+  },
+  {
+   "fetch_from": "serial_no.custom_material_status",
+   "fieldname": "material_status",
+   "fieldtype": "Data",
+   "label": "Material Status "
+  },
+  {
+   "default": "1",
+   "fieldname": "planned_pieces",
+   "fieldtype": "Int",
+   "label": "Planned Pieces "
+  },
+  {
+   "fieldname": "line_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Input\nOutput"
+  },
+  {
+   "fieldname": "categorie",
+   "fieldtype": "Select",
+   "label": "Categorie",
+   "options": "Raw Material\nFinished Good\nBy Product"
+  },
+  {
+   "fieldname": "serial_bundle",
+   "fieldtype": "Link",
+   "label": "Serial Bundle",
+   "options": "Serial and Batch Bundle"
+  },
+  {
+   "fieldname": "related_input_serial_no",
+   "fieldtype": "Link",
+   "label": "Parent SN",
+   "options": "Serial No"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-01 21:50:27.217553",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Material Reconfiguration Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-27 18:57:10.454692",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "kerf_mm",
+  "min_keep_dimension_mm",
+  "allow_rotation",
+  "cutting_strategy",
+  "split_policy",
+  "max_children_per_cut",
+  "column_break_fndl",
+  "allow_partial_reuse",
+  "advanced_kerf_accounting",
+  "smallest_regular_dimension_mm",
+  "weight_piece_output",
+  "weight_waste",
+  "weight_big_rectangle"
+ ],
+ "fields": [
+  {
+   "default": "5",
+   "fieldname": "kerf_mm",
+   "fieldtype": "Float",
+   "label": "Kerf (mm)"
+  },
+  {
+   "default": "500",
+   "description": "Regle:\nRectangle stockable \u21d4 min(L, W) \u2265 min_keep_dimension_mm",
+   "fieldname": "min_keep_dimension_mm",
+   "fieldtype": "Float",
+   "label": "Seuil dimension minimale"
+  },
+  {
+   "fieldname": "column_break_fndl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_rotation",
+   "fieldtype": "Check",
+   "label": "Autoriser rotation"
+  },
+  {
+   "default": "Strip",
+   "fieldname": "cutting_strategy",
+   "fieldtype": "Select",
+   "label": "Mode de d\u00e9coupe",
+   "options": "Strip\nPiece by Piece\nHybrid"
+  },
+  {
+   "default": "Always Split",
+   "fieldname": "split_policy",
+   "fieldtype": "Select",
+   "label": "Politique de split",
+   "options": "Always Split\nNever Split\nSplit If Both Valid"
+  },
+  {
+   "default": "2",
+   "fieldname": "max_children_per_cut",
+   "fieldtype": "Int",
+   "label": "Maximum Chutes"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_partial_reuse",
+   "fieldtype": "Check",
+   "label": "Chutes Partielles"
+  },
+  {
+   "fieldname": "smallest_regular_dimension_mm",
+   "fieldtype": "Float",
+   "label": "Dimension minimale courante produite"
+  },
+  {
+   "default": "0",
+   "fieldname": "advanced_kerf_accounting",
+   "fieldtype": "Check",
+   "label": "Activer optimisation kerf avanc\u00e9e"
+  },
+  {
+   "default": "1",
+   "fieldname": "weight_piece_output",
+   "fieldtype": "Float",
+   "label": "Poids maximisation pi\u00e8ces"
+  },
+  {
+   "default": "1",
+   "fieldname": "weight_waste",
+   "fieldtype": "Float",
+   "label": "Poids minimisation d\u00e9chets"
+  },
+  {
+   "default": "1",
+   "fieldname": "weight_big_rectangle",
+   "fieldtype": "Float",
+   "label": "Poids conservation grandes chutes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-27 19:13:51.777486",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Reconfiguration Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,587 @@
+# Copyright (c) 2026, Richard Amouzou and contributors
+# For license information, please see license.txt
+
+# Copyright (c) 2026, Richard Amouzou and contributors
+# For license information, please see license.txt
+
+import frappe
+from frappe.model.document import Document
+from frappe.utils import cint, flt
+
+# Change if your child fieldname differs
+PLANNED_PIECES_FIELD = "planned_pieces"
+
+
+class MaterialReconfiguration(Document):
+
+    def before_save(self):
+        # No debug msgprint in production
+        if self.status == "Executed":
+            return
+
+        # Minimal prerequisites
+        if not self.sales_order or not self.source_item:
+            return
+
+        # Required header fields for V2
+        fg_qty = cint(getattr(self, "fg_total_qty", 0))
+        fg_L = flt(getattr(self, "fg_length_mm", 0))
+        fg_W = flt(getattr(self, "fg_width_mm", 0))
+        if fg_qty <= 0 or fg_L <= 0 or fg_W <= 0:
+            return
+
+        # Build proposal
+        propose_v2_inputs_fg_and_chutes(self)
+
+    
+    def on_submit(self):
+        assign_chute_serials_on_submit(self)      # génère + crée les Serial No des chutes
+        apply_material_status_on_submit(self)     # applique Consumed / Partial / Full|Part
+
+
+# ------------------------
+# V2 simple algorithm
+# ------------------------
+
+def apply_material_status_on_submit(doc):
+    """Set material_status on detail lines according to business rules."""
+    required = cint(getattr(doc, "fg_total_qty", 0))
+
+    # total produced from FG lines
+    produced = 0
+    for d in (doc.detail or []):
+        if (getattr(d, "categorie", "") or "").strip() == "Finished Good":
+            produced += cint(getattr(d, PLANNED_PIECES_FIELD, 0) or 0)
+
+    fg_status = "Full" if required > 0 and produced >= required else "Part"
+
+    changed = False
+    for d in (doc.detail or []):
+        cat = (getattr(d, "categorie", "") or "").strip()
+
+        if cat == "Raw Material":
+            if hasattr(d, "material_status") and d.material_status != "Consumed":
+                d.material_status = "Consumed"
+                changed = True
+
+        elif cat == "By Product":
+            if hasattr(d, "material_status") and d.material_status != "Partial":
+                d.material_status = "Partial"
+                changed = True
+
+            # also ensure the Serial No doc is marked Partial (if created)
+            sn_name = (getattr(d, "serial_no", "") or "").strip()
+            if sn_name and frappe.db.exists("Serial No", sn_name):
+                frappe.db.set_value("Serial No", sn_name, "custom_material_status", "Partial")
+
+        elif cat == "Finished Good":
+            if hasattr(d, "material_status") and d.material_status != fg_status:
+                d.material_status = fg_status
+                changed = True
+
+    if changed:
+        doc.db_update()
+        for d in doc.detail:
+            d.db_update()
+
+def create_chute_serial_no(doc, chute_serial: str, length_mm: float, width_mm: float):
+    """
+    Create a real Serial No document for the chute if it doesn't exist.
+    Uses source_item as item_code (raw material stays same).
+    """
+    if frappe.db.exists("Serial No", chute_serial):
+        return
+
+    sn = frappe.get_doc({
+        "doctype": "Serial No",
+        "name": chute_serial,  # force the serial format you want
+        "serial_no": chute_serial,  # if you added a custom field; harmless if exists
+        "item_code": doc.source_item,
+        "custom_dimension_length_mm": flt(length_mm),
+        "custom_dimension_width_mm": flt(width_mm),
+        "custom_quality_rating": 5,
+        "custom_material_status": "Partial",
+        #"warehouse": doc.source_warehouse,
+    })
+
+    # important: bypass permission issues on submit
+    sn.flags.ignore_permissions = True
+    sn.insert()
+
+def _parse_chute_suffix(base_serial: str, chute_serial: str):
+    """
+    base_serial = '2026-000001'
+    chute_serial = '2026-000001-02' => returns 2
+    """
+    prefix = f"{base_serial}-"
+    if not chute_serial.startswith(prefix):
+        return None
+    tail = chute_serial[len(prefix):]
+    if not tail.isdigit():
+        return None
+    return int(tail)
+
+def assign_chute_serials_on_submit(doc):
+    """
+    Assign serial_no to each chute (categorie = 'By Product') at submit time.
+    Serial format: <input_serial>-NN (NN starts at 01 per input_serial in this document)
+
+    Robust: does NOT rely on related_input_serial_no being present.
+    It uses the last seen Input (categorie='Raw Material') serial_no as the base.
+    """
+
+    # counter per base input serial
+    counters = {}
+
+    last_input_serial = None
+    changed = False
+
+    for d in (doc.detail or []):
+        cat = (getattr(d, "categorie", "") or "").strip()
+
+        # Track current base serial from Inputs
+        if cat == "Raw Material":
+            last_input_serial = (getattr(d, "serial_no", "") or "").strip()
+            continue
+
+        # Only apply to chutes
+        if cat != "By Product":
+            continue
+
+        # If already assigned, just update counters (idempotent)
+        if getattr(d, "serial_no", None):
+            base = (getattr(d, "related_input_serial_no", None) or last_input_serial or "").strip()
+            if base:
+                suffix = _parse_chute_suffix(base, d.serial_no)
+                if suffix:
+                    counters[base] = max(counters.get(base, 0), suffix)
+            continue
+
+        # Need a base input serial
+        base = (getattr(d, "related_input_serial_no", None) or last_input_serial or "").strip()
+        if not base:
+            # No input encountered before this chute: can't build serial
+            continue
+
+        # increment per base
+        next_i = counters.get(base, 0) + 1
+
+        # Generate candidate serial
+        candidate = f"{base}-{str(next_i).zfill(2)}"
+
+        # 🔒 Collision protection
+        while frappe.db.exists("Serial No", candidate):
+            next_i += 1
+            candidate = f"{base}-{str(next_i).zfill(2)}"
+
+        # Final serial chosen
+        d.serial_no = candidate
+        counters[base] = next_i
+
+        # Create real Serial No document
+        create_chute_serial_no(doc, d.serial_no, d.length_mm, d.width_mm)
+
+        # optional: also set related_input_serial_no if the field exists
+        if hasattr(d, "related_input_serial_no") and not getattr(d, "related_input_serial_no", None):
+            d.related_input_serial_no = base
+
+        changed = True
+
+    # Persist changes
+    if changed:
+        doc.db_update()
+        for d in doc.detail:
+            d.db_update()
+
+def propose_v2_inputs_fg_and_chutes(doc):
+    """
+    V2 (simple, as specified):
+    - We know fg_total_qty, fg_length_mm, fg_width_mm
+    - We select sheets one by one (prefer smallest sufficient L/W)
+    - For each selected sheet:
+        * compute nb = min(floor(L/fgL), floor(W/fgW)) (try both FG orientations)
+        * produce = min(nb, remaining)
+        * chute dims:
+            reste_long = L - produce * fgL_used
+            reste_larg = W - produce * fgW_used
+            swap if reste_larg > reste_long
+        * Add 3 lines:
+            - Input (sheet)
+            - Output FG (planned_pieces = produce)
+            - Output Chute (if >0)
+    Notes:
+    - This is intentionally simplified (not full 2D packing).
+    """
+
+    # Reset all proposal lines (clean)
+    doc.detail = []
+
+    fg_qty = cint(getattr(doc, "fg_total_qty", 0))
+    fg_L0 = flt(getattr(doc, "fg_length_mm", 0))
+    fg_W0 = flt(getattr(doc, "fg_width_mm", 0))
+
+    # Pull available sheets (Serial Nos)
+    serials = frappe.db.sql(
+        """
+        SELECT name,
+               custom_dimension_length_mm AS L,
+               custom_dimension_width_mm  AS W,
+               custom_quality_rating      AS Q,
+               custom_material_status     AS S
+          FROM `tabSerial No`
+         WHERE item_code=%s
+           AND IFNULL(custom_material_status,'') IN ('Full','Partial')
+           AND custom_dimension_length_mm * custom_dimension_width_mm > 0
+        """,
+        (doc.source_item,),
+        as_dict=True,
+    )
+
+    if not serials:
+        frappe.throw("No available sheets (Serial No) found for this Source Item.")
+
+    # Keep only sheets that can fit 1 FG (rotation allowed)
+    candidates = []
+    for s in serials:
+        sL = flt(s.get("L"))
+        sW = flt(s.get("W"))
+        if _can_fit_piece(sL, sW, fg_L0, fg_W0):
+            candidates.append(s)
+
+    if not candidates:
+        frappe.throw("No sheet can fit the FG dimensions.")
+
+    # Prefer Partial first, then smallest area first ("smallest sufficient")
+    candidates.sort(
+        key=lambda s: (
+            0 if (s.get("S") == "Partial") else 1,
+            _area(s.get("L"), s.get("W")),
+        )
+    )
+
+    remaining = fg_qty
+    total_input_area = 0.0
+    total_waste_area = 0.0
+
+    for s in candidates:
+        if remaining <= 0:
+            break
+
+        sheet_L = flt(s.get("L"))
+        sheet_W = flt(s.get("W"))
+
+        nb, use_fg_L, use_fg_W = _compute_nb(sheet_L, sheet_W, fg_L0, fg_W0)
+        if nb <= 0:
+            continue
+
+        produce = min(nb, remaining)
+
+        # --- INPUT ---
+        doc.append(
+            "detail",
+            {
+                "line_type": "Input",
+                "categorie": "Raw Material",
+                "serial_no": s["name"],
+                "length_mm": sheet_L,
+                "width_mm": sheet_W,
+                "quality_rating": s.get("Q"),
+                "material_status": s.get("S"),
+                PLANNED_PIECES_FIELD: 1,
+            },
+        )
+        total_input_area += _area(sheet_L, sheet_W)
+
+        # --- OUTPUT FG (for coherence) ---
+        fg_out_L, fg_out_W = _norm_dims(use_fg_L, use_fg_W)
+        row_fg = {
+            "line_type": "Output",
+            "categorie": "Finished Good",
+            "related_input_serial_no": s["name"],
+            #"output_type": "FG",
+            "length_mm": fg_out_L,
+            "width_mm": fg_out_W,
+            "quality_rating": 5,
+            "target_warehouse": doc.source_warehouse,
+            "serial_no": None,
+        }
+        row_fg[PLANNED_PIECES_FIELD] = produce
+        doc.append("detail", row_fg)
+
+        # --- CHUTE ---
+        # As specified: subtract produce * FG dims
+        reste_long = sheet_L - (produce * use_fg_L)
+        reste_larg = sheet_W - (produce * use_fg_W)
+
+        reste_long = max(reste_long, 0)
+        reste_larg = max(reste_larg, 0)
+
+        chute_L, chute_W = _norm_dims(reste_long, reste_larg)
+
+        if chute_L > 0 and chute_W > 0:
+            row_chute = {
+                "line_type": "Output",
+                "categorie": "By Product",
+                "related_input_serial_no": s["name"],
+                #"output_type": "Chute",
+                "length_mm": chute_L,
+                "width_mm": chute_W,
+                "quality_rating": 5,
+                "target_warehouse": doc.source_warehouse,
+                "serial_no": None,
+            }
+            row_chute[PLANNED_PIECES_FIELD] = 1
+            doc.append("detail", row_chute)
+
+            total_waste_area += _area(chute_L, chute_W)
+
+        remaining -= produce
+
+    if remaining > 0:
+        frappe.throw(f"Not enough sheets to produce required quantity. Missing: {remaining}")
+
+    # Totals (keep consistent with header)
+    doc.total_required_pieces = fg_qty
+    doc.total_required_area_mm2 = _area(fg_L0, fg_W0) * fg_qty
+    doc.total_input_area_mm2 = total_input_area
+    doc.total_estimated_waste_mm2 = total_waste_area
+
+    _reindex_child_rows(doc, "detail")
+
+
+# ------------------------
+# Helpers
+# ------------------------
+
+def _compute_nb(sheet_L, sheet_W, fg_L, fg_W):
+    """
+    Your rule:
+      long_nb = floor(L / fgL)
+      larg_nb = floor(W / fgW)
+      nb = min(long_nb, larg_nb)
+
+    We test both FG orientations and keep the one that yields the biggest nb.
+
+    Returns: (nb, fgL_used, fgW_used)
+    """
+    # orientation A
+    a1 = int(sheet_L // fg_L) if fg_L else 0
+    a2 = int(sheet_W // fg_W) if fg_W else 0
+    nb_a = min(a1, a2)
+
+    # orientation B (rotate FG)
+    b1 = int(sheet_L // fg_W) if fg_W else 0
+    b2 = int(sheet_W // fg_L) if fg_L else 0
+    nb_b = min(b1, b2)
+
+    if nb_b > nb_a:
+        return nb_b, fg_W, fg_L
+    return nb_a, fg_L, fg_W
+
+
+def _can_fit_piece(sheet_L, sheet_W, fg_L, fg_W):
+    return (sheet_L >= fg_L and sheet_W >= fg_W) or (sheet_L >= fg_W and sheet_W >= fg_L)
+
+
+def _area(L, W):
+    return flt(L) * flt(W)
+
+
+def _norm_dims(L, W):
+    """Normalize dims so Length >= Width to avoid L/W swap confusion in UI."""
+    L = flt(L)
+    W = flt(W)
+    return (max(L, W), min(L, W))
+
+
+def _reindex_child_rows(doc, childfield="detail"):
+    rows = doc.get(childfield) or []
+    for i, r in enumerate(rows, start=1):
+        r.idx = i
+
+
+# ------------------------
+# KEEP THIS FUNCTION AS-IS (as requested)
+# ------------------------
+
+def _get_so_requirements(so_name: str):
+    """
+    Build dimension requirements from Sales Order lines.
+
+    Rules (v1):
+    - Keep only SO items where Item.custom_requires_dimensions = 1
+    - Dimensions come from Item (custom_sheet_length_mm/custom_sheet_width_mm)
+      Fallback to SO row custom_client_length_mm/custom_client_width_mm if Item dims missing.
+    - qty from SO row.qty
+    """
+    so = frappe.get_doc("Sales Order", so_name)
+    reqs = []
+
+    item_cache = {}
+
+    for row in so.items:
+        item_code = row.item_code
+        if not item_code:
+            continue
+
+        if item_code not in item_cache:
+            item_cache[item_code] = (
+                frappe.db.get_value(
+                    "Item",
+                    item_code,
+                    [
+                        "custom_requires_dimensions",
+                        "custom_sheet_length_mm",
+                        "custom_sheet_width_mm",
+                    ],
+                    as_dict=True,
+                )
+                or {}
+            )
+
+        meta = item_cache[item_code]
+        if not cint(meta.get("custom_requires_dimensions")):
+            continue
+
+        # Dimensions from Item
+        L = flt(meta.get("custom_sheet_length_mm"))
+        W = flt(meta.get("custom_sheet_width_mm"))
+
+        # Fallback (optional): dimensions on Sales Order line
+        if L <= 0 or W <= 0:
+            L = flt(getattr(row, "custom_client_length_mm", 0))
+            W = flt(getattr(row, "custom_client_width_mm", 0))
+
+        q = cint(row.qty)
+
+        if L <= 0 or W <= 0 or q <= 0:
+            continue
+
+        reqs.append(
+            {
+                "item_code": item_code,
+                "L": L,
+                "W": W,
+                "qty": q,
+                "A": _area(L, W) * q,
+            }
+        )
+
+    return reqs
+
+
+
+#////////////////////////////////////////////////////////////////////////
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_reconfigurable_fg_items(doctype, txt, searchfield, start, page_len, filters):
+    """Link query for fg_item_code: only SO items where Item.custom_is_reconfigurable = 1."""
+    so_name = (filters or {}).get("sales_order")
+    if not so_name:
+        return []
+
+    like_txt = f"%{txt}%"
+
+    return frappe.db.sql(
+        """
+        SELECT DISTINCT soi.item_code
+        FROM `tabSales Order Item` soi
+        INNER JOIN `tabItem` it ON it.name = soi.item_code
+        WHERE soi.parent = %s
+          AND IFNULL(it.custom_requires_dimensions, 0) = 1
+          AND (soi.item_code LIKE %s)
+        ORDER BY soi.item_code
+        LIMIT %s OFFSET %s
+        """,
+        (so_name, like_txt, page_len, start),
+    )
+
+
+@frappe.whitelist()
+def get_first_so_item_row(sales_order: str, item_code: str):
+    """Return the first Sales Order Item rowname for this SO + item_code (idx ascending)."""
+    if not sales_order or not item_code:
+        return None
+
+    rowname = frappe.db.get_value(
+        "Sales Order Item",
+        {"parent": sales_order, "item_code": item_code},
+        "name",
+        order_by="idx asc",
+    )
+    return rowname
+
+
+@frappe.whitelist()
+def get_fg_from_so_item_row(so_item_row: str):
+    """Return dims (and qty) from a specific Sales Order Item row."""
+    if not so_item_row:
+        return {"item_code": None, "qty": 0, "length_mm": 0, "width_mm": 0}
+
+    row = frappe.db.get_value(
+        "Sales Order Item",
+        so_item_row,
+        ["item_code", "qty", "custom_client_length_mm", "custom_client_width_mm"],
+        as_dict=True,
+    ) or {}
+
+    return {
+        "item_code": row.get("item_code"),
+        "qty": flt(row.get("qty")),
+        "length_mm": flt(row.get("custom_client_length_mm")),
+        "width_mm": flt(row.get("custom_client_width_mm")),
+    }
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_reconfigurable_so_item_rows(doctype, txt, searchfield, start, page_len, filters):
+    so_name = (filters or {}).get("sales_order")
+    item_code = (filters or {}).get("item_code")
+
+    if not so_name:
+        return []
+
+    like_txt = f"%{txt}%"
+
+    cond_item = ""
+    params = [so_name, like_txt, like_txt, page_len, start]
+
+    if item_code:
+        cond_item = " AND soi.item_code = %s "
+        params = [so_name, item_code, like_txt, like_txt, page_len, start]
+
+        return frappe.db.sql(
+            f"""
+            SELECT
+                soi.name,
+                CONCAT(soi.description, ' | Qty: ', soi.qty, ' | Row: ', soi.idx) as description
+            FROM `tabSales Order Item` soi
+            INNER JOIN `tabItem` it ON it.name = soi.item_code
+            WHERE soi.parent = %s
+              AND soi.item_code = %s
+              AND (soi.item_code LIKE %s OR soi.name LIKE %s)
+            ORDER BY soi.idx
+            LIMIT %s OFFSET %s
+            """,
+            tuple(params),
+        )
+
+    return frappe.db.sql(
+        """
+        SELECT
+            soi.name,
+            CONCAT(soi.description, ' | Qty: ', soi.qty, ' | Row: ', soi.idx) as description
+        FROM `tabSales Order Item` soi
+        INNER JOIN `tabItem` it ON it.name = soi.item_code
+        WHERE soi.parent = %s
+          AND (soi.item_code LIKE %s OR soi.name LIKE %s)
+        ORDER BY soi.idx
+        LIMIT %s OFFSET %s
+        """,
+        (so_name, like_txt, like_txt, page_len, start),
+    )
+
+
