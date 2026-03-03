@@ -139,6 +139,7 @@ app_license = "mit"
 
 doc_events = {
     "Stock Entry": {
+        "validate": "mat_reco.stock_hooks.stock_entry_validate",
         "before_submit": "mat_reco.stock_hooks.stock_entry_before_submit"
     },
 # 	"*": {

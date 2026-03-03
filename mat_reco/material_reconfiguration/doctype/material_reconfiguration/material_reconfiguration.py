@@ -166,8 +166,8 @@ class MaterialReconfiguration(Document):
                     'Serial No', row.serial_no,
                     {
                         'custom_material_status': 'Consumed',
-                        'custom_dimension_length_mm': 0,
-                        'custom_dimension_width_mm': 0,
+                        #'custom_dimension_length_mm': 0,
+                        #'custom_dimension_width_mm': 0,
                     }
                 )
 

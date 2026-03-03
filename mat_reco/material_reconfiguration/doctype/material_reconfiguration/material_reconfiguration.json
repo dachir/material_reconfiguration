@@ -136,8 +136,13 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2026-02-27 09:45:50.468840",
+ "links": [
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "custom_material_reconfiguration"
+  }
+ ],
+ "modified": "2026-03-03 11:21:54.603539",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Material Reconfiguration",

@@ -81,6 +81,7 @@ def get_repack_payload(mr_name: str) -> dict:
     return {
         "stock_entry_type": "Repack",
         "remarks": f"Prepared from Material Reconfiguration {mr.name}",
+        "custom_material_reconfiguration": mr.name,
         "lines": repack_lines
     }
 

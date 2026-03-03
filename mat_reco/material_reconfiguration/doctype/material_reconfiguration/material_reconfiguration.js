@@ -66,7 +66,7 @@ frappe.ui.form.on("Material Reconfiguration", {
 
           row.qty = line.qty || 0;
           row.conversion_factor = 1;
-          row.allow_zero_valuation_rate = 1;
+          //row.allow_zero_valuation_rate = 1;
 
           const stock_uom = await get_stock_uom(line.item_code);
           if (stock_uom) row.stock_uom = stock_uom;
