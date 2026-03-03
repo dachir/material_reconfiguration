@@ -23,6 +23,9 @@ frappe.ui.form.on("Material Reconfiguration", {
         const se = frappe.model.get_new_doc("Stock Entry");
         se.stock_entry_type = payload.stock_entry_type || "Repack";
         se.remarks = payload.remarks || "";
+        se.custom_material_reconfiguration = frm.doc.name;
+        se.company = frm.doc.company;
+        se.custom_sales_order = frm.doc.sales_order;
 
         // Helper: create bundle in DB (so link validation passes on Stock Entry save)
         const make_bundle = async (item_code, warehouse, serials, transaction_type) => {
