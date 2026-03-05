@@ -46,29 +46,20 @@ class MaterialReconfiguration(Document):
     submission.
     """
 
-    def before_save(self):  # noqa: D401
-        """Propose cutting plan and populate detail lines before saving.
-
-        This hook runs whenever the document is saved (including submit)
-        and ensures that the ``detail`` table reflects the current
-        requirements.  It only acts when the necessary fields are set
-        (source item, warehouse, finished good dimensions and quantity).
-        If any of these are missing or invalid, the proposal is skipped.
-        """
-        # Only attempt to propose when key fields are present
+    def before_save(self):
         if not self.source_item or not self.source_warehouse:
             return
-        # Retrieve finished good dimensions and quantity
+
         try:
             a = float(self.get("fg_length_mm") or 0)
             b = float(self.get("fg_width_mm") or 0)
         except Exception:
-            a = 0.0
-            b = 0.0
-        qty = int(self.get("fg_total_qty") or 0)
-        if a <= 0 or b <= 0 or qty <= 0:
+            a = b = 0.0
+
+        total_qty = int(self.get("fg_total_qty") or 0)
+        if a <= 0 or b <= 0 or total_qty <= 0:
             return
-        # Fetch available serials (sheets/chutes) for this source item
+
         candidates = list(get_available_serials(self.source_item, self.source_warehouse))
         if not candidates:
             frappe.msgprint(
@@ -78,38 +69,68 @@ class MaterialReconfiguration(Document):
                 indicator="orange",
             )
             return
-        # Choose the best candidate sheet and compute a plan
-        best_id, plan = pick_best_candidate(candidates, (a, b), qty, kerf=self.kerf_mm)
-        if plan is None or plan.produced_qty <= 0:
+
+        kerf = float(self.kerf_mm or 0)
+        remaining = total_qty
+
+        all_lines = []
+        used_serials = set()
+        total_produced = 0
+
+        # IMPORTANT: boucle multi-plaques
+        while remaining > 0 and candidates:
+            best_id, plan = pick_best_candidate(candidates, (a, b), remaining, kerf=kerf)
+
+            if plan is None or plan.produced_qty <= 0:
+                break
+
+            used_serials.add(best_id)
+
+            lines = build_mr_lines(
+                source_serial=best_id,
+                plan=plan,
+                target_warehouse=self.source_warehouse,
+                fg_item_code=self.fg_item_code,
+            )
+            all_lines.extend(lines)
+
+            total_produced += int(plan.produced_qty)
+            remaining -= int(plan.produced_qty)
+
+            # enlever le serial utilisé des candidats (pour éviter de le reprendre)
+            candidates = [c for c in candidates if c[0] != best_id] if isinstance(candidates[0], (list, tuple)) else [
+                c for c in candidates if c != best_id
+            ]
+
+        # on remplit detail
+        self.set("detail", [])
+        for line in all_lines:
+            self.append("detail", line)
+
+        if total_produced <= 0:
+            frappe.msgprint(_("Unable to generate a cutting plan for the requested dimensions."), indicator="orange")
+            return
+
+        if remaining > 0:
             frappe.msgprint(
-                _("Unable to generate a cutting plan for the requested dimensions."),
+                _("Partial plan only: produced {0} / {1}. Missing: {2}.").format(total_produced, total_qty, remaining),
                 indicator="orange",
             )
-            return
-        # Build Material Reconfiguration lines
-        lines = build_mr_lines(
-            source_serial=best_id,
-            plan=plan,
-            target_warehouse=self.source_warehouse,
-            fg_item_code=self.fg_item_code,
-        )
-        # Clear existing detail rows and populate with new lines
-        self.set("detail", [])
-        for line in lines:
-            self.append("detail", line)
-        # Compute summary fields on save
+            # si tu veux: self.status = "Partially Proposed"
+        else:
+            # plan complet
+            self.status = "Proposed"
+
+        # recalcul des champs de synthèse (je garde ton bloc, mais attention: raw_serials doit compter les inputs)
         raw_serials = 0
         total_fg_area = 0.0
         total_waste_area = 0.0
+
         for row in self.get("detail", []) or []:
-            try:
-                length_mm = float(row.get("length_mm") or 0)
-                width_mm = float(row.get("width_mm") or 0)
-                qty = int(row.get("planned_pieces") or 0)
-            except Exception:
-                length_mm = 0.0
-                width_mm = 0.0
-                qty = 0
+            length_mm = float(row.get("length_mm") or 0)
+            width_mm = float(row.get("width_mm") or 0)
+            qty = int(row.get("planned_pieces") or 0)
+
             cat = (row.get("categorie") or "").strip()
             if cat == "Raw Material":
                 raw_serials += 1
@@ -118,20 +139,10 @@ class MaterialReconfiguration(Document):
             elif cat == "By Product":
                 if min(length_mm, width_mm) < 500:
                     total_waste_area += length_mm * width_mm * max(qty, 1)
-        try:
-            self.total_required_pieces = raw_serials
-        except Exception:
-            pass
-        try:
-            self.total_required_area_mm2 = total_fg_area
-        except Exception:
-            pass
-        try:
-            self.total_estimated_waste_mm2 = total_waste_area
-        except Exception:
-            pass
-        # Update document status to reflect proposal
-        self.status = "Proposed"
+
+        self.total_required_pieces = raw_serials
+        self.total_required_area_mm2 = total_fg_area
+        self.total_estimated_waste_mm2 = total_waste_area
 
     def on_cancel(self):
         # 1. Annuler et supprimer le Stock Entry associé
