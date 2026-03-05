@@ -125,3 +125,59 @@ def create_serial_batch_bundle(company: str, voucher_type: str, item_code: str, 
 
     b.insert(ignore_permissions=True)
     return b.name
+
+
+@frappe.whitelist()
+def get_available_serials_for_repack(item_codes: list[str] | None = None):
+    """
+    Return available serials for input items used in a Repack Stock Entry.
+    Filters:
+      - item_code in item_codes
+      - custom_material_status != Consumed (and != Comsumed just in case)
+    """
+    if not item_codes:
+        return []
+
+    # Clean
+    item_codes = [c for c in item_codes if c]
+    if not item_codes:
+        return []
+
+    # We only want serialized items
+    serialized = frappe.get_all(
+        "Item",
+        filters={"name": ["in", item_codes], "has_serial_no": 1},
+        pluck="name",
+    )
+    if not serialized:
+        return []
+
+    # Serial No filter: status != Consumed
+    rows = frappe.get_all(
+        "Serial No",
+        filters={
+            "item_code": ["in", serialized],
+            "custom_material_status": ["not in", ["Consumed", "Comsumed"]],
+        },
+        fields=[
+            "name",
+            "item_code",
+            "custom_dimension_length_mm",
+            "custom_dimension_width_mm",
+            "custom_quality_rating",
+            "custom_material_status",
+        ],
+        order_by="item_code asc, modified desc",
+        limit_page_length=1000,
+    )
+
+    # Add item_name
+    item_name_map = {}
+    for code in set([r["item_code"] for r in rows]):
+        item_name_map[code] = frappe.get_cached_value("Item", code, "item_name")
+
+    for r in rows:
+        r["item_name"] = item_name_map.get(r["item_code"])
+
+    return rows
+
