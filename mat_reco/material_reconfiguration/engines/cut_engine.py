@@ -1,57 +1,309 @@
 """
-Cutting algorithm for material reconfiguration.
+Cutting engine based on explicit layout generation.
 
-This module contains a high-level function that, given a source
-rectangle and a demand for a number of identically sized pieces,
-returns a plan describing how many pieces can be produced and
-what chutes remain. The function delegates geometry calculations to
-helpers in :mod:`mat_reco.material_reconfiguration.utils.dimensions` and consumes settings from
-the reconfiguration settings document.
-
-The implementation here is intentionally pure: it takes simple types
-as input and produces plain dictionaries as output. This makes the
-core logic easy to unit test and to reuse in different contexts
-without pulling in Frappe.
+This engine computes a cutting plan with coordinates, leftovers,
+indicative cuts and statistics. It is designed to be stored as JSON
+on the Input line of Material Reconfiguration Line.
 """
 
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
-
-from mat_reco.material_reconfiguration.utils.dimensions import (
-    can_fit,
-    strip_capacity,
-    used_dims,
-    band_rest,
-    filter_keepable_rects,
-    norm_dims,
-)
-# Settings for the cutting engine are retrieved from a module under
-# `mat_reco.material_reconfiguration.utils` rather than the global utils
-# to make the path explicit and configurable per application.
-from mat_reco.material_reconfiguration.utils.settings import get_reco_settings
+from typing import List, Tuple, Optional, Dict, Any
+from copy import deepcopy
 
 
 @dataclass
 class CutPlan:
-    """Represents a plan for cutting a single rectangle."""
-
     produced_qty: int
-    """Number of pieces produced."""
-
     orientation: Tuple[float, float]
-    """Orientation of the piece used for this plan (x,y)."""
-
     grid: Tuple[int, int]
-    """Number of pieces along (n,m) directions."""
-
     used_dims: Tuple[float, float]
-    """Dimensions consumed by the produced grid (used_L, used_W)."""
-
     children: List[Tuple[float, float]]
-    """List of chutes to be kept (dimensions)."""
-
     waste: List[Tuple[float, float]]
-    """List of waste pieces discarded (dimensions)."""
+    raw_result: Dict[str, Any]
+    best_solution: Dict[str, Any]
+
+
+def build_layout(sheet_length, sheet_width, kerf, piece_length, piece_width, qty):
+    """
+    Construit un plan simple de découpe guillotine indicatif.
+
+    Règle métier:
+    - on place autant de pièces que possible, jusqu'à qty
+    - si toute la quantité ne rentre pas, on retourne quand même un plan partiel
+    - on retourne None seulement si aucune pièce ne peut être placée
+    """
+
+    placements = []
+
+    x = 0
+    y = 0
+    placed = 0
+    row_height = piece_width
+
+    while placed < qty:
+        # Si la pièce ne rentre pas sur la ligne courante
+        if x + piece_length > sheet_length:
+            # Si on est déjà au début d'une ligne vide,
+            # alors elle ne rentre nulle part en longueur
+            if x == 0:
+                break
+
+            # Sinon on passe à la ligne suivante
+            x = 0
+            y += row_height + kerf
+            continue
+
+        # Si la pièce ne rentre plus en hauteur, on s'arrête
+        if y + piece_width > sheet_width:
+            break
+
+        placements.append({
+            "piece_id": f"A{placed + 1}",
+            "x": x,
+            "y": y,
+            "length": piece_length,
+            "width": piece_width,
+            "rotation": False
+        })
+
+        placed += 1
+        x += piece_length + kerf
+
+    # Si aucune pièce n'a pu être placée, échec réel
+    if not placements:
+        return None
+
+    leftovers = compute_leftovers_from_row_layout(
+        sheet_length=sheet_length,
+        sheet_width=sheet_width,
+        kerf=kerf,
+        placements=placements
+    )
+
+    cuts = build_indicative_cuts(placements, kerf)
+
+    sheet_area = sheet_length * sheet_width
+    used_area = sum(p["length"] * p["width"] for p in placements)
+    leftover_area = sum(l["area"] for l in leftovers)
+    kerf_loss_area = sheet_area - used_area - leftover_area
+
+    result = {
+        "sheet": {
+            "length": sheet_length,
+            "width": sheet_width,
+            "kerf": kerf,
+            "origin": [0, 0]
+        },
+        "placements": placements,
+        "cuts": cuts,
+        "leftovers": leftovers,
+        "statistics": {
+            "sheet_area": sheet_area,
+            "used_area": used_area,
+            "leftover_area": leftover_area,
+            "kerf_loss_area": kerf_loss_area,
+            "utilization_ratio": used_area / sheet_area if sheet_area else 0,
+            "leftover_count": len(leftovers)
+        }
+    }
+
+    return result
+
+
+def compute_leftovers_from_row_layout(sheet_length, sheet_width, kerf, placements):
+    if not placements:
+        return []
+
+    rows = {}
+    for p in placements:
+        rows.setdefault(p["y"], []).append(p)
+
+    sorted_rows_y = sorted(rows.keys())
+    leftovers = []
+    leftover_index = 1
+
+    normalized_rows = []
+    for y in sorted_rows_y:
+        row_pieces = sorted(rows[y], key=lambda p: p["x"])
+        normalized_rows.append((y, row_pieces))
+
+    for y, row_pieces in normalized_rows:
+        last_piece = row_pieces[-1]
+        right_start = last_piece["x"] + last_piece["length"] + kerf
+
+        if right_start < sheet_length:
+            length = sheet_length - right_start
+            width = row_pieces[0]["width"]
+            leftovers.append({
+                "leftover_id": f"L{leftover_index}",
+                "x": right_start,
+                "y": y,
+                "length": length,
+                "width": width,
+                "shape": "rectangle",
+                "area": length * width
+            })
+            leftover_index += 1
+
+    last_y, last_row = normalized_rows[-1]
+    top_start = last_y + last_row[0]["width"] + kerf
+    if top_start < sheet_width:
+        leftovers.append({
+            "leftover_id": f"L{leftover_index}",
+            "x": 0,
+            "y": top_start,
+            "length": sheet_length,
+            "width": sheet_width - top_start,
+            "shape": "rectangle",
+            "area": sheet_length * (sheet_width - top_start)
+        })
+
+    return leftovers
+
+
+def build_indicative_cuts(placements, kerf):
+    cuts = []
+    cut_index = 1
+
+    horizontal_positions = sorted(set(
+        p["y"] + p["width"] for p in placements
+    ))
+    vertical_positions = sorted(set(
+        p["x"] + p["length"] for p in placements
+    ))
+
+    for pos in horizontal_positions:
+        cuts.append({
+            "cut_id": f"C{cut_index}",
+            "type": "horizontal",
+            "position": pos,
+            "kerf": kerf
+        })
+        cut_index += 1
+
+    for pos in vertical_positions:
+        cuts.append({
+            "cut_id": f"C{cut_index}",
+            "type": "vertical",
+            "position": pos,
+            "kerf": kerf
+        })
+        cut_index += 1
+
+    return cuts
+
+
+def score_solution(result):
+    stats = result["statistics"]
+    leftovers = result["leftovers"]
+    placements = result.get("placements", [])
+
+    produced_qty = len(placements)
+    largest_leftover = max((l["area"] for l in leftovers), default=0)
+
+    return (
+        -produced_qty,                    # priorité absolue : produire plus
+        stats["kerf_loss_area"],          # puis moins de perte
+        -largest_leftover,                # puis plus grande chute
+        stats["leftover_count"],          # puis moins de chutes
+        -stats["leftover_area"],          # puis plus de surface récupérable
+    )
+
+
+def optimize_cutting(
+    sheet_length,
+    sheet_width,
+    kerf,
+    piece_length,
+    piece_width,
+    qty,
+    piece_rotation_allowed=True
+):
+    candidates = []
+
+    sheet_variants = [
+        {
+            "sheet_length": sheet_length,
+            "sheet_width": sheet_width,
+            "sheet_rotated": False
+        },
+        {
+            "sheet_length": sheet_width,
+            "sheet_width": sheet_length,
+            "sheet_rotated": True
+        }
+    ]
+
+    piece_variants = [
+        {
+            "piece_length": piece_length,
+            "piece_width": piece_width,
+            "piece_rotated": False
+        }
+    ]
+
+    if piece_rotation_allowed and (piece_length != piece_width):
+        piece_variants.append({
+            "piece_length": piece_width,
+            "piece_width": piece_length,
+            "piece_rotated": True
+        })
+
+    for s in sheet_variants:
+        for p in piece_variants:
+            layout = build_layout(
+                sheet_length=s["sheet_length"],
+                sheet_width=s["sheet_width"],
+                kerf=kerf,
+                piece_length=p["piece_length"],
+                piece_width=p["piece_width"],
+                qty=qty
+            )
+
+            if layout is None:
+                continue
+
+            candidate = deepcopy(layout)
+            candidate["comparison"] = {
+                "sheet_rotated_90": s["sheet_rotated"],
+                "piece_rotated_90": p["piece_rotated"],
+                "original_sheet": {
+                    "length": sheet_length,
+                    "width": sheet_width
+                },
+                "original_piece": {
+                    "length": piece_length,
+                    "width": piece_width
+                }
+            }
+
+            for placement in candidate["placements"]:
+                placement["rotation"] = p["piece_rotated"]
+
+            candidates.append(candidate)
+
+    if not candidates:
+        return {
+            "best_solution": None,
+            "all_candidates": [],
+            "message": "No valid layout found."
+        }
+
+    best = min(candidates, key=score_solution)
+
+    for idx, c in enumerate(candidates, start=1):
+        c["candidate_id"] = f"OPTION_{idx}"
+
+    best["selected"] = True
+
+    return {
+        "best_solution": best,
+        "all_candidates": candidates
+    }
+
+
+def _is_keepable_leftover(length: float, width: float, min_keep_dimension_mm: float) -> bool:
+    return min(length, width) >= min_keep_dimension_mm
 
 
 def plan_cut(
@@ -59,98 +311,24 @@ def plan_cut(
     piece: Tuple[float, float],
     qty: int,
     allow_rotation: bool = True,
-    kerf: float | None = None,
+    kerf: float = 0,
+    min_keep_dimension_mm: float = 0,
 ) -> CutPlan:
-    """Plan how to cut a rectangle to produce as many pieces as possible.
+    sheet_length, sheet_width = source
+    piece_length, piece_width = piece
 
-    Given a source rectangle (L,W) and a demanded piece (a,b), this
-    function determines the optimal orientation and grid size to cut
-    up to ``qty`` pieces. It then calculates the dimensions of the
-    resulting chutes after applying the minimum dimension filter from
-    the current reconfiguration settings. The function does not
-    recurse or chain cuts; it only plans a single cut operation.
+    raw_result = optimize_cutting(
+        sheet_length=sheet_length,
+        sheet_width=sheet_width,
+        kerf=kerf,
+        piece_length=piece_length,
+        piece_width=piece_width,
+        qty=qty,
+        piece_rotation_allowed=allow_rotation,
+    )
 
-    :param source: Dimensions of the source rectangle (L,W).
-    :param piece: Dimensions of the demanded piece (a,b).
-    :param qty: Requested quantity of pieces.
-    :param allow_rotation: Whether the piece may be rotated.
-    :return: A :class:`CutPlan` describing the cut.
-    """
-    settings = get_reco_settings()
-    L, W = norm_dims(*source)
-    a, b = piece
-
-    # Try both orientations and pick the one with the highest capacity
-    best_orientation: Optional[Tuple[float, float]] = None
-    best_grid: Tuple[int, int] = (0, 0)
-    best_production = 0
-    best_chutes: List[Tuple[float, float]] = []
-    best_waste: List[Tuple[float, float]] = []
-    # Define candidate orientations
-    orientations = [(a, b)]
-    if allow_rotation:
-        orientations.append((b, a))
-
-    for x, y in orientations:
-        # Skip impossible orientations
-        if not can_fit(L, W, x, y, allow_rotation=False):
-            continue
-        n, m = strip_capacity(L, W, x, y, kerf or settings.kerf_mm)
-        if n <= 0 or m <= 0:
-            continue
-        total_capacity = n * m
-        produced = min(qty, total_capacity)
-        # Compute how much of the rectangle will be used by the produced grid.
-        used_L, used_W = used_dims(n, m, x, y, kerf or settings.kerf_mm)
-        # Compute potential residual rectangles
-        (r1_L, r1_W), (r2_L, r2_W) = band_rest(L, W, used_L, used_W)
-        # ------------------------------------------------------------------
-        # Adjust residual dimensions for kerf at the outer boundary.
-        #
-        # When cutting a grid of n columns and m rows from the top-left
-        # corner of a sheet, we make a vertical cut along the right edge
-        # of the grid and a horizontal cut along the bottom edge of the
-        # grid.  Each of these boundary cuts consumes one kerf.  The
-        # default ``band_rest`` computation subtracts only the consumed
-        # dimensions from the grid (i.e. ``used_dims`` includes only
-        # interior kerfs), so the residual rectangles are too large by
-        # one kerf along the respective dimension.  Here we deduct the
-        # kerf from the appropriate residual when there is at least one
-        # piece along that dimension.
-        r1_L_adj, r1_W_adj = r1_L, r1_W
-        r2_L_adj, r2_W_adj = r2_L, r2_W
-        # If at least one column (n > 0), subtract kerf from the band on
-        # the right side of the grid (r1_L).  This accounts for the
-        # boundary cut separating the grid from the remainder.
-        if n > 0:
-            r1_L_adj = max(r1_L - settings.kerf_mm, 0.0)
-        # If at least one row (m > 0), subtract kerf from the band below
-        # the grid (r2_W).  This accounts for the horizontal boundary cut.
-        if m > 0:
-            r2_W_adj = max(r2_W - settings.kerf_mm, 0.0)
-        # Determine which residuals are worth keeping based on the
-        # adjusted dimensions
-        adjusted_rects = [(r1_L_adj, r1_W_adj), (r2_L_adj, r2_W_adj)]
-        keep = filter_keepable_rects(adjusted_rects, settings.min_keep_dimension_mm)
-        waste = []
-        # Mark waste rectangles. Use the adjusted dimensions for
-        # comparison but record the adjusted sizes in waste for clarity.
-        if (r1_L_adj, r1_W_adj) not in keep:
-            waste.append((r1_L_adj, r1_W_adj))
-        if (r2_L_adj, r2_W_adj) not in keep:
-            waste.append((r2_L_adj, r2_W_adj))
-        # Prefer the plan that produces the most pieces; tie-break by keeping more useful chutes
-        if produced > best_production or (
-            produced == best_production and len(keep) > len(best_chutes)
-        ):
-            best_orientation = (x, y)
-            best_grid = (n, m)
-            best_production = produced
-            best_chutes = keep
-            best_waste = waste
-
-    if best_orientation is None:
-        # Cannot cut anything; return a plan with zero produced pieces
+    best_solution = raw_result.get("best_solution")
+    if not best_solution:
         return CutPlan(
             produced_qty=0,
             orientation=(0.0, 0.0),
@@ -158,20 +336,50 @@ def plan_cut(
             used_dims=(0.0, 0.0),
             children=[],
             waste=[source],
+            raw_result=raw_result,
+            best_solution={},
         )
 
-    # Recompute used dims for chosen orientation
-    n, m = best_grid
-    x, y = best_orientation
-    used_L, used_W = used_dims(n, m, x, y, settings.kerf_mm)
+    placements = best_solution.get("placements", [])
+    leftovers = best_solution.get("leftovers", [])
+
+    produced_qty = len(placements)
+
+    orientation = (piece_length, piece_width)
+    if placements:
+        first = placements[0]
+        orientation = (first["length"], first["width"])
+
+    used_area = sum(p["length"] * p["width"] for p in placements)
+    used_dims = (
+        best_solution["statistics"].get("used_area", used_area),
+        0.0,
+    )
+
+    children = []
+    waste = []
+
+    for lf in leftovers:
+        dims = (lf["length"], lf["width"])
+        if _is_keepable_leftover(lf["length"], lf["width"], min_keep_dimension_mm):
+            children.append(dims)
+        else:
+            waste.append(dims)
+
+    unique_x = sorted(set(p["x"] for p in placements))
+    unique_y = sorted(set(p["y"] for p in placements))
+    grid = (len(unique_x), len(unique_y))
+
     return CutPlan(
-        produced_qty=best_production,
-        orientation=best_orientation,
-        grid=best_grid,
-        used_dims=(used_L, used_W),
-        children=best_chutes,
-        waste=best_waste,
+        produced_qty=produced_qty,
+        orientation=orientation,
+        grid=grid,
+        used_dims=used_dims,
+        children=children,
+        waste=waste,
+        raw_result=raw_result,
+        best_solution=best_solution,
     )
 
 
-__all__ = ["CutPlan", "plan_cut"]
+__all__ = ["CutPlan", "plan_cut", "optimize_cutting"]

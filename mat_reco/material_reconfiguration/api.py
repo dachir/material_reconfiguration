@@ -27,6 +27,11 @@ def get_repack_payload(mr_name: str) -> dict:
         and l.categorie == "By Product"
         #and l.serial_no
     ]
+    fg_rows = [
+        l for l in lines
+        if (l.line_type or "") == "Output"
+        and l.categorie == "Finished Good"
+    ]
     #frappe.throw(str(outputs))
 
     # ---- GROUP INPUTS: 1 line per raw material + source warehouse
@@ -48,13 +53,26 @@ def get_repack_payload(mr_name: str) -> dict:
         })
 
     # ---- FG OUTPUT: single line
+    fg_serials = []
+    for l in fg_rows:
+        if getattr(l, "serial_nos", None):
+            parts = [s.strip() for s in l.serial_nos.replace("\n", ",").split(",") if s.strip()]
+            for sn in parts:
+                if sn not in fg_serials:
+                    fg_serials.append(sn)
+        elif l.serial_no:
+            if l.serial_no not in fg_serials:
+                fg_serials.append(l.serial_no)
+
+    fg_qty = len(fg_serials) if fg_serials else sum(flt(l.planned_pieces) for l in fg_rows)
+
     repack_lines.append({
         "row_type": "FG",
         "item_code": mr.fg_item_code,
         "s_warehouse": None,
         "t_warehouse": mr.source_warehouse,   # as you requested
-        "qty": flt(mr.fg_total_qty),
-        "serials": []
+        "qty": fg_qty,
+        "serials": fg_serials
     })
 
     # ---- GROUP OUTPUTS (by-product): 1 line per (item_code + target_warehouse)

@@ -1,34 +1,33 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{YY}RECO{MM}{#####}",
- "creation": "2026-02-25 16:22:12.652367",
+ "creation": "2026-03-08 16:35:05.629973",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_bcdm",
   "company",
   "sales_order",
-  "status",
+  "posting_date",
+  "column_break_gdbh",
+  "statut",
   "source_warehouse",
   "fg_item_code",
   "so_item_row",
+  "section_break_sjmb",
   "fg_total_qty",
+  "column_break_adae",
   "fg_length_mm",
+  "column_break_elgc",
   "fg_width_mm",
-  "column_break_vmdo",
-  "source_item",
-  "total_required_pieces",
-  "total_required_area_mm2",
-  "total_estimated_waste_mm2",
-  "kerf_mm",
-  "section_break_nhid",
-  "detail",
-  "section_break_htre",
+  "column_break_ltrb",
+  "fg_thickness_mm",
+  "section_break_e7ro",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "section_break_htre",
+   "fieldname": "section_break_e7ro",
    "fieldtype": "Section Break"
   },
   {
@@ -36,7 +35,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Material Reconfiguration",
+   "options": "Material Production Plan",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -54,35 +53,19 @@
    "options": "Sales Order"
   },
   {
-   "fieldname": "source_item",
-   "fieldtype": "Link",
-   "label": "Source Item",
-   "options": "Item"
-  },
-  {
-   "fieldname": "column_break_vmdo",
+   "fieldname": "column_break_gdbh",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "statut",
    "fieldtype": "Select",
-   "label": "Status",
-   "options": "Draft\nProposed\nApproved\nExecuted\nCancelled"
-  },
-  {
-   "fieldname": "total_required_pieces",
-   "fieldtype": "Int",
-   "label": "Total Required Pieces"
-  },
-  {
-   "fieldname": "total_required_area_mm2",
-   "fieldtype": "Float",
-   "label": "Total Required Area mm2"
-  },
-  {
-   "fieldname": "total_estimated_waste_mm2",
-   "fieldtype": "Float",
-   "label": "Total Estimated Waste mm2"
+   "label": "Statut",
+   "options": "Draft\nTree Generated\nStock Checked\nProduction Required\nReady for Completion\nCompleted\nCancelled"
   },
   {
    "fieldname": "source_warehouse",
@@ -91,36 +74,38 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "kerf_mm",
-   "fieldtype": "Float",
-   "label": "Kerf mm"
-  },
-  {
    "fieldname": "fg_item_code",
    "fieldtype": "Link",
    "label": "Produit Fini",
    "options": "Item"
   },
   {
-   "fieldname": "fg_total_qty",
-   "fieldtype": "Int",
-   "label": "Quantite"
-  },
-  {
-   "fieldname": "section_break_nhid",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "detail",
-   "fieldtype": "Table",
-   "label": "Detail",
-   "options": "Material Reconfiguration Line"
-  },
-  {
    "fieldname": "so_item_row",
    "fieldtype": "Link",
    "label": "SO Item Row",
    "options": "Sales Order Item"
+  },
+  {
+   "fieldname": "section_break_sjmb",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "fg_total_qty",
+   "fieldtype": "Float",
+   "label": "Quantite"
+  },
+  {
+   "fieldname": "column_break_adae",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_elgc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ltrb",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "fg_length_mm",
@@ -131,22 +116,26 @@
    "fieldname": "fg_width_mm",
    "fieldtype": "Float",
    "label": "FG Hauteur"
+  },
+  {
+   "fieldname": "fg_thickness_mm",
+   "fieldtype": "Float",
+   "label": "FG Epaisseur"
+  },
+  {
+   "fieldname": "section_break_bcdm",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [
-  {
-   "link_doctype": "Stock Entry",
-   "link_fieldname": "custom_material_reconfiguration"
-  }
- ],
- "modified": "2026-03-10 06:25:26.201688",
+ "links": [],
+ "modified": "2026-03-10 06:28:36.493810",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
- "name": "Material Reconfiguration",
- "naming_rule": "Expression",
+ "name": "Material Production Plan",
  "owner": "Administrator",
  "permissions": [
   {

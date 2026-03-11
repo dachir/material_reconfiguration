@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-07 08:00:12.484509",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "component_item_code",
+  "qty_factor"
+ ],
+ "fields": [
+  {
+   "fieldname": "component_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Component Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty_factor",
+   "fieldtype": "Int",
+   "label": "Qty Factor"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-07 08:46:24.232103",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Composite Item Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

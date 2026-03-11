@@ -177,8 +177,11 @@ frappe.ui.form.on("Material Reconfiguration", {
   },
 
   validate(frm) {
-    if (frm.doc.fg_item_code && !frm.doc.so_item_row) {
-      frappe.throw(__("Please select a Sales Order Item row (so_item_row)."));
+    if (frm.doc.fg_item_code) {
+      //frappe.throw(__("Please select a Sales Order Item row (so_item_row)."));
+      if (frm.doc.sales_order && !frm.doc.so_item_row) {
+        frappe.throw(__("Please select a Sales Order Item row (so_item_row)."));
+      }
     }
   },
 });

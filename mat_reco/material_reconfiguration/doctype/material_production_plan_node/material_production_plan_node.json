@@ -1,0 +1,159 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-10 06:37:21.956947",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "node_id",
+  "node_label",
+  "node_type",
+  "parent_node",
+  "indent_level",
+  "item_code",
+  "item_name",
+  "is_composite",
+  "required_qty",
+  "length_mm",
+  "width_mm",
+  "warehouse",
+  "available_stock_qty",
+  "matched_serial_no",
+  "is_ready",
+  "is_buildable",
+  "requires_mr",
+  "requires_repack",
+  "material_reconfiguration",
+  "repack_stock_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "node_id",
+   "fieldtype": "Data",
+   "label": "Node Id"
+  },
+  {
+   "fieldname": "parent_node",
+   "fieldtype": "Data",
+   "label": "Parent Node"
+  },
+  {
+   "fieldname": "indent_level",
+   "fieldtype": "Int",
+   "label": "Indent Level"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.custom_is_composite",
+   "fieldname": "is_composite",
+   "fieldtype": "Check",
+   "label": "Is Composite"
+  },
+  {
+   "fieldname": "required_qty",
+   "fieldtype": "Float",
+   "label": "Quantit\u00e9"
+  },
+  {
+   "fieldname": "length_mm",
+   "fieldtype": "Float",
+   "label": "Longueur"
+  },
+  {
+   "fieldname": "width_mm",
+   "fieldtype": "Float",
+   "label": "Hauteur"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "available_stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock"
+  },
+  {
+   "fieldname": "matched_serial_no",
+   "fieldtype": "Link",
+   "label": "Serial No",
+   "options": "Serial No"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_ready",
+   "fieldtype": "Check",
+   "label": "Ready"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_buildable",
+   "fieldtype": "Check",
+   "label": "Buildable"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_mr",
+   "fieldtype": "Check",
+   "label": "Requires MR"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_repack",
+   "fieldtype": "Check",
+   "label": "Requires Repack"
+  },
+  {
+   "fieldname": "material_reconfiguration",
+   "fieldtype": "Link",
+   "label": "Material reconfiguration",
+   "options": "Material Reconfiguration"
+  },
+  {
+   "fieldname": "repack_stock_entry",
+   "fieldtype": "Link",
+   "label": "Repack",
+   "options": "Stock Entry"
+  },
+  {
+   "fieldname": "node_label",
+   "fieldtype": "Data",
+   "label": "Label"
+  },
+  {
+   "fieldname": "node_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Final Product\nComposite\nLeaf Material\nAccessory"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-10 06:55:36.843180",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Material Production Plan Node",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

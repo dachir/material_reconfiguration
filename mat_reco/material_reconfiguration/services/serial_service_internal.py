@@ -186,6 +186,8 @@ def generate_chute_serials(
                 "item_code": item_code,
                 "custom_dimension_length_mm": length_mm,
                 "custom_dimension_width_mm": width_mm,
+                "custom_surface_mm2": (length_mm or 0) * (width_mm or 0),
+                "custom_perimeter_mm": 2 * ((length_mm or 0) + (width_mm or 0)),
                 # Default material status for chutes comes from the MR line
                 "custom_material_status": ch.get("material_status") or "Partial",
                 "custom_quality_rating": ch.get("quality_rating") or 0,
@@ -207,3 +209,55 @@ def generate_chute_serials(
 # override the __all__ set after appending.  Leaving the previous line
 # would drop ``generate_chute_serials`` from the exported names.
 #__all__.append("generate_chute_serials")
+
+def generate_fg_serials_for_row(
+    parent_serial: str,
+    qty: int,
+    item_code: str,
+    length_mm: float,
+    width_mm: float,
+    material_status: str = "Full",
+    quality_rating: int = 0,
+) -> list[str]:
+    """
+    Generate N FG serials for one FG row.
+
+    Example:
+        parent_serial = B000-01
+        qty = 3
+
+    Returns:
+        ["B000-01-01", "B000-01-02", "B000-01-03"]
+    """
+    if frappe is None:
+        return []
+
+    results = []
+    next_i = 1
+
+    while len(results) < qty:
+        proposed = f"{parent_serial}-{next_i:02d}"
+
+        if frappe.db.exists("Serial No", proposed):
+            next_i += 1
+            continue
+
+        serial_doc = frappe.get_doc({
+            "doctype": "Serial No",
+            "serial_no": proposed,
+            "name": proposed,
+            "item_code": item_code,
+            "custom_dimension_length_mm": length_mm,
+            "custom_dimension_width_mm": width_mm,
+            "custom_surface_mm2": (length_mm or 0) * (width_mm or 0),
+            "custom_perimeter_mm": 2 * ((length_mm or 0) + (width_mm or 0)),
+            "custom_material_status": material_status,
+            "custom_quality_rating": quality_rating,
+        })
+        serial_doc.flags.ignore_permissions = True
+        serial_doc.insert()
+
+        results.append(proposed)
+        next_i += 1
+
+    return results
