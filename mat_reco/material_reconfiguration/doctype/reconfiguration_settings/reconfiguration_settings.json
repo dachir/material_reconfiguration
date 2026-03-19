@@ -9,6 +9,8 @@
   "min_keep_dimension_mm",
   "allow_rotation",
   "cutting_strategy",
+  "packing_algorithm",
+  "packing_heuristic",
   "split_policy",
   "max_children_per_cut",
   "column_break_fndl",
@@ -97,13 +99,25 @@
    "fieldname": "weight_big_rectangle",
    "fieldtype": "Float",
    "label": "Poids conservation grandes chutes"
+  },
+  {
+   "fieldname": "packing_algorithm",
+   "fieldtype": "Select",
+   "label": "Packing Algorithm",
+   "options": "maxrects\nguillotine\nskyline"
+  },
+  {
+   "fieldname": "packing_heuristic",
+   "fieldtype": "Select",
+   "label": "Packing Heuristic",
+   "options": "best_area_fit\nbest_short_side_fit\nbest_long_side_fit\nbottom_left"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-27 19:13:51.777486",
+ "modified": "2026-03-16 14:49:56.431072",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Reconfiguration Settings",

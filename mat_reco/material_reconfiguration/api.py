@@ -199,3 +199,292 @@ def get_available_serials_for_repack(item_codes: list[str] | None = None):
 
     return rows
 
+@frappe.whitelist()
+def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
+    """Return Sales Orders that contain decoupe items linked to the given source item.
+
+    A Sales Order is included if it contains at least one item of type
+    ``DECOUPE`` whose ``custom_parent_item`` field matches the
+    provided ``source_item`` code.  Only orders with ``docstatus`` 1
+    (submitted) are considered.  For each qualifying order, the
+    function returns its name, customer and transaction date.
+
+    Args:
+        source_item: The code of the raw material to filter orders by.
+
+    Returns:
+        A list of dictionaries with keys ``name``, ``customer`` and
+        ``transaction_date``.
+    """
+    if not source_item:
+        return []
+
+    # Retrieve submitted Sales Orders
+    sales_orders = frappe.get_all(
+        "Sales Order",
+        filters={"docstatus": 1},
+        fields=["name", "customer", "transaction_date"],
+        order_by="transaction_date asc",
+    )
+
+    result: list[dict[str, object]] = []
+
+    for so in sales_orders:
+        # Fetch items for this Sales Order
+        rows = frappe.get_all(
+            "Sales Order Item",
+            filters={"parent": so.name},
+            fields=["item_code"],
+        )
+
+        keep = False
+        for row in rows:
+            item_code = row.item_code
+            if not item_code:
+                continue
+            # Determine custom item type
+            item_type = (frappe.db.get_value("Item", item_code, "custom_item_types") or "").strip()
+            if item_type != "DECOUPE":
+                continue
+            # Check if this decoupe references the selected source item via custom_parent_item
+            parent_raw = frappe.db.get_value("Item", item_code, "custom_parent_item")
+            if parent_raw and parent_raw == source_item:
+                keep = True
+                break
+        if keep:
+            result.append(so)
+    return result
+
+# -----------------------------------------------------------------------------
+# Order selection APIs
+#
+# The following functions expose helper endpoints to retrieve Sales Orders
+# relevant for material reconfiguration.  They mirror functionality added in
+# the Material Cutting Plan module but live in the material_reconfiguration
+# namespace so that front-end scripts can call them without importing
+# additional modules.  Both functions operate on submitted Sales Orders
+# (docstatus = 1) and filter orders based on the items they contain.
+
+@frappe.whitelist()
+def get_non_processed_orders(source_item: str | None = None) -> list[dict[str, object]]:
+    """
+    Return submitted Sales Orders relevant for cutting.
+    If source_item is provided, only keep orders whose DECOUPE descendants
+    are linked to that raw material.
+    """
+    sales_orders = frappe.get_all(
+        "Sales Order",
+        filters={"docstatus": 1},
+        fields=["name", "customer", "transaction_date"],
+        order_by="transaction_date asc",
+    )
+
+    result = []
+
+    for so in sales_orders:
+        rows = frappe.get_all(
+            "Sales Order Item",
+            filters={"parent": so["name"]},
+            fields=["item_code"],
+        )
+
+        keep = False
+
+        for row in rows:
+            item_code = row.get("item_code")
+            if not item_code:
+                continue
+
+            item_type = (
+                frappe.db.get_value("Item", item_code, "custom_item_types") or ""
+            ).strip()
+
+            if not source_item:
+                if item_type in ("DECOUPE", "OUVRAGE"):
+                    keep = True
+                    break
+                continue
+
+            if item_type == "DECOUPE":
+                if _is_descendant_of_raw(item_code=item_code, raw_item_code=source_item):
+                    keep = True
+                    break
+
+            elif item_type == "OUVRAGE":
+                if _ouvrage_has_decoupe_for_raw(
+                    item_code=item_code,
+                    raw_item_code=source_item
+                ):
+                    keep = True
+                    break
+
+        if keep:
+            result.append(so)
+
+    return result
+
+
+@frappe.whitelist()
+def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
+    """Return Sales Orders containing decoupe items linked to a given raw material.
+
+    Only Sales Orders with ``docstatus`` 1 are considered.  An order is
+    included in the result if it contains at least one Sales Order Item
+    whose associated Item has ``custom_item_types = 'DECOUPE'`` and a
+    ``custom_parent_item`` field equal to the provided ``source_item``.  The
+    returned dicts contain basic Sales Order information so that a client
+    can populate a selection list.
+
+    Args:
+        source_item: The item code of the raw material used to filter
+            decoupe items.  If empty, the function returns an empty list.
+
+    Returns:
+        A list of dicts with keys ``name``, ``customer`` and
+        ``transaction_date`` for each qualifying Sales Order.
+    """
+    if not source_item:
+        return []
+    # Fetch all submitted Sales Orders
+    sales_orders = frappe.get_all(
+        "Sales Order",
+        filters={"docstatus": 1},
+        fields=["name", "customer", "transaction_date"],
+        order_by="transaction_date asc",
+    )
+    result: list[dict[str, object]] = []
+    for so in sales_orders:
+        # Retrieve items for this Sales Order
+        rows = frappe.get_all(
+            "Sales Order Item",
+            filters={"parent": so["name"]},
+            fields=["item_code"],
+        )
+        keep = False
+        for row in rows:
+            item_code = row.get("item_code")
+            if not item_code:
+                continue
+            # Determine the custom item type (e.g. DECOUPE or OUVRAGE)
+            item_type = (
+                frappe.db.get_value("Item", item_code, "custom_item_types") or ""
+            ).strip()
+            if item_type == "DECOUPE":
+                # For decoupe items, check if they descend from the raw material via custom_parent_item chain
+                if _is_descendant_of_raw(item_code=item_code, raw_item_code=source_item):
+                    keep = True
+                    break
+            elif item_type == "OUVRAGE":
+                # For ouvrage items, recursively inspect component tree to find decoupe descendants linked to the raw material
+                if _ouvrage_has_decoupe_for_raw(item_code=item_code, raw_item_code=source_item):
+                    keep = True
+                    break
+            else:
+                # Other item types do not contribute to cutting plan for the selected raw material
+                continue
+        if keep:
+            result.append(so)
+    return result
+
+
+def _is_descendant_of_raw(item_code: str, raw_item_code: str, *, max_depth: int = 10) -> bool:
+    """Return True if the given item descends from the specified raw material.
+
+    The function traverses the ``custom_parent_item`` chain on the Item doctype to
+    determine if the provided ``item_code`` has the given ``raw_item_code`` as
+    one of its ancestors.  It stops when either the raw material is found, the
+    chain terminates or a maximum depth is reached to prevent infinite loops.
+
+    Args:
+        item_code: Code of the item to start from (e.g. a DECOUPE).
+        raw_item_code: Code of the raw material we are trying to match.
+        max_depth: Maximum number of parents to traverse.
+
+    Returns:
+        True if ``raw_item_code`` is an ancestor of ``item_code``; False otherwise.
+    """
+
+    # Avoid trivial cases
+    if not item_code or not raw_item_code:
+        return False
+    current = item_code
+    for _ in range(max_depth):
+        # Fetch the parent item of the current code
+        parent = frappe.db.get_value("Item", current, "custom_parent_item") or ""
+        parent = str(parent or "").strip()
+        if not parent:
+            # Reached top of chain without finding the raw material
+            return False
+        if parent == raw_item_code:
+            return True
+        # Move up the chain and continue searching
+        current = parent
+    # Maximum depth reached without a match
+    return False
+
+
+def _ouvrage_has_decoupe_for_raw(
+    item_code: str,
+    raw_item_code: str,
+    *,
+    depth: int = 0,
+    max_depth: int = 10,
+    visited: set[str] | None = None,
+) -> bool:
+    """Return True if an OUVRAGE item contains a decoupe linked to the raw material.
+
+    This helper inspects the composition of an OUVRAGE item by traversing its
+    ``custom_composite_items`` child table on the Item doctype.  It walks
+    recursively through nested OUVRAGE and DECOUPE components, searching for
+    at least one DECOUPE component that descends from the specified
+    ``raw_item_code`` via the ``custom_parent_item`` chain.
+
+    Args:
+        item_code: The code of the OUVRAGE item to inspect.
+        raw_item_code: The raw material code we are trying to match.
+        depth: Current recursion depth (internal use).
+        max_depth: Maximum allowed recursion depth to avoid infinite loops.
+        visited: Set of already visited item codes to prevent cycles.
+
+    Returns:
+        True if a qualifying decoupe descendant is found; False otherwise.
+    """
+    # Prevent excessive recursion or cycles
+    if not item_code or depth > max_depth:
+        return False
+    if visited is None:
+        visited = set()
+    if item_code in visited:
+        return False
+    visited.add(item_code)
+    # Determine this item's type
+    item_type = (
+        frappe.db.get_value("Item", item_code, "custom_item_types") or ""
+    ).strip()
+    # If this is a DECOUPE, check if it descends from the raw material
+    if item_type == "DECOUPE":
+        return _is_descendant_of_raw(item_code=item_code, raw_item_code=raw_item_code)
+    # If not an OUVRAGE, no further inspection needed
+    if item_type != "OUVRAGE":
+        return False
+    # Load this item document to access its custom composite items
+    try:
+        item_doc = frappe.get_doc("Item", item_code)
+    except Exception:
+        return False
+    # Iterate over components in the custom_composite_items child table
+    for comp in item_doc.get("custom_composite_items", []) or []:
+        comp_code = comp.get("component_item_code")
+        if not comp_code:
+            continue
+        # Recursively check the component for matching decoupes or nested ouvrages
+        if _ouvrage_has_decoupe_for_raw(
+            item_code=comp_code,
+            raw_item_code=raw_item_code,
+            depth=depth + 1,
+            max_depth=max_depth,
+            visited=visited,
+        ):
+            return True
+    # No qualifying decoupe found in this ouvrage's components
+    return False

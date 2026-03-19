@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-17 20:01:23.386344",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "plan_node_id",
+  "source_serial_no",
+  "original_node_type",
+  "original_item_code",
+  "original_length_mm",
+  "original_width_mm",
+  "original_area_mm2",
+  "incident_action",
+  "affected_node_ids_json",
+  "group_area_mm2",
+  "new_node_type",
+  "new_length_mm",
+  "new_width_mm",
+  "new_area_mm2",
+  "include_in_repack",
+  "is_active",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "plan_node_id",
+   "fieldtype": "Data",
+   "label": "Plan Node ID"
+  },
+  {
+   "fieldname": "source_serial_no",
+   "fieldtype": "Data",
+   "label": "Source Serial No"
+  },
+  {
+   "fieldname": "original_node_type",
+   "fieldtype": "Data",
+   "label": "Original Node Type"
+  },
+  {
+   "fieldname": "original_item_code",
+   "fieldtype": "Link",
+   "label": "Original Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "original_length_mm",
+   "fieldtype": "Float",
+   "label": "Original Length mm"
+  },
+  {
+   "fieldname": "original_width_mm",
+   "fieldtype": "Float",
+   "label": "Original Width mm"
+  },
+  {
+   "fieldname": "original_area_mm2",
+   "fieldtype": "Float",
+   "label": "Original Area mm2"
+  },
+  {
+   "fieldname": "incident_action",
+   "fieldtype": "Select",
+   "label": "Incident Action",
+   "options": "Resize\nDestroy"
+  },
+  {
+   "fieldname": "affected_node_ids_json",
+   "fieldtype": "Long Text",
+   "label": "Affected Node IDs JSON"
+  },
+  {
+   "fieldname": "group_area_mm2",
+   "fieldtype": "Float",
+   "label": "Group Area mm2"
+  },
+  {
+   "fieldname": "new_node_type",
+   "fieldtype": "Data",
+   "label": "New Node Type"
+  },
+  {
+   "fieldname": "new_length_mm",
+   "fieldtype": "Float",
+   "label": "New Length mm"
+  },
+  {
+   "fieldname": "new_width_mm",
+   "fieldtype": "Float",
+   "label": "New Width mm"
+  },
+  {
+   "fieldname": "new_area_mm2",
+   "fieldtype": "Float",
+   "label": "New Area mm2"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_in_repack",
+   "fieldtype": "Check",
+   "label": "Include in Repack"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-17 20:10:11.381869",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Material Plan Incidents",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

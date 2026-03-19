@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-16 14:40:28.366921",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "component_item",
+  "length_mm",
+  "width_mm",
+  "thickness_mm",
+  "qty_required",
+  "qty_planned",
+  "qty_available",
+  "pending_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "component_item",
+   "fieldtype": "Link",
+   "label": "Component Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "length_mm",
+   "fieldtype": "Float",
+   "label": "Length mm"
+  },
+  {
+   "fieldname": "width_mm",
+   "fieldtype": "Float",
+   "label": "Width mm"
+  },
+  {
+   "fieldname": "qty_required",
+   "fieldtype": "Float",
+   "label": "Qty Required"
+  },
+  {
+   "fieldname": "qty_planned",
+   "fieldtype": "Float",
+   "label": "Qty Planned"
+  },
+  {
+   "fieldname": "qty_available",
+   "fieldtype": "Float",
+   "label": "Qty Available"
+  },
+  {
+   "fieldname": "pending_qty",
+   "fieldtype": "Float",
+   "label": "Pending Qty"
+  },
+  {
+   "fieldname": "thickness_mm",
+   "fieldtype": "Float",
+   "label": "Thickness mm"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-17 12:35:23.332322",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Material Cutting Plan Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

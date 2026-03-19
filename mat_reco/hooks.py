@@ -25,7 +25,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/mat_reco/css/mat_reco.css"
+# app_include_css = "/assets/mat_reco/css/app.css"
 # app_include_js = "/assets/mat_reco/js/mat_reco.js"
 
 # include js, css files in header of web template
@@ -43,7 +43,11 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Delivery Note": "public/js/dimension_from_serial.js",
+    "Sales Invoice": "public/js/dimension_from_serial.js",
+    "Stock Entry": "public/js/stock_entry_repack_from_so.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

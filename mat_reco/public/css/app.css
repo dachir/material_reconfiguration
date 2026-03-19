@@ -1,0 +1,29 @@
+/* Colonne du preview */
+[data-fieldname="cutting_plan_preview"] {
+    width: 100% !important;
+}
+
+[data-fieldname="cutting_plan_preview"] .form-group,
+[data-fieldname="cutting_plan_preview"] .frappe-control,
+[data-fieldname="cutting_plan_preview"] .control-value,
+[data-fieldname="cutting_plan_preview"] .control-input-wrapper {
+    width: 100% !important;
+}
+
+/* Colonne du summary */
+[data-fieldname="plan_summary"] {
+    width: 100% !important;
+}
+
+/* Si les deux champs sont dans deux colonnes voisines */
+.form-column:has([data-fieldname="cutting_plan_preview"]) {
+    flex: 0 0 25% !important;
+    max-width: 25% !important;
+    width: 25% !important;
+}
+
+.form-column:has([data-fieldname="plan_summary"]) {
+    flex: 0 0 75% !important;
+    max-width: 75% !important;
+    width: 75% !important;
+}

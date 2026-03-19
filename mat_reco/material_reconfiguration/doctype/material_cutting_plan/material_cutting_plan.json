@@ -1,0 +1,335 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{YY}MCP{MM}{#####}",
+ "creation": "2026-03-16 13:41:04.650946",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "source_warehouse",
+  "posting_date",
+  "column_break_wegm",
+  "status",
+  "source_item",
+  "section_break_czkp",
+  "selected_sales_orders",
+  "column_break_aypv",
+  "max_depth",
+  "cutting_simulation_rules_section",
+  "kerf_mm",
+  "column_break_lzrn",
+  "packing_algorithm",
+  "column_break_gcgm",
+  "packing_heuristic",
+  "column_break_skmr",
+  "allow_rotation",
+  "add_waiste_to_stock",
+  "cutting_plan_summary_section",
+  "simulation_lines",
+  "section_break_dbzs",
+  "requested_piece_count",
+  "total_required_area_m2",
+  "column_break_kkst",
+  "planned_piece_count",
+  "total_used_input_area_m2",
+  "column_break_oagi",
+  "missing_piece_count",
+  "total_leftover_area_m2",
+  "column_break_voyj",
+  "used_input_serial_count",
+  "total_waste_area_m2",
+  "section_break_pevo",
+  "summary_json",
+  "result_json",
+  "created_stock_entries_json",
+  "section_break_385y",
+  "amended_from",
+  "cutttin_plan_preview_tab",
+  "col1",
+  "cutting_plan_preview",
+  "col2",
+  "plan_summary",
+  "section_break_zfox",
+  "material_plan_incidents"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_385y",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Material Cutting Plan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_wegm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSimulated\nApproved\nExecuted\nCancelled"
+  },
+  {
+   "fieldname": "source_item",
+   "fieldtype": "Link",
+   "label": "Source Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "section_break_czkp",
+   "fieldtype": "Section Break",
+   "label": "Selected Sales Orders"
+  },
+  {
+   "fieldname": "selected_sales_orders",
+   "fieldtype": "Table MultiSelect",
+   "options": "MCP Sales Order"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "cutting_simulation_rules_section",
+   "fieldtype": "Section Break",
+   "label": "Cutting Simulation Rules"
+  },
+  {
+   "fieldname": "kerf_mm",
+   "fieldtype": "Float",
+   "label": "Kerf mm"
+  },
+  {
+   "fieldname": "column_break_lzrn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_rotation",
+   "fieldtype": "Check",
+   "label": "Allow Rotation"
+  },
+  {
+   "fieldname": "column_break_gcgm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "packing_algorithm",
+   "fieldtype": "Select",
+   "label": "Packing Algorithm",
+   "options": "maxrects\nguillotine\nskyline"
+  },
+  {
+   "fieldname": "column_break_skmr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "packing_heuristic",
+   "fieldtype": "Select",
+   "label": "Packing Heuristic",
+   "options": "best_area_fit\nbest_short_side_fit\nbest_long_side_fit\nbottom_left"
+  },
+  {
+   "fieldname": "cutting_plan_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Cutting Plan summary"
+  },
+  {
+   "fieldname": "section_break_dbzs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "requested_piece_count",
+   "fieldtype": "Int",
+   "label": "Requested Piece Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_required_area_m2",
+   "fieldtype": "Float",
+   "label": "Total Required Area m2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kkst",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "planned_piece_count",
+   "fieldtype": "Int",
+   "label": "Planned Piece Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_used_input_area_m2",
+   "fieldtype": "Float",
+   "label": "Total Used Input Area m2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_oagi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "missing_piece_count",
+   "fieldtype": "Int",
+   "label": "Missing Piece Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_leftover_area_m2",
+   "fieldtype": "Float",
+   "label": "Total Leftover Area m2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_voyj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "used_input_serial_count",
+   "fieldtype": "Int",
+   "label": "Used Input Serial Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_waste_area_m2",
+   "fieldtype": "Float",
+   "label": "Total Waste Area m2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_pevo",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "summary_json",
+   "fieldtype": "Long Text",
+   "label": "Summary JSON"
+  },
+  {
+   "fieldname": "result_json",
+   "fieldtype": "Long Text",
+   "label": "Result JSON"
+  },
+  {
+   "fieldname": "created_stock_entries_json",
+   "fieldtype": "Long Text",
+   "label": "Created Stock Entries JSON"
+  },
+  {
+   "fieldname": "column_break_aypv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "10",
+   "fieldname": "max_depth",
+   "fieldtype": "Int",
+   "label": "Max Depth"
+  },
+  {
+   "fieldname": "simulation_lines",
+   "fieldtype": "Table",
+   "options": "Material Cutting Plan Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cutttin_plan_preview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cutting Plan Preview"
+  },
+  {
+   "fieldname": "cutting_plan_preview",
+   "fieldtype": "HTML",
+   "label": "Cutting Plan"
+  },
+  {
+   "default": "0",
+   "fieldname": "add_waiste_to_stock",
+   "fieldtype": "Check",
+   "label": "Add Waiste to stock"
+  },
+  {
+   "fieldname": "material_plan_incidents",
+   "fieldtype": "Table",
+   "label": "Material Plan Incidents",
+   "options": "Material Plan Incidents"
+  },
+  {
+   "fieldname": "plan_summary",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_zfox",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break",
+   "label": "Summary"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Fabrication",
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "custom_material_cutting_plan"
+  }
+ ],
+ "modified": "2026-03-19 15:08:06.761383",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Material Cutting Plan",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
