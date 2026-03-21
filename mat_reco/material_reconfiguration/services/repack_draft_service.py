@@ -2,7 +2,8 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe.utils import cint, flt
+from frappe import _
+from frappe.utils import cint, flt, cstr
 
 
 def _safe_json_load(value):
@@ -421,6 +422,97 @@ def _apply_rate_on_row(it, new_vr: float):
     if hasattr(it, "allow_zero_valuation_rate") and new_vr > 0:
         it.allow_zero_valuation_rate = 0
 
+def _extract_serial_nos_from_stock_entry_detail(row) -> set[str]:
+    """Extract serial numbers from a Stock Entry Detail row using both
+    the direct serial_no field and the Serial and Batch Bundle.
+    """
+    serial_nos = set()
+
+    serial_no_value = row.get("serial_no")
+    if serial_no_value:
+        for s in cstr(serial_no_value).split("\n"):
+            s = s.strip()
+            if s:
+                serial_nos.add(s)
+
+    bundle_name = row.get("serial_and_batch_bundle")
+    if bundle_name:
+        try:
+            bundle = frappe.get_doc("Serial and Batch Bundle", bundle_name)
+            for entry in bundle.get("entries", []):
+                serial_no = (entry.get("serial_no") or "").strip()
+                if serial_no:
+                    serial_nos.add(serial_no)
+        except Exception:
+            pass
+
+    return serial_nos
+
+def validate_all_expected_outputs_not_already_generated(doc, effective_nodes):
+    """Check whether all expected MCP outputs (excluding destroyed ones)
+    have already been generated in non-cancelled Stock Entries.
+
+    Important:
+    - generated outputs are read from Stock Entry Detail serial_no and bundle
+    - expected outputs should ideally use serial_no too, when available
+    """
+    expected_output_ids = set()
+
+    for node in effective_nodes or []:
+        for child in node.get("children", []) or []:
+            node_type = (child.get("node_type") or "").strip()
+
+            if (
+                node_type == "finished_good"
+                or node_type == "leftover"
+                or (node_type == "waste" and cint(doc.get("add_waste_to_stock") or 0) == 1)
+            ):
+                output_id = child.get("id")
+                if output_id:
+                    expected_output_ids.add(cstr(output_id).strip())
+
+
+    if not expected_output_ids:
+        return
+
+    already_generated_output_ids = set()
+
+    stock_entries = frappe.get_all(
+        "Stock Entry",
+        filters={
+            "docstatus": ["<", 2],  # Draft or Submitted, but not Cancelled
+            "custom_material_cutting_plan": doc.name,
+        },
+        fields=["name"],
+    )
+
+    for se_row in stock_entries:
+        se_items = frappe.get_all(
+            "Stock Entry Detail",
+            filters={
+                "parent": se_row.name,
+                "is_finished_item": 1,
+            },
+            fields=[
+                "name",
+                "item_code",
+                "serial_no",
+                "serial_and_batch_bundle",
+                "qty",
+            ],
+        )
+
+        for item in se_items:
+            row_serials = _extract_serial_nos_from_stock_entry_detail(item)
+            already_generated_output_ids.update(row_serials)
+
+    #frappe.msgprint(_("Expected output IDs: {0}").format(", ".join(sorted(expected_output_ids))))
+    #frappe.msgprint(_("Already generated output IDs: {0}").format(", ".join(sorted(already_generated_output_ids))))
+
+    if expected_output_ids.issubset(already_generated_output_ids):
+        frappe.throw(
+            _("All planned outputs that were not destroyed have already been generated for Material Cutting Plan {0}.").format(doc.name)
+        )
 
 @frappe.whitelist()
 def make_repack_draft(material_cutting_plan_name):
@@ -428,6 +520,8 @@ def make_repack_draft(material_cutting_plan_name):
     doc.check_permission("read")
 
     effective_nodes = build_effective_nodes(doc)
+
+    validate_all_expected_outputs_not_already_generated(doc, effective_nodes)
 
     se = frappe.new_doc("Stock Entry")
     se.stock_entry_type = "Repack"
@@ -444,3 +538,322 @@ def make_repack_draft(material_cutting_plan_name):
     _build_output_rows(se, doc, effective_nodes)
 
     return se.as_dict()
+
+
+"""
+L’idée métier devient :
+tant que tous les outputs ne sont pas encore générés, on laisse soumettre
+dès que le submit courant fait que tous les outputs prévus sont désormais générés, alors on vérifie aussi que tous les inputs prévus ont bien été consommés
+sinon on bloque le submit
+"""
+def _collect_expected_serials(effective_nodes, add_waiste_to_stock):
+    expected_output_serials = set()
+    destroyed_output_serials = set()
+    expected_input_serials = set()
+
+    for node in effective_nodes or []:
+        # INPUT
+        if node.get("serial_no"):
+            expected_input_serials.add(node.get("serial_no").strip())
+
+        for child in node.get("children", []) or []:
+            node_type = (child.get("node_type") or "").strip()
+
+            if node_type == "finished_good" or node_type == "leftover" or (node_type == "waste" and add_waiste_to_stock):
+                serial = (child.get("serial_no") or "").strip()
+                if serial:
+                    expected_output_serials.add(serial)
+
+            elif node_type == "destroyed":
+                serial = (
+                    child.get("serial_no")
+                    or child.get("source_serial_no")
+                    or ""
+                ).strip()
+                if serial:
+                    destroyed_output_serials.add(serial)
+
+    frappe.msgprint(_("Expected output serials: {0}").format(", ".join(expected_output_serials)))
+    frappe.msgprint(_("Destroyed output serials: {0}").format(", ".join(destroyed_output_serials)))
+
+    expected_output_serials -= destroyed_output_serials
+
+    return expected_output_serials, expected_input_serials
+
+def _extract_serials_from_row(row):
+    """Return a set of serial numbers from a Stock Entry Detail row."""
+    serials = set()
+
+    # Cas classique : champ texte
+    if row.get("serial_no"):
+        serials.update([s.strip() for s in row.serial_no.split("\n") if s.strip()])
+
+    # Cas bundle
+    if row.get("serial_and_batch_bundle"):
+        bundle = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+        for entry in bundle.entries:
+            if entry.serial_no:
+                serials.add(entry.serial_no.strip())
+
+    return serials
+
+def _collect_generated_outputs_and_inputs_from_serials(mcp_name):
+    generated_output_serials = set()
+    consumed_input_serials = set()
+
+    stock_entries = frappe.get_all(
+        "Stock Entry",
+        filters={
+            "docstatus": 1,
+            "custom_material_cutting_plan": mcp_name,
+        },
+        fields=["name"],
+    )
+
+    for se in stock_entries:
+        items = frappe.get_all(
+            "Stock Entry Detail",
+            filters={"parent": se.name},
+            fields=[
+                "name",
+                "is_finished_item",
+                "serial_no",
+                "serial_and_batch_bundle",
+            ],
+        )
+
+        for row in items:
+            serials = _extract_serials_from_row(row)
+
+            if row.get("is_finished_item"):
+                generated_output_serials.update(serials)
+            else:
+                consumed_input_serials.update(serials)
+
+    return generated_output_serials, consumed_input_serials
+
+def _collect_generated_outputs_and_inputs_from_serials(mcp_name):
+    generated_output_serials = set()
+    consumed_input_serials = set()
+
+    stock_entries = frappe.get_all(
+        "Stock Entry",
+        filters={
+            "docstatus": 1,
+            "custom_material_cutting_plan": mcp_name,
+        },
+        fields=["name"],
+    )
+
+    for se in stock_entries:
+        items = frappe.get_all(
+            "Stock Entry Detail",
+            filters={"parent": se.name},
+            fields=[
+                "name",
+                "is_finished_item",
+                "serial_no",
+                "serial_and_batch_bundle",
+            ],
+        )
+
+        for row in items:
+            serials = _extract_serials_from_row(row)
+
+            if row.get("is_finished_item"):
+                generated_output_serials.update(serials)
+            else:
+                consumed_input_serials.update(serials)
+
+    return generated_output_serials, consumed_input_serials
+
+def validate_mcp_completion_on_submit(stock_entry_doc):
+    mcp_name = stock_entry_doc.get("custom_material_cutting_plan")
+    if not mcp_name:
+        return
+
+    mcp = frappe.get_doc("Material Cutting Plan", mcp_name)
+    effective_nodes = build_effective_nodes(mcp)
+
+    expected_outputs, expected_inputs = _collect_expected_serials(effective_nodes, stock_entry_doc.add_waiste_to_stock)
+    generated_outputs, consumed_inputs = _collect_generated_outputs_and_inputs_from_serials(mcp_name)
+
+    # 1. Tant que outputs incomplets → OK
+    if not expected_outputs.issubset(generated_outputs):
+        return
+
+    # 2. Si outputs complets → inputs doivent être complets
+    missing_inputs = sorted(expected_inputs - consumed_inputs)
+
+    if missing_inputs:
+        frappe.throw(
+            _(
+                "All outputs are generated but some inputs are not fully consumed:\n{0}"
+            ).format("\n".join(missing_inputs))
+        )
+
+
+def _get_serial_area_mm2(serial_no: str) -> float:
+    """Return the area in mm² for a serial number."""
+    if not serial_no:
+        return 0.0
+
+    area = frappe.db.get_value("Serial No", serial_no, "custom_surface_mm2")
+    if area:
+        return flt(area)
+
+    # Fallbacks if needed
+    length_mm = frappe.db.get_value("Serial No", serial_no, "custom_length_mm") or 0
+    width_mm = frappe.db.get_value("Serial No", serial_no, "custom_width_mm") or 0
+    return flt(length_mm) * flt(width_mm)
+
+
+def _collect_expected_repack_limits(doc, effective_nodes):
+    """Return the maximum authorized totals from the effective MCP."""
+    expected_input_serials = set()
+    expected_output_serials = set()
+
+    expected_input_area_mm2 = 0.0
+    expected_output_area_mm2 = 0.0
+
+    # INPUTS = input serial nodes
+    for node in effective_nodes or []:
+        input_serial = cstr(node.get("serial_no") or node.get("id") or "").strip()
+        if input_serial:
+            if input_serial not in expected_input_serials:
+                expected_input_serials.add(input_serial)
+                expected_input_area_mm2 += flt(node.get("area_mm2") or 0)
+
+        # OUTPUTS = finished_good + leftover + waste(if stock)
+        for child in node.get("children") or []:
+            node_type = (child.get("node_type") or "").strip()
+
+            if (
+                node_type == "finished_good"
+                or node_type == "leftover"
+                or (node_type == "waste" and cint(doc.get("add_waste_to_stock") or 0) == 1)
+            ):
+                output_serial = cstr(child.get("id") or "").strip()
+                if output_serial and output_serial not in expected_output_serials:
+                    expected_output_serials.add(output_serial)
+                    expected_output_area_mm2 += flt(
+                        child.get("effective_area_mm2")
+                        or child.get("area_mm2")
+                        or (flt(child.get("effective_length_mm")) * flt(child.get("effective_width_mm")))
+                        or (flt(child.get("length_mm")) * flt(child.get("width_mm")))
+                    )
+
+    return {
+        "expected_input_count": len(expected_input_serials),
+        "expected_input_area_mm2": expected_input_area_mm2,
+        "expected_output_count": len(expected_output_serials),
+        "expected_output_area_mm2": expected_output_area_mm2,
+    }
+
+def _collect_actual_repack_totals(mcp_name: str, current_stock_entry_doc=None):
+    """Collect actual cumulative input/output totals for submitted repacks
+    linked to a given MCP, and optionally include the current stock entry doc.
+    """
+    consumed_input_serials = set()
+    generated_output_serials = set()
+
+    def absorb_stock_entry_items(items):
+        for row in items:
+            row_serials = _extract_serial_nos_from_stock_entry_detail(row)
+            if not row_serials:
+                continue
+
+            if cint(row.get("is_finished_item")) == 1:
+                generated_output_serials.update(row_serials)
+            else:
+                consumed_input_serials.update(row_serials)
+
+    # Submitted stock entries already linked to the MCP
+    submitted_ses = frappe.get_all(
+        "Stock Entry",
+        filters={
+            "docstatus": 1,
+            "custom_material_cutting_plan": mcp_name,
+        },
+        fields=["name"],
+    )
+
+    for se in submitted_ses:
+        items = frappe.get_all(
+            "Stock Entry Detail",
+            filters={"parent": se.name},
+            fields=[
+                "name",
+                "is_finished_item",
+                "serial_no",
+                "serial_and_batch_bundle",
+            ],
+        )
+        absorb_stock_entry_items(items)
+
+    # Include current stock entry being submitted
+    if current_stock_entry_doc:
+        absorb_stock_entry_items(current_stock_entry_doc.get("items") or [])
+
+    consumed_input_area_mm2 = sum(_get_serial_area_mm2(s) for s in consumed_input_serials)
+    generated_output_area_mm2 = sum(_get_serial_area_mm2(s) for s in generated_output_serials)
+
+    return {
+        "actual_input_count": len(consumed_input_serials),
+        "actual_input_area_mm2": consumed_input_area_mm2,
+        "actual_output_count": len(generated_output_serials),
+        "actual_output_area_mm2": generated_output_area_mm2,
+    }
+
+
+def validate_repack_totals_against_mcp_on_submit(stock_entry_doc):
+    """Block submit if cumulative repack totals exceed MCP authorized totals."""
+    mcp_name = stock_entry_doc.get("custom_material_cutting_plan")
+    if not mcp_name:
+        return
+
+    if (stock_entry_doc.get("stock_entry_type") or "") != "Repack":
+        return
+
+    mcp = frappe.get_doc("Material Cutting Plan", mcp_name)
+    effective_nodes = build_effective_nodes(mcp)
+
+    expected = _collect_expected_repack_limits(mcp, effective_nodes)
+    actual = _collect_actual_repack_totals(mcp_name, current_stock_entry_doc=stock_entry_doc)
+
+    errors = []
+
+    if actual["actual_input_area_mm2"] > expected["expected_input_area_mm2"] + 0.001:
+        errors.append(
+            _("Total consumed input area ({0} m²) exceeds planned input area ({1} m²)").format(
+                frappe.format_value(actual["actual_input_area_mm2"] / 1_000_000.0, {"fieldtype": "Float", "precision": 3}),
+                frappe.format_value(expected["expected_input_area_mm2"] / 1_000_000.0, {"fieldtype": "Float", "precision": 3}),
+            )
+        )
+
+    if actual["actual_output_area_mm2"] > expected["expected_output_area_mm2"] + 0.001:
+        errors.append(
+            _("Total generated output area ({0} m²) exceeds planned output area ({1} m²)").format(
+                frappe.format_value(actual["actual_output_area_mm2"] / 1_000_000.0, {"fieldtype": "Float", "precision": 3}),
+                frappe.format_value(expected["expected_output_area_mm2"] / 1_000_000.0, {"fieldtype": "Float", "precision": 3}),
+            )
+        )
+
+    if actual["actual_input_count"] > expected["expected_input_count"]:
+        errors.append(
+            _("Total consumed input serial count ({0}) exceeds planned input serial count ({1})").format(
+                actual["actual_input_count"],
+                expected["expected_input_count"],
+            )
+        )
+
+    if actual["actual_output_count"] > expected["expected_output_count"]:
+        errors.append(
+            _("Total generated output serial count ({0}) exceeds planned output serial count ({1})").format(
+                actual["actual_output_count"],
+                expected["expected_output_count"],
+            )
+        )
+
+    if errors:
+        frappe.throw("<br>".join(errors))

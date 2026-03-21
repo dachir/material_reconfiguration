@@ -326,8 +326,9 @@ def get_non_processed_orders(source_item: str | None = None) -> list[dict[str, o
 
 @frappe.whitelist()
 def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
-    """Return Sales Orders containing decoupe items linked to a given raw material.
+    """Return Sales Orders containing decoupe/ouvrage items linked to a given raw material.
 
+    Excludes Sales Orders already linked to a non-cancelled Material Cutting Plan.
     Only Sales Orders with ``docstatus`` 1 are considered.  An order is
     included in the result if it contains at least one Sales Order Item
     whose associated Item has ``custom_item_types = 'DECOUPE'`` and a
@@ -345,6 +346,23 @@ def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
     """
     if not source_item:
         return []
+
+    # Récupérer les Sales Orders déjà utilisés dans un MCP non annulé
+    linked_sales_orders = set(
+        frappe.db.sql(
+            """
+            select distinct mcp_so.sales_order
+            from `tabMCP Sales Order` mcp_so
+            inner join `tabMaterial Cutting Plan` mcp
+                on mcp.name = mcp_so.parent
+            where ifnull(mcp_so.sales_order, '') != ''
+              and ifnull(mcp.docstatus, 0) < 2
+            """,
+            as_dict=False,
+        )
+    )
+    linked_sales_orders = {row[0] for row in linked_sales_orders if row and row[0]}
+
     # Fetch all submitted Sales Orders
     sales_orders = frappe.get_all(
         "Sales Order",
@@ -352,40 +370,52 @@ def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
         fields=["name", "customer", "transaction_date"],
         order_by="transaction_date asc",
     )
+
     result: list[dict[str, object]] = []
+
     for so in sales_orders:
+        so_name = so.get("name")
+        if not so_name:
+            continue
+
+        # Exclure les SO déjà liés à un MCP non annulé
+        if so_name in linked_sales_orders:
+            continue
+
         # Retrieve items for this Sales Order
         rows = frappe.get_all(
             "Sales Order Item",
-            filters={"parent": so["name"]},
+            filters={"parent": so_name},
             fields=["item_code"],
         )
+
         keep = False
         for row in rows:
             item_code = row.get("item_code")
             if not item_code:
                 continue
-            # Determine the custom item type (e.g. DECOUPE or OUVRAGE)
+
             item_type = (
                 frappe.db.get_value("Item", item_code, "custom_item_types") or ""
             ).strip()
+
             if item_type == "DECOUPE":
-                # For decoupe items, check if they descend from the raw material via custom_parent_item chain
                 if _is_descendant_of_raw(item_code=item_code, raw_item_code=source_item):
                     keep = True
                     break
+
             elif item_type == "OUVRAGE":
-                # For ouvrage items, recursively inspect component tree to find decoupe descendants linked to the raw material
                 if _ouvrage_has_decoupe_for_raw(item_code=item_code, raw_item_code=source_item):
                     keep = True
                     break
-            else:
-                # Other item types do not contribute to cutting plan for the selected raw material
-                continue
+
         if keep:
             result.append(so)
-    return result
 
+    if not result:
+        frappe.msgprint("No Sales Orders found for the selected source item.")
+
+    return result
 
 def _is_descendant_of_raw(item_code: str, raw_item_code: str, *, max_depth: int = 10) -> bool:
     """Return True if the given item descends from the specified raw material.

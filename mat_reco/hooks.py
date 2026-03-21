@@ -254,4 +254,5 @@ fixtures = [
     {"dt": "Custom Field", "filters": [["module", "=", "Material Reconfiguration"]]},
     {"dt": "Client Script", "filters": [["enabled", "=", 1],["module", "=", "Material Reconfiguration"]]},
     {"dt": "Server Script", "filters": [["disabled", "=", 0],["module", "=", "Material Reconfiguration"]]},
+    {"dt": "Print Format", "filters": [["disabled", "=", 0],["module", "=", "Material Reconfiguration"]]},
 ]

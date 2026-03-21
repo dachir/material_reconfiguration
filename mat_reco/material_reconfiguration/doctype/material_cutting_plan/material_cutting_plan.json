@@ -43,6 +43,7 @@
   "summary_json",
   "result_json",
   "created_stock_entries_json",
+  "mcp_sheets",
   "section_break_385y",
   "amended_from",
   "cutttin_plan_preview_tab",
@@ -295,6 +296,12 @@
    "fieldname": "col2",
    "fieldtype": "Column Break",
    "label": "Summary"
+  },
+  {
+   "fieldname": "mcp_sheets",
+   "fieldtype": "Table",
+   "label": "MCP Sheets",
+   "options": "MCP Sheet"
   }
  ],
  "grid_page_length": 50,
@@ -307,7 +314,7 @@
    "link_fieldname": "custom_material_cutting_plan"
   }
  ],
- "modified": "2026-03-19 15:08:06.761383",
+ "modified": "2026-03-21 17:51:39.273016",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Material Cutting Plan",

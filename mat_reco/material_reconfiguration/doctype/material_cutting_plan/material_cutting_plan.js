@@ -9,7 +9,7 @@ const MCP_MIN_LEFTOVER_DIMENSION_MM = 500;
 
 frappe.ui.form.on('Material Cutting Plan', {
     refresh: function(frm) {
-        frm.add_custom_button(
+        /*frm.add_custom_button(
             __('Get Non Processed Orders'),
             function() {
                 frappe.call({
@@ -33,7 +33,7 @@ frappe.ui.form.on('Material Cutting Plan', {
                 });
             },
             __('Order Selection')
-        );
+        );*/
 
         frm.add_custom_button(
             __('Select Orders for Source Item'),
@@ -63,7 +63,7 @@ frappe.ui.form.on('Material Cutting Plan', {
                     }
                 });
             },
-            __('Order Selection')
+            //__('Order Selection')
         );
 
         frm.add_custom_button(__('Create Draft Repack'), function() {
@@ -504,6 +504,10 @@ function render_cutting_plan_preview(frm) {
 }
 
 function on_cut_piece_click(frm, $piece) {
+    if (frm.doc.status !== 'Draft') {
+        frappe.msgprint(__('Incidents can only be added or modified when the plan is in Draft status.'));
+        return;
+    }
     const nodeData = extract_node_data($piece);
     const existingIncident = find_incident_row(frm, nodeData.node_id);
 

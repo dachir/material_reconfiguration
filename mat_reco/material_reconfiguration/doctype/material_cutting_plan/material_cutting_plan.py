@@ -15,6 +15,7 @@ from mat_reco.material_reconfiguration.services.stock_candidate_service import (
 from mat_reco.material_reconfiguration.services.cutting_plan_service import (
     generate_material_cutting_plan,
 )
+from mat_reco.material_reconfiguration.doctype.material_cutting_plan.mcp_sheet_sync import sync_mcp_sheets
 
 class MaterialCuttingPlan(Document):
     """Material Cutting Plan aggregates multiple Sales Orders and generates an
@@ -161,20 +162,4 @@ class MaterialCuttingPlan(Document):
                 continue
 
     def on_submit(self):
-        pass
-        #result = create_serial_nos_and_bundles_from_material_cutting_plan(self)
-
-        #messages = []
-
-        #if result.get("serial_nos"):
-        #    messages.append(
-        #        "<b>Created Serial Nos</b><br>" + "<br>".join(result["serial_nos"])
-        #    )
-
-        #if result.get("bundles"):
-        #    messages.append(
-        #        "<b>Created Serial and Batch Bundles</b><br>" + "<br>".join(result["bundles"])
-        #    )
-
-        #if messages:
-        #    frappe.msgprint("<br><br>".join(messages))
+        sync_mcp_sheets(self, overwrite=True)

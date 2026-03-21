@@ -13,6 +13,9 @@ from mat_reco.material_reconfiguration.services.serial_creation_service import (
     ensure_mcp_serials_and_bundles_for_stock_entry,
     ensure_repack_output_serials_and_bundles_for_stock_entry,
 )
+from mat_reco.material_reconfiguration.services.repack_draft_service import (
+    validate_repack_totals_against_mcp_on_submit,
+)
 
 
 def _norm_dims(L, W):
@@ -277,6 +280,7 @@ def _apply_repack_costing(doc):
 
 
 def stock_entry_validate(doc, method=None):
+    _hydrate_mcp_row_dimensions_from_serials(doc)
     _apply_repack_costing(doc)
 
 def _already_costed(doc):
@@ -286,6 +290,44 @@ def _already_costed(doc):
 
 def stock_entry_before_submit(doc, method=None):
     _cleanup_legacy_serial_fields_when_bundle_exists(doc)
+    validate_repack_totals_against_mcp_on_submit(doc)
 
     if _already_costed(doc):
         return
+
+
+def _hydrate_mcp_row_dimensions_from_serials(doc):
+    mcp_name = (doc.get("custom_material_cutting_plan") or "").strip()
+    if not mcp_name:
+        return
+
+    if (doc.stock_entry_type or "") != "Repack":
+        return
+
+    for it in (doc.items or []):
+        current_length = flt(it.get("custom_dimension_length_mm") or 0)
+        current_width = flt(it.get("custom_dimension_width_mm") or 0)
+
+        if current_length > 0 and current_width > 0:
+            continue
+
+        bundle_name = _get_bundle_name(it)
+        serial_text = (it.get("serial_no") or "").strip()
+
+        if not bundle_name and not serial_text:
+            continue
+
+        L, W = _get_row_dims_from_serials(it)
+        if L <= 0 or W <= 0:
+            continue
+
+        it.custom_dimension_length_mm = L
+        it.custom_dimension_width_mm = W
+
+        if hasattr(it, "custom_surface_mm2"):
+            it.custom_surface_mm2 = flt(L) * flt(W)
+
+        if hasattr(it, "custom_perimeter_mm"):
+            it.custom_perimeter_mm = 2 * (flt(L) + flt(W))
+
+
