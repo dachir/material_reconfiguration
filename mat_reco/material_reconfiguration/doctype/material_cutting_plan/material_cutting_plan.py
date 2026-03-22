@@ -161,5 +161,7 @@ class MaterialCuttingPlan(Document):
                 # If the child table or fields are missing, skip adding rows
                 continue
 
-    def on_submit(self):
         sync_mcp_sheets(self, overwrite=True)
+        
+    #def on_submit(self):
+    #    sync_mcp_sheets(self, overwrite=True)

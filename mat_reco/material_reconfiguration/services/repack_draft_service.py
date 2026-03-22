@@ -204,6 +204,15 @@ def _extract_bundle_serials(bundle_doc):
     return serials
 
 
+def _extract_serials_from_text(value):
+    serials = []
+    for s in cstr(value or "").splitlines():
+        s = s.strip()
+        if s:
+            serials.append(s)
+    return list(dict.fromkeys(serials))
+
+
 def _find_existing_bundle_for_exact_serials(item_code, warehouse, serials, material_cutting_plan):
     if not serials:
         return None
@@ -294,28 +303,21 @@ def _build_input_rows(se, doc, effective_nodes):
         grouped_inputs[(item_code, warehouse)].append(serial_no)
 
     for (item_code, warehouse), serials in grouped_inputs.items():
+        serials = list(dict.fromkeys(serials))
+
         row = se.append("items", {})
         row.item_code = item_code
         row.s_warehouse = warehouse
         row.qty = len(serials)
         _set_item_uom_fields(row, item_code)
 
-        if len(serials) == 1:
-            row.serial_no = serials[0]
-        else:
-            bundle_name = _find_existing_bundle_for_exact_serials(
-                item_code=item_code,
-                warehouse=warehouse,
-                serials=serials,
-                material_cutting_plan=doc.name,
-            )
-            if bundle_name:
-                row.serial_and_batch_bundle = bundle_name
-                row.serial_no = ""
-                if hasattr(row, "batch_no"):
-                    row.batch_no = ""
-            else:
-                row.serial_no = "\n".join(serials)
+        # MCP source of truth: always write serial_no directly
+        row.serial_no = "\n".join(serials)
+
+        # Do not bind an input bundle here.
+        row.serial_and_batch_bundle = None
+        if hasattr(row, "batch_no"):
+            row.batch_no = ""
 
 
 def _build_output_rows(se, doc, effective_nodes):
@@ -423,38 +425,53 @@ def _apply_rate_on_row(it, new_vr: float):
         it.allow_zero_valuation_rate = 0
 
 def _extract_serial_nos_from_stock_entry_detail(row) -> set[str]:
-    """Extract serial numbers from a Stock Entry Detail row using both
-    the direct serial_no field and the Serial and Batch Bundle.
+    """Read actual serials attached to a Stock Entry Detail row.
+
+    Priority:
+    - input row: direct serial_no first
+    - otherwise: bundle first, fallback to serial_no
     """
     serial_nos = set()
 
-    serial_no_value = row.get("serial_no")
-    if serial_no_value:
-        for s in cstr(serial_no_value).split("\n"):
-            s = s.strip()
-            if s:
-                serial_nos.add(s)
+    is_input_row = bool(row.get("s_warehouse")) and not bool(row.get("t_warehouse"))
 
-    bundle_name = row.get("serial_and_batch_bundle")
+    if is_input_row:
+        serial_no_value = cstr(row.get("serial_no") or "").strip()
+        if serial_no_value:
+            for s in serial_no_value.splitlines():
+                s = s.strip()
+                if s:
+                    serial_nos.add(s)
+            return serial_nos
+
+    bundle_name = cstr(row.get("serial_and_batch_bundle") or "").strip()
     if bundle_name:
         try:
             bundle = frappe.get_doc("Serial and Batch Bundle", bundle_name)
-            for entry in bundle.get("entries", []):
-                serial_no = (entry.get("serial_no") or "").strip()
+            for entry in (bundle.get("entries") or bundle.get("items") or []):
+                serial_no = cstr(entry.get("serial_no") or "").strip()
                 if serial_no:
                     serial_nos.add(serial_no)
+            if serial_nos:
+                return serial_nos
         except Exception:
-            pass
+            frappe.log_error(
+                frappe.get_traceback(),
+                f"Failed to read bundle {bundle_name}"
+            )
+
+    serial_no_value = cstr(row.get("serial_no") or "").strip()
+    if serial_no_value:
+        for s in serial_no_value.splitlines():
+            s = s.strip()
+            if s:
+                serial_nos.add(s)
 
     return serial_nos
 
 def validate_all_expected_outputs_not_already_generated(doc, effective_nodes):
     """Check whether all expected MCP outputs (excluding destroyed ones)
     have already been generated in non-cancelled Stock Entries.
-
-    Important:
-    - generated outputs are read from Stock Entry Detail serial_no and bundle
-    - expected outputs should ideally use serial_no too, when available
     """
     expected_output_ids = set()
 
@@ -465,12 +482,11 @@ def validate_all_expected_outputs_not_already_generated(doc, effective_nodes):
             if (
                 node_type == "finished_good"
                 or node_type == "leftover"
-                or (node_type == "waste" and cint(doc.get("add_waste_to_stock") or 0) == 1)
+                or (node_type == "waste" and cint(doc.get("add_waiste_to_stock") or 0) == 1)
             ):
-                output_id = child.get("id")
+                output_id = cstr(_target_serial_name(child) or "").strip()
                 if output_id:
-                    expected_output_ids.add(cstr(output_id).strip())
-
+                    expected_output_ids.add(output_id)
 
     if not expected_output_ids:
         return
@@ -489,25 +505,23 @@ def validate_all_expected_outputs_not_already_generated(doc, effective_nodes):
     for se_row in stock_entries:
         se_items = frappe.get_all(
             "Stock Entry Detail",
-            filters={
-                "parent": se_row.name,
-                "is_finished_item": 1,
-            },
+            filters={"parent": se_row.name},
             fields=[
                 "name",
                 "item_code",
                 "serial_no",
                 "serial_and_batch_bundle",
                 "qty",
+                "s_warehouse",
+                "t_warehouse",
             ],
         )
 
         for item in se_items:
+            if not item.get("t_warehouse"):
+                continue
             row_serials = _extract_serial_nos_from_stock_entry_detail(item)
             already_generated_output_ids.update(row_serials)
-
-    #frappe.msgprint(_("Expected output IDs: {0}").format(", ".join(sorted(expected_output_ids))))
-    #frappe.msgprint(_("Already generated output IDs: {0}").format(", ".join(sorted(already_generated_output_ids))))
 
     if expected_output_ids.issubset(already_generated_output_ids):
         frappe.throw(
@@ -552,33 +566,27 @@ def _collect_expected_serials(effective_nodes, add_waiste_to_stock):
     expected_input_serials = set()
 
     for node in effective_nodes or []:
-        # INPUT
-        if node.get("serial_no"):
-            expected_input_serials.add(node.get("serial_no").strip())
+        input_serial = cstr(node.get("serial_no") or "").strip()
+        if input_serial:
+            expected_input_serials.add(input_serial)
 
         for child in node.get("children", []) or []:
             node_type = (child.get("node_type") or "").strip()
+            serial = cstr(_target_serial_name(child) or "").strip()
 
-            if node_type == "finished_good" or node_type == "leftover" or (node_type == "waste" and add_waiste_to_stock):
-                serial = (child.get("serial_no") or "").strip()
-                if serial:
-                    expected_output_serials.add(serial)
+            if not serial:
+                continue
 
+            if node_type in ("finished_good", "leftover") or (
+                node_type == "waste" and add_waiste_to_stock
+            ):
+                expected_output_serials.add(serial)
             elif node_type == "destroyed":
-                serial = (
-                    child.get("serial_no")
-                    or child.get("source_serial_no")
-                    or ""
-                ).strip()
-                if serial:
-                    destroyed_output_serials.add(serial)
-
-    frappe.msgprint(_("Expected output serials: {0}").format(", ".join(expected_output_serials)))
-    frappe.msgprint(_("Destroyed output serials: {0}").format(", ".join(destroyed_output_serials)))
+                destroyed_output_serials.add(serial)
 
     expected_output_serials -= destroyed_output_serials
-
     return expected_output_serials, expected_input_serials
+
 
 def _extract_serials_from_row(row):
     """Return a set of serial numbers from a Stock Entry Detail row."""
@@ -616,56 +624,23 @@ def _collect_generated_outputs_and_inputs_from_serials(mcp_name):
             filters={"parent": se.name},
             fields=[
                 "name",
-                "is_finished_item",
                 "serial_no",
                 "serial_and_batch_bundle",
+                "s_warehouse",
+                "t_warehouse",
             ],
         )
 
         for row in items:
-            serials = _extract_serials_from_row(row)
+            serials = _extract_serial_nos_from_stock_entry_detail(row)
 
-            if row.get("is_finished_item"):
+            if row.get("t_warehouse"):
                 generated_output_serials.update(serials)
-            else:
+            elif row.get("s_warehouse"):
                 consumed_input_serials.update(serials)
 
     return generated_output_serials, consumed_input_serials
 
-def _collect_generated_outputs_and_inputs_from_serials(mcp_name):
-    generated_output_serials = set()
-    consumed_input_serials = set()
-
-    stock_entries = frappe.get_all(
-        "Stock Entry",
-        filters={
-            "docstatus": 1,
-            "custom_material_cutting_plan": mcp_name,
-        },
-        fields=["name"],
-    )
-
-    for se in stock_entries:
-        items = frappe.get_all(
-            "Stock Entry Detail",
-            filters={"parent": se.name},
-            fields=[
-                "name",
-                "is_finished_item",
-                "serial_no",
-                "serial_and_batch_bundle",
-            ],
-        )
-
-        for row in items:
-            serials = _extract_serials_from_row(row)
-
-            if row.get("is_finished_item"):
-                generated_output_serials.update(serials)
-            else:
-                consumed_input_serials.update(serials)
-
-    return generated_output_serials, consumed_input_serials
 
 def validate_mcp_completion_on_submit(stock_entry_doc):
     mcp_name = stock_entry_doc.get("custom_material_cutting_plan")
@@ -703,8 +678,8 @@ def _get_serial_area_mm2(serial_no: str) -> float:
         return flt(area)
 
     # Fallbacks if needed
-    length_mm = frappe.db.get_value("Serial No", serial_no, "custom_length_mm") or 0
-    width_mm = frappe.db.get_value("Serial No", serial_no, "custom_width_mm") or 0
+    length_mm = frappe.db.get_value("Serial No", serial_no, "custom_dimension_length_mm") or 0
+    width_mm = frappe.db.get_value("Serial No", serial_no, "custom_dimension_width_mm") or 0
     return flt(length_mm) * flt(width_mm)
 
 
@@ -731,7 +706,7 @@ def _collect_expected_repack_limits(doc, effective_nodes):
             if (
                 node_type == "finished_good"
                 or node_type == "leftover"
-                or (node_type == "waste" and cint(doc.get("add_waste_to_stock") or 0) == 1)
+                or (node_type == "waste" and cint(doc.get("add_waiste_to_stock") or 0) == 1)
             ):
                 output_serial = cstr(child.get("id") or "").strip()
                 if output_serial and output_serial not in expected_output_serials:
@@ -750,31 +725,57 @@ def _collect_expected_repack_limits(doc, effective_nodes):
         "expected_output_area_mm2": expected_output_area_mm2,
     }
 
-def _collect_actual_repack_totals(mcp_name: str, current_stock_entry_doc=None):
-    """Collect actual cumulative input/output totals for submitted repacks
-    linked to a given MCP, and optionally include the current stock entry doc.
+def _collect_actual_repack_totals(mcp_doc, effective_nodes, current_stock_entry_doc=None):
+    """Collect actual cumulative input/output totals for repacks linked to a given MCP.
+
+    Important:
+    - submitted stock entries: read actual rows from DB
+    - current stock entry being submitted:
+        for input rows, prefer MCP planned serials by item+warehouse
+        because input bundles may have been auto-rewritten incorrectly
     """
     consumed_input_serials = set()
     generated_output_serials = set()
 
-    def absorb_stock_entry_items(items):
+    mcp_name = mcp_doc.name
+    planned_input_map = _get_planned_input_serials_by_item_warehouse(mcp_doc, effective_nodes)
+
+    def absorb_stock_entry_items(items, is_current_doc=False):
         for row in items:
-            row_serials = _extract_serial_nos_from_stock_entry_detail(row)
-            if not row_serials:
+            is_output = bool(row.get("t_warehouse"))
+            is_input = bool(row.get("s_warehouse")) and not bool(row.get("t_warehouse"))
+
+            if is_input:
+                # For the current doc being submitted, trust MCP planned inputs
+                # instead of a possibly mutated bundle.
+                if is_current_doc:
+                    key = (row.get("item_code"), row.get("s_warehouse"))
+                    planned_serials = planned_input_map.get(key) or set()
+                    if planned_serials:
+                        consumed_input_serials.update(planned_serials)
+                        continue
+
+                row_serials = _extract_serial_nos_from_stock_entry_detail(row)
+                if row_serials:
+                    consumed_input_serials.update(row_serials)
                 continue
 
-            if cint(row.get("is_finished_item")) == 1:
-                generated_output_serials.update(row_serials)
-            else:
-                consumed_input_serials.update(row_serials)
+            if is_output:
+                row_serials = _extract_serial_nos_from_stock_entry_detail(row)
+                if row_serials:
+                    generated_output_serials.update(row_serials)
 
-    # Submitted stock entries already linked to the MCP
+    submitted_filters = {
+        "docstatus": 1,
+        "custom_material_cutting_plan": mcp_name,
+    }
+
+    if current_stock_entry_doc and current_stock_entry_doc.get("name"):
+        submitted_filters["name"] = ["!=", current_stock_entry_doc.get("name")]
+
     submitted_ses = frappe.get_all(
         "Stock Entry",
-        filters={
-            "docstatus": 1,
-            "custom_material_cutting_plan": mcp_name,
-        },
+        filters=submitted_filters,
         fields=["name"],
     )
 
@@ -784,16 +785,18 @@ def _collect_actual_repack_totals(mcp_name: str, current_stock_entry_doc=None):
             filters={"parent": se.name},
             fields=[
                 "name",
-                "is_finished_item",
+                "item_code",
                 "serial_no",
                 "serial_and_batch_bundle",
+                "s_warehouse",
+                "t_warehouse",
+                "is_finished_item",
             ],
         )
-        absorb_stock_entry_items(items)
+        absorb_stock_entry_items(items, is_current_doc=False)
 
-    # Include current stock entry being submitted
     if current_stock_entry_doc:
-        absorb_stock_entry_items(current_stock_entry_doc.get("items") or [])
+        absorb_stock_entry_items(current_stock_entry_doc.get("items") or [], is_current_doc=True)
 
     consumed_input_area_mm2 = sum(_get_serial_area_mm2(s) for s in consumed_input_serials)
     generated_output_area_mm2 = sum(_get_serial_area_mm2(s) for s in generated_output_serials)
@@ -819,7 +822,7 @@ def validate_repack_totals_against_mcp_on_submit(stock_entry_doc):
     effective_nodes = build_effective_nodes(mcp)
 
     expected = _collect_expected_repack_limits(mcp, effective_nodes)
-    actual = _collect_actual_repack_totals(mcp_name, current_stock_entry_doc=stock_entry_doc)
+    actual = _collect_actual_repack_totals(mcp, effective_nodes, current_stock_entry_doc=stock_entry_doc)
 
     errors = []
 
@@ -857,3 +860,125 @@ def validate_repack_totals_against_mcp_on_submit(stock_entry_doc):
 
     if errors:
         frappe.throw("<br>".join(errors))
+
+def _create_bundle(company, item_code, warehouse, serials, material_cutting_plan=None):
+    if not serials:
+        return None
+
+    serials = _filter_valid_output_serials(serials, warehouse)
+
+    if not serials:
+        return None
+
+    bundle = frappe.new_doc("Serial and Batch Bundle")
+    bundle.company = company
+    bundle.item_code = item_code
+    bundle.warehouse = warehouse
+    bundle.use_serial_batch_fields = 1  # 🔥 IMPORTANT
+
+    if frappe.db.has_column("Serial and Batch Bundle", "custom_material_cutting_plan"):
+        bundle.custom_material_cutting_plan = material_cutting_plan
+
+    for serial_no in serials:
+        bundle.append("entries", {
+            "serial_no": serial_no
+        })
+
+    bundle.flags.ignore_validate = True
+    bundle.flags.ignore_links = True
+    bundle.insert(ignore_permissions=True)
+
+    return bundle.name
+
+
+def _ensure_mcp_input_bundles(doc):
+    created_bundles = []
+
+    for it in (doc.items or []):
+        is_input = bool(it.s_warehouse) and not bool(it.t_warehouse)
+        if not is_input:
+            continue
+
+        item_code = it.item_code
+        warehouse = it.s_warehouse
+
+        if not item_code or not warehouse:
+            continue
+
+        if cint(frappe.db.get_value("Item", item_code, "has_serial_no") or 0) != 1:
+            continue
+
+        serials = _extract_serials_from_text(it.serial_no or "")
+        if not serials:
+            continue
+
+        serials = _filter_valid_output_serials(serials, warehouse)
+
+        # Optional: validate every serial belongs to MCP planned inputs
+        bundle_name = _create_bundle(
+            company=doc.company,
+            item_code=item_code,
+            warehouse=warehouse,
+            serials=serials,
+            material_cutting_plan=doc.custom_material_cutting_plan or None,
+        )
+
+        _assert_bundle_matches_expected(bundle_name, serials)
+
+        if bundle_name:
+            it.serial_and_batch_bundle = bundle_name
+            it.serial_no = None
+            it.use_serial_batch_fields = 1
+            created_bundles.append(bundle_name)
+
+    return sorted(set(created_bundles))
+
+def _assert_bundle_matches_expected(bundle_name: str, expected_serials: list[str]):
+    if not bundle_name:
+        return
+
+    bundle_doc = frappe.get_doc("Serial and Batch Bundle", bundle_name)
+    actual_serials = set(_extract_bundle_serials(bundle_doc))
+    expected_set = set(expected_serials)
+
+    if actual_serials != expected_set:
+        frappe.throw(
+            _("Bundle {0} does not match expected MCP serials.\nExpected: {1}\nActual: {2}")
+            .format(
+                bundle_name,
+                ", ".join(sorted(expected_set)),
+                ", ".join(sorted(actual_serials)),
+            )
+        )
+
+
+def _get_planned_input_serials_by_item_warehouse(doc, effective_nodes):
+    planned = defaultdict(set)
+
+    for node in effective_nodes or []:
+        item_code = node.get("item_code") or doc.get("source_item")
+        warehouse = _target_input_warehouse(doc, node)
+        serial_no = cstr(node.get("serial_no") or "").strip()
+
+        if item_code and warehouse and serial_no:
+            planned[(item_code, warehouse)].add(serial_no)
+
+    return planned
+
+def _filter_valid_output_serials(serials, warehouse):
+    valid_serials = []
+
+    for s in serials:
+        existing = frappe.db.get_value("Serial No", s, ["warehouse"], as_dict=True)
+
+        if not existing:
+            # nouveau serial → OK
+            valid_serials.append(s)
+        elif existing.warehouse != warehouse:
+            # déjà ailleurs → erreur métier
+            frappe.throw(f"Serial {s} exists in another warehouse: {existing.warehouse}")
+        else:
+            # déjà présent → skip
+            continue
+
+    return valid_serials
