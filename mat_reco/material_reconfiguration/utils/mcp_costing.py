@@ -326,17 +326,113 @@ def allocate_mcp_repack_costs_from_stock_entry(doc, mcp_name: str) -> dict:
 
 def allocate_sales_order_repack_costs_from_stock_entry(doc) -> dict:
     """
-    Sales Order Repack costing:
-    reuse the same area-based allocator as MCP,
-    but without MCP-specific destroyed/waste logic.
-    Output dimensions must already exist on Stock Entry rows.
+    Allocate costs for a Repack Stock Entry created from a Sales Order.
+
+    Unlike MCP costing, which allocates cost based on the area of the
+    produced pieces, Sales Order repack costing uses a quantity-based
+    allocation: the total cost of the input rows is distributed across
+    output rows in proportion to their quantities.  The valuation rate
+    for each output row is therefore ``total_input_cost / total_output_qty``.
+
+    Args:
+        doc: The Stock Entry document being costed.
+
+    Returns:
+        dict: A result dict similar to the MCP costing function, with keys
+        ``total_input_cost``, ``total_output_qty``, ``unit_rate`` (the
+        valuation rate applied to each unit), and ``lines`` listing the
+        per‑row cost allocations.  Each entry in ``lines`` contains
+        ``row_index``, ``row_type``, ``item_code``, ``qty``, ``line_amount``,
+        and ``valuation_rate``.  Additional fields ``length_mm``,
+        ``width_mm`` and ``line_area_mm2`` are included for structural
+        compatibility but are not used in the allocation.
     """
-    return _allocate_area_repack_costs_from_stock_entry(
-        doc,
-        serial_dim_map={},
-        skip_destroyed=False,
-        skip_waste=False,
-    )
+    items = doc.get("items") or []
+
+    # 1) Total input cost: sum of absolute basic_amount on input rows
+    total_input_cost = 0.0
+    for it in items:
+        if it.get("s_warehouse"):
+            total_input_cost += abs(flt(it.get("basic_amount") or 0))
+
+    if total_input_cost <= 0:
+        frappe.throw("Input basic_amount is zero; cannot allocate repack costs.")
+
+    # 2) Collect output rows and total output quantity
+    output_rows = []
+    total_output_qty = 0.0
+    for idx, it in enumerate(items, start=1):
+        if not it.get("t_warehouse"):
+            continue
+        qty = flt(it.get("qty") or 0)
+        item_code = (it.get("item_code") or "").strip()
+        if not item_code or qty <= 0:
+            continue
+        total_output_qty += qty
+        output_rows.append((idx, it, qty))
+
+    if total_output_qty <= 0:
+        frappe.throw("Total output quantity is zero; cannot allocate repack costs.")
+
+    # 3) Compute unit valuation rate
+    unit_rate = total_input_cost / total_output_qty
+
+    lines = []
+    allocated_total = 0.0
+    for idx, it, qty in output_rows:
+        node_type = (it.get("custom_cutting_node_type") or "").strip() or "output"
+        item_code = it.get("item_code")
+        # compute line amount proportionally by quantity
+        line_amount_total = unit_rate * qty
+        valuation_rate = unit_rate
+        allocated_total += line_amount_total
+        # fetch dimensions for completeness; not used in allocation
+        L = flt(it.get("custom_dimension_length_mm") or 0)
+        W = flt(it.get("custom_dimension_width_mm") or 0)
+        # if dimensions missing, attempt to derive from first serial
+        if (L <= 0 or W <= 0):
+            row_serials = _get_row_serials(it)
+            if row_serials:
+                sn = row_serials[0]
+                # attempt to load from Serial No custom fields
+                sn_doc = frappe.get_doc("Serial No", sn) if frappe.db.exists("Serial No", sn) else None
+                if sn_doc:
+                    L = flt(sn_doc.get("custom_dimension_length_mm") or 0)
+                    W = flt(sn_doc.get("custom_dimension_width_mm") or 0)
+        L, W = _norm_dims_key(L, W)
+        # compute area (for compatibility; not used)
+        line_area_total = _area_mm2(L, W) * qty
+        lines.append(
+            {
+                "row_index": idx,
+                "row_type": node_type,
+                "item_code": item_code,
+                "length_mm": L,
+                "width_mm": W,
+                "qty": qty,
+                "line_area_mm2": line_area_total,
+                "line_amount": line_amount_total,
+                "valuation_rate": valuation_rate,
+            }
+        )
+
+    # 4) Delta fix on last line to absorb rounding differences
+    delta = flt(total_input_cost - allocated_total)
+    if abs(delta) > DELTA_EPS and lines:
+        last = lines[-1]
+        qty = flt(last.get("qty") or 0)
+        if qty > 0:
+            last["line_amount"] = flt(last["line_amount"] + delta)
+            last["valuation_rate"] = flt(last["line_amount"] / qty)
+            if last["valuation_rate"] < 0:
+                last["valuation_rate"] = 0.0
+
+    return {
+        "total_input_cost": total_input_cost,
+        "total_output_qty": total_output_qty,
+        "unit_rate": unit_rate,
+        "lines": lines,
+    }
 
 def _extract_serials_from_text(value: str) -> list[str]:
     result = []

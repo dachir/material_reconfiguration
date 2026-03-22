@@ -10,8 +10,11 @@ from mat_reco.material_reconfiguration.utils.mcp_costing import (
     allocate_sales_order_repack_costs_from_stock_entry,
 )
 from mat_reco.material_reconfiguration.services.serial_creation_service import (
-    ensure_mcp_serials_and_bundles_for_stock_entry,
     ensure_repack_output_serials_and_bundles_for_stock_entry,
+)
+# Import the MCP bundling materialisation function from the repack draft
+from mat_reco.material_reconfiguration.services.repack_draft_service import (
+    ensure_mcp_bundles_for_stock_entry,
 )
 from mat_reco.material_reconfiguration.services.repack_draft_service import (
     validate_repack_totals_against_mcp_on_submit,
@@ -87,9 +90,12 @@ def _cleanup_legacy_serial_fields_when_bundle_exists(doc):
         bundle_name = (it.get("serial_and_batch_bundle") or it.get("serial_batch_bundle") or "").strip()
         if not bundle_name:
             continue
-
+        # When a bundle is present, clear the serial_no field to satisfy ERPNext's
+        # validation.  Having both serial_no and serial_and_batch_bundle
+        # simultaneously would cause validation errors on submit.
         it.serial_no = ""
         if hasattr(it, "batch_no"):
+            # Always clear batch_no to avoid confusing batch/serial handling
             it.batch_no = ""
 
 
@@ -181,7 +187,11 @@ def _apply_mcp_costing(doc):
 
     doc.set_basic_rate_manually = 1
 
-    ensure_mcp_serials_and_bundles_for_stock_entry(doc)
+    # Ne pas créer de bundles en phase de validation : la matérialisation des
+    # serials et bundles MCP est désormais effectuée en `before_submit` pour
+    # disposer du contexte transactionnel complet. On se contente ici de
+    # nettoyer d’éventuels champs hérités sur les lignes déjà liées à des
+    # bundles.
     _cleanup_legacy_serial_fields_when_bundle_exists(doc)
 
     result = allocate_mcp_repack_costs_from_stock_entry(doc, mcp_name)
@@ -289,6 +299,11 @@ def _already_costed(doc):
     )
 
 def stock_entry_before_submit(doc, method=None):
+    # Before submitting, ensure that MCP serials and bundles are fully materialised.
+    # This guarantees that the Stock Entry has a consistent transactional context and
+    # prevents late creation of serials/bundles when the document is locked.
+    ensure_mcp_bundles_for_stock_entry(doc)
+
     _cleanup_legacy_serial_fields_when_bundle_exists(doc)
     validate_repack_totals_against_mcp_on_submit(doc)
 
@@ -329,5 +344,12 @@ def _hydrate_mcp_row_dimensions_from_serials(doc):
 
         if hasattr(it, "custom_perimeter_mm"):
             it.custom_perimeter_mm = 2 * (flt(L) + flt(W))
+
+def _mcp_rows_already_bound_to_bundles(doc):
+    for it in (doc.items or []):
+        if it.get("t_warehouse") or it.get("s_warehouse"):
+            if (it.get("serial_and_batch_bundle") or "").strip():
+                return True
+    return False
 
 

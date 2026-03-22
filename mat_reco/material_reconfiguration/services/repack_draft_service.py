@@ -213,6 +213,161 @@ def _extract_serials_from_text(value):
     return list(dict.fromkeys(serials))
 
 
+def _get_input_serial_names_from_mcp_sheets(doc):
+    grouped = defaultdict(set)
+
+    for row in (doc.get("mcp_sheets") or []):
+        serial_no = cstr(row.get("source_serial_no") or "").strip()
+        item_code = cstr(row.get("source_item_code") or "").strip()
+        warehouse = cstr(doc.get("source_warehouse") or "").strip()
+
+        if serial_no and item_code and warehouse:
+            grouped[(item_code, warehouse)].add(serial_no)
+
+    return grouped
+
+
+def _ensure_input_serial_exists(
+    serial_no: str,
+    item_code: str | None = None,
+    warehouse: str | None = None,
+    *,
+    material_cutting_plan: str | None = None,
+    custom_stock_entry_row_name: str | None = None,
+) -> dict:
+    """Validate that an input serial exists and matches the given item and warehouse.
+
+    If the serial exists, optionally update its custom fields to record the
+    Material Cutting Plan and the Stock Entry row that consumed it. This
+    provides traceability for input serials in MCP repack operations.
+
+    Args:
+        serial_no: Serial number to validate.
+        item_code: Expected item code (optional).
+        warehouse: Expected warehouse (optional).
+        material_cutting_plan: Name of the Material Cutting Plan consuming this serial.
+        custom_stock_entry_row_name: Name of the Stock Entry Detail row consuming this serial.
+
+    Returns:
+        dict: The existing serial record with keys ``name``, ``item_code`` and ``warehouse``.
+    """
+    existing = frappe.db.get_value(
+        "Serial No",
+        serial_no,
+        ["name", "item_code", "warehouse"],
+        as_dict=True,
+    )
+    if not existing:
+        frappe.throw(_("Input Serial No {0} does not exist").format(serial_no))
+    if item_code and existing.item_code and existing.item_code != item_code:
+        frappe.throw(
+            _("Input Serial No {0} belongs to item {1}, not {2}")
+            .format(serial_no, existing.item_code, item_code)
+        )
+    if warehouse and existing.warehouse and existing.warehouse != warehouse:
+        frappe.throw(
+            _("Input Serial No {0} is in warehouse {1}, not {2}")
+            .format(serial_no, existing.warehouse, warehouse)
+        )
+    # Update custom fields on the existing serial for traceability
+    updates = {}
+    if material_cutting_plan and frappe.db.has_column("Serial No", "custom_material_cutting_plan"):
+        updates["custom_material_cutting_plan"] = material_cutting_plan
+    if custom_stock_entry_row_name and frappe.db.has_column("Serial No", "custom_stock_entry_row_name"):
+        updates["custom_stock_entry_row_name"] = custom_stock_entry_row_name
+    if updates:
+        frappe.db.set_value("Serial No", serial_no, updates, update_modified=False)
+    return existing
+
+
+def _ensure_output_serial_exists_or_create(
+    serial_no,
+    item_code,
+    warehouse,
+    material_cutting_plan=None,
+    custom_stock_entry_row_name=None,
+    length_mm=None,
+    width_mm=None,
+    node_type=None,
+):
+    existing = frappe.db.get_value(
+        "Serial No",
+        serial_no,
+        ["name", "item_code", "warehouse"],
+        as_dict=True,
+    )
+
+    if existing:
+        if existing.item_code and existing.item_code != item_code:
+            frappe.throw(
+                _("Output Serial No {0} belongs to item {1}, not {2}")
+                .format(serial_no, existing.item_code, item_code)
+            )
+
+        if existing.warehouse and existing.warehouse != warehouse:
+            frappe.throw(
+                _("Output Serial No {0} already exists in another warehouse: {1}")
+                .format(serial_no, existing.warehouse)
+            )
+
+        updates = {}
+        if frappe.db.has_column("Serial No", "custom_material_cutting_plan"):
+            updates["custom_material_cutting_plan"] = material_cutting_plan
+        if frappe.db.has_column("Serial No", "custom_stock_entry_row_name"):
+            updates["custom_stock_entry_row_name"] = custom_stock_entry_row_name
+        if frappe.db.has_column("Serial No", "custom_dimension_length_mm") and length_mm is not None:
+            updates["custom_dimension_length_mm"] = flt(length_mm)
+        if frappe.db.has_column("Serial No", "custom_dimension_width_mm") and width_mm is not None:
+            updates["custom_dimension_width_mm"] = flt(width_mm)
+        if frappe.db.has_column("Serial No", "custom_surface_mm2") and length_mm is not None and width_mm is not None:
+            updates["custom_surface_mm2"] = flt(length_mm) * flt(width_mm)
+        if frappe.db.has_column("Serial No", "custom_cutting_node_type") and node_type:
+            updates["custom_cutting_node_type"] = node_type
+
+        if updates:
+            frappe.db.set_value("Serial No", serial_no, updates, update_modified=False)
+
+        return {
+            "serial_no": serial_no,
+            "already_exists": True,
+        }
+
+    serial_doc = frappe.new_doc("Serial No")
+    serial_doc.serial_no = serial_no
+    serial_doc.item_code = item_code
+    serial_doc.company = frappe.defaults.get_user_default("Company")
+
+    # IMPORTANT:
+    # Do NOT set warehouse on a newly created Serial No.
+    # ERPNext will set it through Stock Entry / Purchase Receipt.
+
+    if frappe.db.has_column("Serial No", "custom_material_cutting_plan"):
+        serial_doc.custom_material_cutting_plan = material_cutting_plan
+    if frappe.db.has_column("Serial No", "custom_stock_entry_row_name"):
+        serial_doc.custom_stock_entry_row_name = custom_stock_entry_row_name
+    if frappe.db.has_column("Serial No", "custom_dimension_length_mm") and length_mm is not None:
+        serial_doc.custom_dimension_length_mm = flt(length_mm)
+    if frappe.db.has_column("Serial No", "custom_dimension_width_mm") and width_mm is not None:
+        serial_doc.custom_dimension_width_mm = flt(width_mm)
+    if frappe.db.has_column("Serial No", "custom_surface_mm2") and length_mm is not None and width_mm is not None:
+        serial_doc.custom_surface_mm2 = flt(length_mm) * flt(width_mm)
+    if frappe.db.has_column("Serial No", "custom_cutting_node_type") and node_type:
+        serial_doc.custom_cutting_node_type = node_type
+
+    serial_doc.insert(ignore_permissions=True)
+
+    return {
+        "serial_no": serial_doc.name,
+        "already_exists": False,
+    }
+
+
+def _bind_bundle_to_row(row, bundle_name):
+    row.serial_and_batch_bundle = bundle_name
+    row.serial_no = None
+    row.use_serial_batch_fields = 1
+
+
 def _find_existing_bundle_for_exact_serials(item_code, warehouse, serials, material_cutting_plan):
     if not serials:
         return None
@@ -290,40 +445,100 @@ def _find_bundle_name(item_code, warehouse, length_mm, width_mm, material_cuttin
 
 
 def _build_input_rows(se, doc, effective_nodes):
-    grouped_inputs = defaultdict(list)
+    """
+    Prepare input rows for a MCP repack Stock Entry.
 
-    for node in effective_nodes:
-        item_code = node.get("item_code") or doc.get("source_item")
-        warehouse = _target_input_warehouse(doc, node)
-        serial_no = (node.get("serial_no") or "").strip()
+    Rather than creating Serial and Batch Bundles at draft time, this
+    function collects and attaches the expected serial numbers to each
+    row.  Serial validation still occurs to ensure that all input
+    serials exist and are located in the appropriate warehouse, but
+    bundle creation is deferred until the Stock Entry is submitted.  The
+    deterministic serial list is exposed on the ``serial_no`` field so
+    that ERPNext does not auto‑fill arbitrary serials when editing the
+    draft.  In addition, the list is recorded in
+    ``custom_mcp_serial_nos_json`` and the row's ``use_serial_batch_fields``
+    flag is set so that ERPNext will create the outgoing bundle using
+    these serials during submission.
+    """
+    import json
 
-        if not item_code or not warehouse or not serial_no:
-            continue
+    grouped_inputs = _get_input_serial_names_from_mcp_sheets(doc)
 
-        grouped_inputs[(item_code, warehouse)].append(serial_no)
+    if not grouped_inputs:
+        for node in effective_nodes:
+            item_code = node.get("item_code") or doc.get("source_item")
+            warehouse = _target_input_warehouse(doc, node)
+            serial_no = cstr(node.get("serial_no") or "").strip()
+
+            if item_code and warehouse and serial_no:
+                grouped_inputs[(item_code, warehouse)].add(serial_no)
 
     for (item_code, warehouse), serials in grouped_inputs.items():
+        # Ensure a deterministic ordering and remove duplicates
         serials = list(dict.fromkeys(serials))
+        if not serials:
+            continue
 
+        # Create the input row on the Stock Entry
         row = se.append("items", {})
         row.item_code = item_code
         row.s_warehouse = warehouse
         row.qty = len(serials)
         _set_item_uom_fields(row, item_code)
 
-        # MCP source of truth: always write serial_no directly
-        row.serial_no = "\n".join(serials)
+        validated_serials = []
+        for serial_no in serials:
+            # Validate that each input serial exists and belongs to the
+            # correct item and warehouse. This does not create anything new.
+            _ensure_input_serial_exists(
+                serial_no=serial_no,
+                item_code=item_code,
+                warehouse=warehouse,
+            )
+            validated_serials.append(serial_no)
 
-        # Do not bind an input bundle here.
-        row.serial_and_batch_bundle = None
+        # At draft time, do not create bundles.  Instead, expose the list of
+        # expected serials on the ``serial_no`` field so that the user can
+        # immediately see which serials are planned for this row.  Also
+        # record the deterministic list in ``custom_mcp_serial_nos_json`` so
+        # that the materialisation logic can read it later.  Finally, set
+        # ``use_serial_batch_fields`` so that ERPNext will use these serials
+        # during submission and create the outgoing bundle automatically.
+        row.serial_no = "\n".join(validated_serials)
+        try:
+            row.custom_mcp_serial_nos_json = json.dumps(validated_serials)
+        except Exception:
+            pass
+        # Mark row to use the serial/batch fields for input rows.  Assign even if
+        # the property does not exist to ensure the flag is present on the document.
+        try:
+            row.use_serial_batch_fields = 1
+        except Exception:
+            setattr(row, "use_serial_batch_fields", 1)
+
+        # Clear batch information; bundling will clear the batch later.
         if hasattr(row, "batch_no"):
             row.batch_no = ""
 
-
 def _build_output_rows(se, doc, effective_nodes):
+    """
+    Prepare output rows for a MCP repack Stock Entry.
+
+    In the draft phase, no Serial Nos or Serial and Batch Bundles are
+    created.  This function defines the expected output rows and
+    records the list of deterministic serial numbers for each row in both
+    the ``serial_no`` display field and the ``custom_mcp_serial_nos_json``
+    field.  The dimensions and node types are also stored on the row for
+    later processing.  Creation of Serial Nos and bundles is deferred
+    until ``before_submit``, when the Stock Entry has a full
+    transactional context and a name.
+    """
+    import json
+
     fg_groups = defaultdict(list)
     other_rows = []
 
+    # Group finished goods with identical characteristics
     for node in effective_nodes:
         for child in node.get("children") or []:
             if not _include_child_in_repack(doc, child):
@@ -332,19 +547,14 @@ def _build_output_rows(se, doc, effective_nodes):
             node_type = (child.get("node_type") or "").strip()
             item_code = _target_output_item_code(doc, node, child)
             warehouse = _target_output_warehouse(doc, node, child)
-            serial_no = _target_serial_name(child)
+            serial_no = cstr(_target_serial_name(child) or "").strip()
             length_mm, width_mm = _get_effective_dims(child)
 
-            if not item_code or not warehouse:
+            if not item_code or not warehouse or not serial_no:
                 continue
 
             if node_type == "finished_good":
-                key = (
-                    item_code,
-                    warehouse,
-                    length_mm,
-                    width_mm,
-                )
+                key = (item_code, warehouse, length_mm, width_mm, node_type)
                 fg_groups[key].append(serial_no)
             else:
                 other_rows.append(
@@ -358,47 +568,69 @@ def _build_output_rows(se, doc, effective_nodes):
                     }
                 )
 
-    # FG grouped rows
-    for (item_code, warehouse, length_mm, width_mm), serials in fg_groups.items():
+    # Handle finished goods rows
+    for (item_code, warehouse, length_mm, width_mm, node_type), serials in fg_groups.items():
+        # Ensure deterministic ordering and remove duplicates
+        serials = list(dict.fromkeys(serials))
+        if not serials:
+            continue
+
         row = se.append("items", {})
         row.item_code = item_code
         row.t_warehouse = warehouse
-        row.qty = len(serials)
         row.is_finished_item = 1
 
+        # Set manual rate flag if available
         if hasattr(row, "set_basic_rate_manually"):
             row.set_basic_rate_manually = 1
-            
+
         _set_item_uom_fields(row, item_code)
 
-        if len(serials) == 1:
-            row.serial_no = serials[0]
-        else:
-            row.serial_no = "\n".join(serials)
+        # At draft time, expose the deterministic serial list on
+        # ``serial_no`` so the user can see which serials will be produced.
+        # Also store the list in ``custom_mcp_serial_nos_json`` to be read
+        # during materialisation.  Output rows do not need to set
+        # use_serial_batch_fields because bundles are created manually.
+        row.serial_no = "\n".join(serials)
+        row.qty = len(serials)
+        try:
+            row.custom_mcp_serial_nos_json = json.dumps(serials)
+        except Exception:
+            pass
 
-        _append_custom_output_fields(row, length_mm, width_mm, "finished_good")
+        # Append custom dimension and node type fields
+        _append_custom_output_fields(row, length_mm, width_mm, node_type)
 
-    # leftovers / waste
+    # Handle leftovers, waste, and other node types one by one
     for out in other_rows:
+        # Each leftover or waste output is represented by a separate row
         row = se.append("items", {})
         row.item_code = out["item_code"]
         row.t_warehouse = out["warehouse"]
         row.qty = 1
         _set_item_uom_fields(row, out["item_code"])
 
+        # Set manual rate flag if available
         if hasattr(row, "set_basic_rate_manually"):
             row.set_basic_rate_manually = 1
 
-        if out["serial_no"]:
-            row.serial_no = out["serial_no"]
+        # Display the single deterministic serial number in serial_no so the
+        # user can view it directly in the UI.  Also record it in
+        # custom_mcp_serial_nos_json for later materialisation.  Output rows
+        # do not use serial batch fields at draft time.
+        row.serial_no = out["serial_no"]
+        try:
+            row.custom_mcp_serial_nos_json = json.dumps([out["serial_no"]])
+        except Exception:
+            pass
 
+        # Append custom dimension and node type fields
         _append_custom_output_fields(
             row,
             out["length_mm"],
             out["width_mm"],
             out["node_type"],
         )
-
 
 def _apply_rate_on_row(it, new_vr: float):
     new_vr = flt(new_vr)
@@ -425,24 +657,17 @@ def _apply_rate_on_row(it, new_vr: float):
         it.allow_zero_valuation_rate = 0
 
 def _extract_serial_nos_from_stock_entry_detail(row) -> set[str]:
-    """Read actual serials attached to a Stock Entry Detail row.
-
-    Priority:
-    - input row: direct serial_no first
-    - otherwise: bundle first, fallback to serial_no
-    """
     serial_nos = set()
 
-    is_input_row = bool(row.get("s_warehouse")) and not bool(row.get("t_warehouse"))
-
-    if is_input_row:
-        serial_no_value = cstr(row.get("serial_no") or "").strip()
-        if serial_no_value:
-            for s in serial_no_value.splitlines():
-                s = s.strip()
-                if s:
-                    serial_nos.add(s)
-            return serial_nos
+    row_name = cstr(row.get("name") or "").strip()
+    if row_name and frappe.db.has_column("Serial No", "custom_stock_entry_row_name"):
+        linked_serials = frappe.get_all(
+            "Serial No",
+            filters={"custom_stock_entry_row_name": row_name},
+            pluck="name",
+        )
+        if linked_serials:
+            return set(linked_serials)
 
     bundle_name = cstr(row.get("serial_and_batch_bundle") or "").strip()
     if bundle_name:
@@ -861,12 +1086,18 @@ def validate_repack_totals_against_mcp_on_submit(stock_entry_doc):
     if errors:
         frappe.throw("<br>".join(errors))
 
-def _create_bundle(company, item_code, warehouse, serials, material_cutting_plan=None):
-    if not serials:
-        return None
-
-    serials = _filter_valid_output_serials(serials, warehouse)
-
+def _create_bundle(
+    company,
+    item_code,
+    warehouse,
+    serials,
+    custom_stock_entry_row_name,
+    material_cutting_plan=None,
+    type_of_transaction=None,
+    voucher_type=None,
+    voucher_no=None,
+    voucher_detail_no=None,
+):
     if not serials:
         return None
 
@@ -874,22 +1105,26 @@ def _create_bundle(company, item_code, warehouse, serials, material_cutting_plan
     bundle.company = company
     bundle.item_code = item_code
     bundle.warehouse = warehouse
-    bundle.use_serial_batch_fields = 1  # 🔥 IMPORTANT
+    bundle.use_serial_batch_fields = 1
+
+    bundle.type_of_transaction = type_of_transaction
+    bundle.voucher_type = voucher_type
+    bundle.voucher_no = voucher_no
+    bundle.voucher_detail_no = voucher_detail_no
 
     if frappe.db.has_column("Serial and Batch Bundle", "custom_material_cutting_plan"):
         bundle.custom_material_cutting_plan = material_cutting_plan
 
-    for serial_no in serials:
+    if frappe.db.has_column("Serial and Batch Bundle", "custom_stock_entry_row_name"):
+        bundle.custom_stock_entry_row_name = custom_stock_entry_row_name
+
+    for serial_no in list(dict.fromkeys(serials)):
         bundle.append("entries", {
             "serial_no": serial_no
         })
 
-    bundle.flags.ignore_validate = True
-    bundle.flags.ignore_links = True
     bundle.insert(ignore_permissions=True)
-
     return bundle.name
-
 
 def _ensure_mcp_input_bundles(doc):
     created_bundles = []
@@ -908,27 +1143,39 @@ def _ensure_mcp_input_bundles(doc):
         if cint(frappe.db.get_value("Item", item_code, "has_serial_no") or 0) != 1:
             continue
 
-        serials = _extract_serials_from_text(it.serial_no or "")
+        row_name = cstr(it.name or "").strip()
+        if row_name and frappe.db.has_column("Serial No", "custom_stock_entry_row_name"):
+            linked_serials = frappe.get_all(
+                "Serial No",
+                filters={"custom_stock_entry_row_name": row_name},
+                pluck="name",
+            )
+            if linked_serials:
+                serials = linked_serials
+            else:
+                serials = _extract_serials_from_text(it.serial_no or "")
+        else:
+            serials = _extract_serials_from_text(it.serial_no or "")
+
         if not serials:
             continue
 
-        serials = _filter_valid_output_serials(serials, warehouse)
+        for serial_no in serials:
+            _ensure_input_serial_exists(serial_no=serial_no, item_code=item_code, warehouse=warehouse)
 
-        # Optional: validate every serial belongs to MCP planned inputs
         bundle_name = _create_bundle(
             company=doc.company,
             item_code=item_code,
             warehouse=warehouse,
             serials=serials,
+            custom_stock_entry_row_name=it.name,
             material_cutting_plan=doc.custom_material_cutting_plan or None,
         )
 
         _assert_bundle_matches_expected(bundle_name, serials)
 
         if bundle_name:
-            it.serial_and_batch_bundle = bundle_name
-            it.serial_no = None
-            it.use_serial_batch_fields = 1
+            _bind_bundle_to_row(it, bundle_name)
             created_bundles.append(bundle_name)
 
     return sorted(set(created_bundles))
@@ -943,7 +1190,7 @@ def _assert_bundle_matches_expected(bundle_name: str, expected_serials: list[str
 
     if actual_serials != expected_set:
         frappe.throw(
-            _("Bundle {0} does not match expected MCP serials.\nExpected: {1}\nActual: {2}")
+            _("Bundle {0} does not match expected MCP serials. Expected: {1} Actual: {2}")
             .format(
                 bundle_name,
                 ", ".join(sorted(expected_set)),
@@ -951,10 +1198,12 @@ def _assert_bundle_matches_expected(bundle_name: str, expected_serials: list[str
             )
         )
 
-
 def _get_planned_input_serials_by_item_warehouse(doc, effective_nodes):
-    planned = defaultdict(set)
+    grouped = _get_input_serial_names_from_mcp_sheets(doc)
+    if grouped:
+        return grouped
 
+    planned = defaultdict(set)
     for node in effective_nodes or []:
         item_code = node.get("item_code") or doc.get("source_item")
         warehouse = _target_input_warehouse(doc, node)
@@ -982,3 +1231,192 @@ def _filter_valid_output_serials(serials, warehouse):
             continue
 
     return valid_serials
+
+
+# -----------------------------------------------------------------------------
+# MCP bundling service
+#
+# When creating a draft Stock Entry from a Material Cutting Plan (MCP), the
+# repack draft service records the expected output and input serial numbers on
+# each row via the ``serial_no`` field.  No Serial No or bundle records are
+# created at that time.  Once the user validates or submits the Stock Entry,
+# the serials and bundles must be materialised.  The following function
+# performs this materialisation in a transactional context, ensuring that
+# deterministic serials and bundles are created and linked to the Stock Entry
+# rows. It uses the same helper functions as the draft service for serial
+# creation and bundle linking and respects ERPNext rules around serial and
+# bundle creation.
+def ensure_mcp_bundles_for_stock_entry(doc):
+    """
+    Materialise MCP serials and bundles for a Stock Entry.
+
+    This function should be invoked during the ``before_submit`` event of a
+    Stock Entry.  It reads the deterministic list of serial numbers from
+    ``custom_mcp_serial_nos_json`` on each item row; if that field is
+    missing or empty, it falls back to the ``serial_no`` display field.  For
+    input rows (those with ``s_warehouse`` only), it validates that each
+    listed Serial No exists in the correct item and warehouse, stamps the
+    ``Serial No`` record with the MCP and Stock Entry row information, and
+    then writes the newline‑separated list back to ``serial_no`` and sets
+    ``use_serial_batch_fields = 1``.  No bundle is created for input rows;
+    ERPNext will create the outgoing bundle automatically based on these
+    fields when the Stock Entry is submitted.  For output rows (those
+    with ``t_warehouse``), it ensures that each Serial No exists or
+    creates it if missing, stamps custom fields for traceability, and
+    creates an incoming ``Serial and Batch Bundle`` that links the serials
+    to the Stock Entry.  After bundling, the row's ``serial_no`` is
+    cleared (handled by ``_bind_bundle_to_row``) to satisfy ERPNext
+    validation.
+
+    Args:
+        doc: The Stock Entry document to process.
+
+    Returns:
+        dict: A dictionary containing the names of any created serial numbers
+        and bundles.  Keys are ``serial_nos`` and ``bundles``.
+    """
+    import json
+    from frappe.utils import flt
+
+    # Only apply to Repack entries linked to an MCP
+    if (doc.stock_entry_type or "") != "Repack":
+        return {"serial_nos": [], "bundles": []}
+
+    mcp_name = cstr(doc.get("custom_material_cutting_plan") or "").strip()
+    if not mcp_name:
+        return {"serial_nos": [], "bundles": []}
+
+    created_serials: list[str] = []
+    created_bundles: list[str] = []
+
+    for it in (doc.items or []):
+        # Skip rows that are already bound to a bundle
+        existing_bundle = (it.get("serial_and_batch_bundle") or it.get("serial_batch_bundle") or "").strip()
+        if existing_bundle:
+            continue
+
+        # Determine row type
+        is_input = bool(it.get("s_warehouse")) and not bool(it.get("t_warehouse"))
+        is_output = bool(it.get("t_warehouse"))
+        if not is_input and not is_output:
+            continue
+
+        # Parse serial list from custom_mcp_serial_nos_json if present; otherwise
+        # fall back to serial_no display field.  Always remove duplicates
+        # while preserving order.
+        serials: list[str] = []
+        json_text = cstr(it.get("custom_mcp_serial_nos_json") or "").strip()
+        if json_text:
+            try:
+                loaded = json.loads(json_text)
+                if isinstance(loaded, list):
+                    for s in loaded:
+                        s = cstr(s).strip()
+                        if s:
+                            serials.append(s)
+            except Exception:
+                # If JSON parsing fails, ignore and fall back to serial_no
+                serials = []
+        if not serials:
+            # Fallback: parse serial_no lines
+            serial_no_value = cstr(it.get("serial_no") or "").strip()
+            if serial_no_value:
+                for s in serial_no_value.splitlines():
+                    s = cstr(s).strip()
+                    if s:
+                        serials.append(s)
+        # Remove duplicates while preserving order
+        if serials:
+            serials = list(dict.fromkeys(serials))
+        if not serials:
+            continue
+
+        item_code = (it.get("item_code") or "").strip()
+        if not item_code:
+            continue
+
+        if is_input:
+            warehouse = (it.get("s_warehouse") or "").strip()
+            if not warehouse:
+                continue
+
+            validated_serials: list[str] = []
+            for sn in serials:
+                # Validate that the input serial exists and matches item and warehouse,
+                # and stamp the Serial No with MCP and row information for traceability.
+                _ensure_input_serial_exists(
+                    serial_no=sn,
+                    item_code=item_code,
+                    warehouse=warehouse,
+                    material_cutting_plan=mcp_name or None,
+                    custom_stock_entry_row_name=it.name,
+                )
+                validated_serials.append(sn)
+
+            # For input rows, do not create any bundle.  Instead, set the row's
+            # serial_no field to the deterministic list and enable use_serial_batch_fields
+            # so that ERPNext will create the outgoing bundle automatically.
+            it.serial_no = "\n".join(validated_serials)
+            # set custom_mcp_serial_nos_json as the canonical source if not already set
+            try:
+                it.custom_mcp_serial_nos_json = json.dumps(validated_serials)
+            except Exception:
+                pass
+            # Flag ERPNext to use serial/batch fields during submission
+            try:
+                it.use_serial_batch_fields = 1
+            except Exception:
+                # attribute may not exist; assign anyway to document
+                setattr(it, "use_serial_batch_fields", 1)
+            # Clear batch information for consistency
+            if hasattr(it, "batch_no"):
+                it.batch_no = ""
+            continue
+
+        if is_output:
+            warehouse = (it.get("t_warehouse") or "").strip()
+            if not warehouse:
+                continue
+
+            # Gather dimension and node type information to stamp on Serial No
+            length_mm = flt(it.get("custom_dimension_length_mm") or 0)
+            width_mm = flt(it.get("custom_dimension_width_mm") or 0)
+            node_type = (it.get("custom_cutting_node_type") or "").strip()
+
+            newly_created: list[str] = []
+            for sn in serials:
+                result = _ensure_output_serial_exists_or_create(
+                    serial_no=sn,
+                    item_code=item_code,
+                    warehouse=warehouse,
+                    material_cutting_plan=mcp_name or None,
+                    custom_stock_entry_row_name=it.name,
+                    length_mm=length_mm,
+                    width_mm=width_mm,
+                    node_type=node_type,
+                )
+                if not result.get("already_exists"):
+                    newly_created.append(result["serial_no"])
+            # Create a bundle that references all serials (existing and newly created). Output
+            # bundles are linked to the voucher for complete traceability.
+            bundle_name = _create_bundle(
+                company=doc.company,
+                item_code=item_code,
+                warehouse=warehouse,
+                serials=serials,
+                custom_stock_entry_row_name=it.name,
+                material_cutting_plan=mcp_name or None,
+                type_of_transaction="Inward",
+                voucher_type="Stock Entry",
+                voucher_no=doc.name,
+                voucher_detail_no=it.name,
+            )
+            if bundle_name:
+                _bind_bundle_to_row(it, bundle_name)
+                # Do not set serial_no after binding; it must remain blank when a bundle is present.
+                if hasattr(it, "batch_no"):
+                    it.batch_no = ""
+                created_bundles.append(bundle_name)
+                created_serials.extend(newly_created)
+
+    return {"serial_nos": created_serials, "bundles": created_bundles}

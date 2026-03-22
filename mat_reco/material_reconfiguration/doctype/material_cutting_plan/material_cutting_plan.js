@@ -504,7 +504,7 @@ function render_cutting_plan_preview(frm) {
 }
 
 function on_cut_piece_click(frm, $piece) {
-    if (frm.doc.status !== 'Draft') {
+    if (frm.doc.docstatus !== 0) {
         frappe.msgprint(__('Incidents can only be added or modified when the plan is in Draft status.'));
         return;
     }
