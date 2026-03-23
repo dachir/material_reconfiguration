@@ -702,3 +702,4 @@ function get_display_width(child) {
     }
     return child.width_mm;
 }
+
