@@ -46,6 +46,7 @@ class MaterialCuttingPlan(Document):
         # Explode selected orders into individual cutting demands
         demands = explode_sales_orders_into_cutting_demands(
             sales_order_names=sales_orders,
+            source_item=self.source_item,
             max_depth=int(self.max_depth or 10),
         )
 

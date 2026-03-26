@@ -30,6 +30,74 @@ import frappe
 from frappe import _
 
 
+def _is_descendant_of_raw(item_code: str, raw_item_code: str, *, max_depth: int = 10) -> bool:
+    if not item_code or not raw_item_code:
+        return False
+
+    current = item_code
+    visited = set()
+
+    for _ in range(max_depth):
+        if current in visited:
+            return False
+        visited.add(current)
+
+        parent = frappe.db.get_value("Item", current, "custom_parent_item") or ""
+        parent = str(parent).strip()
+
+        if not parent:
+            return False
+        if parent == raw_item_code:
+            return True
+
+        current = parent
+
+    return False
+
+
+def _ouvrage_has_decoupe_for_raw(
+    item_code: str,
+    raw_item_code: str,
+    *,
+    depth: int = 0,
+    max_depth: int = 10,
+    visited: set[str] | None = None,
+) -> bool:
+    if not item_code or depth > max_depth:
+        return False
+
+    if visited is None:
+        visited = set()
+    if item_code in visited:
+        return False
+    visited.add(item_code)
+
+    item_type = (frappe.db.get_value("Item", item_code, "custom_item_types") or "").strip()
+
+    if item_type == "DECOUPE":
+        return _is_descendant_of_raw(item_code, raw_item_code, max_depth=max_depth)
+
+    if item_type != "OUVRAGE":
+        return False
+
+    item_doc = frappe.get_doc("Item", item_code)
+    for comp in item_doc.get("custom_composite_items", []) or []:
+        comp_code = comp.get("component_item_code")
+        if not comp_code:
+            continue
+
+        if _ouvrage_has_decoupe_for_raw(
+            item_code=comp_code,
+            raw_item_code=raw_item_code,
+            depth=depth + 1,
+            max_depth=max_depth,
+            visited=visited,
+        ):
+            return True
+
+    return False
+
+
 # Custom field names defining the composite structure on Item
 COMPONENT_TABLE_FIELD = "custom_composite_items"
 COMPONENT_ITEM_FIELD = "component_item_code"
@@ -37,7 +105,9 @@ COMPONENT_QTY_FIELD = "qty_factor"
 
 
 def explode_sales_orders_into_cutting_demands(
-    sales_order_names: list[str], max_depth: int = 10
+    sales_order_names: list[str],
+    source_item: str | None = None,
+    max_depth: int = 10
 ) -> list[dict[str, object]]:
     """Explode the given Sales Orders into unit cutting demands.
 
@@ -78,6 +148,26 @@ def explode_sales_orders_into_cutting_demands(
             if item_type not in ("DECOUPE", "OUVRAGE"):
                 # Skip non-cutting items
                 continue
+
+            if source_item:
+                keep_row = False
+
+                if item_type == "DECOUPE":
+                    keep_row = _is_descendant_of_raw(
+                        item_code=item_code,
+                        raw_item_code=source_item,
+                        max_depth=max_depth,
+                    )
+
+                elif item_type == "OUVRAGE":
+                    keep_row = _ouvrage_has_decoupe_for_raw(
+                        item_code=item_code,
+                        raw_item_code=source_item,
+                        max_depth=max_depth,
+                    )
+
+                if not keep_row:
+                    continue
 
             so_qty = float(row.qty or 0)
             if so_qty <= 0:
