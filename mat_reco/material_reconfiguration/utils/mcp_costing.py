@@ -7,6 +7,12 @@ import json
 import frappe
 from frappe.utils import flt
 
+from mat_reco.material_reconfiguration.services.mcp_incident_service import (
+    apply_incidents_to_nodes,
+    build_incident_map,
+    ensure_effective_fields,
+)
+
 
 DELTA_EPS = 1e-6
 
@@ -43,66 +49,31 @@ def _safe_json_load(value):
 
 
 def _get_mcp_tree(mcp):
-    result_json = mcp.get("result_json") or mcp.get("result_tree_json")
+    result_json = mcp.get("effective_result_json") or mcp.get("result_json") or mcp.get("result_tree_json")
     parsed = _safe_json_load(result_json)
     if not parsed:
         return {}
     return parsed.get("tree") or parsed
 
 
-def _build_incident_map(mcp):
-    rows = mcp.get("material_plan_incidents") or []
-    result = {}
-    for row in rows:
-        if flt(row.get("is_active") or 0) != 1:
-            continue
-        plan_node_id = (row.get("plan_node_id") or "").strip()
-        if not plan_node_id:
-            continue
-        result[plan_node_id] = row
-    return result
-
-
-def _apply_incident_to_child(child, incident):
-    out = dict(child)
-
-    if not incident:
-        return out
-
-    action = (incident.get("incident_action") or "").strip()
-
-    if action == "Destroy":
-        out["node_type"] = "destroyed"
-        out["effective_length_mm"] = 0.0
-        out["effective_width_mm"] = 0.0
-        return out
-
-    if action == "Resize":
-        out["node_type"] = (incident.get("new_node_type") or out.get("node_type") or "").strip()
-        out["effective_length_mm"] = flt(incident.get("new_length_mm") or 0)
-        out["effective_width_mm"] = flt(incident.get("new_width_mm") or 0)
-        return out
-
-    return out
+def _tree_is_return_terrain_resolved(tree):
+    if not isinstance(tree, dict):
+        return False
+    if tree.get("return_terrain_resolved"):
+        return True
+    options = tree.get("options") or {}
+    return bool(options.get("return_terrain_resolved"))
 
 
 def _get_effective_children(mcp):
     tree = _get_mcp_tree(mcp)
     nodes = tree.get("nodes") or []
-    incident_map = _build_incident_map(mcp)
+    incident_map = {} if _tree_is_return_terrain_resolved(tree) else build_incident_map(mcp)
 
     result = []
-    for node in nodes:
+    for node in apply_incidents_to_nodes(nodes, incident_map):
         for child in node.get("children") or []:
-            child_id = (child.get("id") or child.get("piece_uid") or "").strip()
-            incident = incident_map.get(child_id)
-            row = _apply_incident_to_child(child, incident)
-
-            if "effective_length_mm" not in row:
-                row["effective_length_mm"] = flt(child.get("length_mm") or 0)
-            if "effective_width_mm" not in row:
-                row["effective_width_mm"] = flt(child.get("width_mm") or 0)
-
+            row = ensure_effective_fields(child)
             row["source_item_code"] = node.get("item_code") or mcp.get("source_item")
             result.append(row)
 
@@ -466,8 +437,9 @@ def _get_mcp_serial_dimension_map(mcp):
         serial_candidate -> (length_mm, width_mm)
     based on result_json + incidents
     """
-    nodes = (_get_mcp_tree(mcp).get("nodes") or [])
-    incident_map = _build_incident_map(mcp)
+    tree = _get_mcp_tree(mcp)
+    nodes = (tree.get("nodes") or [])
+    incident_map = {} if _tree_is_return_terrain_resolved(tree) else build_incident_map(mcp)
     result = {}
 
     for node in nodes:

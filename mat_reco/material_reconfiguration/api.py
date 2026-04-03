@@ -1,6 +1,116 @@
 import frappe
 import json
 from frappe.utils import flt, cint
+from mat_reco.material_reconfiguration.doctype.item_variant_detail.item_variant_detail import (
+    validate_variant_item_code,
+)
+from mat_reco.material_reconfiguration.services.stock_candidate_service import (
+    get_available_cutting_bins,
+)
+
+def _coerce_variant_item_codes(item_variants) -> list[str]:
+    """Accept list[str], list[dict], JSON string, or None."""
+    if not item_variants:
+        return []
+
+    if isinstance(item_variants, str):
+        item_variants = item_variants.strip()
+        if not item_variants:
+            return []
+        try:
+            item_variants = json.loads(item_variants)
+        except Exception:
+            item_variants = [x.strip() for x in item_variants.replace("\n", ",").split(",") if x.strip()]
+
+    result = []
+    for row in item_variants or []:
+        code = ""
+        if isinstance(row, str):
+            code = row
+        elif isinstance(row, dict):
+            code = row.get("variant_item_code") or ""
+        else:
+            code = getattr(row, "variant_item_code", "") or ""
+
+        code = (code or "").strip()
+        if not code or code in result:
+            continue
+        result.append(code)
+
+    return result
+
+
+@frappe.whitelist()
+def get_item_variants_for_mcp(source_item: str) -> list[dict[str, str]]:
+    """Load the Item.custom_item_variant_detail rows into MCP.item_variant_detail."""
+    source_item = (source_item or "").strip()
+    if not source_item:
+        return []
+
+    source_type = (frappe.db.get_value("Item", source_item, "custom_item_types") or "").strip()
+    if source_type != "PRIMAIRE":
+        frappe.throw(_("Source Item must be of type PRIMAIRE."))
+
+    item_doc = frappe.get_doc("Item", source_item)
+
+    rows = []
+    seen = set()
+    for row in item_doc.get("custom_item_variant_detail", []) or []:
+        code = validate_variant_item_code(row.variant_item_code, source_item=source_item)
+        if not code or code in seen:
+            continue
+        seen.add(code)
+        rows.append({"variant_item_code": code})
+
+    return rows
+
+
+@frappe.whitelist()
+def get_stock_for_mcp(
+    source_item: str,
+    source_warehouse: str | None = None,
+    item_variants=None,
+) -> list[dict[str, object]]:
+    """Return MCP stock candidates ordered by business priority."""
+    source_item = (source_item or "").strip()
+    source_warehouse = (source_warehouse or "").strip()
+
+    if not source_item:
+        frappe.throw(_("Source Item is required."))
+
+    source_type = (frappe.db.get_value("Item", source_item, "custom_item_types") or "").strip()
+    if source_type != "PRIMAIRE":
+        frappe.throw(_("Source Item must be of type PRIMAIRE."))
+
+    variant_codes = _coerce_variant_item_codes(item_variants)
+    validated_variant_codes = []
+    for code in variant_codes:
+        code = validate_variant_item_code(code, source_item=source_item)
+        if code and code not in validated_variant_codes:
+            validated_variant_codes.append(code)
+
+    bins = get_available_cutting_bins(
+        item_code=source_item,
+        warehouse=source_warehouse or None,
+        variant_item_codes=validated_variant_codes,
+    )
+
+    candidates = []
+    for b in bins:
+        candidates.append(
+            {
+                "serial_no": b.get("serial_no"),
+                "item_code": b.get("item_code"),
+                "warehouse": b.get("warehouse"),
+                "material_status": b.get("material_status"),
+                "length_mm": b.get("length_mm"),
+                "width_mm": b.get("width_mm"),
+                "thickness_mm": b.get("thickness_mm"),
+                "is_qualified": 1,
+            }
+        )
+
+    return candidates
 
 @frappe.whitelist()
 def get_repack_payload(mr_name: str) -> dict:
@@ -357,7 +467,10 @@ def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
                 on mcp.name = mcp_so.parent
             where ifnull(mcp_so.sales_order, '') != ''
               and ifnull(mcp.docstatus, 0) < 2
+              and ifnull(mcp.source_item, '') = %(source_item)s
+              and ifnull(mcp.status, '') not in ('Closed', 'Completed', 'Cancelled')
             """,
+            {"source_item": source_item},
             as_dict=False,
         )
     )

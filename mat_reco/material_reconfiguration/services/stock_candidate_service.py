@@ -24,74 +24,172 @@ from __future__ import annotations
 import frappe
 
 
-def get_available_cutting_bins(item_code: str, warehouse: str) -> list[dict[str, object]]:
-    """Return a list of Serial No documents usable for cutting plans.
+VALID_MATERIAL_STATUSES = ("Full", "Partial")
 
-    Serial numbers must belong to the specified item and warehouse and
-    have a custom material status of either "Full" or "Partial".
-    Dimensions (length and width) are normalized such that length is
-    the larger of the two values.  Entries with non-positive
-    dimensions are excluded.  The result list is sorted first by
-    increasing length and then by increasing width.
+
+def _unique_codes(values: list[str] | None) -> list[str]:
+    seen = set()
+    out = []
+    for value in values or []:
+        code = (value or "").strip()
+        if not code or code in seen:
+            continue
+        seen.add(code)
+        out.append(code)
+    return out
+
+
+def _normalize_bin_dimensions(length_mm: float, width_mm: float) -> tuple[float, float]:
+    """Always keep length >= width for the cutting engine."""
+    return max(length_mm, width_mm), min(length_mm, width_mm)
+
+
+def _build_sort_key(
+    *,
+    row_item_code: str,
+    row_material_status: str,
+    row_length_mm: float,
+    row_width_mm: float,
+    row_name: str,
+    source_item: str,
+    variant_item_codes: list[str],
+    serial_order: dict[str, int] | None = None,
+) -> tuple:
+    """Business ordering:
+    1. leftovers of source_item
+    2. leftovers of variants
+    3. full sheets of source_item
+    4. full sheets of variants
+
+    If serial_order is provided, preserve explicit order from the MCP table.
+    """
+    if serial_order is not None and row_name in serial_order:
+        return (serial_order[row_name],)
+
+    is_leftover = (row_material_status or "").strip() == "Partial"
+    is_source = row_item_code == source_item
+
+    if is_source and is_leftover:
+        group_rank = 0
+    elif (not is_source) and is_leftover:
+        group_rank = 1
+    elif is_source and not is_leftover:
+        group_rank = 2
+    else:
+        group_rank = 3
+
+    item_rank_map = {source_item: 0}
+    for idx, code in enumerate(variant_item_codes or [], start=1):
+        item_rank_map[code] = idx
+
+    return (
+        group_rank,
+        item_rank_map.get(row_item_code, 999),
+        row_length_mm,
+        row_width_mm,
+        row_name,
+    )
+
+
+def get_available_cutting_bins(
+    item_code: str,
+    warehouse: str | None = None,
+    variant_item_codes: list[str] | None = None,
+    serial_nos: list[str] | None = None,
+) -> list[dict[str, object]]:
+    """Return cutting bins for MCP.
 
     Args:
-        item_code: The code of the raw material item (PRIMAIRE).
-        warehouse: The warehouse to search for available serials.
+        item_code: source raw material item.
+        warehouse: optional warehouse filter.
+        variant_item_codes: optional variant items to include.
+        serial_nos: optional explicit list of serial numbers to return.
+            When supplied, output order follows the given serial order.
 
     Returns:
-        A list of dictionaries describing candidate bins.  Each
-        dictionary includes the serial number, normalized dimensions,
-        area, material status, and a source kind ("Full Sheet" or
-        "Leftover").
+        A list of normalized cutting bins usable by the cutting engine.
     """
-    if not item_code or not warehouse:
+    source_item = (item_code or "").strip()
+    if not source_item:
         return []
+
+    variant_item_codes = [c for c in _unique_codes(variant_item_codes) if c != source_item]
+    eligible_items = _unique_codes([source_item] + variant_item_codes)
+    if not eligible_items:
+        return []
+
+    serial_nos = _unique_codes(serial_nos)
+    serial_order = {sn: idx for idx, sn in enumerate(serial_nos)} if serial_nos else None
+
+    filters: dict[str, object] = {
+        "item_code": ["in", eligible_items],
+        "custom_material_status": ["in", list(VALID_MATERIAL_STATUSES)],
+    }
+    if warehouse:
+        filters["warehouse"] = warehouse
+    if serial_nos:
+        filters["name"] = ["in", serial_nos]
 
     rows = frappe.get_all(
         "Serial No",
-        filters={
-            "item_code": item_code,
-            "warehouse": warehouse,
-            "custom_material_status": ["in", ["Full", "Partial"]],
-        },
+        filters=filters,
         fields=[
             "name",
             "item_code",
             "warehouse",
             "custom_dimension_length_mm",
             "custom_dimension_width_mm",
+            "custom_dimension_thickness_mm",
             "custom_material_status",
         ],
-        order_by="custom_dimension_length_mm asc, custom_dimension_width_mm asc",
+        limit_page_length=2000,
     )
 
     results: list[dict[str, object]] = []
+    seen_serials = set()
+
     for row in rows:
+        serial_no = row.name
+        if not serial_no or serial_no in seen_serials:
+            continue
+
         length_mm = float(row.custom_dimension_length_mm or 0)
         width_mm = float(row.custom_dimension_width_mm or 0)
-        # Skip bins with invalid dimensions
+        thickness_mm = float(row.custom_dimension_thickness_mm or 0)
+
         if length_mm <= 0 or width_mm <= 0:
             continue
 
-        # Normalize so that length >= width
-        l_norm = max(length_mm, width_mm)
-        w_norm = min(length_mm, width_mm)
-        # Extract thickness if available on the Serial No.  Fallback to 0.
-        try:
-            thickness_mm = float(getattr(row, "custom_dimension_thickness_mm", 0) or 0)
-        except Exception:
-            thickness_mm = 0.0
-        results.append({
-            "serial_no": row.name,
-            "item_code": row.item_code,
-            "warehouse": row.warehouse,
-            "length_mm": l_norm,
-            "width_mm": w_norm,
-            "thickness_mm": thickness_mm,
-            "area_mm2": l_norm * w_norm,
-            "material_status": row.custom_material_status,
-            "source_kind": "Full Sheet" if row.custom_material_status == "Full" else "Leftover",
-        })
+        l_norm, w_norm = _normalize_bin_dimensions(length_mm, width_mm)
+        material_status = (row.custom_material_status or "").strip()
 
+        results.append(
+            {
+                "serial_no": serial_no,
+                "item_code": row.item_code,
+                "warehouse": row.warehouse,
+                "length_mm": l_norm,
+                "width_mm": w_norm,
+                "thickness_mm": thickness_mm,
+                "area_mm2": l_norm * w_norm,
+                "material_status": material_status,
+                "source_kind": "Full Sheet" if material_status == "Full" else "Leftover",
+            }
+        )
+        seen_serials.add(serial_no)
+
+    results.sort(
+        key=lambda d: _build_sort_key(
+            row_item_code=str(d.get("item_code") or ""),
+            row_material_status=str(d.get("material_status") or ""),
+            row_length_mm=float(d.get("length_mm") or 0),
+            row_width_mm=float(d.get("width_mm") or 0),
+            row_name=str(d.get("serial_no") or ""),
+            source_item=source_item,
+            variant_item_codes=variant_item_codes,
+            serial_order=serial_order,
+        )
+    )
     return results
+
 

@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-31 11:51:04.479595",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "serial_no",
+  "item_code",
+  "warehouse",
+  "material_status",
+  "length_mm",
+  "width_mm",
+  "thickness_mm",
+  "is_qualified",
+  "is_active_input"
+ ],
+ "fields": [
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "label": "Serial No",
+   "options": "Serial No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "length_mm",
+   "fieldtype": "Float",
+   "label": "Longueur",
+   "read_only": 1
+  },
+  {
+   "fieldname": "width_mm",
+   "fieldtype": "Float",
+   "label": "Hauteur",
+   "read_only": 1
+  },
+  {
+   "fieldname": "thickness_mm",
+   "fieldtype": "Float",
+   "label": "Epaisseur",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_qualified",
+   "fieldtype": "Check",
+   "label": "Is Qualified"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active_input",
+   "fieldtype": "Check",
+   "label": "Is Active Input"
+  }
+ ],
+ "grid_page_length": 10,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-31 16:39:51.967774",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "MCP Stock Candidate",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

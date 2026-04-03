@@ -4,6 +4,11 @@ from collections import defaultdict
 import json
 
 import frappe
+
+from mat_reco.material_reconfiguration.services.mcp_incident_service import (
+    apply_incidents_to_nodes,
+    build_incident_map,
+)
 from frappe.utils import cint, flt
 
 
@@ -58,6 +63,15 @@ def _norm_dims(L, W):
     return (L, W) if L >= W else (W, L)
 
 
+def _tree_is_return_terrain_resolved(tree):
+    if not isinstance(tree, dict):
+        return False
+    if tree.get("return_terrain_resolved"):
+        return True
+    options = tree.get("options") or {}
+    return bool(options.get("return_terrain_resolved"))
+
+
 def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
     """
     Build a map:
@@ -77,21 +91,19 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
 
     mcp = frappe.get_doc("Material Cutting Plan", mcp_name)
 
-    parsed = _safe_json_load(mcp.get("result_json") or mcp.get("result_tree_json"))
+    parsed = _safe_json_load(mcp.get("effective_result_json") or mcp.get("result_json") or mcp.get("result_tree_json"))
     tree = parsed.get("tree") or parsed or {}
     nodes = tree.get("nodes") or []
 
     incident_map = {}
-    for row in (mcp.get("material_plan_incidents") or []):
-        if cint(row.get("is_active") or 0) != 1:
-            continue
-        plan_node_id = (row.get("plan_node_id") or "").strip()
-        if plan_node_id:
-            incident_map[plan_node_id] = row
+    if not _tree_is_return_terrain_resolved(tree):
+        incident_map = build_incident_map(mcp)
 
     result = {}
 
-    for node in nodes:
+    effective_nodes = nodes if _tree_is_return_terrain_resolved(tree) else apply_incidents_to_nodes(nodes, incident_map)
+
+    for node in effective_nodes:
         source_item_code = node.get("item_code") or mcp.get("source_item")
 
         for child in (node.get("children") or []):
@@ -99,21 +111,9 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
             if not serial_no:
                 continue
 
-            incident = incident_map.get(serial_no)
             node_type = (child.get("node_type") or "").strip()
-            length_mm = flt(child.get("length_mm") or 0)
-            width_mm = flt(child.get("width_mm") or 0)
-
-            if incident:
-                action = (incident.get("incident_action") or "").strip()
-                if action == "Destroy":
-                    node_type = "destroyed"
-                    length_mm = 0
-                    width_mm = 0
-                elif action == "Resize":
-                    node_type = (incident.get("new_node_type") or node_type).strip()
-                    length_mm = flt(incident.get("new_length_mm") or 0)
-                    width_mm = flt(incident.get("new_width_mm") or 0)
+            length_mm = flt(child.get("effective_length_mm") or child.get("length_mm") or 0)
+            width_mm = flt(child.get("effective_width_mm") or child.get("width_mm") or 0)
 
             length_mm, width_mm = _norm_dims(length_mm, width_mm)
 

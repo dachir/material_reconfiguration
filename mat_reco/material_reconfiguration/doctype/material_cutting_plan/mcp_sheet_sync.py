@@ -2,7 +2,8 @@ import json
 import frappe
 from frappe.utils import flt
 
-CHILD_TABLE_FIELD = "mcp_sheets"
+DEFAULT_CHILD_TABLE_FIELD = "mcp_sheets"
+DEFAULT_SOURCE_JSON_FIELD = "result_json"
 
 
 def _to_dict(raw):
@@ -123,16 +124,23 @@ def build_sheet_rows_from_result_json(result_json):
     return rows
 
 
-def sync_mcp_sheets(doc, overwrite=True):
-    if not doc.get("result_json"):
+def sync_mcp_sheets(
+    doc,
+    source_json_field=DEFAULT_SOURCE_JSON_FIELD,
+    child_table_field=DEFAULT_CHILD_TABLE_FIELD,
+    overwrite=True,
+):
+    raw_json = doc.get(source_json_field)
+
+    if not raw_json:
         if overwrite:
-            doc.set(CHILD_TABLE_FIELD, [])
+            doc.set(child_table_field, [])
         return
 
-    rows = build_sheet_rows_from_result_json(doc.result_json)
+    rows = build_sheet_rows_from_result_json(raw_json)
 
     if overwrite:
-        doc.set(CHILD_TABLE_FIELD, [])
+        doc.set(child_table_field, [])
 
     for row in rows:
-        doc.append(CHILD_TABLE_FIELD, row)
+        doc.append(child_table_field, row)

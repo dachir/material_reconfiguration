@@ -22,7 +22,12 @@
   "new_area_mm2",
   "include_in_repack",
   "is_active",
-  "remarks"
+  "remarks",
+  "target_serial_no",
+  "target_zone_id",
+  "target_x_mm",
+  "target_y_mm",
+  "move_case"
  ],
  "fields": [
   {
@@ -65,7 +70,7 @@
    "fieldname": "incident_action",
    "fieldtype": "Select",
    "label": "Incident Action",
-   "options": "Resize\nDestroy"
+   "options": "Resize\nDestroy\nMove\nMerge"
   },
   {
    "fieldname": "affected_node_ids_json",
@@ -113,13 +118,39 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "target_serial_no",
+   "fieldtype": "Data",
+   "label": "Target Serial No"
+  },
+  {
+   "fieldname": "target_zone_id",
+   "fieldtype": "Data",
+   "label": "Target Zone Id"
+  },
+  {
+   "fieldname": "target_x_mm",
+   "fieldtype": "Float",
+   "label": "Target X"
+  },
+  {
+   "fieldname": "target_y_mm",
+   "fieldtype": "Float",
+   "label": "Target Y"
+  },
+  {
+   "fieldname": "move_case",
+   "fieldtype": "Select",
+   "label": "Move Case",
+   "options": "swap\nswing"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-17 20:10:11.381869",
+ "modified": "2026-04-02 18:40:51.548758",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Material Plan Incidents",

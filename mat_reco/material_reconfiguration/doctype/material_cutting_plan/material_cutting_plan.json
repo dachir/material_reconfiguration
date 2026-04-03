@@ -11,7 +11,10 @@
   "posting_date",
   "column_break_wegm",
   "status",
+  "mcp_mode",
   "source_item",
+  "item_variant_detail",
+  "clear_all_variants",
   "section_break_czkp",
   "selected_sales_orders",
   "column_break_aypv",
@@ -25,6 +28,8 @@
   "column_break_skmr",
   "allow_rotation",
   "add_waiste_to_stock",
+  "section_break_hsya",
+  "mcp_stock_candidate",
   "cutting_plan_summary_section",
   "simulation_lines",
   "section_break_dbzs",
@@ -44,6 +49,8 @@
   "result_json",
   "created_stock_entries_json",
   "mcp_sheets",
+  "effective_result_json",
+  "effective_mcp_sheets",
   "section_break_385y",
   "amended_from",
   "cutttin_plan_preview_tab",
@@ -72,14 +79,18 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Source Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_wegm",
@@ -94,8 +105,10 @@
   {
    "fieldname": "source_item",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Source Item",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_czkp",
@@ -302,6 +315,45 @@
    "fieldtype": "Table",
    "label": "MCP Sheets",
    "options": "MCP Sheet"
+  },
+  {
+   "fieldname": "item_variant_detail",
+   "fieldtype": "Table MultiSelect",
+   "label": "Item Variant Detail",
+   "options": "Item Variant Detail"
+  },
+  {
+   "fieldname": "section_break_hsya",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "mcp_stock_candidate",
+   "fieldtype": "Table",
+   "label": "MCP Stock Candidate",
+   "options": "MCP Stock Candidate"
+  },
+  {
+   "fieldname": "clear_all_variants",
+   "fieldtype": "Button",
+   "label": "Clear All Variants"
+  },
+  {
+   "default": "Planification",
+   "fieldname": "mcp_mode",
+   "fieldtype": "Select",
+   "label": "Mode",
+   "options": "Planification\nRetour Terrain"
+  },
+  {
+   "fieldname": "effective_result_json",
+   "fieldtype": "Long Text",
+   "label": "Effective Result Json"
+  },
+  {
+   "fieldname": "effective_mcp_sheets",
+   "fieldtype": "Table",
+   "label": "Effective MCP Sheets",
+   "options": "Effective MCP Sheet"
   }
  ],
  "grid_page_length": 50,
@@ -314,7 +366,7 @@
    "link_fieldname": "custom_material_cutting_plan"
   }
  ],
- "modified": "2026-03-22 19:00:47.997780",
+ "modified": "2026-04-03 12:17:59.820942",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Material Cutting Plan",

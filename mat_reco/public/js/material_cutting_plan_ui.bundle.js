@@ -1,308 +1,13 @@
 // Copyright (c) 2026, Richard Amouzou and contributors
 // For license information, please see license.txt
 
-// Client-side script for Material Cutting Plan
-
-//const MCP_UI_BUNDLE = '/assets/mat_reco/js/material_cutting_plan_ui.bundle.js';
-//frappe.require(MCP_UI_BUNDLE);
-
-const MCP_INCIDENT_TABLE = 'material_plan_incidents';
-const MCP_INCIDENT_ACTIONS = ['Resize', 'Destroy', 'Move', 'Merge'];
-const MCP_MIN_LEFTOVER_DIMENSION_MM = 500;
-const MCP_MODE_PLANIFICATION = 'Planification';
-const MCP_MODE_RETOUR_TERRAIN = 'Retour Terrain';
-
-const MCP_VARIANT_TABLE = 'item_variant_detail';
-const MCP_STOCK_CANDIDATE_TABLE = 'mcp_stock_candidate';
-const MCP_SELECTED_SO_TABLE = 'selected_sales_orders';
-const MCP_VARIANT_ITEM_FIELD = 'variant_item_code';
-
-function build_mcp_ui_config() {
-    return {
-        MCP_INCIDENT_TABLE,
-        MCP_INCIDENT_ACTIONS,
-        MCP_MIN_LEFTOVER_DIMENSION_MM,
-        MCP_MODE_PLANIFICATION,
-        MCP_MODE_RETOUR_TERRAIN,
-        MCP_STOCK_CANDIDATE_TABLE
-    };
-}
-
-function get_mcp_ui(callback) {
-    const configure = function(ui) {
-        if (!ui || typeof ui.configure !== 'function') return null;
-        globalThis.MAT_RECO_MCP_UI_CONFIG = Object.assign({}, globalThis.MAT_RECO_MCP_UI_CONFIG || {}, build_mcp_ui_config());
-        return ui.configure(build_mcp_ui_config());
-    };
-
-    const readyUi = configure(window.MatRecoMCPUI);
-    if (readyUi) {
-        if (typeof callback === 'function') {
-            callback(readyUi);
-        }
-        return readyUi;
-    }
-
-    /*frappe.require(MCP_UI_BUNDLE, function() {
-        const loadedUi = configure(window.MatRecoMCPUI);
-        if (loadedUi && typeof callback === 'function') {
-            callback(loadedUi);
-        }
-    });
-    */
-
-    return null;
-}
-
-function with_mcp_ui(methodName, args, errorMessage) {
-    const callArgs = Array.isArray(args) ? args : [args];
-    return get_mcp_ui(function(ui) {
-        if (!ui || typeof ui[methodName] !== 'function') return;
-        try {
-            ui[methodName].apply(ui, callArgs);
-        } catch (e) {
-            console.error(errorMessage || '[MCP] UI action failed:', e);
-        }
-    });
-}
-
-function get_mcp_mode(frm) {
-    const ui = get_mcp_ui();
-    if (ui && typeof ui.get_mcp_mode === 'function') {
-        return ui.get_mcp_mode(frm);
-    }
-
-    const mode = (frm.doc.mcp_mode || MCP_MODE_PLANIFICATION).trim();
-    return [MCP_MODE_PLANIFICATION, MCP_MODE_RETOUR_TERRAIN].includes(mode)
-        ? mode
-        : MCP_MODE_PLANIFICATION;
-}
-
-function get_preview_result_json(frm) {
-    if (get_mcp_mode(frm) === MCP_MODE_RETOUR_TERRAIN) {
-        return frm.doc.effective_result_json || frm.doc.result_json || frm.doc.result_tree_json || '';
-    }
-    return frm.doc.result_json || frm.doc.result_tree_json || frm.doc.effective_result_json || '';
-}
-
-frappe.ui.form.on('Material Cutting Plan', {
-    refresh(frm) {
-        frm.clear_custom_buttons();
-
-        try {
-            if (frm.fields_dict[MCP_VARIANT_TABLE]) {
-                frm.set_query(MCP_VARIANT_ITEM_FIELD, MCP_VARIANT_TABLE, function() {
-                    return {
-                        filters: {
-                            custom_item_types: 'PRIMAIRE'
-                        }
-                    };
-                });
-            } else {
-                console.warn('[MCP] Variant table not found on form:', MCP_VARIANT_TABLE);
-            }
-        } catch (e) {
-            console.error('[MCP] Failed to set query for variants:', e);
-        }
-
-        with_mcp_ui('apply_mcp_mode_ui', [frm], '[MCP] Failed to apply MCP mode UI:');
-
-        if (get_mcp_mode(frm) === MCP_MODE_PLANIFICATION) {
-            frm.add_custom_button(__('Select Orders for Source Item'), function() {
-                if (!frm.doc.source_item) {
-                    frappe.msgprint(__('Please select a Source Item first.'));
-                    return;
-                }
-
-                frappe.call({
-                    method: 'mat_reco.material_reconfiguration.api.get_orders_by_source_item',
-                    args: {
-                        source_item: frm.doc.source_item
-                    },
-                    callback(r) {
-                        if (!r.message) return;
-
-                        if (!frm.fields_dict[MCP_SELECTED_SO_TABLE]) {
-                            console.warn('[MCP] Sales order table not found on form:', MCP_SELECTED_SO_TABLE);
-                            return;
-                        }
-
-                        frm.clear_table(MCP_SELECTED_SO_TABLE);
-
-                        $.each(r.message, function(i, so) {
-                            const row = frm.add_child(MCP_SELECTED_SO_TABLE);
-                            row.sales_order = so.name;
-                            if (so.customer) {
-                                row.customer = so.customer;
-                            }
-                        });
-
-                        frm.refresh_field(MCP_SELECTED_SO_TABLE);
-                    }
-                });
-            }, __('Outils'));
-
-            frm.add_custom_button(__('Get Stock'), function() {
-                if (!frm.doc.source_item) {
-                    frappe.msgprint(__('Please select a Source Item first.'));
-                    return;
-                }
-
-                if (!frm.fields_dict[MCP_STOCK_CANDIDATE_TABLE]) {
-                    frappe.msgprint(__('Stock candidate table field not found on the Material Cutting Plan.'));
-                    return;
-                }
-
-                const variantRows = frm.doc[MCP_VARIANT_TABLE] || [];
-
-                frappe.call({
-                    method: 'mat_reco.material_reconfiguration.api.get_stock_for_mcp',
-                    args: {
-                        source_item: frm.doc.source_item,
-                        source_warehouse: frm.doc.source_warehouse,
-                        item_variants: variantRows.map(d => ({
-                            variant_item_code: d[MCP_VARIANT_ITEM_FIELD]
-                        }))
-                    },
-                    freeze: true,
-                    freeze_message: __('Loading stock candidates...'),
-                    callback(r) {
-                        frm.clear_table(MCP_STOCK_CANDIDATE_TABLE);
-
-                        (r.message || []).forEach(function(d) {
-                            const row = frm.add_child(MCP_STOCK_CANDIDATE_TABLE);
-                            row.serial_no = d.serial_no;
-                            row.item_code = d.item_code;
-                            row.warehouse = d.warehouse;
-                            row.material_status = d.material_status;
-                            row.length_mm = d.length_mm;
-                            row.width_mm = d.width_mm;
-                            row.thickness_mm = d.thickness_mm;
-                            row.is_qualified = 1;
-                        });
-
-                        frm.refresh_field(MCP_STOCK_CANDIDATE_TABLE);
-                        with_mcp_ui('select_all_grid_rows', [frm, MCP_STOCK_CANDIDATE_TABLE], '[MCP] Failed to select grid rows:');
-                        with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
-                    }
-                });
-            }, __('Outils'));
-        }
-
-        frm.add_custom_button(__('Create Draft Repack'), function() {
-            if (!frm.doc.name) {
-                frappe.msgprint(__('Please save the Material Cutting Plan first.'));
-                return;
-            }
-
-            frappe.call({
-                method: 'mat_reco.material_reconfiguration.services.repack_draft_service.make_repack_draft',
-                args: {
-                    material_cutting_plan_name: frm.doc.name
-                },
-                freeze: true,
-                freeze_message: __('Preparing draft Repack Stock Entry...'),
-                callback(r) {
-                    if (!r.message) return;
-                    const doc = frappe.model.sync(r.message)[0];
-                    frappe.set_route('Form', doc.doctype, doc.name);
-                }
-            });
-        });
-
-        with_mcp_ui('render_cutting_plan_preview', [frm], '[MCP] Preview rendering failed:');
-        with_mcp_ui('apply_variant_colors', [frm], '[MCP] Variant color rendering failed:');
-    },
-
-    source_item(frm) {
-        if (frm.fields_dict[MCP_VARIANT_TABLE]) {
-            frm.clear_table(MCP_VARIANT_TABLE);
-            frm.refresh_field(MCP_VARIANT_TABLE);
-        }
-
-        if (frm.fields_dict[MCP_STOCK_CANDIDATE_TABLE]) {
-            frm.clear_table(MCP_STOCK_CANDIDATE_TABLE);
-            frm.refresh_field(MCP_STOCK_CANDIDATE_TABLE);
-        }
-
-        if (!frm.doc.source_item) {
-            with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
-            return;
-        }
-
-        frappe.call({
-            method: 'mat_reco.material_reconfiguration.api.get_item_variants_for_mcp',
-            args: {
-                source_item: frm.doc.source_item
-            },
-            freeze: true,
-            freeze_message: __('Loading item variants...'),
-            callback(r) {
-                if (!frm.fields_dict[MCP_VARIANT_TABLE]) {
-                    console.warn('[MCP] Variant table not found on form:', MCP_VARIANT_TABLE);
-                    return;
-                }
-
-                frm.clear_table(MCP_VARIANT_TABLE);
-
-                (r.message || []).forEach(function(d) {
-                    const row = frm.add_child(MCP_VARIANT_TABLE);
-                    row[MCP_VARIANT_ITEM_FIELD] = d.variant_item_code;
-                });
-
-                frm.refresh_field(MCP_VARIANT_TABLE);
-                with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
-            }
-        });
-    },
-
-    clear_all_variants(frm) {
-        if (!frm.fields_dict[MCP_VARIANT_TABLE]) {
-            console.warn('[MCP] Variant table not found on form:', MCP_VARIANT_TABLE);
-            return;
-        }
-
-        frm.clear_table(MCP_VARIANT_TABLE);
-        frm.refresh_field(MCP_VARIANT_TABLE);
-        with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
-    },
-
-    [MCP_VARIANT_TABLE](frm) {
-        with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
-    },
-
-    [MCP_STOCK_CANDIDATE_TABLE](frm) {
-        with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
-    },
-
-    result_json(frm) {
-        with_mcp_ui('render_cutting_plan_preview', [frm], '[MCP] Preview rendering failed:');
-    },
-
-    result_tree_json(frm) {
-        with_mcp_ui('render_cutting_plan_preview', [frm], '[MCP] Preview rendering failed:');
-    },
-
-    material_plan_incidents(frm) {
-        with_mcp_ui('render_cutting_plan_preview', [frm], '[MCP] Preview rendering failed:');
-    },
-
-    mcp_mode(frm) {
-        with_mcp_ui('apply_mcp_mode_ui', [frm], '[MCP] Failed to apply MCP mode UI:');
-        frm.refresh();
-    }
-});
-
-// Copyright (c) 2026, Richard Amouzou and contributors
-// For license information, please see license.txt
-
 // Material Cutting Plan UX module
 // This file centralizes preview / canvas / incidents / move mode behavior.
 
 (function(global) {
     const DEFAULT_CONFIG = {
         MCP_INCIDENT_TABLE: 'material_plan_incidents',
-        MCP_INCIDENT_ACTIONS: ['Resize', 'Destroy', 'Move', 'Merge'],
+        MCP_INCIDENT_ACTIONS: ['Resize', 'Destroy', 'Move'],
         MCP_MIN_LEFTOVER_DIMENSION_MM: 500,
         MCP_MODE_PLANIFICATION: 'Planification',
         MCP_MODE_RETOUR_TERRAIN: 'Retour Terrain',
@@ -500,33 +205,15 @@ function get_active_move_state(frm) {
     return frm.__mcp_move_state || null;
 }
 
-function get_active_merge_state(frm) {
-    return frm.__mcp_merge_state || null;
-}
-
-function clear_merge_state(frm, options) {
-    const opts = options || {};
-    frm.__mcp_merge_state = null;
-    if (!opts.silent) {
-        frappe.show_alert({ message: __('Merge mode cancelled.'), indicator: 'orange' });
-    }
-    render_cutting_plan_preview(frm);
-}
-
 function ensure_move_escape_binding(frm) {
     if (frm.__mcp_move_escape_bound) return;
     frm.__mcp_move_escape_bound = true;
     $(document).off('keydown.mcpmove.' + frm.doctype + '.' + frm.docname);
     $(document).on('keydown.mcpmove.' + frm.doctype + '.' + frm.docname, function(event) {
         if (event.key !== 'Escape') return;
-        if (!get_active_move_state(frm) && !get_active_merge_state(frm)) return;
+        if (!get_active_move_state(frm)) return;
         event.preventDefault();
-        if (get_active_move_state(frm)) {
-            clear_move_state(frm, { silent: false });
-        }
-        if (get_active_merge_state(frm)) {
-            clear_merge_state(frm, { silent: false });
-        }
+        clear_move_state(frm, { silent: false });
     });
 }
 
@@ -556,225 +243,6 @@ function start_move_mode(frm, nodeData) {
     });
     render_cutting_plan_preview(frm);
 }
-function start_merge_mode(frm, nodeData) {
-    frm.__mcp_merge_state = {
-        source_serial_no: nodeData.source_serial_no,
-        selected_node_ids: [nodeData.node_id],
-        selected_nodes: [nodeData]
-    };
-    frappe.show_alert({
-        message: __('Merge mode active. Click contiguous free zones on the same serial. Double-click or press Esc to cancel.'),
-        indicator: 'purple'
-    });
-    render_cutting_plan_preview(frm);
-}
-
-function intervals_overlap(a1, a2, b1, b2) {
-    return Math.max(flt(a1), flt(b1)) < Math.min(flt(a2), flt(b2));
-}
-
-function are_free_rects_contiguous(a, b) {
-    if (!a || !b) return false;
-    const ax = flt(a.x || 0), ay = flt(a.y || 0), al = flt(a.length_mm || 0), aw = flt(a.width_mm || 0);
-    const bx = flt(b.x || 0), by = flt(b.y || 0), bl = flt(b.length_mm || 0), bw = flt(b.width_mm || 0);
-    const horiz = (ax + al === bx || bx + bl === ax) && intervals_overlap(ay, ay + aw, by, by + bw);
-    const vert = (ay + aw === by || by + bw === ay) && intervals_overlap(ax, ax + al, bx, bx + bl);
-    return horiz || vert;
-}
-
-function build_rect_from_node_data(nodeData) {
-    return {
-        id: nodeData.node_id,
-        x: flt(nodeData.x || 0),
-        y: flt(nodeData.y || 0),
-        length_mm: flt(nodeData.length_mm || 0),
-        width_mm: flt(nodeData.width_mm || 0),
-        node_type: nodeData.node_type,
-        source_serial_no: nodeData.source_serial_no
-    };
-}
-
-function toggle_merge_selection(frm, nodeData) {
-    const state = get_active_merge_state(frm);
-    if (!state) return false;
-    if (!is_free_zone_type(nodeData.node_type)) {
-        frappe.msgprint(__('Merge is only available for leftover or waste zones.'));
-        return true;
-    }
-    if (String(nodeData.source_serial_no || '') !== String(state.source_serial_no || '')) {
-        frappe.msgprint(__('All merged zones must belong to the same serial.'));
-        return true;
-    }
-
-    const ids = state.selected_node_ids || [];
-    const idx = ids.indexOf(nodeData.node_id);
-    if (idx >= 0) {
-        if (ids.length === 1) {
-            clear_merge_state(frm, { silent: false });
-            return true;
-        }
-        state.selected_node_ids.splice(idx, 1);
-        state.selected_nodes = (state.selected_nodes || []).filter(function(row) { return row.node_id !== nodeData.node_id; });
-        render_cutting_plan_preview(frm);
-        return true;
-    }
-
-    const candidate = build_rect_from_node_data(nodeData);
-    const ok = (state.selected_nodes || []).some(function(row) {
-        return are_free_rects_contiguous(candidate, build_rect_from_node_data(row));
-    });
-    if (!ok) {
-        frappe.msgprint(__('Selected zone must be contiguous to the current merge selection.'));
-        return true;
-    }
-
-    state.selected_node_ids.push(nodeData.node_id);
-    state.selected_nodes.push(nodeData);
-    render_cutting_plan_preview(frm);
-    return true;
-}
-
-function build_selected_merge_rectangles(frm) {
-    const state = get_active_merge_state(frm);
-    return (state && state.selected_nodes) ? state.selected_nodes.map(build_rect_from_node_data) : [];
-}
-
-function rect_contains_point(rect, x, y) {
-    return x >= flt(rect.x) && x < flt(rect.x) + flt(rect.length_mm) && y >= flt(rect.y) && y < flt(rect.y) + flt(rect.width_mm);
-}
-
-function build_occupancy_grid(rects) {
-    const xs = []; const ys = [];
-    (rects || []).forEach(function(r) {
-        xs.push(flt(r.x), flt(r.x) + flt(r.length_mm));
-        ys.push(flt(r.y), flt(r.y) + flt(r.width_mm));
-    });
-    const ux = Array.from(new Set(xs)).sort(function(a,b){return a-b;});
-    const uy = Array.from(new Set(ys)).sort(function(a,b){return a-b;});
-    const cells = [];
-    for (let yi = 0; yi < uy.length - 1; yi++) {
-        const row = [];
-        for (let xi = 0; xi < ux.length - 1; xi++) {
-            const cx = (ux[xi] + ux[xi+1]) / 2;
-            const cy = (uy[yi] + uy[yi+1]) / 2;
-            const occ = (rects || []).some(function(r){ return rect_contains_point(r, cx, cy); });
-            row.push(occ);
-        }
-        cells.push(row);
-    }
-    return { xs: ux, ys: uy, cells: cells };
-}
-
-function find_largest_rectangle_in_grid(grid) {
-    const xs = grid.xs, ys = grid.ys, cells = grid.cells;
-    let best = null; let bestArea = 0;
-    for (let y1 = 0; y1 < ys.length - 1; y1++) {
-        for (let y2 = y1 + 1; y2 < ys.length; y2++) {
-            for (let x1 = 0; x1 < xs.length - 1; x1++) {
-                for (let x2 = x1 + 1; x2 < xs.length; x2++) {
-                    let ok = true;
-                    for (let yi = y1; yi < y2 && ok; yi++) {
-                        for (let xi = x1; xi < x2; xi++) {
-                            if (!cells[yi][xi]) { ok = false; break; }
-                        }
-                    }
-                    if (!ok) continue;
-                    const area = (xs[x2] - xs[x1]) * (ys[y2] - ys[y1]);
-                    if (area > bestArea) {
-                        bestArea = area;
-                        best = { x: xs[x1], y: ys[y1], length_mm: xs[x2] - xs[x1], width_mm: ys[y2] - ys[y1] };
-                    }
-                }
-            }
-        }
-    }
-    return best;
-}
-
-function build_residual_rectangles_from_grid(grid, mergedRect) {
-    const xs = grid.xs, ys = grid.ys, cells = grid.cells.map(function(r){ return r.slice(); });
-    for (let yi = 0; yi < ys.length - 1; yi++) {
-        for (let xi = 0; xi < xs.length - 1; xi++) {
-            const cx = (xs[xi] + xs[xi+1]) / 2;
-            const cy = (ys[yi] + ys[yi+1]) / 2;
-            if (rect_contains_point(mergedRect, cx, cy)) {
-                cells[yi][xi] = false;
-            }
-        }
-    }
-    const used = cells.map(function(r){ return r.map(function(){ return false; }); });
-    const rects = [];
-    for (let yi = 0; yi < ys.length - 1; yi++) {
-        for (let xi = 0; xi < xs.length - 1; xi++) {
-            if (!cells[yi][xi] || used[yi][xi]) continue;
-            let maxWidth = 0;
-            while (xi + maxWidth < xs.length - 1 && cells[yi][xi + maxWidth] && !used[yi][xi + maxWidth]) maxWidth++;
-            let height = 1;
-            let growing = true;
-            while (yi + height < ys.length - 1 && growing) {
-                for (let k = 0; k < maxWidth; k++) {
-                    if (!cells[yi + height][xi + k] || used[yi + height][xi + k]) { growing = false; break; }
-                }
-                if (growing) height++;
-            }
-            for (let yj = yi; yj < yi + height; yj++) for (let xj = xi; xj < xi + maxWidth; xj++) used[yj][xj] = true;
-            rects.push({ x: xs[xi], y: ys[yi], length_mm: xs[xi + maxWidth] - xs[xi], width_mm: ys[yi + height] - ys[yi] });
-        }
-    }
-    return rects;
-}
-
-function build_merge_payload(frm) {
-    const state = get_active_merge_state(frm);
-    const rects = build_selected_merge_rectangles(frm);
-    if (!state || rects.length < 2) {
-        return { ok: false, message: __('Select at least two free zones to merge.') };
-    }
-    const grid = build_occupancy_grid(rects);
-    const merged = find_largest_rectangle_in_grid(grid);
-    if (!merged) {
-        return { ok: false, message: __('Could not compute a mergeable area from the selection.') };
-    }
-    const residuals = build_residual_rectangles_from_grid(grid, merged);
-    const area = flt(merged.length_mm) * flt(merged.width_mm);
-    return {
-        ok: true,
-        payload: {
-            plan_node_id: state.selected_node_ids[0],
-            source_serial_no: state.source_serial_no,
-            original_node_type: 'leftover',
-            original_item_code: '',
-            original_length_mm: 0,
-            original_width_mm: 0,
-            original_area_mm2: 0,
-            incident_action: 'Merge',
-            affected_node_ids_json: JSON.stringify(state.selected_node_ids),
-            group_area_mm2: rects.reduce(function(sum, r){ return sum + flt(r.length_mm) * flt(r.width_mm); }, 0),
-            new_node_type: classify_free_zone_type(merged.length_mm, merged.width_mm),
-            new_length_mm: merged.length_mm,
-            new_width_mm: merged.width_mm,
-            new_area_mm2: area,
-            target_x_mm: merged.x,
-            target_y_mm: merged.y,
-            include_in_repack: 1,
-            is_active: 1,
-            remarks: JSON.stringify({ residual_rects: residuals })
-        }
-    };
-}
-
-function apply_current_merge_selection(frm) {
-    const result = build_merge_payload(frm);
-    if (!result.ok) {
-        frappe.msgprint(result.message || __('Invalid merge selection.'));
-        return;
-    }
-    upsert_incident_row(frm, result.payload);
-    frm.refresh_field(cfg().MCP_INCIDENT_TABLE);
-    frm.__mcp_merge_state = null;
-    frappe.show_alert({ message: __('Merge preview applied. Save to persist the merged free zone.'), indicator: 'green' });
-    render_cutting_plan_preview(frm);
-}
 
 function rectangles_overlap(a, b) {
     return !(
@@ -796,28 +264,15 @@ function child_id_js(child) {
     return String((child && (child.id || child.piece_uid)) || '').trim();
 }
 
-/**
- * Normalize a node_type string by trimming whitespace and converting to lower case.
- * This helper ensures that variations like 'Destroy', 'destroyed ' or ' destroy' are all
- * treated consistently when comparing node types.  It should be used wherever
- * comparisons on node_type are made.
- *
- * @param {string} nodeType The raw node_type value from a child node
- * @returns {string} A trimmed, lower‑cased version of the node type
- */
+// --- Normalization helpers for node_type ---
+// Many services label destroyed regions as either 'destroyed' or 'destroy', sometimes
+// with inconsistent whitespace or casing.  To ensure consistent comparisons, the
+// following helpers trim and lower‑case node_type values, and provide a simple
+// predicate for identifying destroyed pieces.
 function normalize_node_type(nodeType) {
     return String(nodeType || '').trim().toLowerCase();
 }
 
-/**
- * Determine whether a given node_type corresponds to a destroyed region.  Some
- * services may label destroyed pieces as 'destroy' instead of 'destroyed'.
- * This helper considers both variants, and is case‑insensitive, so the rest of
- * the UI code can safely check against a single predicate.
- *
- * @param {string} nodeType The raw node_type value from a child node
- * @returns {boolean} True when the node type represents a destroyed piece
- */
 function is_destroy_node_type(nodeType) {
     const t = normalize_node_type(nodeType);
     return t === 'destroyed' || t === 'destroy';
@@ -828,7 +283,6 @@ function node_serial_js(node) {
 }
 
 function is_free_zone_type(nodeType) {
-    // Normalize the node type to ensure case and whitespace differences are ignored.
     const value = normalize_node_type(nodeType);
     return value === 'leftover' || value === 'waste';
 }
@@ -942,35 +396,33 @@ function build_target_move_payload(frm, targetSerialNo, targetX, targetY, option
         return { ok: false, message: __('The selected target position is not fully contained in a free zone.') };
     }
 
-    const targetZoneLength = flt(get_display_length(targetZone) || targetZone.length_mm || 0);
-    const targetZoneWidth = flt(get_display_width(targetZone) || targetZone.width_mm || 0);
-
-    // Business rules for move:
-    // 1) target < source => impossible
-    if (targetZoneLength < pieceLength || targetZoneWidth < pieceWidth) {
-        return { ok: false, message: __('Target zone is smaller than source piece.') };
+    // Validate that the moving piece fits entirely inside the target free zone.
+    // Although resolve_target_free_zone ensures containment, explicitly check here
+    // to allow tailored error messaging when the piece is too large to swap with
+    // the target zone. If the piece dimensions exceed the target zone dimensions,
+    // swapping the two elements is impossible.
+    const zoneLength = flt(get_display_length(targetZone) || 0);
+    const zoneWidth = flt(get_display_width(targetZone) || 0);
+    if (pieceLength > zoneLength || pieceWidth > zoneWidth) {
+        return { ok: false, message: __('The moving piece is larger than the selected free zone and cannot be swapped.') };
     }
 
-    // 2) target = source => pure swap
-    const isExactSwap = flt(targetZoneLength) === flt(pieceLength) && flt(targetZoneWidth) === flt(pieceWidth);
-    // 3) target > source => swing with complement zones
-    const isLargerTarget = flt(targetZoneLength) > flt(pieceLength) || flt(targetZoneWidth) > flt(pieceWidth);
+    // Determine whether this move represents an exact size match with the target zone.
+    // When the piece and zone share identical dimensions, the operation is effectively
+    // a pure swap (the free zone becomes the finished good and the original piece
+    // becomes a free zone).  This flag is passed along in the payload for potential
+    // backend logic but does not alter the validation in the client.
+    const swapOnly = pieceLength === zoneLength && pieceWidth === zoneWidth;
 
-    // Build the list of occupied zones on the target serial.  A zone is considered
-    // occupied if it is a finished good or a destroyed region.  Free zones such
-    // as leftovers and wastes are explicitly ignored here so that they can be
-    // replaced by the moving finished good.  Additionally, we skip the source
-    // node itself to avoid incorrectly flagging the original piece as an
-    // obstruction when moving within the same serial.
     const occupied = (targetNode.children || []).filter(function(child) {
         const nodeId = child_id_js(child);
-        // Never consider the source piece as an obstacle
+        // Skip the source piece when checking for overlap
         if (nodeId === String(moveState.source_node_id || '')) {
             return false;
         }
-        // Normalize the type for consistent comparisons
+        // Normalize the node type for consistent comparisons
         const normalizedType = normalize_node_type(child && child.node_type);
-        // Free zones (leftover and waste) are allowed to be replaced
+        // Free zones (leftover/waste) are always replaceable
         if (is_free_zone_type(normalizedType)) {
             return false;
         }
@@ -1013,13 +465,12 @@ function build_target_move_payload(frm, targetSerialNo, targetX, targetY, option
             new_width_mm: pieceWidth,
             new_area_mm2: pieceLength * pieceWidth,
             target_serial_no: targetSerialNo,
-            target_zone_id: preferredZoneId || '',
             target_x_mm: targetX,
             target_y_mm: targetY,
-            move_case: isExactSwap ? 'swap' : (isLargerTarget ? 'swing' : 'swap'),
             include_in_repack: 1,
             is_active: 1,
-            remarks: ''
+            remarks: '',
+            swap_only: swapOnly ? 1 : 0
         }
     };
 }
@@ -1123,7 +574,7 @@ function render_cutting_plan_preview(frm) {
         });
     }
 
-    const jsonStr = get_preview_result_json(frm);
+    const jsonStr = frm.doc.result_json || frm.doc.result_tree_json;
     if (!jsonStr) {
         wrapper.html('<p>No cutting plan available.</p>');
         return;
@@ -1145,10 +596,14 @@ function render_cutting_plan_preview(frm) {
     }
 
     // Always preview incidents in Retour Terrain mode, regardless of resolution status.
-    // We filter out 'Move' incidents from preview so that destroy/resize remain functional.
     const isRetour = get_mcp_mode(frm) === cfg().MCP_MODE_RETOUR_TERRAIN;
     const allIncidents = (frm.doc[cfg().MCP_INCIDENT_TABLE] || []);
-    const previewIncidents = isRetour ? allIncidents : [];
+    const previewIncidents = isRetour
+        ? allIncidents.filter(function(inc) {
+            const action = String((inc && inc.incident_action) || '').trim().toLowerCase();
+            return action !== 'move';
+        })
+        : [];
     frm.__cut_nodes = apply_incidents_to_nodes(nodes, previewIncidents);
     frm.__cut_color_map = buildSalesOrderColorMap(frm.__cut_nodes);
 
@@ -1199,20 +654,10 @@ function render_cutting_plan_preview(frm) {
 
         let html = '';
         const moveState = get_active_move_state(frm);
-        const mergeState = get_active_merge_state(frm);
         if (moveState) {
             html += '<div style="margin-bottom:8px; padding:8px 10px; border:1px solid #93c5fd; background:#eff6ff; color:#1d4ed8; border-radius:6px;">';
             html += '<strong>Move mode</strong> — ' + frappe.utils.escape_html(moveState.source_node_id || '') + ' from ' + frappe.utils.escape_html(moveState.source_serial_no || '') + '. ';
             html += 'Click a target position on any serial preview. Double-click or press Esc to cancel.';
-            html += '</div>';
-        }
-        if (mergeState) {
-            html += '<div style="margin-bottom:8px; padding:8px 10px; border:1px solid #c084fc; background:#faf5ff; color:#7e22ce; border-radius:6px;">';
-            html += '<strong>Merge mode</strong> — Serial ' + frappe.utils.escape_html(mergeState.source_serial_no || '') + '. Selected zones: ' + (mergeState.selected_node_ids || []).length + '. ';
-            html += 'Click contiguous free zones on the same serial. Double-click or press Esc to cancel.';
-            if ((mergeState.selected_node_ids || []).length >= 2) {
-                html += ' <button type="button" class="btn btn-xs btn-primary apply-merge-selection" style="margin-left:8px;">Apply Merge</button>';
-            }
             html += '</div>';
         }
         html += '<div style="margin-bottom:5px;">';
@@ -1311,6 +756,7 @@ function render_cutting_plan_preview(frm) {
             } else if (normalizedType === 'waste') {
                 style += 'border:2px solid #dc2626; background-color:#fee2e2; background-image:repeating-linear-gradient(45deg,#fca5a5,#fca5a5 6px,#fee2e2 6px,#fee2e2 12px); color:#7f1d1d;';
             } else if (is_destroy_node_type(normalizedType)) {
+                // Render destroyed or destroy incidents with a dark grey appearance to make them stand out.
                 style += 'border:2px solid #374151; background-color:#4b5563; color:#f8fafc;';
             } else {
                 const c = (frm.__cut_color_map && frm.__cut_color_map[so]) || { fill: '#e5e7eb', border: '#6b7280', text: '#111827' };
@@ -1319,11 +765,6 @@ function render_cutting_plan_preview(frm) {
 
             if (isMoveSource) {
                 style += 'outline:3px dashed #2563eb; outline-offset:-3px;';
-            }
-            const mergeStateActive = get_active_merge_state(frm);
-            const isMergeSelected = mergeStateActive && (mergeStateActive.selected_node_ids || []).indexOf(String(child.id || child.piece_uid || '')) >= 0;
-            if (isMergeSelected) {
-                style += 'outline:3px dashed #7e22ce; outline-offset:-3px;';
             }
 
             let dataAttrs = '';
@@ -1395,10 +836,6 @@ function render_cutting_plan_preview(frm) {
                 try_finish_move_on_sheet(frm, e, $piece.closest('.mcp-sheet-canvas'), $piece);
                 return;
             }
-            if (get_active_merge_state(frm)) {
-                toggle_merge_selection(frm, extract_node_data($piece));
-                return;
-            }
             on_cut_piece_click(frm, $piece);
         });
         wrapper.find('.mcp-sheet-canvas').on('click', function(e) {
@@ -1409,17 +846,9 @@ function render_cutting_plan_preview(frm) {
             e.stopPropagation();
             try_finish_move_on_sheet(frm, e, $(this), null);
         });
-        wrapper.find('.apply-merge-selection').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            apply_current_merge_selection(frm);
-        });
         wrapper.off('dblclick.mcpmove').on('dblclick.mcpmove', function() {
             if (get_active_move_state(frm)) {
                 clear_move_state(frm, { silent: false });
-            }
-            if (get_active_merge_state(frm)) {
-                clear_merge_state(frm, { silent: false });
             }
         });
     }
@@ -1525,7 +954,7 @@ function on_cut_piece_click(frm, $piece) {
     }
     let parsedResult = null;
     try {
-        parsedResult = JSON.parse(get_preview_result_json(frm) || '{}');
+        parsedResult = JSON.parse(frm.doc.result_json || frm.doc.result_tree_json || '{}');
     } catch (e) {
         parsedResult = null;
     }
@@ -1582,15 +1011,6 @@ function on_cut_piece_click(frm, $piece) {
                 start_move_mode(frm, nodeData);
                 return;
             }
-            if (values.incident_action === 'Merge') {
-                if (!is_free_zone_type(nodeData.node_type)) {
-                    frappe.msgprint(__('Merge is only available for leftover or waste zones.'));
-                    return;
-                }
-                d.hide();
-                start_merge_mode(frm, nodeData);
-                return;
-            }
 
             const result = build_incident_payload(frm, nodeData, values);
             if (!result.ok) {
@@ -1618,13 +1038,7 @@ function build_incident_payload(frm, nodeData, values) {
     let includeInRepack = 1;
 
     if (action === 'Move') {
-        return [clone_child(child)];
-    }
-    if (action === 'Merge') {
-        return [clone_child(child)];
-    }
-    if (action === 'Merge') {
-        return { ok: false, message: __('Use Merge mode to select contiguous free zones on the same serial.') };
+        return { ok: false, message: __('Use Move mode to select a target position on another serial.') };
     }
 
     if (action === 'Destroy') {
@@ -1835,13 +1249,7 @@ function apply_incident_to_child_as_nodes_js(child, incident) {
     const action = (incident.incident_action || '').trim();
 
     if (action === 'Move') {
-        return [clone_child(child)];
-    }
-    if (action === 'Merge') {
-        return [clone_child(child)];
-    }
-    if (action === 'Merge') {
-        return { ok: false, message: __('Use Merge mode to select contiguous free zones on the same serial.') };
+        return { ok: false, message: __('Use Move mode to select a target position on another serial.') };
     }
 
     if (action === 'Destroy') {
@@ -1911,47 +1319,9 @@ function build_target_zone_complements_js(targetZone, candidate) {
     return rows;
 }
 
-function build_rectangles_from_merge_residuals(templateChild, residualRects) {
-    return (residualRects || []).map(function(rect, idx) {
-        const row = build_free_zone_from_rect_js(templateChild, rect.x, rect.y, rect.length_mm, rect.width_mm, '__merge_residual_' + idx);
-        return row;
-    }).filter(Boolean);
-}
-
-function build_merge_output_children(templateChild, incident) {
-    const merged = build_free_zone_from_rect_js(
-        templateChild,
-        flt(incident.target_x_mm || 0),
-        flt(incident.target_y_mm || 0),
-        flt(incident.new_length_mm || 0),
-        flt(incident.new_width_mm || 0),
-        '__merged'
-    );
-    if (merged) {
-        merged.node_type = incident.new_node_type || merged.node_type;
-        merged.__incident_action = 'Merge';
-    }
-    let residuals = [];
-    try {
-        const parsed = incident.remarks ? JSON.parse(incident.remarks) : {};
-        residuals = (parsed && parsed.residual_rects) || [];
-    } catch (e) {
-        residuals = [];
-    }
-    const rows = [];
-    if (merged) rows.push(merged);
-    build_rectangles_from_merge_residuals(templateChild, residuals).forEach(function(row) {
-        row.__incident_action = 'Merge';
-        rows.push(row);
-    });
-    return rows;
-}
-
 function apply_incidents_to_nodes(nodes, incidents) {
     const incidentMap = build_incident_map(incidents || []);
     const sourceMoveIds = {};
-    const mergeConsumedIds = {};
-    const processedMergeKeys = {};
     const consumedTargetZonesBySerial = {};
     const additionsBySerial = {};
     const originalNodeBySerial = {};
@@ -1966,39 +1336,18 @@ function apply_incidents_to_nodes(nodes, incidents) {
             const childId = child_id_js(child);
             const incident = incidentMap[childId];
             const action = String((incident && incident.incident_action) || '').trim();
-            if (action === 'Merge') {
-                const mergeKey = String((incident && incident.name) || (incident && incident.plan_node_id) || childId);
-                const targetSerial = String((incident && incident.source_serial_no) || sourceSerial).trim() || sourceSerial;
-                let affectedIds = [];
-                try { affectedIds = JSON.parse((incident && incident.affected_node_ids_json) || '[]') || []; } catch (e) { affectedIds = []; }
-                if (affectedIds.indexOf(childId) >= 0) {
-                    mergeConsumedIds[targetSerial] = mergeConsumedIds[targetSerial] || {};
-                    mergeConsumedIds[targetSerial][childId] = true;
-                }
-                if (!processedMergeKeys[mergeKey]) {
-                    processedMergeKeys[mergeKey] = true;
-                    additionsBySerial[targetSerial] = additionsBySerial[targetSerial] || [];
-                    build_merge_output_children(child, incident).forEach(function(row) { additionsBySerial[targetSerial].push(row); });
-                }
-                return;
-            }
             if (action !== 'Move' || String((child && child.node_type) || '').trim() !== 'finished_good') {
                 return;
             }
 
             sourceMoveIds[childId] = true;
             additionsBySerial[sourceSerial] = additionsBySerial[sourceSerial] || [];
-
-            // Determine the target serial. Default to source serial when none provided
             const targetSerial = String((incident && incident.target_serial_no) || sourceSerial).trim() || sourceSerial;
-            // Resolve the proposed coordinates for the move.  If not specified on the
-            // incident the current child coordinates are used.
             const targetX = (incident && incident.target_x_mm) != null ? incident.target_x_mm : (child.x || 0);
             const targetY = (incident && incident.target_y_mm) != null ? incident.target_y_mm : (child.y || 0);
-
-            // Only free the source zone when the move actually places the piece in a
-            // different location.  When the target serial and coordinates match the
-            // original, freeing would produce a leftover overlapping the moved piece.
+            // Only free the source zone when the move actually changes location.  When
+            // the target serial and coordinates match the original, freeing would
+            // produce a leftover overlapping the moved piece.
             const sameSpot = (targetSerial === sourceSerial) && (flt(targetX) === flt(child.x || 0)) && (flt(targetY) === flt(child.y || 0));
             if (!sameSpot) {
                 const freedZone = build_free_zone_from_child_js(child, '__freed');
@@ -2008,7 +1357,6 @@ function apply_incidents_to_nodes(nodes, incidents) {
             }
 
             const targetNode = originalNodeBySerial[targetSerial];
-            // Build the moved child at the new location
             const movedChild = clone_child(child);
             movedChild.x = flt(targetX);
             movedChild.y = flt(targetY);
@@ -2030,7 +1378,7 @@ function apply_incidents_to_nodes(nodes, incidents) {
                 length_mm: flt(movedChild.length_mm || 0),
                 width_mm: flt(movedChild.width_mm || 0)
             };
-            const targetZone = resolve_target_free_zone(targetNode, candidate, String((incident && incident.target_zone_id) || ''));
+            const targetZone = resolve_target_free_zone(targetNode, candidate, '');
             if (!targetZone) {
                 return;
             }
@@ -2057,9 +1405,6 @@ function apply_incidents_to_nodes(nodes, incidents) {
             if (sourceMoveIds[childId]) {
                 return;
             }
-            if ((mergeConsumedIds[serial] || {})[childId]) {
-                return;
-            }
             if ((consumedTargetZonesBySerial[serial] || {})[childId]) {
                 return;
             }
@@ -2084,17 +1429,7 @@ function apply_incidents_to_nodes(nodes, incidents) {
 function build_incident_map(incidents) {
     const map = {};
     (incidents || []).forEach(function(row) {
-        if (!row || cint(row.is_active || 0) !== 1) {
-            return;
-        }
-        const action = String((row.incident_action) || '').trim();
-        if (action === 'Merge') {
-            let ids = [];
-            try { ids = JSON.parse(row.affected_node_ids_json || '[]') || []; } catch (e) { ids = []; }
-            ids.forEach(function(id) { if (id) map[String(id)] = row; });
-            return;
-        }
-        if (!row.plan_node_id) {
+        if (!row || !row.plan_node_id || cint(row.is_active || 0) !== 1) {
             return;
         }
         map[row.plan_node_id] = row;
@@ -2127,8 +1462,7 @@ function get_display_width(child) {
         apply_variant_colors,
         select_all_grid_rows,
         render_cutting_plan_preview,
-        clear_move_state,
-        clear_merge_state
+        clear_move_state
     };
 
     global.MatRecoMCPUI = api;

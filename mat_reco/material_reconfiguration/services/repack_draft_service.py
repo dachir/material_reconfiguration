@@ -4,6 +4,12 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, cstr
+from copy import deepcopy
+
+from mat_reco.material_reconfiguration.services.mcp_incident_service import (
+    apply_incidents_to_nodes,
+    build_incident_map,
+)
 
 
 def _safe_json_load(value):
@@ -18,24 +24,20 @@ def _safe_json_load(value):
 
 
 def _get_tree_from_doc(doc):
-    result_json = doc.get("result_json") or doc.get("result_tree_json")
+    result_json = doc.get("effective_result_json") or doc.get("result_json") or doc.get("result_tree_json")
     parsed = _safe_json_load(result_json)
     if not parsed:
         return {}
     return parsed.get("tree") or parsed
 
 
-def _build_incident_map(doc):
-    rows = doc.get("material_plan_incidents") or []
-    result = {}
-    for row in rows:
-        if cint(row.get("is_active") or 0) != 1:
-            continue
-        plan_node_id = (row.get("plan_node_id") or "").strip()
-        if not plan_node_id:
-            continue
-        result[plan_node_id] = row
-    return result
+def _tree_is_return_terrain_resolved(tree):
+    if not isinstance(tree, dict):
+        return False
+    if tree.get("return_terrain_resolved"):
+        return True
+    options = tree.get("options") or {}
+    return bool(options.get("return_terrain_resolved"))
 
 
 def _apply_incident_to_child(child, incident):
@@ -70,37 +72,11 @@ def _apply_incident_to_child(child, incident):
 def build_effective_nodes(doc):
     tree = _get_tree_from_doc(doc)
     nodes = tree.get("nodes") or []
-    incident_map = _build_incident_map(doc)
+    if _tree_is_return_terrain_resolved(tree):
+        return nodes
 
-    effective_nodes = []
-
-    for node in nodes:
-        node_copy = dict(node)
-        children = []
-
-        for child in node.get("children") or []:
-            child_id = (child.get("id") or child.get("piece_uid") or "").strip()
-            incident = incident_map.get(child_id)
-            effective_child = _apply_incident_to_child(child, incident)
-
-            if "effective_length_mm" not in effective_child:
-                effective_child["effective_length_mm"] = flt(child.get("length_mm") or 0)
-
-            if "effective_width_mm" not in effective_child:
-                effective_child["effective_width_mm"] = flt(child.get("width_mm") or 0)
-
-            if "effective_area_mm2" not in effective_child:
-                effective_child["effective_area_mm2"] = (
-                    flt(effective_child.get("effective_length_mm"))
-                    * flt(effective_child.get("effective_width_mm"))
-                )
-
-            children.append(effective_child)
-
-        node_copy["children"] = children
-        effective_nodes.append(node_copy)
-
-    return effective_nodes
+    incident_map = build_incident_map(doc)
+    return apply_incidents_to_nodes(nodes, incident_map)
 
 
 def _include_child_in_repack(doc, child):
@@ -216,7 +192,7 @@ def _extract_serials_from_text(value):
 def _get_input_serial_names_from_mcp_sheets(doc):
     grouped = defaultdict(set)
 
-    for row in (doc.get("mcp_sheets") or []):
+    for row in (doc.get("effective_mcp_sheets") or doc.get("mcp_sheets") or []):
         serial_no = cstr(row.get("source_serial_no") or "").strip()
         item_code = cstr(row.get("source_item_code") or "").strip()
         warehouse = cstr(doc.get("source_warehouse") or "").strip()
@@ -1420,3 +1396,165 @@ def ensure_mcp_bundles_for_stock_entry(doc):
                 created_serials.extend(newly_created)
 
     return {"serial_nos": created_serials, "bundles": created_bundles}
+
+
+def _build_destroy_regions_from_complement(child, kept_length_mm, kept_width_mm):
+    """
+    Build the exact complementary destroy regions after a Resize incident.
+
+    Convention:
+    - the kept part preserves the original top-left anchor (x, y)
+    - resize shrinks toward the right and/or downward
+
+    Geometry:
+    original rectangle = [x, y, L, W]
+    kept rectangle     = [x, y, l, w]
+
+    Complement is represented by up to two non-overlapping rectangles:
+    1. right strip  : (L-l) x W
+    2. bottom strip : l x (W-w)
+
+    This exactly covers the removed area without overlap.
+    """
+    original_length = flt(child.get("length_mm"))
+    original_width = flt(child.get("width_mm"))
+    x = flt(child.get("x") or 0)
+    y = flt(child.get("y") or 0)
+
+    destroys = []
+
+    # Nothing to destroy if unchanged
+    if kept_length_mm >= original_length and kept_width_mm >= original_width:
+        return destroys
+
+    # -------------------------------------------------------------
+    # Right strip
+    # -------------------------------------------------------------
+    right_width = original_length - kept_length_mm
+    if right_width > 0:
+        destroy_right = deepcopy(child)
+        destroy_right["node_type"] = "destroyed"
+        destroy_right["x"] = x + kept_length_mm
+        destroy_right["y"] = y
+        destroy_right["length_mm"] = right_width
+        destroy_right["width_mm"] = original_width
+        destroy_right["effective_length_mm"] = 0.0
+        destroy_right["effective_width_mm"] = 0.0
+        destroy_right["effective_area_mm2"] = 0.0
+        destroy_right["include_in_repack"] = 0
+        destroy_right["__generated_from_resize"] = 1
+        destroy_right["__destroy_region_kind"] = "right_strip"
+        destroy_right["__original_length_mm"] = right_width
+        destroy_right["__original_width_mm"] = original_width
+        destroy_right["__kept_length_mm"] = kept_length_mm
+        destroy_right["__kept_width_mm"] = kept_width_mm
+        destroys.append(destroy_right)
+
+    # -------------------------------------------------------------
+    # Bottom strip
+    # -------------------------------------------------------------
+    bottom_height = original_width - kept_width_mm
+    if bottom_height > 0:
+        destroy_bottom = deepcopy(child)
+        destroy_bottom["node_type"] = "destroyed"
+        destroy_bottom["x"] = x
+        destroy_bottom["y"] = y + kept_width_mm
+        destroy_bottom["length_mm"] = kept_length_mm
+        destroy_bottom["width_mm"] = bottom_height
+        destroy_bottom["effective_length_mm"] = 0.0
+        destroy_bottom["effective_width_mm"] = 0.0
+        destroy_bottom["effective_area_mm2"] = 0.0
+        destroy_bottom["include_in_repack"] = 0
+        destroy_bottom["__generated_from_resize"] = 1
+        destroy_bottom["__destroy_region_kind"] = "bottom_strip"
+        destroy_bottom["__original_length_mm"] = kept_length_mm
+        destroy_bottom["__original_width_mm"] = bottom_height
+        destroy_bottom["__kept_length_mm"] = kept_length_mm
+        destroy_bottom["__kept_width_mm"] = kept_width_mm
+        destroys.append(destroy_bottom)
+
+    return destroys
+
+
+def _apply_destroy_to_child(child):
+    """
+    Apply a full destroy to a child node.
+
+    Important:
+    - keep length_mm / width_mm untouched for geometric traceability
+    - set only effective dimensions to zero
+    """
+    out = deepcopy(child)
+    out["node_type"] = "destroyed"
+    out["effective_length_mm"] = 0.0
+    out["effective_width_mm"] = 0.0
+    out["effective_area_mm2"] = 0.0
+    out["include_in_repack"] = 0
+    return out
+
+
+
+
+def _apply_resize_to_child(child, incident):
+    """
+    Apply a Resize to a child node and generate exact complementary destroy
+    regions through the destroy logic.
+    """
+    original_length = flt(child.get("length_mm"))
+    original_width = flt(child.get("width_mm"))
+
+    new_length = flt(incident.get("new_length_mm"))
+    new_width = flt(incident.get("new_width_mm"))
+    new_type = (incident.get("new_node_type") or child.get("node_type") or "").strip()
+
+    if new_length <= 0 or new_width <= 0:
+        raise ValueError("Resize dimensions must be greater than zero.")
+
+    if new_length > original_length or new_width > original_width:
+        raise ValueError("Resize dimensions cannot exceed original dimensions.")
+
+    # 1) Build the kept / modified part
+    modified = deepcopy(child)
+    modified["node_type"] = new_type or modified.get("node_type")
+    modified["length_mm"] = new_length
+    modified["width_mm"] = new_width
+    modified["effective_length_mm"] = new_length
+    modified["effective_width_mm"] = new_width
+    modified["effective_area_mm2"] = new_length * new_width
+    modified["include_in_repack"] = 1
+    modified["__generated_from_resize"] = 0
+
+    # 2) Build exact complementary regions
+    complement_regions = _build_destroy_regions_from_complement(
+        child=child,
+        kept_length_mm=new_length,
+        kept_width_mm=new_width,
+    )
+
+    # 3) Apply destroy logic to each complementary region
+    generated_destroys = [_apply_destroy_to_child(region) for region in complement_regions]
+
+    results = [modified]
+    results.extend(generated_destroys)
+    return results
+
+
+def apply_incident_to_child_as_nodes(child, incident):
+    """
+    Normalize one child + one incident into one or more resulting nodes.
+
+    Returns:
+        list[dict]
+    """
+    if not incident:
+        return [deepcopy(child)]
+
+    action = (incident.get("incident_action") or "").strip()
+
+    if action == "Destroy":
+        return [_apply_destroy_to_child(child)]
+
+    if action == "Resize":
+        return _apply_resize_to_child(child, incident)
+
+    return [deepcopy(child)]

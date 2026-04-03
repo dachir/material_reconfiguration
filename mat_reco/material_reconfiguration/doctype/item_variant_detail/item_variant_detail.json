@@ -1,0 +1,38 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-31 11:30:48.619631",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_kwfn",
+  "variant_item_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_kwfn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "variant_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Variant Item Code",
+   "options": "Item"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-31 11:32:06.541891",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Item Variant Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

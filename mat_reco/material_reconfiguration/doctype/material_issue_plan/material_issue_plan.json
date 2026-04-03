@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{YY}MIP{MM}{####}",
+ "creation": "2026-04-03 12:05:11.208476",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_gkws",
+  "company",
+  "source_warehouse",
+  "posting_date",
+  "column_break_papv",
+  "status",
+  "source_item",
+  "total_selected_serials",
+  "total_selected_area_m2",
+  "section_break_aanj",
+  "issue_reason",
+  "material_issue_candidate",
+  "section_break_7n7r",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_7n7r",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Material Issue Plan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "column_break_papv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nIssued\nCancelled"
+  },
+  {
+   "fieldname": "issue_reason",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Reason",
+   "max_height": "200px",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_selected_serials",
+   "fieldtype": "Int",
+   "label": "Total Serials",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_selected_area_m2",
+   "fieldtype": "Float",
+   "label": "Total Area",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_gkws",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_aanj",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "material_issue_candidate",
+   "fieldtype": "Table",
+   "label": "Material Issue Candidate",
+   "options": "Material Issue Candidate"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-03 14:56:04.385893",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Material Issue Plan",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
