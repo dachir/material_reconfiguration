@@ -143,6 +143,7 @@ doctype_js = {
 
 doc_events = {
     "Stock Entry": {
+        "before_validate": "mat_reco.stock_hooks.stock_entry_before_validate",
         "validate": "mat_reco.stock_hooks.stock_entry_validate",
         "before_submit": "mat_reco.stock_hooks.stock_entry_before_submit"
     },
@@ -255,4 +256,18 @@ fixtures = [
     {"dt": "Client Script", "filters": [["enabled", "=", 1],["module", "=", "Material Reconfiguration"]]},
     {"dt": "Server Script", "filters": [["disabled", "=", 0],["module", "=", "Material Reconfiguration"]]},
     {"dt": "Print Format", "filters": [["disabled", "=", 0],["module", "=", "Material Reconfiguration"]]},
+]
+
+# Accounting Dimensions
+# ---------------------
+# Register the custom planning DocType so ERPNext creates the same dynamic
+# Accounting Dimension fields (Branch, etc.) on it.
+accounting_dimension_doctypes = [
+    "Material Receipt Plan",
+]
+
+# Existing Accounting Dimensions may pre-date this app/hook, therefore sync the
+# fields after migrate as well.
+after_migrate = [
+    "mat_reco.setup.sync_material_receipt_plan_accounting_dimensions",
 ]

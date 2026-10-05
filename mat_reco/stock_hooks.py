@@ -19,6 +19,9 @@ from mat_reco.material_reconfiguration.services.repack_draft_service import (
 from mat_reco.material_reconfiguration.services.repack_draft_service import (
     validate_repack_totals_against_mcp_on_submit,
 )
+from mat_reco.material_reconfiguration.utils.accounting_dimensions import (
+    resolve_and_apply_stock_entry_dimensions,
+)
 
 
 def _norm_dims(L, W):
@@ -289,7 +292,22 @@ def _apply_repack_costing(doc):
         return
 
 
+def stock_entry_before_validate(doc, method=None):
+    # Fill active Accounting Dimensions as early as possible so ERPNext controller
+    # validation and later GL generation receive a complete transaction.
+    resolve_and_apply_stock_entry_dimensions(
+        doc,
+        source_doc=doc,
+        validate_mandatory=False,
+    )
+
+
 def stock_entry_validate(doc, method=None):
+    resolve_and_apply_stock_entry_dimensions(
+        doc,
+        source_doc=doc,
+        validate_mandatory=False,
+    )
     _hydrate_mcp_row_dimensions_from_serials(doc)
     _apply_repack_costing(doc)
 
@@ -299,6 +317,13 @@ def _already_costed(doc):
     )
 
 def stock_entry_before_submit(doc, method=None):
+    # Final guard before Stock Entry creates Stock Ledger / GL Entries.
+    resolve_and_apply_stock_entry_dimensions(
+        doc,
+        source_doc=doc,
+        validate_mandatory=True,
+    )
+
     # Before submitting, ensure that MCP serials and bundles are fully materialised.
     # This guarantees that the Stock Entry has a consistent transactional context and
     # prevents late creation of serials/bundles when the document is locked.
