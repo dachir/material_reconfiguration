@@ -7,7 +7,7 @@
 //frappe.require(MCP_UI_BUNDLE);
 
 const MCP_INCIDENT_TABLE = 'material_plan_incidents';
-const MCP_INCIDENT_ACTIONS = ['Resize', 'Destroy', 'Move', 'Merge'];
+const MCP_INCIDENT_ACTIONS = ['Resize', 'Destroy', 'Move', 'Merge', 'Single'];
 const MCP_MIN_LEFTOVER_DIMENSION_MM = 500;
 const MCP_MODE_PLANIFICATION = 'Planification';
 const MCP_MODE_RETOUR_TERRAIN = 'Retour Terrain';
@@ -167,6 +167,7 @@ frappe.ui.form.on('Material Cutting Plan', {
                     freeze: true,
                     freeze_message: __('Loading stock candidates...'),
                     callback(r) {
+                        frm.__mcp_initial_candidates = r.message || [];
                         frm.clear_table(MCP_STOCK_CANDIDATE_TABLE);
 
                         (r.message || []).forEach(function(d) {
@@ -184,15 +185,32 @@ frappe.ui.form.on('Material Cutting Plan', {
                         frm.refresh_field(MCP_STOCK_CANDIDATE_TABLE);
                         with_mcp_ui('select_all_grid_rows', [frm, MCP_STOCK_CANDIDATE_TABLE], '[MCP] Failed to select grid rows:');
                         with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
+                        with_mcp_ui('render_cutting_plan_preview', [frm], '[MCP] Preview rendering failed:');
                     }
                 });
             }, __('Outils'));
         }
 
-        frm.add_custom_button(__('Create Draft Repack'), function() {
+        frm.add_custom_button(__('Create Draft Repack'), async function() {
             if (!frm.doc.name) {
                 frappe.msgprint(__('Please save the Material Cutting Plan first.'));
                 return;
+            }
+
+            // The preview includes uncommitted incidents; the server does not.
+            // Persist Single (and other pending edits) before reading the
+            // Material Cutting Plan to create a Stock Entry.
+            if (frm.is_dirty()) {
+                try {
+                    await frm.save();
+                } catch (error) {
+                    frappe.msgprint(__('The Material Cutting Plan was not saved. No Repack was created.'));
+                    return;
+                }
+                if (frm.is_dirty()) {
+                    frappe.msgprint(__('Please save the Material Cutting Plan before generating the Repack.'));
+                    return;
+                }
             }
 
             frappe.call({
@@ -224,6 +242,7 @@ frappe.ui.form.on('Material Cutting Plan', {
             frm.clear_table(MCP_STOCK_CANDIDATE_TABLE);
             frm.refresh_field(MCP_STOCK_CANDIDATE_TABLE);
         }
+        frm.__mcp_initial_candidates = [];
 
         if (!frm.doc.source_item) {
             with_mcp_ui('apply_variant_colors', [frm], '[MCP] Failed to apply variant colors:');
@@ -556,14 +575,16 @@ function start_move_mode(frm, nodeData) {
     });
     render_cutting_plan_preview(frm);
 }
-function start_merge_mode(frm, nodeData) {
+function start_merge_mode(frm, nodeData, action) {
+    const selectedAction = action === 'Single' ? 'Single' : 'Merge';
     frm.__mcp_merge_state = {
+        action: selectedAction,
         source_serial_no: nodeData.source_serial_no,
         selected_node_ids: [nodeData.node_id],
         selected_nodes: [nodeData]
     };
     frappe.show_alert({
-        message: __('Merge mode active. Click contiguous free zones on the same serial. Double-click or press Esc to cancel.'),
+        message: __(selectedAction === 'Single' ? 'Single mode active. Click the second free region on the same serial.' : 'Merge mode active. Click contiguous free zones on the same serial. Double-click or press Esc to cancel.'),
         indicator: 'purple'
     });
     render_cutting_plan_preview(frm);
@@ -597,8 +618,9 @@ function build_rect_from_node_data(nodeData) {
 function toggle_merge_selection(frm, nodeData) {
     const state = get_active_merge_state(frm);
     if (!state) return false;
+    const isSingle = state.action === 'Single';
     if (!is_free_zone_type(nodeData.node_type)) {
-        frappe.msgprint(__('Merge is only available for leftover or waste zones.'));
+        frappe.msgprint(__(isSingle ? 'Single requires two free regions, including at least one leftover.' : 'Merge is only available for leftover or waste zones.'));
         return true;
     }
     if (String(nodeData.source_serial_no || '') !== String(state.source_serial_no || '')) {
@@ -619,6 +641,10 @@ function toggle_merge_selection(frm, nodeData) {
         return true;
     }
 
+    if (isSingle && state.selected_node_ids.length >= 2) {
+        frappe.msgprint(__('Single supports exactly two free regions. Remove a selection before adding another.'));
+        return true;
+    }
     const candidate = build_rect_from_node_data(nodeData);
     const ok = (state.selected_nodes || []).some(function(row) {
         return are_free_rects_contiguous(candidate, build_rect_from_node_data(row));
@@ -724,9 +750,59 @@ function build_residual_rectangles_from_grid(grid, mergedRect) {
     return rects;
 }
 
+// Find an exact L-shape: two non-overlapping rectangles whose complement is
+// one rectangle in the canonical top-left corner. The server validates again.
+function build_single_geometry_js(rects) {
+    if (rects.length !== 2 || rects.some(function(r) { return !is_free_zone_type(r.node_type) || r.length_mm <= 0 || r.width_mm <= 0; }) || !rects.some(function(r) { return r.node_type === 'leftover'; })) return null;
+    if (rectangles_overlap(rects[0], rects[1])) return null;
+    const x = Math.min.apply(null, rects.map(r => r.x));
+    const y = Math.min.apply(null, rects.map(r => r.y));
+    const maxX = Math.max.apply(null, rects.map(r => r.x + r.length_mm));
+    const maxY = Math.max.apply(null, rects.map(r => r.y + r.width_mm));
+    const length = maxX - x, width = maxY - y;
+    const area = rects.reduce((sum, r) => sum + r.length_mm * r.width_mm, 0);
+    const missing = length * width - area;
+    if (missing <= 0.001) return null;
+    const xs = Array.from(new Set([x, maxX].concat(rects.flatMap(r => [r.x, r.x + r.length_mm])))).sort((a,b) => a-b);
+    const ys = Array.from(new Set([y, maxY].concat(rects.flatMap(r => [r.y, r.y + r.width_mm])))).sort((a,b) => a-b);
+    for (const hx of xs.slice(1, -1)) {
+        for (const hy of ys.slice(1, -1)) {
+            const hole = {x, y, length_mm:hx-x, width_mm:hy-y};
+            if (rectangles_overlap(rects[0], hole) || rectangles_overlap(rects[1], hole)) continue;
+            if (Math.abs(hole.length_mm * hole.width_mm - missing) > 0.001) continue;
+            return {x, y, length_mm:length, width_mm:width, removed_length_mm:hole.length_mm, removed_width_mm:hole.width_mm, area_mm2:area};
+        }
+    }
+    return null;
+}
+
+function build_single_payload(frm, state, rects) {
+    if (rects.length !== 2) return {ok:false, message:__('Select exactly two free rectangles for Single, including one leftover.')};
+    const geometry = build_single_geometry_js(rects);
+    if (!geometry) return {ok:false, message:__('Single requires an L-shaped leftover with one missing upper-left corner. Use Merge for full rectangles.')};
+    return {ok:true, payload:{
+        plan_node_id: state.selected_node_ids[0],
+        source_serial_no: state.source_serial_no,
+        original_node_type: rects[0].node_type,
+        incident_action: 'Single',
+        affected_node_ids_json: JSON.stringify(state.selected_node_ids),
+        group_area_mm2: geometry.area_mm2,
+        new_node_type: 'leftover',
+        new_length_mm: geometry.length_mm,
+        new_width_mm: geometry.width_mm,
+        new_area_mm2: geometry.area_mm2,
+        target_x_mm: geometry.x,
+        target_y_mm: geometry.y,
+        include_in_repack: 1,
+        is_active: 1,
+        remarks: JSON.stringify({removed_length_mm:geometry.removed_length_mm,removed_width_mm:geometry.removed_width_mm})
+    }};
+}
+
 function build_merge_payload(frm) {
     const state = get_active_merge_state(frm);
     const rects = build_selected_merge_rectangles(frm);
+    if (state && state.action === 'Single') return build_single_payload(frm, state, rects);
     if (!state || rects.length < 2) {
         return { ok: false, message: __('Select at least two free zones to merge.') };
     }
@@ -772,7 +848,7 @@ function apply_current_merge_selection(frm) {
     upsert_incident_row(frm, result.payload);
     frm.refresh_field(cfg().MCP_INCIDENT_TABLE);
     frm.__mcp_merge_state = null;
-    frappe.show_alert({ message: __('Merge preview applied. Save to persist the merged free zone.'), indicator: 'green' });
+    frappe.show_alert({ message: __('Selection applied. Save to persist the result.'), indicator: 'green' });
     render_cutting_plan_preview(frm);
 }
 
@@ -1124,17 +1200,33 @@ function render_cutting_plan_preview(frm) {
     }
 
     const jsonStr = get_preview_result_json(frm);
-    if (!jsonStr) {
+    let result;
+    if (!jsonStr && (frm.__mcp_initial_candidates || []).length) {
+        result = {tree: {nodes: frm.__mcp_initial_candidates.map(function(candidate) {
+            const rl = flt(candidate.removed_length_mm || 0);
+            const rw = flt(candidate.removed_width_mm || 0);
+            return {
+                node_type:'input_serial', serial_no:candidate.serial_no,
+                length_mm:candidate.length_mm, width_mm:candidate.width_mm,
+                area_mm2:candidate.area_mm2,
+                children: rl && rw ? [{
+                    id:String(candidate.serial_no) + '::PREEXISTING_CUTOUT',
+                    node_type:'destroyed', x:0, y:0, length_mm:rl, width_mm:rw,
+                    __original_length_mm:rl, __original_width_mm:rw,
+                    __preexisting_cutout:1, include_in_repack:0
+                }] : []
+            };
+        })}};
+    } else if (!jsonStr) {
         wrapper.html('<p>No cutting plan available.</p>');
         return;
-    }
-
-    let result;
-    try {
-        result = JSON.parse(jsonStr);
-    } catch (e) {
-        wrapper.html('<p>Invalid cutting plan data.</p>');
-        return;
+    } else {
+        try {
+            result = JSON.parse(jsonStr);
+        } catch (e) {
+            wrapper.html('<p>Invalid cutting plan data.</p>');
+            return;
+        }
     }
 
     const tree = result.tree || result;
@@ -1194,7 +1286,7 @@ function render_cutting_plan_preview(frm) {
             usedPieceArea += cl * cw;
         });
 
-        const sheetArea = length_mm * width_mm;
+        const sheetArea = flt(node.area_mm2 || 0) || length_mm * width_mm;
         const occupancy = sheetArea ? (usedPieceArea / sheetArea) * 100 : 0;
 
         let html = '';
@@ -1207,11 +1299,12 @@ function render_cutting_plan_preview(frm) {
             html += '</div>';
         }
         if (mergeState) {
+            const selectionAction = mergeState.action === 'Single' ? 'Single' : 'Merge';
             html += '<div style="margin-bottom:8px; padding:8px 10px; border:1px solid #c084fc; background:#faf5ff; color:#7e22ce; border-radius:6px;">';
-            html += '<strong>Merge mode</strong> — Serial ' + frappe.utils.escape_html(mergeState.source_serial_no || '') + '. Selected zones: ' + (mergeState.selected_node_ids || []).length + '. ';
-            html += 'Click contiguous free zones on the same serial. Double-click or press Esc to cancel.';
+            html += '<strong>' + selectionAction + ' mode</strong> — Serial ' + frappe.utils.escape_html(mergeState.source_serial_no || '') + '. Selected zones: ' + (mergeState.selected_node_ids || []).length + '. ';
+            html += 'Click contiguous zones on the same serial. Double-click or press Esc to cancel.';
             if ((mergeState.selected_node_ids || []).length >= 2) {
-                html += ' <button type="button" class="btn btn-xs btn-primary apply-merge-selection" style="margin-left:8px;">Apply Merge</button>';
+                html += ' <button type="button" class="btn btn-xs btn-primary apply-merge-selection" style="margin-left:8px;">Apply ' + selectionAction + '</button>';
             }
             html += '</div>';
         }
@@ -1276,6 +1369,9 @@ function render_cutting_plan_preview(frm) {
         `;
 
         (node.children || []).forEach(function(child) {
+            // Pre-existing cutouts remain in the model for geometry and collision checks,
+            // but must not paint over finished goods or the sheet background.
+            if (child.__preexisting_cutout) return;
             const displayLength = get_display_length(child);
             const displayWidth = get_display_width(child);
             const cx = parseFloat((child.x || child.x === 0) ? child.x : 0);
@@ -1307,11 +1403,18 @@ function render_cutting_plan_preview(frm) {
             // Normalize the node type for consistent comparisons
             const normalizedType = normalize_node_type(child.node_type);
             if (normalizedType === 'leftover') {
+                if (child.geometry_type === 'single' && flt(child.removed_length_mm) > 0 && flt(child.removed_width_mm) > 0) {
+                    const hl = 100 * flt(child.removed_length_mm) / cl;
+                    const hw = 100 * flt(child.removed_width_mm) / cw;
+                    style += 'clip-path:polygon(' + hl + '% 0,100% 0,100% 100%,0 100%,0 ' + hw + '%,' + hl + '% ' + hw + '%);';
+                }
                 style += 'border:2px solid #6b7280; background-color:#f3f4f6; background-image:repeating-linear-gradient(45deg,#d1d5db,#d1d5db 6px,#f3f4f6 6px,#f3f4f6 12px); color:#1f2937;';
             } else if (normalizedType === 'waste') {
                 style += 'border:2px solid #dc2626; background-color:#fee2e2; background-image:repeating-linear-gradient(45deg,#fca5a5,#fca5a5 6px,#fee2e2 6px,#fee2e2 12px); color:#7f1d1d;';
             } else if (is_destroy_node_type(normalizedType)) {
-                style += 'border:2px solid #374151; background-color:#4b5563; color:#f8fafc;';
+                style += child.__preexisting_cutout
+                    ? 'border:2px solid rgba(185,28,28,0.24); background-color:rgba(220,38,38,0.14); color:rgba(127,29,29,0.65); cursor:default;'
+                    : 'border:2px solid #374151; background-color:#4b5563; color:#f8fafc;';
             } else {
                 const c = (frm.__cut_color_map && frm.__cut_color_map[so]) || { fill: '#e5e7eb', border: '#6b7280', text: '#111827' };
                 style += 'border:1px solid ' + c.border + '; background:' + c.fill + '; color:' + c.text + ';';
@@ -1329,6 +1432,7 @@ function render_cutting_plan_preview(frm) {
             let dataAttrs = '';
             dataAttrs += ' data-node-id="' + frappe.utils.escape_html(String(child.id || child.piece_uid || '')) + '"';
             dataAttrs += ' data-node-type="' + frappe.utils.escape_html(String(child.node_type || '')) + '"';
+            dataAttrs += ' data-preexisting-cutout="' + (child.__preexisting_cutout ? '1' : '0') + '"';
             dataAttrs += ' data-source-serial="' + frappe.utils.escape_html(String(node.serial_no || '')) + '"';
             dataAttrs += ' data-length="' + frappe.utils.escape_html(String(child.length_mm || 0)) + '"';
             dataAttrs += ' data-width="' + frappe.utils.escape_html(String(child.width_mm || 0)) + '"';
@@ -1391,6 +1495,7 @@ function render_cutting_plan_preview(frm) {
             e.preventDefault();
             e.stopPropagation();
             const $piece = $(this);
+            if ($piece.attr('data-preexisting-cutout') === '1') return;
             if (get_active_move_state(frm)) {
                 try_finish_move_on_sheet(frm, e, $piece.closest('.mcp-sheet-canvas'), $piece);
                 return;
@@ -1580,6 +1685,15 @@ function on_cut_piece_click(frm, $piece) {
                 }
                 d.hide();
                 start_move_mode(frm, nodeData);
+                return;
+            }
+            if (values.incident_action === 'Single') {
+                if (!is_free_zone_type(nodeData.node_type)) {
+                    frappe.msgprint(__('Single is only available for leftover or waste zones.'));
+                    return;
+                }
+                d.hide();
+                start_merge_mode(frm, nodeData, 'Single');
                 return;
             }
             if (values.incident_action === 'Merge') {
@@ -1918,6 +2032,28 @@ function build_rectangles_from_merge_residuals(templateChild, residualRects) {
     }).filter(Boolean);
 }
 
+function build_single_output_children_js(templateChild, incident) {
+    const meta = (() => { try { return JSON.parse(incident.remarks || '{}'); } catch(e) { return {}; } })();
+    const out = clone_child(templateChild);
+    out.id = child_id_js(templateChild) + '__single';
+    delete out.piece_uid;
+    out.node_type = 'leftover';
+    out.geometry_type = 'single';
+    out.x = flt(incident.target_x_mm || 0);
+    out.y = flt(incident.target_y_mm || 0);
+    out.length_mm = flt(incident.new_length_mm || 0);
+    out.width_mm = flt(incident.new_width_mm || 0);
+    out.removed_length_mm = flt(meta.removed_length_mm || 0);
+    out.removed_width_mm = flt(meta.removed_width_mm || 0);
+    out.area_mm2 = flt(incident.new_area_mm2 || 0);
+    out.effective_length_mm = out.length_mm;
+    out.effective_width_mm = out.width_mm;
+    out.effective_area_mm2 = out.area_mm2;
+    out.include_in_repack = 1;
+    out.__incident_action = 'Single';
+    return [out];
+}
+
 function build_merge_output_children(templateChild, incident) {
     const merged = build_free_zone_from_rect_js(
         templateChild,
@@ -1966,8 +2102,8 @@ function apply_incidents_to_nodes(nodes, incidents) {
             const childId = child_id_js(child);
             const incident = incidentMap[childId];
             const action = String((incident && incident.incident_action) || '').trim();
-            if (action === 'Merge') {
-                const mergeKey = String((incident && incident.name) || (incident && incident.plan_node_id) || childId);
+            if (action === 'Merge' || action === 'Single') {
+                const mergeKey = action + ':' + String((incident && incident.name) || (incident && incident.plan_node_id) || childId);
                 const targetSerial = String((incident && incident.source_serial_no) || sourceSerial).trim() || sourceSerial;
                 let affectedIds = [];
                 try { affectedIds = JSON.parse((incident && incident.affected_node_ids_json) || '[]') || []; } catch (e) { affectedIds = []; }
@@ -1978,7 +2114,8 @@ function apply_incidents_to_nodes(nodes, incidents) {
                 if (!processedMergeKeys[mergeKey]) {
                     processedMergeKeys[mergeKey] = true;
                     additionsBySerial[targetSerial] = additionsBySerial[targetSerial] || [];
-                    build_merge_output_children(child, incident).forEach(function(row) { additionsBySerial[targetSerial].push(row); });
+                    const additions = action === 'Single' ? build_single_output_children_js(child, incident) : build_merge_output_children(child, incident);
+                    additions.forEach(function(row) { additionsBySerial[targetSerial].push(row); });
                 }
                 return;
             }
@@ -2088,7 +2225,7 @@ function build_incident_map(incidents) {
             return;
         }
         const action = String((row.incident_action) || '').trim();
-        if (action === 'Merge') {
+        if (action === 'Merge' || action === 'Single') {
             let ids = [];
             try { ids = JSON.parse(row.affected_node_ids_json || '[]') || []; } catch (e) { ids = []; }
             ids.forEach(function(id) { if (id) map[String(id)] = row; });

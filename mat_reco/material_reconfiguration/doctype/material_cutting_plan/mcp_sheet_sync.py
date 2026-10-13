@@ -57,7 +57,7 @@ def build_sheet_rows_from_result_json(result_json):
 
         sheet_length = flt(node.get("length_mm") or node.get("length") or 0)
         sheet_width = flt(node.get("width_mm") or node.get("width") or 0)
-        sheet_area = _safe_area(sheet_length, sheet_width)
+        sheet_area = flt(node.get("area_mm2") or _safe_area(sheet_length, sheet_width))
         sheet_perimeter = _safe_perimeter(sheet_length, sheet_width)
 
         rows.append({
@@ -94,7 +94,9 @@ def build_sheet_rows_from_result_json(result_json):
 
             child_length = flt(child.get("length_mm") or child.get("length") or 0)
             child_width = flt(child.get("width_mm") or child.get("width") or 0)
-            child_area = _safe_area(child_length, child_width)
+            child_area = (0.0 if child.get("__preexisting_cutout") else flt(
+                child.get("effective_area_mm2") or child.get("area_mm2") or _safe_area(child_length, child_width)
+            ))
             child_perimeter = _safe_perimeter(child_length, child_width)
 
             rows.append({

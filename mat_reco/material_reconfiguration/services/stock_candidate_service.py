@@ -23,6 +23,8 @@ from __future__ import annotations
 
 import frappe
 
+from mat_reco.material_reconfiguration.services.single_geometry import normalize_single_dimensions, single_area
+
 
 VALID_MATERIAL_STATUSES = ("Full", "Partial")
 
@@ -141,6 +143,8 @@ def get_available_cutting_bins(
             "custom_dimension_width_mm",
             "custom_dimension_thickness_mm",
             "custom_material_status",
+            "custom_removed_length_mm",
+            "custom_removed_width_mm",
         ],
         limit_page_length=2000,
     )
@@ -160,7 +164,12 @@ def get_available_cutting_bins(
         if length_mm <= 0 or width_mm <= 0:
             continue
 
-        l_norm, w_norm = _normalize_bin_dimensions(length_mm, width_mm)
+        removed_l = float(row.get("custom_removed_length_mm") or 0)
+        removed_w = float(row.get("custom_removed_width_mm") or 0)
+        l_norm, w_norm, removed_l, removed_w = normalize_single_dimensions(
+            length_mm, width_mm, removed_l, removed_w
+        )
+        actual_area = single_area(l_norm, w_norm, removed_l, removed_w)
         material_status = (row.custom_material_status or "").strip()
 
         results.append(
@@ -171,7 +180,9 @@ def get_available_cutting_bins(
                 "length_mm": l_norm,
                 "width_mm": w_norm,
                 "thickness_mm": thickness_mm,
-                "area_mm2": l_norm * w_norm,
+                "area_mm2": actual_area,
+                "removed_length_mm": removed_l,
+                "removed_width_mm": removed_w,
                 "material_status": material_status,
                 "source_kind": "Full Sheet" if material_status == "Full" else "Leftover",
             }

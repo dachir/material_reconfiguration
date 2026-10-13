@@ -5,9 +5,12 @@ import json
 
 import frappe
 
+from mat_reco.material_reconfiguration.services.single_geometry import normalize_single_dimensions, single_area, stock_area_or_zero
+
 from mat_reco.material_reconfiguration.services.mcp_incident_service import (
     apply_incidents_to_nodes,
     build_incident_map,
+    resolve_mcp_effective_nodes,
 )
 from frappe.utils import cint, flt
 
@@ -95,13 +98,9 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
     tree = parsed.get("tree") or parsed or {}
     nodes = tree.get("nodes") or []
 
-    incident_map = {}
-    if not _tree_is_return_terrain_resolved(tree):
-        incident_map = build_incident_map(mcp)
-
     result = {}
 
-    effective_nodes = nodes if _tree_is_return_terrain_resolved(tree) else apply_incidents_to_nodes(nodes, incident_map)
+    effective_nodes = resolve_mcp_effective_nodes(mcp, tree)
 
     for node in effective_nodes:
         source_item_code = node.get("item_code") or mcp.get("source_item")
@@ -115,7 +114,9 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
             length_mm = flt(child.get("effective_length_mm") or child.get("length_mm") or 0)
             width_mm = flt(child.get("effective_width_mm") or child.get("width_mm") or 0)
 
-            length_mm, width_mm = _norm_dims(length_mm, width_mm)
+            length_mm, width_mm, removed_l, removed_w = normalize_single_dimensions(
+                length_mm, width_mm, child.get("removed_length_mm") or 0, child.get("removed_width_mm") or 0,
+            )
 
             if node_type == "finished_good":
                 item_code = child.get("piece_item_code") or child.get("item_code")
@@ -127,6 +128,8 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
                 "node_type": node_type,
                 "length_mm": length_mm,
                 "width_mm": width_mm,
+                "removed_length_mm": removed_l,
+                "removed_width_mm": removed_w,
             }
 
     return result
@@ -140,6 +143,8 @@ def _create_or_update_serial_no(
     length_mm: float,
     width_mm: float,
     material_cutting_plan: str | None = None,
+    removed_length_mm: float = 0,
+    removed_width_mm: float = 0,
 ):
     if not serial_no or not item_code:
         return None
@@ -162,8 +167,12 @@ def _create_or_update_serial_no(
     if hasattr(serial_doc, "custom_dimension_width_mm"):
         serial_doc.custom_dimension_width_mm = flt(width_mm)
 
+    if hasattr(serial_doc, "custom_removed_length_mm"):
+        serial_doc.custom_removed_length_mm = flt(removed_length_mm)
+    if hasattr(serial_doc, "custom_removed_width_mm"):
+        serial_doc.custom_removed_width_mm = flt(removed_width_mm)
     if hasattr(serial_doc, "custom_surface_mm2"):
-        serial_doc.custom_surface_mm2 = flt(length_mm) * flt(width_mm)
+        serial_doc.custom_surface_mm2 = stock_area_or_zero(length_mm, width_mm, removed_length_mm, removed_width_mm)
 
     if hasattr(serial_doc, "custom_material_status"):
         serial_doc.custom_material_status = _target_material_status(node_type)
@@ -299,6 +308,8 @@ def _ensure_output_serials(doc, material_cutting_plan: str | None = None):
             width_mm = flt(mcp_row.get("width_mm") or it.get("custom_dimension_width_mm") or 0)
 
             serial_doc = _create_or_update_serial_no(
+                removed_length_mm=flt(mcp_row.get("removed_length_mm") or it.get("custom_removed_length_mm") or 0),
+                removed_width_mm=flt(mcp_row.get("removed_width_mm") or it.get("custom_removed_width_mm") or 0),
                 serial_no=serial_no,
                 item_code=serial_item_code,
                 company=doc.company,

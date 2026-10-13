@@ -6,9 +6,12 @@ from frappe import _
 from frappe.utils import cint, flt, cstr
 from copy import deepcopy
 
+from mat_reco.material_reconfiguration.services.single_geometry import normalize_single_dimensions, single_area, stock_area_or_zero
+
 from mat_reco.material_reconfiguration.services.mcp_incident_service import (
     apply_incidents_to_nodes,
     build_incident_map,
+    resolve_mcp_effective_nodes,
 )
 
 
@@ -71,12 +74,7 @@ def _apply_incident_to_child(child, incident):
 
 def build_effective_nodes(doc):
     tree = _get_tree_from_doc(doc)
-    nodes = tree.get("nodes") or []
-    if _tree_is_return_terrain_resolved(tree):
-        return nodes
-
-    incident_map = build_incident_map(doc)
-    return apply_incidents_to_nodes(nodes, incident_map)
+    return resolve_mcp_effective_nodes(doc, tree)
 
 
 def _include_child_in_repack(doc, child):
@@ -153,14 +151,26 @@ def _set_item_uom_fields(row, item_code):
     row.conversion_factor = 1
 
 
-def _append_custom_output_fields(item_row, length_mm, width_mm, node_type):
-    length_mm, width_mm = _norm_dims_key(length_mm, width_mm)
+def _append_custom_output_fields(item_row, length_mm, width_mm, node_type, removed_length_mm=0, removed_width_mm=0):
+    length_mm, width_mm, removed_length_mm, removed_width_mm = normalize_single_dimensions(
+        length_mm, width_mm, removed_length_mm, removed_width_mm
+    )
 
     item_row.custom_dimension_length_mm = length_mm
     item_row.custom_dimension_width_mm = width_mm
 
+    if removed_length_mm or removed_width_mm:
+        # Never silently lose Single dimensions when fixtures have not been
+        # migrated.  A Repack without these fields would create invalid stock.
+        required = ("custom_removed_length_mm", "custom_removed_width_mm")
+        missing = [f"{doctype}.{field}" for doctype in ("Stock Entry Detail", "Serial No")
+            for field in required if not frappe.db.has_column(doctype, field)]
+        if missing:
+            frappe.throw(_("Missing Single custom fields: {0}. Run bench migrate before generating a Single Repack.").format(", ".join(missing)))
+    item_row.custom_removed_length_mm = removed_length_mm
+    item_row.custom_removed_width_mm = removed_width_mm
     if hasattr(item_row, "custom_surface_mm2"):
-        item_row.custom_surface_mm2 = flt(length_mm) * flt(width_mm)
+        item_row.custom_surface_mm2 = single_area(length_mm, width_mm, removed_length_mm, removed_width_mm)
 
     if hasattr(item_row, "custom_cutting_node_type"):
         item_row.custom_cutting_node_type = node_type
@@ -265,7 +275,12 @@ def _ensure_output_serial_exists_or_create(
     length_mm=None,
     width_mm=None,
     node_type=None,
+    removed_length_mm=0,
+    removed_width_mm=0,
 ):
+    length_mm, width_mm, removed_length_mm, removed_width_mm = normalize_single_dimensions(
+        length_mm, width_mm, removed_length_mm, removed_width_mm
+    ) if length_mm and width_mm else (length_mm, width_mm, removed_length_mm, removed_width_mm)
     existing = frappe.db.get_value(
         "Serial No",
         serial_no,
@@ -295,8 +310,12 @@ def _ensure_output_serial_exists_or_create(
             updates["custom_dimension_length_mm"] = flt(length_mm)
         if frappe.db.has_column("Serial No", "custom_dimension_width_mm") and width_mm is not None:
             updates["custom_dimension_width_mm"] = flt(width_mm)
+        if frappe.db.has_column("Serial No", "custom_removed_length_mm"):
+            updates["custom_removed_length_mm"] = flt(removed_length_mm)
+        if frappe.db.has_column("Serial No", "custom_removed_width_mm"):
+            updates["custom_removed_width_mm"] = flt(removed_width_mm)
         if frappe.db.has_column("Serial No", "custom_surface_mm2") and length_mm is not None and width_mm is not None:
-            updates["custom_surface_mm2"] = flt(length_mm) * flt(width_mm)
+            updates["custom_surface_mm2"] = stock_area_or_zero(length_mm, width_mm, removed_length_mm, removed_width_mm)
         if frappe.db.has_column("Serial No", "custom_cutting_node_type") and node_type:
             updates["custom_cutting_node_type"] = node_type
 
@@ -325,8 +344,12 @@ def _ensure_output_serial_exists_or_create(
         serial_doc.custom_dimension_length_mm = flt(length_mm)
     if frappe.db.has_column("Serial No", "custom_dimension_width_mm") and width_mm is not None:
         serial_doc.custom_dimension_width_mm = flt(width_mm)
+    if frappe.db.has_column("Serial No", "custom_removed_length_mm"):
+        serial_doc.custom_removed_length_mm = flt(removed_length_mm)
+    if frappe.db.has_column("Serial No", "custom_removed_width_mm"):
+        serial_doc.custom_removed_width_mm = flt(removed_width_mm)
     if frappe.db.has_column("Serial No", "custom_surface_mm2") and length_mm is not None and width_mm is not None:
-        serial_doc.custom_surface_mm2 = flt(length_mm) * flt(width_mm)
+        serial_doc.custom_surface_mm2 = stock_area_or_zero(length_mm, width_mm, removed_length_mm, removed_width_mm)
     if frappe.db.has_column("Serial No", "custom_cutting_node_type") and node_type:
         serial_doc.custom_cutting_node_type = node_type
 
@@ -533,8 +556,16 @@ def _build_output_rows(se, doc, effective_nodes):
                 key = (item_code, warehouse, length_mm, width_mm, node_type)
                 fg_groups[key].append(serial_no)
             else:
+                removed_l = flt(child.get("removed_length_mm") or 0)
+                removed_w = flt(child.get("removed_width_mm") or 0)
+                _, _, removed_l, removed_w = normalize_single_dimensions(
+                    flt(child.get("effective_length_mm") or child.get("length_mm") or 0),
+                    flt(child.get("effective_width_mm") or child.get("width_mm") or 0),
+                    removed_l, removed_w,
+                )
                 other_rows.append(
                     {
+                        "removed_length_mm": removed_l, "removed_width_mm": removed_w,
                         "item_code": item_code,
                         "warehouse": warehouse,
                         "serial_no": serial_no,
@@ -606,6 +637,8 @@ def _build_output_rows(se, doc, effective_nodes):
             out["length_mm"],
             out["width_mm"],
             out["node_type"],
+            out["removed_length_mm"],
+            out["removed_width_mm"],
         )
 
 def _apply_rate_on_row(it, new_vr: float):
@@ -881,7 +914,9 @@ def _get_serial_area_mm2(serial_no: str) -> float:
     # Fallbacks if needed
     length_mm = frappe.db.get_value("Serial No", serial_no, "custom_dimension_length_mm") or 0
     width_mm = frappe.db.get_value("Serial No", serial_no, "custom_dimension_width_mm") or 0
-    return flt(length_mm) * flt(width_mm)
+    removed_length_mm = frappe.db.get_value("Serial No", serial_no, "custom_removed_length_mm") or 0
+    removed_width_mm = frappe.db.get_value("Serial No", serial_no, "custom_removed_width_mm") or 0
+    return single_area(length_mm, width_mm, removed_length_mm, removed_width_mm) if flt(length_mm) > 0 and flt(width_mm) > 0 else 0.0
 
 
 def _collect_expected_repack_limits(doc, effective_nodes):
@@ -1222,6 +1257,78 @@ def _filter_valid_output_serials(serials, warehouse):
 # rows. It uses the same helper functions as the draft service for serial
 # creation and bundle linking and respects ERPNext rules around serial and
 # bundle creation.
+def validate_single_output_rows_before_submit(stock_entry_doc):
+    """Reject an old draft that would put two pre-Single leftovers back in stock.
+
+    Input serials must remain intact; we inspect output rows only.  Other MCP
+    actions and partial Repack submissions keep their prior behaviour.
+    """
+    mcp_name = cstr(stock_entry_doc.get("custom_material_cutting_plan") or "").strip()
+    if not mcp_name or stock_entry_doc.get("stock_entry_type") != "Repack":
+        return
+
+    mcp = frappe.get_doc("Material Cutting Plan", mcp_name)
+    if (mcp.get("mcp_mode") or "").strip() not in ("", "Retour Terrain"):
+        return
+    active_singles = [incident for incident in (mcp.get("material_plan_incidents") or [])
+        if cint(incident.get("is_active") or 0) == 1 and
+        cstr(incident.get("incident_action") or "").strip() == "Single"]
+    if not active_singles:
+        return
+    effective_nodes = build_effective_nodes(mcp)
+    single_by_output = {}
+    for node in effective_nodes:
+        for child in node.get("children") or []:
+            if child.get("node_type") != "leftover" or child.get("geometry_type") != "single":
+                continue
+            serial = _target_serial_name(child)
+            if serial:
+                single_by_output[serial] = child
+    obsolete_output_serials = set()
+    for incident in active_singles:
+        try:
+            ids = json.loads(incident.get("affected_node_ids_json") or "[]")
+        except (TypeError, ValueError):
+            continue
+        if isinstance(ids, list) and len(ids) == 2:
+            # A later re-cut may consume the Single, but its two pre-Single
+            # serials must never appear as new stock outputs again.
+            obsolete_output_serials.update(ids)
+
+    for row in (stock_entry_doc.get("items") or []):
+        if not row.get("t_warehouse"):
+            continue
+        # Draft rows contain serials as text and/or JSON; submitted rows can
+        # contain a bundle.  Never interpret the input serial list as output.
+        serials = _extract_serials_from_text(row.get("serial_no"))
+        json_serials = _safe_json_load(row.get("custom_mcp_serial_nos_json"))
+        if isinstance(json_serials, list):
+            serials.extend(cstr(s).strip() for s in json_serials if cstr(s).strip())
+        bundle_name = cstr(row.get("serial_and_batch_bundle") or "").strip()
+        if bundle_name and frappe.db.exists("Serial and Batch Bundle", bundle_name):
+            serials.extend(_extract_bundle_serials(frappe.get_doc("Serial and Batch Bundle", bundle_name)))
+        serials = list(dict.fromkeys(serials))
+
+        obsolete = [s for s in serials if s in obsolete_output_serials]
+        if obsolete:
+            frappe.throw(_("Repack contains old Serial Nos ({0}) replaced by Single. Discard this draft and generate a new Repack from Material Cutting Plan {1}.").format(", ".join(obsolete), mcp_name))
+
+        for serial in serials:
+            expected = single_by_output.get(serial)
+            if not expected:
+                continue
+            expected_l, expected_w, removed_l, removed_w = normalize_single_dimensions(
+                expected.get("length_mm"), expected.get("width_mm"),
+                expected.get("removed_length_mm"), expected.get("removed_width_mm"))
+            row_l, row_w, row_rl, row_rw = normalize_single_dimensions(
+                row.get("custom_dimension_length_mm"), row.get("custom_dimension_width_mm"),
+                row.get("custom_removed_length_mm"), row.get("custom_removed_width_mm"))
+            if (abs(expected_l - row_l) > 0.001 or abs(expected_w - row_w) > 0.001 or
+                abs(removed_l - row_rl) > 0.001 or abs(removed_w - row_rw) > 0.001 or
+                flt(row.get("qty") or 0) != 1):
+                frappe.throw(_("Repack row for Single {0} has incorrect dimensions or quantity. Regenerate the Repack from MCP {1}.").format(serial, mcp_name))
+
+
 def ensure_mcp_bundles_for_stock_entry(doc):
     """
     Materialise MCP serials and bundles for a Stock Entry.
@@ -1261,6 +1368,9 @@ def ensure_mcp_bundles_for_stock_entry(doc):
     mcp_name = cstr(doc.get("custom_material_cutting_plan") or "").strip()
     if not mcp_name:
         return {"serial_nos": [], "bundles": []}
+
+    # Block stale Repack drafts BEFORE creating output Serial Nos or bundles.
+    validate_single_output_rows_before_submit(doc)
 
     created_serials: list[str] = []
     created_bundles: list[str] = []
@@ -1358,6 +1468,8 @@ def ensure_mcp_bundles_for_stock_entry(doc):
             length_mm = flt(it.get("custom_dimension_length_mm") or 0)
             width_mm = flt(it.get("custom_dimension_width_mm") or 0)
             node_type = (it.get("custom_cutting_node_type") or "").strip()
+            removed_length_mm = flt(it.get("custom_removed_length_mm") or 0)
+            removed_width_mm = flt(it.get("custom_removed_width_mm") or 0)
 
             newly_created: list[str] = []
             for sn in serials:
@@ -1370,6 +1482,8 @@ def ensure_mcp_bundles_for_stock_entry(doc):
                     length_mm=length_mm,
                     width_mm=width_mm,
                     node_type=node_type,
+                    removed_length_mm=removed_length_mm,
+                    removed_width_mm=removed_width_mm,
                 )
                 if not result.get("already_exists"):
                     newly_created.append(result["serial_no"])

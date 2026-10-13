@@ -7,10 +7,13 @@ import json
 import frappe
 from frappe.utils import flt
 
+from mat_reco.material_reconfiguration.services.single_geometry import normalize_single_dimensions, single_area
+
 from mat_reco.material_reconfiguration.services.mcp_incident_service import (
     apply_incidents_to_nodes,
     build_incident_map,
     ensure_effective_fields,
+    resolve_mcp_effective_nodes,
 )
 
 
@@ -67,11 +70,8 @@ def _tree_is_return_terrain_resolved(tree):
 
 def _get_effective_children(mcp):
     tree = _get_mcp_tree(mcp)
-    nodes = tree.get("nodes") or []
-    incident_map = {} if _tree_is_return_terrain_resolved(tree) else build_incident_map(mcp)
-
     result = []
-    for node in apply_incidents_to_nodes(nodes, incident_map):
+    for node in resolve_mcp_effective_nodes(mcp, tree):
         for child in node.get("children") or []:
             row = ensure_effective_fields(child)
             row["source_item_code"] = node.get("item_code") or mcp.get("source_item")
@@ -146,13 +146,15 @@ def _allocate_area_repack_costs_from_stock_entry(
     sn_rows = frappe.get_all(
         "Serial No",
         filters={"name": ["in", input_serials]},
-        fields=["name", "custom_dimension_length_mm", "custom_dimension_width_mm"],
+        fields=["name", "custom_dimension_length_mm", "custom_dimension_width_mm", "custom_removed_length_mm", "custom_removed_width_mm"],
     )
 
     dims_map = {
         d["name"]: (
             flt(d.get("custom_dimension_length_mm") or 0),
             flt(d.get("custom_dimension_width_mm") or 0),
+            flt(d.get("custom_removed_length_mm") or 0),
+            flt(d.get("custom_removed_width_mm") or 0),
         )
         for d in sn_rows
     }
@@ -161,8 +163,8 @@ def _allocate_area_repack_costs_from_stock_entry(
     missing_dims = []
 
     for sn in input_serials:
-        L, W = dims_map.get(sn, (0.0, 0.0))
-        a = _area_mm2(L, W)
+        L, W, RL, RW = dims_map.get(sn, (0.0, 0.0, 0.0, 0.0))
+        a = single_area(L, W, RL, RW) if L > 0 and W > 0 else 0.0
         if a <= 0:
             missing_dims.append(sn)
         total_input_area += a
@@ -200,7 +202,9 @@ def _allocate_area_repack_costs_from_stock_entry(
         L = flt(it.get("custom_dimension_length_mm") or 0)
         W = flt(it.get("custom_dimension_width_mm") or 0)
 
-        # 2) fallback from first serial on row if row dims missing
+        removed_l = flt(it.get("custom_removed_length_mm") or 0)
+        removed_w = flt(it.get("custom_removed_width_mm") or 0)
+        # 2) fallback from serial metadata when a row has incomplete dimensions
         if L <= 0 or W <= 0:
             row_serials = _get_row_serials(it)
             if row_serials:
@@ -208,10 +212,13 @@ def _allocate_area_repack_costs_from_stock_entry(
                 dim_row = serial_dim_map.get(first_serial) or {}
                 L = flt(dim_row.get("length_mm") or 0)
                 W = flt(dim_row.get("width_mm") or 0)
+                removed_l = flt(dim_row.get("removed_length_mm") or removed_l)
+                removed_w = flt(dim_row.get("removed_width_mm") or removed_w)
                 if not node_type:
                     node_type = (dim_row.get("node_type") or "").strip()
-
-        L, W = _norm_dims_key(L, W)
+        if W > L:
+            L, W = W, L
+            removed_l, removed_w = removed_w, removed_l
 
         if skip_destroyed and node_type == "destroyed":
             continue
@@ -224,7 +231,7 @@ def _allocate_area_repack_costs_from_stock_entry(
                 f"Missing output dimensions on Stock Entry row {idx} for item {item_code}."
             )
 
-        line_area_total = _area_mm2(L, W) * qty
+        line_area_total = single_area(L, W, removed_l, removed_w) * qty
         line_amount_total = unit_cost * line_area_total
         valuation_rate = (line_amount_total / qty) if qty else 0.0
 
@@ -438,17 +445,17 @@ def _get_mcp_serial_dimension_map(mcp):
     based on result_json + incidents
     """
     tree = _get_mcp_tree(mcp)
-    nodes = (tree.get("nodes") or [])
-    incident_map = {} if _tree_is_return_terrain_resolved(tree) else build_incident_map(mcp)
     result = {}
 
-    for node in nodes:
+    # Resolve Merge and Single against the same tree used by Stock Entry.
+    effective_nodes = resolve_mcp_effective_nodes(mcp, tree)
+    for node in effective_nodes:
         for child in (node.get("children") or []):
             serial_no = (child.get("id") or child.get("piece_uid") or "").strip()
             if not serial_no:
                 continue
 
-            incident = incident_map.get(serial_no)
+            incident = None
             length_mm = flt(child.get("length_mm") or 0)
             width_mm = flt(child.get("width_mm") or 0)
             node_type = (child.get("node_type") or "").strip()
@@ -464,10 +471,17 @@ def _get_mcp_serial_dimension_map(mcp):
                     length_mm = flt(incident.get("new_length_mm") or 0)
                     width_mm = flt(incident.get("new_width_mm") or 0)
 
+            L, W, removed_l, removed_w = normalize_single_dimensions(
+                length_mm, width_mm,
+                child.get("removed_length_mm") or 0,
+                child.get("removed_width_mm") or 0,
+            )
             result[serial_no] = {
                 "node_type": node_type,
-                "length_mm": _norm_dims_key(length_mm, width_mm)[0],
-                "width_mm": _norm_dims_key(length_mm, width_mm)[1],
+                "length_mm": L,
+                "width_mm": W,
+                "removed_length_mm": removed_l,
+                "removed_width_mm": removed_w,
             }
 
     return result

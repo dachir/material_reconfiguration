@@ -26,6 +26,8 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Tuple
 
+from mat_reco.material_reconfiguration.services.single_geometry import available_regions, single_area
+
 from mat_reco.material_reconfiguration.services.mcp_incident_service import (
     apply_incidents_to_nodes,
     build_incident_map,
@@ -178,11 +180,42 @@ def generate_material_cutting_plan(
     Uses rectpack only. If rectpack fails, we stop instead of generating
     a mathematically invalid fallback plan.
     """
+    # A Single is one physical Serial No but two disjoint packing rectangles.
+    # Ordinary rectangular inputs are passed through without alteration.
+    virtual_bins = []
+    virtual_offsets = {}
+    original_bins = {str(b.get("serial_no")): b for b in bins}
+    for source_bin in bins:
+        sn = str(source_bin.get("serial_no") or "")
+        length = float(source_bin.get("length_mm") or 0)
+        width = float(source_bin.get("width_mm") or 0)
+        rl = float(source_bin.get("removed_length_mm") or 0)
+        rw = float(source_bin.get("removed_width_mm") or 0)
+        regions = available_regions(length, width, rl, rw)
+        if not rl:
+            virtual_bins.append(source_bin)
+            continue
+        for idx, region in enumerate(regions, 1):
+            virtual_id = f"{sn}::SINGLE_BIN{idx}"
+            virtual_bins.append({**source_bin, "serial_no": virtual_id,
+                "length_mm": region["length_mm"], "width_mm": region["width_mm"],
+                "area_mm2": region["length_mm"] * region["width_mm"]})
+            virtual_offsets[virtual_id] = (sn, region["x"], region["y"])
+
     placements_info = _run_rectpack_plan(
         demands=demands,
-        bins=bins,
+        bins=virtual_bins,
         allow_rotation=allow_rotation,
     )
+    if virtual_offsets:
+        # Fold virtual bin placements into their physical source Serial No.
+        folded = defaultdict(list)
+        for packed_id, placements in (placements_info.get("placements_by_bin") or {}).items():
+            parent, offset_x, offset_y = virtual_offsets.get(packed_id, (packed_id, 0.0, 0.0))
+            for placement in placements:
+                folded[parent].append({**placement, "x": float(placement["x"]) + offset_x,
+                    "y": float(placement["y"]) + offset_y})
+        placements_info = {"placements_by_bin": folded, "bin_index_map": original_bins}
 
     tree = _build_tree_result(
         plan_name=plan_name,
@@ -423,7 +456,7 @@ def _build_tree_result(
         try:
             sheet_len = float(source_bin.get("length_mm") or 0.0)
             sheet_wid = float(source_bin.get("width_mm") or 0.0)
-            bin_area = sheet_len * sheet_wid
+            bin_area = float(source_bin.get("area_mm2") or (sheet_len * sheet_wid))
             total_used_input_area_mm2 += bin_area
         except Exception:
             sheet_len = 0.0
@@ -480,10 +513,29 @@ def _build_tree_result(
             )
 
         try:
-            free_rects = _compute_free_rectangles(sheet_len, sheet_wid, placements)
+            rl = float(source_bin.get("removed_length_mm") or 0)
+            rw = float(source_bin.get("removed_width_mm") or 0)
+            occupied_rects = list(placements)
+            if rl and rw:
+                # This cutout was already removed in a PREVIOUS stock entry.
+                occupied_rects.append({"x": 0.0, "y": 0.0, "length_mm": rl, "width_mm": rw})
+            free_rects = _compute_free_rectangles(sheet_len, sheet_wid, occupied_rects)
         except Exception:
             free_rects = []
 
+        rl = float(source_bin.get("removed_length_mm") or 0)
+        rw = float(source_bin.get("removed_width_mm") or 0)
+        if rl and rw:
+            children.append({
+                "id": f"{source_bin['serial_no']}::PREEXISTING_CUTOUT",
+                "node_type": "destroyed", "label": "D - previously removed",
+                "source_serial_no": source_bin["serial_no"],
+                "x": 0.0, "y": 0.0, "length_mm": rl, "width_mm": rw,
+                "effective_length_mm": 0.0, "effective_width_mm": 0.0,
+                "effective_area_mm2": 0.0, "include_in_repack": 0,
+                "__original_length_mm": rl, "__original_width_mm": rw,
+                "__preexisting_cutout": 1,
+            })
         leftover_index = 1
         waste_index = 1
         for (fx, fy, fw, fh) in free_rects:
@@ -534,6 +586,8 @@ def _build_tree_result(
             "length_mm": source_bin["length_mm"],
             "width_mm": source_bin["width_mm"],
             "area_mm2": source_bin.get("area_mm2"),
+            "removed_length_mm": source_bin.get("removed_length_mm", 0),
+            "removed_width_mm": source_bin.get("removed_width_mm", 0),
             "material_status": source_bin.get("material_status"),
             "children": children,
         })
@@ -712,17 +766,29 @@ def generate_return_terrain_cutting_plan(
 
         effective_node = effective_base_node_map.get(serial_no)
         if not effective_node:
-            usable_regions_by_serial[serial_no].append({
-                "id": f"{serial_no}::FULL",
-                "node_type": _classify_free_region(float(source_bin.get("length_mm") or 0.0), float(source_bin.get("width_mm") or 0.0)),
-                "serial_no": serial_no,
-                "item_code": source_bin.get("item_code"),
-                "length_mm": float(source_bin.get("length_mm") or 0.0),
-                "width_mm": float(source_bin.get("width_mm") or 0.0),
-                "thickness_mm": source_bin.get("thickness_mm"),
-                "x": 0.0,
-                "y": 0.0,
-            })
+            rl = float(source_bin.get("removed_length_mm") or 0.0)
+            rw = float(source_bin.get("removed_width_mm") or 0.0)
+            for region_index, region in enumerate(available_regions(
+                float(source_bin.get("length_mm") or 0), float(source_bin.get("width_mm") or 0), rl, rw
+            ), start=1):
+                usable_regions_by_serial[serial_no].append({
+                    "id": f"{serial_no}::FULL{region_index}",
+                    "node_type": _classify_free_region(region["length_mm"], region["width_mm"]),
+                    "serial_no": serial_no,
+                    "item_code": source_bin.get("item_code"),
+                    "length_mm": region["length_mm"],
+                    "width_mm": region["width_mm"],
+                    "thickness_mm": source_bin.get("thickness_mm"),
+                    "x": region["x"], "y": region["y"],
+                })
+            if rl and rw:
+                locked_children_by_serial[serial_no].append({
+                    "id": f"{serial_no}::PREEXISTING_CUTOUT", "node_type": "destroyed",
+                    "x": 0.0, "y": 0.0, "length_mm": rl, "width_mm": rw,
+                    "__original_length_mm": rl, "__original_width_mm": rw,
+                    "effective_area_mm2": 0.0, "include_in_repack": 0,
+                    "__preexisting_cutout": 1,
+                })
             continue
 
         for child in (effective_node.get("children") or []):
@@ -737,7 +803,17 @@ def generate_return_terrain_cutting_plan(
                 continue
 
             if node_type in ("leftover", "waste"):
-                usable_regions_by_serial[serial_no].append(row)
+                if row.get("geometry_type") == "single":
+                    for region in available_regions(
+                        float(row.get("length_mm") or 0), float(row.get("width_mm") or 0),
+                        float(row.get("removed_length_mm") or 0), float(row.get("removed_width_mm") or 0),
+                    ):
+                        usable_regions_by_serial[serial_no].append({**row, **region,
+                            "x": float(row.get("x") or 0) + region["x"],
+                            "y": float(row.get("y") or 0) + region["y"],
+                            "geometry_type": "rectangle", "__single_parent": row})
+                else:
+                    usable_regions_by_serial[serial_no].append(row)
                 continue
 
             locked_children_by_serial[serial_no].append(row)
@@ -804,6 +880,8 @@ def generate_return_terrain_cutting_plan(
         leftover_idx = 1
         waste_idx = 1
 
+        untouched_singles = {}
+        touched_singles = set()
         for virtual_serial_no, meta in virtual_meta.items():
             if meta["parent_serial_no"] != serial_no:
                 continue
@@ -814,6 +892,12 @@ def generate_return_terrain_cutting_plan(
             region_length = float(region.get("length_mm") or 0.0)
             region_width = float(region.get("width_mm") or 0.0)
             local_placements = list(placements_map.get(virtual_serial_no) or [])
+            parent_single = region.get("__single_parent")
+            if parent_single:
+                key = str(parent_single.get("id") or "")
+                untouched_singles[key] = parent_single
+                if local_placements:
+                    touched_singles.add(key)
 
             for p in local_placements:
                 d = demand_map.get(str(p.get("piece_uid") or "").strip())
@@ -853,6 +937,10 @@ def generate_return_terrain_cutting_plan(
                 fulfilled_piece_uids.add(piece_uid)
                 global_rt_fg_index += 1
 
+            # A selected Single must remain ONE stock output when no piece was
+            # newly placed in it. Do not quietly split it on each save.
+            if parent_single and not local_placements:
+                continue
             free_rects = _compute_free_rectangles(region_length, region_width, local_placements)
             for fx, fy, fw, fh in free_rects:
                 if fw <= 0 or fh <= 0:
@@ -875,6 +963,31 @@ def generate_return_terrain_cutting_plan(
                 else:
                     waste_idx += 1
 
+        # Where a Single was touched in one region, its untouched companion
+        # must remain as a normal leftover rather than a second Single.
+        for virtual_serial_no, meta in virtual_meta.items():
+            if meta["parent_serial_no"] != serial_no:
+                continue
+            region = meta["region"]
+            parent_single = region.get("__single_parent")
+            if not parent_single:
+                continue
+            key = str(parent_single.get("id") or "")
+            if key in touched_singles and not placements_map.get(virtual_serial_no):
+                classification = _classify_free_region(float(region["length_mm"]), float(region["width_mm"]))
+                child = _make_final_free_child(
+                    serial_no=serial_no, source_bin=source_bin,
+                    idx=(leftover_idx if classification == "leftover" else waste_idx),
+                    classification=classification, x=float(region.get("x") or 0), y=float(region.get("y") or 0),
+                    length_mm=float(region["length_mm"]), width_mm=float(region["width_mm"]),
+                )
+                children.append(child)
+                if classification == "leftover": leftover_idx += 1
+                else: waste_idx += 1
+        for key, single in untouched_singles.items():
+            if key not in touched_singles:
+                children.append(single)
+
         children.sort(key=lambda row: (float(row.get("y") or 0.0), float(row.get("x") or 0.0), str(row.get("id") or "")))
 
         final_nodes.append({
@@ -888,6 +1001,8 @@ def generate_return_terrain_cutting_plan(
             "length_mm": source_bin.get("length_mm"),
             "width_mm": source_bin.get("width_mm"),
             "area_mm2": source_bin.get("area_mm2"),
+            "removed_length_mm": source_bin.get("removed_length_mm", 0),
+            "removed_width_mm": source_bin.get("removed_width_mm", 0),
             "material_status": source_bin.get("material_status"),
             "children": children or [],
         })
@@ -906,7 +1021,8 @@ def generate_return_terrain_cutting_plan(
     planned_piece_uids: set[str] = set()
 
     for node in final_nodes:
-        total_used_input_area_mm2 += float(node.get("length_mm") or 0.0) * float(node.get("width_mm") or 0.0)
+        total_used_input_area_mm2 += float(node.get("area_mm2") or
+            (float(node.get("length_mm") or 0.0) * float(node.get("width_mm") or 0.0)))
         for child in node.get("children") or []:
             node_type = str(child.get("node_type") or "").strip()
             if node_type == "finished_good":
@@ -914,7 +1030,8 @@ def generate_return_terrain_cutting_plan(
                 if piece_uid:
                     planned_piece_uids.add(piece_uid)
             elif node_type == "leftover":
-                total_leftover_area_mm2 += float(child.get("length_mm") or 0.0) * float(child.get("width_mm") or 0.0)
+                total_leftover_area_mm2 += float(child.get("effective_area_mm2") or child.get("area_mm2") or
+                    (float(child.get("length_mm") or 0.0) * float(child.get("width_mm") or 0.0)))
                 leftover_count += 1
             elif node_type == "waste":
                 total_waste_area_mm2 += float(child.get("length_mm") or 0.0) * float(child.get("width_mm") or 0.0)

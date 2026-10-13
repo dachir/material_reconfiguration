@@ -2,6 +2,8 @@
 import frappe
 from frappe.utils import flt, cint
 
+from mat_reco.material_reconfiguration.services.single_geometry import stock_area_or_zero
+
 from mat_reco.material_reconfiguration.utils.costing import (
     allocate_repack_costs_from_stock_entry,
 )
@@ -364,8 +366,24 @@ def _hydrate_mcp_row_dimensions_from_serials(doc):
         it.custom_dimension_length_mm = L
         it.custom_dimension_width_mm = W
 
+        removed_l = flt(it.get("custom_removed_length_mm") or 0)
+        removed_w = flt(it.get("custom_removed_width_mm") or 0)
+        if not removed_l and not removed_w:
+            # MCP input rows may be hydrated from their underlying Serial No.
+            # Preserve a previously cut corner when calculating real surface.
+            serials = _extract_serials_from_text(serial_text)
+            if not serials and bundle_name and frappe.db.exists("Serial and Batch Bundle", bundle_name):
+                serials = _extract_bundle_serials(frappe.get_doc("Serial and Batch Bundle", bundle_name))
+            if serials and frappe.db.exists("Serial No", serials[0]):
+                sn = frappe.get_doc("Serial No", serials[0])
+                removed_l = flt(sn.get("custom_removed_length_mm") or 0)
+                removed_w = flt(sn.get("custom_removed_width_mm") or 0)
+                if hasattr(it, "custom_removed_length_mm"):
+                    it.custom_removed_length_mm = removed_l
+                if hasattr(it, "custom_removed_width_mm"):
+                    it.custom_removed_width_mm = removed_w
         if hasattr(it, "custom_surface_mm2"):
-            it.custom_surface_mm2 = flt(L) * flt(W)
+            it.custom_surface_mm2 = stock_area_or_zero(L, W, removed_l, removed_w)
 
         if hasattr(it, "custom_perimeter_mm"):
             it.custom_perimeter_mm = 2 * (flt(L) + flt(W))

@@ -238,24 +238,24 @@ class MaterialCuttingPlan(Document):
 
             if node_type == "input_serial":
                 used_input_serial_count += 1
-                total_used_input_area_mm2 += (
+                total_used_input_area_mm2 += float(node.get("area_mm2") or (
                     float(node.get("length_mm") or node.get("length") or 0)
                     * float(node.get("width_mm") or node.get("width") or 0)
-                )
+                ))
 
             for child in (node.get("children") or []):
                 child_type = (child.get("node_type") or "").strip()
-                child_area = (
+                child_area = float(child.get("effective_area_mm2") or child.get("area_mm2") or (
                     float(child.get("length_mm") or child.get("length") or 0)
                     * float(child.get("width_mm") or child.get("width") or 0)
-                )
+                ))
 
                 if child_type == "finished_good":
                     planned_piece_count += 1
                 elif child_type == "leftover":
                     leftover_count += 1
                     total_leftover_area_mm2 += child_area
-                elif child_type in ("waste", "destroyed"):
+                elif child_type in ("waste", "destroyed") and not child.get("__preexisting_cutout"):
                     waste_count += 1
                     total_waste_area_mm2 += child_area
 

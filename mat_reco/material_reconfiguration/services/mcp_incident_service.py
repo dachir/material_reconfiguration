@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 
 from frappe.utils import flt
+
+from mat_reco.material_reconfiguration.services.single_geometry import single_from_rectangles
 
 
 def _child_id(child) -> str:
@@ -37,12 +40,45 @@ def build_incident_map(doc) -> dict:
         return {}
 
     rows = doc.get("material_plan_incidents") or []
+    # Only Single adds this strict uniqueness contract. Existing Merge semantics
+    # remain unchanged unless an overlapping Single would double-consume stock.
+    import json
+    single_claims = set()
+    for row in rows:
+        if flt(row.get("is_active") or 0) != 1 or (row.get("incident_action") or "").strip() != "Single":
+            continue
+        try:
+            ids = json.loads(row.get("affected_node_ids_json") or "[]")
+        except (TypeError, ValueError):
+            raise ValueError("Single requires two valid free-region identifiers.")
+        if not isinstance(ids, list) or len(ids) != 2 or len({str(x) for x in ids if x}) != 2:
+            raise ValueError("Single requires exactly two different free regions.")
+        for selected_id in map(str, ids):
+            if selected_id in single_claims:
+                raise ValueError("A free region cannot participate in two active Single operations.")
+            single_claims.add(selected_id)
+    for row in rows:
+        if flt(row.get("is_active") or 0) != 1:
+            continue
+        action = (row.get("incident_action") or "").strip()
+        if action == "Single":
+            continue
+        if action == "Merge":
+            try:
+                affected = json.loads(row.get("affected_node_ids_json") or "[]")
+            except (TypeError, ValueError):
+                affected = []
+        else:
+            affected = [row.get("plan_node_id")]
+        if any(str(selected_id or "") in single_claims for selected_id in affected):
+            raise ValueError("A Single region is already used by another active incident.")
+
     result = {}
     for row in rows:
         if flt(row.get("is_active") or 0) != 1:
             continue
         action = (row.get("incident_action") or "").strip()
-        if action == "Merge":
+        if action in ("Merge", "Single"):
             try:
                 affected_ids = row.get("affected_node_ids_json") or "[]"
                 import json
@@ -379,6 +415,75 @@ def _build_merge_output_children(template_child: dict, incident: dict) -> list[d
     return rows
 
 
+def _build_single_output_children(node: dict, incident: dict) -> list[dict]:
+    """Validate against the server tree: never trust client-provided area or dimensions."""
+    import json
+
+    try:
+        ids = json.loads(incident.get("affected_node_ids_json") or "[]")
+    except (TypeError, ValueError):
+        raise ValueError("Single requires two selected free-region identifiers.")
+    if not isinstance(ids, list) or len(ids) != 2 or len(set(map(str, ids))) != 2:
+        raise ValueError("Single requires exactly two different free regions.")
+
+    by_id = {_child_id(child): child for child in node.get("children") or []}
+    if any(str(node_id) not in by_id for node_id in ids):
+        raise ValueError("Both Single regions must belong to the same source Serial No.")
+    selected = [by_id[str(node_id)] for node_id in ids]
+    geometry = single_from_rectangles(selected)
+    serial_no = _node_serial(node)
+    if incident.get("source_serial_no") and str(incident.get("source_serial_no")).strip() != serial_no:
+        raise ValueError("Single source serial does not match the cutting sheet.")
+
+    # The two selected rectangles must be the entire usable L-shaped region:
+    # they cannot cover any other FG/free zone from this sheet.
+    bbox = geometry
+    hole = {
+        "x": bbox["x"], "y": bbox["y"],
+        "length_mm": geometry["removed_length_mm"],
+        "width_mm": geometry["removed_width_mm"],
+    }
+    def overlap(a, b):
+        return (max(flt(a.get("x")), flt(b.get("x"))) < min(flt(a.get("x")) + flt(a.get("length_mm")), flt(b.get("x")) + flt(b.get("length_mm"))) - 0.001
+            and max(flt(a.get("y")), flt(b.get("y"))) < min(flt(a.get("y")) + flt(a.get("width_mm")), flt(b.get("y")) + flt(b.get("width_mm"))) - 0.001)
+    for other in node.get("children") or []:
+        if _child_id(other) in set(map(str, ids)):
+            continue
+        if not overlap(other, bbox):
+            continue
+        # Compare only the intersection with the Single bounding rectangle.
+        # A finished good can extend outside that rectangle while occupying
+        # precisely the absent corner *inside* it.  This is not glass-to-glass
+        # overlap, and its existing output must remain intact.
+        ox = max(flt(other.get("x")), bbox["x"])
+        oy = max(flt(other.get("y")), bbox["y"])
+        ex = min(flt(other.get("x")) + flt(other.get("length_mm")), bbox["x"] + bbox["length_mm"])
+        ey = min(flt(other.get("y")) + flt(other.get("width_mm")), bbox["y"] + bbox["width_mm"])
+        intersection_inside_hole = (
+            ox >= hole["x"] - 0.001 and oy >= hole["y"] - 0.001
+            and ex <= hole["x"] + hole["length_mm"] + 0.001
+            and ey <= hole["y"] + hole["width_mm"] + 0.001
+        )
+        if str(other.get("node_type") or "") in ("finished_good", "destroyed") and intersection_inside_hole:
+            continue
+        raise ValueError("Single overlaps another existing piece or usable zone.")
+
+    output = ensure_effective_fields(selected[0])
+    output.pop("piece_uid", None)
+    output["id"] = f"{ids[0]}__single"
+    output["node_type"] = "leftover"
+    output["geometry_type"] = "single"
+    output.update(geometry)
+    output["effective_length_mm"] = geometry["length_mm"]
+    output["effective_width_mm"] = geometry["width_mm"]
+    output["effective_area_mm2"] = geometry["area_mm2"]
+    output["include_in_repack"] = 1
+    output["source_serial_no"] = serial_no
+    output["__incident_action"] = "Single"
+    output["label"] = f"Single leftover ({geometry['length_mm']:g} x {geometry['width_mm']:g})"
+    return [output]
+
+
 def apply_incident_to_child_as_nodes(child, incident):
     if not incident:
         return [ensure_effective_fields(child)]
@@ -390,7 +495,7 @@ def apply_incident_to_child_as_nodes(child, incident):
         return apply_resize_to_child(child, incident)
     if action == "Move":
         return [ensure_effective_fields(child)]
-    if action == "Merge":
+    if action in ("Merge", "Single"):
         return [ensure_effective_fields(child)]
     return [ensure_effective_fields(child)]
 
@@ -411,6 +516,21 @@ def apply_incidents_to_nodes(nodes: list[dict], incident_map: dict | None = None
             child_id = _child_id(child)
             incident = incident_map.get(child_id)
             action = (incident.get("incident_action") or "").strip() if incident else ""
+            if action == "Single":
+                import json
+                try:
+                    ids = json.loads(incident.get("affected_node_ids_json") or "[]")
+                except (TypeError, ValueError):
+                    raise ValueError("Single requires two valid leftover identifiers.")
+                if not isinstance(ids, list) or len(ids) != 2 or len(set(map(str, ids))) != 2:
+                    raise ValueError("Single requires exactly two distinct leftovers.")
+                single_key = "Single:" + str(incident.get("name") or incident.get("plan_node_id") or ids[0])
+                if single_key not in processed_merge_keys:
+                    new_children = _build_single_output_children(node, incident)
+                    processed_merge_keys.add(single_key)
+                    merge_consumed_ids.setdefault(source_serial_no, set()).update(map(str, ids))
+                    additions_by_serial.setdefault(source_serial_no, []).extend(new_children)
+                continue
             if action == "Merge":
                 merge_key = str(incident.get("name") or incident.get("plan_node_id") or child_id)
                 target_serial_no = str(incident.get("source_serial_no") or source_serial_no).strip() or source_serial_no
@@ -511,3 +631,102 @@ def apply_incidents_to_nodes(nodes: list[dict], incident_map: dict | None = None
 
     return result_nodes
 
+
+
+def resolve_mcp_effective_nodes(doc, tree: dict) -> list[dict]:
+    """Return the real MCP outputs, keeping saved Retour Terrain plans intact.
+
+    Previously, any tree marked ``return_terrain_resolved`` bypassed its
+    incidents.  A newly recorded Single could therefore be visible in the
+    client preview while the Repack silently exported both old leftovers.
+
+    Only reconcile *pending Single* actions on an already resolved tree.
+    Never replay Move, Resize, Destroy or Merge on an already resolved tree.
+    """
+    nodes = tree.get("nodes") or []
+    is_resolved = bool(tree.get("return_terrain_resolved") or
+        (tree.get("options") or {}).get("return_terrain_resolved"))
+    if not is_resolved:
+        return apply_incidents_to_nodes(nodes, build_incident_map(doc))
+    if (doc.get("mcp_mode") or "").strip() not in ("", "Retour Terrain"):
+        return nodes
+
+    pending_singles = {}
+    pending_incident_rows = []
+    active_rows = [row for row in (doc.get("material_plan_incidents") or [])
+        if flt(row.get("is_active") or 0) == 1 and
+        str(row.get("incident_action") or "").strip() == "Single"]
+    if not active_rows:
+        return nodes
+    # Keep the original Single overlap/uniqueness validation without replaying
+    # other incident actions on the already resolved plan.
+    build_incident_map(doc)
+
+    children_by_serial = {}
+    for node in nodes:
+        serial = _node_serial(node)
+        children_by_serial[serial] = {_child_id(child): child
+            for child in (node.get("children") or [])}
+
+    for row in active_rows:
+        try:
+            ids = json.loads(row.get("affected_node_ids_json") or "[]")
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Single has invalid selected-node identifiers.") from exc
+        if not isinstance(ids, list) or len(ids) != 2 or not all(isinstance(i, str) and i.strip() for i in ids) or ids[0] == ids[1]:
+            raise ValueError("Single requires exactly two distinct node identifiers.")
+
+        source = str(row.get("source_serial_no") or "").strip()
+        # The server-generated identity is stable and does not reuse the
+        # identifiers of the two old leftover outputs.
+        output_id = f"{ids[0]}__single"
+        if not source:
+            matches = [serial for serial, children in children_by_serial.items()
+                if output_id in children or all(i in children for i in ids)]
+            if len(matches) != 1:
+                raise ValueError("Single source sheet is ambiguous. Save the Material Cutting Plan again.")
+            source = matches[0]
+
+        children = children_by_serial.get(source, {})
+        output = children.get(output_id)
+        originals = [children.get(i) for i in ids]
+        if output:
+            if any(originals):
+                raise ValueError("Single contains both the original and combined leftovers. Save the Material Cutting Plan again.")
+            if (output.get("geometry_type") != "single" or
+                flt(output.get("removed_length_mm") or 0) <= 0 or
+                flt(output.get("removed_width_mm") or 0) <= 0):
+                raise ValueError("Single is missing its cutout dimensions. Save the Material Cutting Plan again.")
+            continue
+
+        if not any(originals):
+            # A later Retour Terrain cut may have consumed this Single and
+            # replaced it with newly cut rectangles.  Do not re-create the
+            # obsolete Single or block the legitimate newer plan.
+            continue
+        if not all(originals):
+            raise ValueError("Single does not match the saved cutting plan. Save the Material Cutting Plan before generating the Repack.")
+        pending_incident_rows.append(row)
+        for selected_id in ids:
+            pending_singles[selected_id] = row
+
+    if not pending_singles:
+        return nodes
+    # Only Single is applied: all other incidents have already been included
+    # in the saved resolved plan and must never be applied a second time.
+    resolved = apply_incidents_to_nodes(nodes, pending_singles)
+    for row in pending_incident_rows:
+        ids = json.loads(row.get("affected_node_ids_json") or "[]")
+        combined_id = f"{ids[0]}__single"
+        source = str(row.get("source_serial_no") or "").strip()
+        for node in resolved:
+            if source and _node_serial(node) != source:
+                continue
+            children = {_child_id(child): child for child in node.get("children") or []}
+            if combined_id in children:
+                if any(i in children for i in ids):
+                    raise ValueError("Single left original outputs in the resolved plan.")
+                break
+        else:
+            raise ValueError("Single could not be materialized. Save the Material Cutting Plan and retry.")
+    return resolved
