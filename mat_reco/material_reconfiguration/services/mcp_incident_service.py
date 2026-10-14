@@ -5,7 +5,7 @@ import json
 
 from frappe.utils import flt
 
-from mat_reco.material_reconfiguration.services.single_geometry import single_from_rectangles
+from mat_reco.material_reconfiguration.services.single_geometry import single_from_rectangles, available_regions
 
 
 def _child_id(child) -> str:
@@ -34,7 +34,7 @@ def ensure_effective_fields(child: dict) -> dict:
     return out
 
 
-def build_incident_map(doc) -> dict:
+def build_incident_map(doc, *, validate_rotation=True) -> dict:
     mode = (doc.get("mcp_mode") or "").strip()
     if mode and mode != "Retour Terrain":
         return {}
@@ -78,6 +78,11 @@ def build_incident_map(doc) -> dict:
         if flt(row.get("is_active") or 0) != 1:
             continue
         action = (row.get("incident_action") or "").strip()
+        if action == "Move" and validate_rotation and doc.get("allow_rotation") is not None and not flt(doc.get("allow_rotation")):
+            length, width = flt(row.get("original_length_mm")), flt(row.get("original_width_mm"))
+            swapped = length > 0 and width > 0 and length != width and abs(flt(row.get("new_length_mm"))-width)<0.001 and abs(flt(row.get("new_width_mm"))-length)<0.001
+            if move_rotation_degrees(row) == 90 or swapped:
+                raise ValueError("La rotation à 90° est désactivée sur ce MCP.")
         if action in ("Merge", "Single"):
             try:
                 affected_ids = row.get("affected_node_ids_json") or "[]"
@@ -214,8 +219,62 @@ def apply_resize_to_child(child, incident):
     return [modified, *generated_destroys]
 
 
+def move_rotation_degrees(incident):
+    """Explicit relative rotation; old Move remarks retain their former meaning."""
+    remarks = incident.get("remarks") or "{}"
+    try:
+        metadata = json.loads(remarks) if isinstance(remarks, str) else remarks
+    except (TypeError, ValueError):
+        return 0
+    if not isinstance(metadata, dict) or "move_rotation_degrees" not in metadata:
+        return 0
+    degrees = metadata["move_rotation_degrees"]
+    if isinstance(degrees, bool) or degrees not in (0, 90):
+        raise ValueError("Move accepts only 0 or 90 degrees of relative rotation.")
+    return degrees
+
+
+def move_target_slots(child):
+    """Maximal physically usable rectangles, including both arms of a Single.
+
+    Slots may overlap: they are alternatives for one moved piece, not packing
+    bins. Residual material is subtracted from disjoint physical regions below.
+    """
+    length = flt(child.get("effective_length_mm", child.get("length_mm")))
+    width = flt(child.get("effective_width_mm", child.get("width_mm")))
+    rl, rw = flt(child.get("removed_length_mm")), flt(child.get("removed_width_mm"))
+    available_regions(length, width, rl, rw)  # validate the historical cutout
+    x, y = flt(child.get("x")), flt(child.get("y"))
+    if not rl:
+        return [{"x":x,"y":y,"length_mm":length,"width_mm":width}]
+    return [{"x":x+rl,"y":y,"length_mm":length-rl,"width_mm":width},
+            {"x":x,"y":y+rw,"length_mm":length,"width_mm":width-rw}]
+
+
 def apply_move_to_child(child, incident, *, source_serial_no: str, target_serial_no: str):
     out = ensure_effective_fields(child)
+    degrees = move_rotation_degrees(incident)
+    original_length, original_width = flt(out["effective_length_mm"]), flt(out["effective_width_mm"])
+    length, width = (original_width, original_length) if degrees == 90 else (original_length, original_width)
+    recorded_length, recorded_width = flt(incident.get("new_length_mm")), flt(incident.get("new_width_mm"))
+    if recorded_length > 0 and recorded_width > 0:
+        same = abs(recorded_length-original_length)<0.001 and abs(recorded_width-original_width)<0.001
+        swapped = abs(recorded_length-original_width)<0.001 and abs(recorded_width-original_length)<0.001
+        if not (same or swapped):
+            raise ValueError("Un déplacement doit conserver les dimensions de la découpe.")
+        length, width = recorded_length, recorded_width
+    try:
+        metadata = json.loads(incident.get("remarks") or "{}")
+    except (TypeError, ValueError):
+        metadata = {}
+    result_rotation = metadata.get("move_result_rotation") if isinstance(metadata, dict) else None
+    if result_rotation is not None and not isinstance(result_rotation, bool):
+        raise ValueError("Orientation finale de Move invalide.")
+    swapped = original_length != original_width and abs(length-original_width)<0.001 and abs(width-original_length)<0.001
+    out["rotation"] = result_rotation if result_rotation is not None else bool(child.get("rotation")) ^ swapped
+    out.update(length_mm=length, width_mm=width, effective_length_mm=length,
+               effective_width_mm=width, effective_area_mm2=length*width,
+               __move_rotation_degrees=degrees)
     out["x"] = flt(incident.get("target_x_mm") if incident.get("target_x_mm") is not None else child.get("x") or 0)
     out["y"] = flt(incident.get("target_y_mm") if incident.get("target_y_mm") is not None else child.get("y") or 0)
     out["__incident_action"] = "Move"
@@ -252,6 +311,10 @@ def _build_free_zone_from_rect(template_child: dict, *, x: float, y: float, leng
     base_id = _child_id(template_child) or "zone"
     out["id"] = f"{base_id}{suffix}"
     out["node_type"] = _classify_free_zone(length_mm, width_mm)
+    out["geometry_type"] = "rectangle"
+    out["removed_length_mm"] = 0
+    out["removed_width_mm"] = 0
+    out.pop("visual_regions", None)
     out["x"] = flt(x)
     out["y"] = flt(y)
     out["length_mm"] = length_mm
@@ -278,7 +341,7 @@ def _build_free_zone_from_child(child: dict, suffix: str = "__freed") -> dict | 
     )
 
 
-def _resolve_target_free_zone(target_node: dict | None, candidate: dict) -> dict | None:
+def _resolve_target_free_zone(target_node: dict | None, candidate: dict, target_zone_id=None) -> dict | None:
     if not target_node:
         return None
 
@@ -286,15 +349,9 @@ def _resolve_target_free_zone(target_node: dict | None, candidate: dict) -> dict
     for child in (target_node.get("children") or []):
         if not _is_free_zone(child.get("node_type") or ""):
             continue
-        zone_rect = {
-            "x": flt(child.get("x") or 0),
-            "y": flt(child.get("y") or 0),
-            "length_mm": flt(child.get("length_mm") or child.get("effective_length_mm") or 0),
-            "width_mm": flt(child.get("width_mm") or child.get("effective_width_mm") or 0),
-        }
-        if zone_rect["length_mm"] <= 0 or zone_rect["width_mm"] <= 0:
+        if target_zone_id and _child_id(child) != str(target_zone_id):
             continue
-        if _rect_contains_rect(zone_rect, candidate):
+        if any(_rect_contains_rect(slot, candidate) for slot in move_target_slots(child)):
             matches.append(child)
 
     matches.sort(key=lambda row: flt(row.get("length_mm") or 0) * flt(row.get("width_mm") or 0))
@@ -302,6 +359,24 @@ def _resolve_target_free_zone(target_node: dict | None, candidate: dict) -> dict
 
 
 def _build_target_zone_complements(target_zone: dict, candidate: dict) -> list[dict]:
+    if flt(target_zone.get("removed_length_mm")) and flt(target_zone.get("removed_width_mm")):
+        rows = []
+        regions = available_regions(flt(target_zone.get("effective_length_mm", target_zone.get("length_mm"))),
+            flt(target_zone.get("effective_width_mm", target_zone.get("width_mm"))),
+            flt(target_zone.get("removed_length_mm")), flt(target_zone.get("removed_width_mm")))
+        for index, region in enumerate(regions):
+            region = {**region, "x":region["x"]+flt(target_zone.get("x")), "y":region["y"]+flt(target_zone.get("y"))}
+            left = max(region["x"],candidate["x"])
+            top = max(region["y"],candidate["y"])
+            length = min(region["x"]+region["length_mm"],candidate["x"]+candidate["length_mm"])-left
+            width = min(region["y"]+region["width_mm"],candidate["y"]+candidate["width_mm"])-top
+            residuals = split_free_rectangle(region, {"x":left,"y":top,"length_mm":length,"width_mm":width}) if length>0 and width>0 else [region]
+            for j, residual in enumerate(residuals):
+                row = _build_free_zone_from_rect(target_zone, **residual, suffix=f"__move_region_{index}_{j}")
+                if row:
+                    rows.append(row)
+        return rows
+
     zone_x = flt(target_zone.get("x") or 0)
     zone_y = flt(target_zone.get("y") or 0)
     zone_l = flt(target_zone.get("length_mm") or target_zone.get("effective_length_mm") or 0)
@@ -588,9 +663,9 @@ def apply_incidents_to_nodes(nodes: list[dict], incident_map: dict | None = None
                 "length_mm": flt(moved_child.get("length_mm") or 0),
                 "width_mm": flt(moved_child.get("width_mm") or 0),
             }
-            target_zone = _resolve_target_free_zone(target_node, candidate)
+            target_zone = _resolve_target_free_zone(target_node, candidate, incident.get("target_zone_id"))
             if not target_zone:
-                continue
+                raise ValueError("La découpe ne tient pas dans une région libre de la plaque cible.")
 
             # Ensure the moving piece fits entirely inside the target free zone.
             # Although the client validates containment, enforce it on the backend
@@ -660,7 +735,7 @@ def resolve_mcp_effective_nodes(doc, tree: dict) -> list[dict]:
         return nodes
     # Keep the original Single overlap/uniqueness validation without replaying
     # other incident actions on the already resolved plan.
-    build_incident_map(doc)
+    build_incident_map(doc, validate_rotation=False)
 
     children_by_serial = {}
     for node in nodes:

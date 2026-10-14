@@ -1,0 +1,2 @@
+<script setup>defineProps({context:Object,compensating:Boolean});defineEmits(['expand']);</script>
+<template><header class="mcpv-top"><div><strong>▱ Atelier de découpe</strong><small>{{context?.reference || 'Material Cutting Plan'}}<template v-if="context?.material"> · {{context.material}}</template></small></div><div class="mcpv-header-tools"><span class="mcpv-badge">{{compensating?'Compensation':'Simulation'}}</span><button aria-label="Agrandir ou réduire l’éditeur" @click="$emit('expand')">⤢</button></div></header></template>

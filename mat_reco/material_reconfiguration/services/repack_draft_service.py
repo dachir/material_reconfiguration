@@ -462,8 +462,21 @@ def _build_input_rows(se, doc, effective_nodes):
     import json
 
     grouped_inputs = _get_input_serial_names_from_mcp_sheets(doc)
+    if _get_tree_from_doc(doc).get("compensation_events"):
+        from mat_reco.material_reconfiguration.services.mcp_compensation_service import submitted_receipts
+        _, consumed = submitted_receipts(doc)
+        # Confirmed compensation adds only used input sheets; never consume an
+        # old input again after a partial Repack has already consumed it.
+        grouped_inputs = defaultdict(set)
+        for node in effective_nodes:
+            serial = node.get("serial_no")
+            if serial and serial not in consumed:
+                grouped_inputs[(node.get("item_code") or doc.get("source_item"), _target_input_warehouse(doc, node))].add(serial)
+        compensated = True
+    else:
+        compensated = False
 
-    if not grouped_inputs:
+    if not grouped_inputs and not compensated:
         for node in effective_nodes:
             item_code = node.get("item_code") or doc.get("source_item")
             warehouse = _target_input_warehouse(doc, node)
@@ -536,6 +549,10 @@ def _build_output_rows(se, doc, effective_nodes):
 
     fg_groups = defaultdict(list)
     other_rows = []
+    submitted = set()
+    if _get_tree_from_doc(doc).get("compensation_events"):
+        from mat_reco.material_reconfiguration.services.mcp_compensation_service import submitted_receipts
+        submitted, _ = submitted_receipts(doc)
 
     # Group finished goods with identical characteristics
     for node in effective_nodes:
@@ -547,6 +564,8 @@ def _build_output_rows(se, doc, effective_nodes):
             item_code = _target_output_item_code(doc, node, child)
             warehouse = _target_output_warehouse(doc, node, child)
             serial_no = cstr(_target_serial_name(child) or "").strip()
+            if serial_no in submitted:
+                continue
             length_mm, width_mm = _get_effective_dims(child)
 
             if not item_code or not warehouse or not serial_no:

@@ -17,6 +17,20 @@ const MCP_STOCK_CANDIDATE_TABLE = 'mcp_stock_candidate';
 const MCP_SELECTED_SO_TABLE = 'selected_sales_orders';
 const MCP_VARIANT_ITEM_FIELD = 'variant_item_code';
 
+let mcp_ux20_bundle_promise=null;
+function load_mcp_ux20_bundle() {
+    if(window.MatRecoMCPUX20?.version==='20261014_move_cursor_1')return Promise.resolve(window.MatRecoMCPUX20);
+    if(mcp_ux20_bundle_promise)return mcp_ux20_bundle_promise;
+    mcp_ux20_bundle_promise=new Promise((resolve,reject)=>{
+        const script=document.createElement('script');
+        script.src='/assets/mat_reco/js/mcp_ux20.bundle.js?ux20_editor=20261014_move_cursor_1';
+        script.onload=()=>window.MatRecoMCPUX20?.openUX20Modal?resolve(window.MatRecoMCPUX20):reject(new Error('Module UX 2.0 indisponible.'));
+        script.onerror=()=>reject(new Error('Bundle UX 2.0 inaccessible.'));
+        document.head.appendChild(script);
+    }).catch(error=>{mcp_ux20_bundle_promise=null;throw error;});
+    return mcp_ux20_bundle_promise;
+}
+
 function build_mcp_ui_config() {
     return {
         MCP_INCIDENT_TABLE,
@@ -86,11 +100,21 @@ function get_preview_result_json(frm) {
 }
 
 frappe.ui.form.on('Material Cutting Plan', {
+    on_submit(frm) {
+        window.MatRecoMCPUX20?.lockUX20Editors?.(frm);
+    },
+
     refresh(frm) {
+        window.MatRecoMCPUX20?.lockUX20Editors?.(frm);
         frm.clear_custom_buttons();
 
         try {
-            if (frm.fields_dict[MCP_VARIANT_TABLE]) {
+            const variantField = frm.fields_dict[MCP_VARIANT_TABLE];
+            const variantGrid = variantField && variantField.grid;
+            // Table MultiSelect can exist without an initialized grid.
+            // Frappe's set_query(child_field, table_field, ...) assumes get_field is available.
+            if (variantGrid && typeof variantGrid.get_field === 'function'
+                && variantGrid.get_field(MCP_VARIANT_ITEM_FIELD)) {
                 frm.set_query(MCP_VARIANT_ITEM_FIELD, MCP_VARIANT_TABLE, function() {
                     return {
                         filters: {
@@ -98,9 +122,11 @@ frappe.ui.form.on('Material Cutting Plan', {
                         }
                     };
                 });
-            } else {
+            } else if (!variantField) {
                 console.warn('[MCP] Variant table not found on form:', MCP_VARIANT_TABLE);
             }
+            // If the Table MultiSelect has no grid yet, leave it untouched;
+            // do not break refresh or the MCP cutting-plan UI.
         } catch (e) {
             console.error('[MCP] Failed to set query for variants:', e);
         }
@@ -230,6 +256,23 @@ frappe.ui.form.on('Material Cutting Plan', {
 
         with_mcp_ui('render_cutting_plan_preview', [frm], '[MCP] Preview rendering failed:');
         with_mcp_ui('apply_variant_colors', [frm], '[MCP] Variant color rendering failed:');
+        frm.add_custom_button(__('UX 2.0'), async function() {
+            try {
+                await load_mcp_ux20_bundle();
+                const ns = window.MatRecoMCPUX20;
+                if (!ns || typeof ns.openUX20Modal !== 'function') {
+                    throw new Error('Module modal UX 2.0 indisponible. Rebuild des assets requis.');
+                }
+                ns.openUX20Modal(frm);
+            } catch (error) {
+                console.error('[MCP UX 2.0 Modal]', error);
+                frappe.msgprint(String(error.message || error));
+            }
+        }, __('Interface'));
+        // Use the same SVG palette before the first application and afterwards.
+        load_mcp_ux20_bundle()
+            .then(ns=>ns.initializeUX20Preview(frm))
+            .catch(error=>console.warn('[MCP UX 2.0] Preview fallback:',error));
     },
 
     source_item(frm) {

@@ -48,6 +48,10 @@ class MaterialCuttingPlan(Document):
         self._validate_source_item()
         self._validate_variant_rows()
 
+        from mat_reco.material_reconfiguration.services.mcp_compensation_service import preserve_compensated_plan
+        if preserve_compensated_plan(self):
+            return
+
         if not self.selected_sales_orders:
             self._clear_plan_results()
             return
@@ -110,6 +114,7 @@ class MaterialCuttingPlan(Document):
                 allow_rotation=bool(self.allow_rotation),
                 packing_algorithm=self.packing_algorithm or "maxrects",
                 packing_heuristic=self.packing_heuristic or "best_area_fit",
+                plan_missing_pieces=False,
             )
 
             # En Retour Terrain, on ne touche pas au result_json de simulation.
@@ -168,7 +173,8 @@ class MaterialCuttingPlan(Document):
             self.status = "Simulated"
 
     def before_submit(self):
-        pass
+        from mat_reco.material_reconfiguration.services.mcp_compensation_service import validate_compensation_coverage
+        validate_compensation_coverage(self)
 
     def _materialize_effective_plan(self, source_json_field="result_json"):
         raw_tree = self._safe_json_load(self.get(source_json_field))

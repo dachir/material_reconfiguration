@@ -735,6 +735,7 @@ def generate_return_terrain_cutting_plan(
     allow_rotation: bool = True,
     packing_algorithm: str = "maxrects",
     packing_heuristic: str = "best_area_fit",
+    plan_missing_pieces: bool = True,
 ) -> Dict[str, object]:
     """Return-terrain planner.
 
@@ -822,6 +823,11 @@ def generate_return_terrain_cutting_plan(
         d for d in demands
         if str(d.get("piece_uid") or "").strip() not in fulfilled_piece_uids
     ]
+
+    if not plan_missing_pieces:
+        # Replacement is proposed by the compensation API and recorded only
+        # after operator confirmation, never implicitly by an incident save.
+        remaining_demands = []
 
     virtual_bins: list[dict[str, object]] = []
     virtual_meta: dict[str, dict[str, object]] = {}
