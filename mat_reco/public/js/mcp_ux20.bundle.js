@@ -478,6 +478,23 @@ async function loadBackend(frm){
 function serverOptions(frm){
  const backend=frm.__mcp_ux20_backend;
  return backend?{baseTree:clone(backend.loaded.effective_tree),documentVersion:backend.loaded.document_version,allowRotation:!!backend.loaded.allow_rotation,previewAction:payload=>backend.client.preview(payload),
+  resetPlan:async payload=>{
+   if(frm.is_dirty?.())throw new Error('Enregistrez les modifications du formulaire avant de réinitialiser.');
+   if(frm.__mcp_ux20_saving)throw new Error('Un enregistrement est déjà en cours.');
+   frm.__mcp_ux20_saving=true;
+   try{
+    const result=await backend.client.reset(payload);
+    if(!result.reset)throw new Error('Réinitialisation non confirmée par Python.');
+    backend.loaded=result;frm.__mcp_ux20_visual=clone(result.effective_tree);
+    frm.__mcp_ux20_base_signature=JSON.stringify(result.effective_tree);
+    const modal=frm.__mcp_ux20_modal_state;
+    if(modal){modal.tree=clone(result.effective_tree);modal.base=clone(result.effective_tree);}
+    try{await frm.reload_doc();}catch(error){frappe.show_alert({message:'Réinitialisation enregistrée. Rechargez le formulaire pour actualiser son affichage.',indicator:'orange'});}
+    if(modal)renderPreviewField(frm,{useCurrent:false});
+    frappe.show_alert({message:'Incidents supprimés. Planification initiale restaurée.',indicator:'green'});
+    return result;
+   }finally{frm.__mcp_ux20_saving=false;}
+  },
   compensationLoad:()=>backend.client.compensationLoad(),compensationPreview:payload=>backend.client.compensationPreview(payload),
   compensationApply:async payload=>{
    if(frm.is_dirty?.())throw new Error('Enregistrez les modifications du formulaire avant de confirmer.');
@@ -555,17 +572,17 @@ const vueJS='/assets/mat_reco/js/mcp_vue_dist/mcp_vue.iife.js';
 const vueCSS='/assets/mat_reco/js/mcp_vue_dist/mat-reco-mcp-ux20-vue.css';
 let vueAssetsPromise=null;
 function loadVueAssets(){
- if(typeof root.MatRecoMCPVue?.mount==='function'&&root.MatRecoMCPVue.version==='20261014_move_cursor_1')return Promise.resolve();
+ if(typeof root.MatRecoMCPVue?.mount==='function'&&root.MatRecoMCPVue.version==='20261014_terrain_rotation_1')return Promise.resolve();
  if(vueAssetsPromise)return vueAssetsPromise;
  vueAssetsPromise=new Promise((resolve,reject)=>{
    const existingStyle=document.querySelector('link[data-mcp-vue-style]');
-   if(existingStyle)existingStyle.href=vueCSS+'?ux20_vue=20261014_move_cursor_1';
+   if(existingStyle)existingStyle.href=vueCSS+'?ux20_vue=20261014_terrain_rotation_1';
    if(!existingStyle){
-     const css=document.createElement('link');css.rel='stylesheet';css.href=vueCSS+'?ux20_vue=20261014_move_cursor_1';css.dataset.mcpVueStyle='1';document.head.appendChild(css);
+     const css=document.createElement('link');css.rel='stylesheet';css.href=vueCSS+'?ux20_vue=20261014_terrain_rotation_1';css.dataset.mcpVueStyle='1';document.head.appendChild(css);
    }
    const script=document.createElement('script');
    // Bypass intermediary and browser caches during the current migration.
-   script.src=vueJS+'?ux20_vue=20261014_move_cursor_1';script.async=true;
+   script.src=vueJS+'?ux20_vue=20261014_terrain_rotation_1';script.async=true;
    script.onload=()=>typeof root.MatRecoMCPVue?.mount==='function'?resolve():reject(new Error('Le fichier Vue est chargé mais MatRecoMCPVue.mount est absent. Reconstruire le bundle Vite.'));
    script.onerror=()=>reject(new Error('Bundle Vue inaccessible : '+vueJS+' (404 ou CSP).'));
    document.head.appendChild(script);
@@ -573,7 +590,7 @@ function loadVueAssets(){
  return vueAssetsPromise;
 }
 function openModal(frm){
- console.info('[MCP UX20] Ouverture modal Vue — build 20261014_move_cursor_1');
+ console.info('[MCP UX20] Ouverture modal Vue — build 20261014_terrain_rotation_1');
  if(frm.__mcp_ux20_modal?.$wrapper?.is(':visible'))return frm.__mcp_ux20_modal;
  const latest=frm.__mcp_ux20_preview_instance?.store?.simulationTree||frm.__mcp_ux20_visual||originalTree(frm);
  const priorStore=frm.__mcp_ux20_preview_instance?.store;
@@ -674,7 +691,7 @@ function lockEditors(frm){
  frm.__mcp_ux20_preview_instance?.store?.setLocked(true);
  if(frm.__mcp_ux20_visual)renderPreviewField(frm,{useCurrent:false});
 }
-ns.version='20261014_move_cursor_1';
+ns.version='20261014_terrain_rotation_1';
 ns.initializeUX20Preview=initializePreview;
 ns.lockUX20Editors=lockEditors;
 ns.openUX20Modal=openModal;ns.renderUX20ReadOnly=renderPreviewField;ns.simulateUX20Operation=updateSimulation;

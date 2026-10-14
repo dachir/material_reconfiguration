@@ -12,6 +12,6 @@ function mount(element,{tree,onApplyPreview,onReset,onToggleExpand,context,reado
  const store=useCuttingStore(pinia);store.load(server?.baseTree||tree||{nodes:[]});store.configureServer(server);store.restoreSession(session);store.setLocked(readonly);app.mount(element);
  return {unmount(){app.unmount();},store};
 }
-const version='20261014_move_cursor_1';
+const version='20261014_terrain_rotation_1';
 window.MatRecoMCPVue={mount,renderPreview,simulate,version,createFrappeClient};
 export {mount,renderPreview,simulate,version,createFrappeClient};

@@ -48,6 +48,12 @@ class MaterialCuttingPlan(Document):
         self._validate_source_item()
         self._validate_variant_rows()
 
+        if self.flags.get("reset_to_planning"):
+            from mat_reco.material_reconfiguration.services.mcp_action_preview import restore_planning_state
+            restore_planning_state(self)
+            self.flags.reset_to_planning = False
+            return
+
         from mat_reco.material_reconfiguration.services.mcp_compensation_service import preserve_compensated_plan
         if preserve_compensated_plan(self):
             return
@@ -111,7 +117,7 @@ class MaterialCuttingPlan(Document):
                 existing_tree=existing_tree,
                 mcp_doc=self,
                 kerf_mm=float(self.kerf_mm or 0),
-                allow_rotation=bool(self.allow_rotation),
+                allow_rotation=True,
                 packing_algorithm=self.packing_algorithm or "maxrects",
                 packing_heuristic=self.packing_heuristic or "best_area_fit",
                 plan_missing_pieces=False,

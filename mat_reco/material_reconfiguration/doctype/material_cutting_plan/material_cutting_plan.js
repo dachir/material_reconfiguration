@@ -19,11 +19,11 @@ const MCP_VARIANT_ITEM_FIELD = 'variant_item_code';
 
 let mcp_ux20_bundle_promise=null;
 function load_mcp_ux20_bundle() {
-    if(window.MatRecoMCPUX20?.version==='20261014_move_cursor_1')return Promise.resolve(window.MatRecoMCPUX20);
+    if(window.MatRecoMCPUX20?.version==='20261014_terrain_rotation_1')return Promise.resolve(window.MatRecoMCPUX20);
     if(mcp_ux20_bundle_promise)return mcp_ux20_bundle_promise;
     mcp_ux20_bundle_promise=new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src='/assets/mat_reco/js/mcp_ux20.bundle.js?ux20_editor=20261014_move_cursor_1';
+        script.src='/assets/mat_reco/js/mcp_ux20.bundle.js?ux20_editor=20261014_terrain_rotation_1';
         script.onload=()=>window.MatRecoMCPUX20?.openUX20Modal?resolve(window.MatRecoMCPUX20):reject(new Error('Module UX 2.0 indisponible.'));
         script.onerror=()=>reject(new Error('Bundle UX 2.0 inaccessible.'));
         document.head.appendChild(script);

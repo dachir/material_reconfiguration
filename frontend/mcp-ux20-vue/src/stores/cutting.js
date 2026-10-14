@@ -57,7 +57,7 @@ export const useCuttingStore=defineStore('cutting',()=>{
   else if(applied){closeCompensation();}
  }
 
- function configureServer(value){server=value;compensationEnabled.value=!!value?.compensationLoad;documentVersion.value=value?.documentVersion||null;allowRotation.value=!!(value?.allowRotation??originalTree.value.options?.allow_rotation??false);}
+ function configureServer(value){server=value;compensationEnabled.value=!!value?.compensationLoad;documentVersion.value=value?.documentVersion||null;allowRotation.value=!!(value?.allowRotation??true);}
 
  const history=ref([]),historyIndex=ref(0),comparisonMode=ref('overlay'),focusedNodeId=ref(null);
  const canUndo=computed(()=>historyIndex.value>0&&!compensationOpen.value&&!activeAction.value&&!locked.value&&!isSaving.value&&!isPreviewing.value),canRedo=computed(()=>historyIndex.value<history.value.length-1&&!compensationOpen.value&&!activeAction.value&&!locked.value&&!isSaving.value&&!isPreviewing.value);
@@ -68,6 +68,15 @@ export const useCuttingStore=defineStore('cutting',()=>{
  function cancel(){requestId++;isPreviewing.value=false;warnings.value=[];activeAction.value=null;targetNodeIds.value=[];previewState.value=null;error.value='';menuOpen.value=false;}
  function clear(){cancel();selectedNodeId.value=null;menuPoint.value=null;focusedNodeId.value=null;}
  function reset(){if(locked.value||isSaving.value)return;simulationTree.value=copy(originalTree.value);sheetIndex.value=0;zoom.value=1;isDirty.value=false;pendingIncidents.value=[];history.value=[{tree:copy(originalTree.value),incidents:[],label:'État initial'}];historyIndex.value=0;clear();}
+ async function resetPlanning(){
+  if(locked.value||isSaving.value||compensationOpen.value)return false;
+  if(!server?.resetPlan){reset();return true;}
+  requestId++;isPreviewing.value=false;isSaving.value=true;error.value='';
+  try{const result=await server.resetPlan({document_version:copy(documentVersion.value)});
+   if(!result?.reset||!result.effective_tree)throw new Error('La réinitialisation n’a pas été confirmée par le serveur.');
+   isSaving.value=false;load(result.effective_tree);documentVersion.value=result.document_version;confirmedCompensation.value=null;return true;
+  }catch(e){error.value=e.message;return false;}finally{isSaving.value=false;}
+ }
  function load(t){if(locked.value)return;originalTree.value=normalizeTree(t);reset();}
  function restoreSession(session){
   if(!session?.pendingIncidents?.length)return;
@@ -113,5 +122,5 @@ export const useCuttingStore=defineStore('cutting',()=>{
  function fit(){focusedNodeId.value=null;setZoom(1);}
  function setZoom(v){zoom.value=Math.min(4,Math.max(.25,v));menuOpen.value=false;}
  function setLocked(value){locked.value=!!value;if(locked.value){clear();compensationOpen.value=false;invalidateCompensation();}}
- return {allowRotation,updateMoveOrientation,canCompensate,compensationOpen,compensationOperations,compensationRequirements,brokenPieces,replacementPieces,internalCandidates,stockCandidates,selectedSources,compensationPreview,compensationWarnings,isCalculating,isApplying,isLoadingCompensation,compensationCoverage,compensationStrategy,compensationReason,compensationError,confirmedCompensation,openCompensation,closeCompensation,loadCompensation,calculateCompensation,applyCompensation,invalidateCompensation,restoreSession,configureServer,pendingIncidents,isPreviewing,isSaving,documentVersion,warnings,locked,setLocked,historyIndex,historyLabel,canUndo,canRedo,comparisonMode,focusedNodeId,undo,redo,focusSelection,fit,originalTree,simulationTree,currentSheetId,selectedNodeId,sourceNodeId,targetNodeIds,candidateNodeIds,previewState,zoom,panelCollapsed,isDirty,error,menuPoint,menuOpen,parameters,sheets,sheet,sheetIndex,selected,activeAction,actionOptions,displayTree,displaySheet,load,reset,cancel,clear,setSheet,select,choose,updatePreview,confirm,setZoom};
+ return {resetPlanning,allowRotation,updateMoveOrientation,canCompensate,compensationOpen,compensationOperations,compensationRequirements,brokenPieces,replacementPieces,internalCandidates,stockCandidates,selectedSources,compensationPreview,compensationWarnings,isCalculating,isApplying,isLoadingCompensation,compensationCoverage,compensationStrategy,compensationReason,compensationError,confirmedCompensation,openCompensation,closeCompensation,loadCompensation,calculateCompensation,applyCompensation,invalidateCompensation,restoreSession,configureServer,pendingIncidents,isPreviewing,isSaving,documentVersion,warnings,locked,setLocked,historyIndex,historyLabel,canUndo,canRedo,comparisonMode,focusedNodeId,undo,redo,focusSelection,fit,originalTree,simulationTree,currentSheetId,selectedNodeId,sourceNodeId,targetNodeIds,candidateNodeIds,previewState,zoom,panelCollapsed,isDirty,error,menuPoint,menuOpen,parameters,sheets,sheet,sheetIndex,selected,activeAction,actionOptions,displayTree,displaySheet,load,reset,cancel,clear,setSheet,select,choose,updatePreview,confirm,setZoom};
 });

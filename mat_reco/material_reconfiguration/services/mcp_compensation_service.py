@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import math
+from mat_reco.material_reconfiguration.services.mcp_incident_service import rotation_allowed
 
 
 def _identity(row):
@@ -220,7 +221,7 @@ def _eligible_stock(doc, nodes, requirements=()):
         if any(int(frappe.db.get_value("Material Cutting Plan", r.parent, "docstatus") or 0) < 2 for r in claims):
             continue
         source["thickness_mm"] = _source_thickness(serial)
-        compatible = not requirements or any(_source_can_fit(source, r, bool(doc.get("allow_rotation"))) for r in requirements)
+        compatible = not requirements or any(_source_can_fit(source, r, rotation_allowed(doc)) for r in requirements)
         result.append({**source, "compatible": compatible, "origin": "stock_leftover" if source["material_status"] == "Partial" else "stock_sheet",
                        "priority": 2 if source["material_status"] == "Partial" else 3, "status": "Disponible" if compatible else "Incompatible"})
     return result
@@ -309,7 +310,7 @@ def _preview(doc, options):
     tree, needs, outputs, inputs, version = _snapshot(doc)
     sources = _eligible_stock(doc, tree["nodes"], needs["compensation_requirements"])
     result = propose_compensation(tree, needs["compensation_requirements"], sources,
-        kerf_mm=float(doc.get("kerf_mm") or 0), allow_rotation=bool(doc.get("allow_rotation")),
+        kerf_mm=float(doc.get("kerf_mm") or 0), allow_rotation=rotation_allowed(doc),
         frozen_ids=outputs, consumed_inputs=inputs, seed=signature([version, needs["requirements"]]), **options)
     result.update({"valid": True, "requirements": needs["requirements"], "broken_pieces": needs["broken_pieces"],
                    "replacement_pieces": needs["replacement_pieces"], "coverage": needs["summary"], "stock_candidates": sources,

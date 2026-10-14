@@ -118,7 +118,7 @@ class TestMoveRotation(unittest.TestCase):
         with patch.object(persistence,'submitted_receipts',return_value=({'p'},set())),patch.object(frappe,'throw',side_effect=fail):
             with self.assertRaises(frappe.ValidationError):persistence.preserve_compensated_plan(doc)
 
-    def test_preview_api_uses_server_rotation_flag_and_ignores_client_dimensions(self):
+    def test_preview_api_allows_return_terrain_rotation_regardless_of_planning_flag(self):
         doc=Document({'nodes':fixture()});doc.allow_rotation=1;doc.check_permission=Mock()
         version=api._document_version(doc)
         with patch.object(frappe,'get_doc',return_value=doc):
@@ -128,11 +128,12 @@ class TestMoveRotation(unittest.TestCase):
         doc.allow_rotation=0;version=api._document_version(doc)
         with patch.object(frappe,'get_doc',return_value=doc):
             denied=api.preview_mcp_action.__wrapped__('MCP','Move','p',['zone'],{'allow_rotation':True},[],version)
-        self.assertFalse(denied['valid'])
+        self.assertTrue(denied['valid'],denied['errors'])
+        self.assertTrue(piece(denied['effective_nodes'])['rotation'])
 
     def test_prepare_revalidates_rotated_move_with_incremental_save_hook_without_writing(self):
-        original=Document({'nodes':fixture()})
-        probe=Document({'nodes':fixture()});probe.previous=original
+        original=Document({'nodes':fixture()});original.allow_rotation=0
+        probe=Document({'nodes':fixture()});probe.previous=original;probe.allow_rotation=0
         probe.before_save=lambda:persistence.preserve_compensated_plan(probe)
         probe.save=Mock(side_effect=AssertionError('No write'))
         version=api._document_version(original)
@@ -145,3 +146,29 @@ class TestMoveRotation(unittest.TestCase):
         self.assertEqual(piece(prepared['effective_tree']['nodes'])['length_mm'],600)
         self.assertEqual(prepared['incidents'][0]['target_zone_id'],'zone')
         probe.save.assert_not_called()
+
+    def test_rotation_policy_keeps_planning_preference_but_never_restricts_return_terrain(self):
+        from mat_reco.material_reconfiguration.services.mcp_incident_service import rotation_allowed
+        self.assertFalse(rotation_allowed({'mcp_mode':'Planification','allow_rotation':0}))
+        self.assertTrue(rotation_allowed({'mcp_mode':'Planification','allow_rotation':1}))
+        self.assertTrue(rotation_allowed({'mcp_mode':'Retour Terrain','allow_rotation':0}))
+
+    def test_compensation_rotates_internal_leftover_when_planning_flag_is_off(self):
+        from mat_reco.material_reconfiguration.tests.test_mcp_compensation_geometry import sheet,need
+        doc=Document();doc.allow_rotation=0
+        tree={'nodes':[sheet(600,800)]}
+        needs={'compensation_requirements':[need()], 'requirements':[], 'broken_pieces':[], 'replacement_pieces':[], 'summary':{}, 'warnings':[]}
+        with patch.object(persistence,'_snapshot',return_value=(tree,needs,set(),set(),{})),patch.object(persistence,'_eligible_stock',return_value=[]):
+            result=persistence._preview(doc,{'strategy':'automatic','selected_sources':[],'override_reason':''})
+        self.assertEqual(len(result['placements']),1)
+        self.assertEqual((result['placements'][0]['length_mm'],result['placements'][0]['width_mm']),(600,800))
+        self.assertEqual(doc.allow_rotation,0)
+
+    def test_stock_leftover_rotated_fit_is_compatible_when_planning_flag_is_off(self):
+        from mat_reco.material_reconfiguration.tests.test_mcp_compensation_geometry import need
+        doc=Document();doc.allow_rotation=0
+        serial=frappe._dict(status='Active',company='CO');serial.has_permission=Mock(return_value=True)
+        source=dict(serial_no='STOCK',warehouse='WH',length_mm=600,width_mm=800,area_mm2=480000,material_status='Partial')
+        with patch('mat_reco.material_reconfiguration.services.stock_candidate_service.get_available_cutting_bins',return_value=[source]),patch.object(frappe,'get_doc',return_value=serial),patch.object(frappe,'get_all',return_value=[]),patch.object(persistence,'_source_thickness',return_value=6):
+            result=persistence._eligible_stock(doc,[],[need()])
+        self.assertTrue(result[0]['compatible'])

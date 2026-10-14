@@ -16,7 +16,14 @@ function escape(e){
 if(e.key==='Escape'&&store.compensationOpen){e.preventDefault();e.stopImmediatePropagation();store.closeCompensation();return;}
 if(e.key==='Escape'&&(store.activeAction||store.menuOpen)){e.preventDefault();e.stopImmediatePropagation();store.cancel();}}
 onMounted(()=>{document.addEventListener('keydown',escape,true);document.addEventListener('pointerdown',trackEditor,true);document.addEventListener('focusin',trackEditor,true);});onUnmounted(()=>{document.removeEventListener('keydown',escape,true);document.removeEventListener('pointerdown',trackEditor,true);document.removeEventListener('focusin',trackEditor,true);});
-function reset(){store.reset();props.onReset?.();}
+async function reset(){
+ if(store.locked||store.isSaving||store.compensationOpen)return;
+ const message='Réinitialiser l’atelier ? Tous les incidents et compensations seront supprimés, ainsi que les modifications en attente. Le plan initial, juste après Planification, sera restauré. Cette action ne peut pas être annulée.';
+ const confirmed=typeof window.frappe?.confirm==='function'
+  ?await new Promise(resolve=>window.frappe.confirm(message,()=>resolve(true),()=>resolve(false)))
+  :window.confirm(message);
+ if(confirmed&&await store.resetPlanning()){appliedSignature.value=null;props.onReset?.();}
+}
 async function apply(){if(store.locked||applying.value||store.isPreviewing)return;applying.value=true;store.isSaving=true;try{const tree=copy(store.simulationTree);const saved=await props.onApplyPreview?.(tree,{pendingIncidents:copy(store.pendingIncidents),documentVersion:copy(store.documentVersion)});if(saved?.effective_tree){store.isSaving=false;store.load(saved.effective_tree);store.documentVersion=saved.document_version;}appliedSignature.value=JSON.stringify(store.simulationTree);}catch(e){store.error=e.message;}finally{applying.value=false;store.isSaving=false;}}
 </script>
 <template>

@@ -1,8 +1,8 @@
-"""LOT 1: read-only, server-authoritative MCP action previews.
+"""Server-authoritative MCP previews, incident preparation and explicit reset.
 
-No Document.save/insert, stock operation or temporary persistence is performed.
-Pending operations are intentions, revalidated in order against the server tree.
-The existing incident engine supplies all effective output nodes.
+Previews and preparation never save. The reset endpoint alone restores the
+planning snapshot and saves the draft document under its database lock.
+Pending operations are revalidated in order by the existing incident engine.
 """
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ from mat_reco.material_reconfiguration.services.mcp_incident_service import (
     _classify_free_zone,
     move_target_slots,
     move_rotation_degrees,
+    rotation_allowed,
 )
 from mat_reco.material_reconfiguration.services.repack_draft_service import build_effective_nodes
 from mat_reco.material_reconfiguration.services.single_geometry import available_regions, single_from_rectangles
@@ -401,7 +402,7 @@ def load_mcp_effective_plan(mcp_name):
     tree = _effective_tree(doc)
     return {"valid":True,"effective_tree":tree,"effective_nodes":tree["nodes"],"summary":_summary(tree["nodes"]),
             "document_version":_document_version(doc),"editable":cint(doc.get("docstatus"))==0 and doc.get("mcp_mode")=="Retour Terrain" and doc.has_permission("write"),
-            "allow_rotation":bool(cint(doc.get("allow_rotation"))),"warnings":[],"errors":[],"document_modified":False}
+            "allow_rotation":rotation_allowed(doc),"warnings":[],"errors":[],"document_modified":False}
 
 
 @frappe.whitelist()
@@ -421,7 +422,7 @@ def preview_mcp_action(mcp_name, action, source_node_id, target_node_ids=None, p
             raise ValueError("La session est limitée à 50 opérations en attente.")
         tree = _effective_tree(doc)
         intent = {"action":action,"source_node_id":source_node_id,"target_node_ids":target_node_ids or [],"parameters":parameters or {}}
-        nodes, incidents = preview_intentions(tree["nodes"],[*pending,intent],allow_rotation=bool(cint(doc.get("allow_rotation"))))
+        nodes, incidents = preview_intentions(tree["nodes"],[*pending,intent],allow_rotation=rotation_allowed(doc))
         tree["nodes"] = nodes
         response.update(valid=True,effective_nodes=nodes,effective_tree=tree,summary=_summary(nodes),
                         incident=incidents[-1],pending_incidents=incidents,document_version=current_version,
@@ -499,7 +500,7 @@ def _prepare_mcp_incidents(mcp_name, pending_incidents, document_version):
     if not pending or len(pending)>MAX_PENDING:
         raise ValueError("Sélectionnez entre une et cinquante opérations confirmées.")
     baseline = _effective_tree(doc)
-    expected, rows = preview_intentions(baseline["nodes"],pending,allow_rotation=bool(cint(doc.get("allow_rotation"))))
+    expected, rows = preview_intentions(baseline["nodes"],pending,allow_rotation=rotation_allowed(doc))
     if not (baseline.get("compensation_events") or baseline.get("ux20_incidents_resolved") or any(r["incident_action"]=="Move" for r in rows)):
         rows = _incident_rows_for_base(doc,baseline,rows)
     # Existing active rows must not be silently replaced by an overlapping batch.
@@ -520,3 +521,49 @@ def prepare_mcp_incidents(mcp_name, pending_incidents, document_version):
         return _prepare_mcp_incidents(mcp_name,pending_incidents,document_version)
     except (ValueError,TypeError,frappe.ValidationError) as exc:
         return {"valid":False,"errors":[str(exc)],"document_modified":False}
+
+
+def restore_planning_state(doc):
+    """Restore the stored planning snapshot; never rerun the packing algorithm."""
+    from mat_reco.material_reconfiguration.services.cutting_plan_service import update_active_input_flags
+    from mat_reco.material_reconfiguration.doctype.material_cutting_plan.mcp_sheet_sync import sync_mcp_sheets
+    tree = _json(doc.get("result_json"), dict, "Plan de planification")
+    tree = deepcopy(tree.get("tree") or tree)
+    if not isinstance(tree.get("nodes"), list) or not tree["nodes"]:
+        raise ValueError("Aucun état de planification enregistré à restaurer.")
+    _validate_nodes(tree["nodes"])
+    doc.set("material_plan_incidents", [])
+    doc.effective_result_json = json.dumps(tree, ensure_ascii=False)
+    update_active_input_flags(doc, tree)
+    sync_mcp_sheets(doc, source_json_field="effective_result_json", child_table_field="effective_mcp_sheets")
+    doc._apply_summary_to_fields(doc._build_summary_from_tree(tree))
+    return tree
+
+
+@frappe.whitelist()
+def reset_mcp_incidents(mcp_name, document_version):
+    """Delete draft incidents and restore exactly the persisted planning snapshot."""
+    from mat_reco.material_reconfiguration.services.mcp_compensation_service import submitted_receipts
+    savepoint = "mcp_reset_incidents"
+    frappe.db.savepoint(savepoint)
+    try:
+        frappe.db.sql("SELECT name FROM `tabMaterial Cutting Plan` WHERE name=%s FOR UPDATE", (mcp_name,))
+        doc = _load_doc(mcp_name, editing=True)
+        if _json(document_version, dict, "Version du MCP") != _document_version(doc):
+            return {"valid":False, "conflict":True, "errors":["Le MCP a changé. Rechargez le plan avant de réinitialiser."]}
+        outputs, inputs = submitted_receipts(doc)
+        if outputs or inputs:
+            raise ValueError("Réinitialisation impossible : des découpes sont déjà enregistrées dans un Repack soumis.")
+        # This flag is server-owned, never taken from the client document.
+        doc.flags.reset_to_planning = True
+        restore_planning_state(doc)
+        doc.save()
+        return {"valid":True, "reset":True, "effective_tree":_json(doc.get("effective_result_json"), dict, "Plan restauré"),
+                "document_version":_document_version(doc), "allow_rotation":rotation_allowed(doc),
+                "editable":True, "warnings":[], "errors":[]}
+    except (ValueError, TypeError) as exc:
+        frappe.db.rollback(save_point=savepoint)
+        return {"valid":False, "errors":[str(exc)]}
+    except Exception:
+        frappe.db.rollback(save_point=savepoint)
+        raise

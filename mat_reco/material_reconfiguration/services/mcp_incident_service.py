@@ -8,6 +8,11 @@ from frappe.utils import flt
 from mat_reco.material_reconfiguration.services.single_geometry import single_from_rectangles, available_regions
 
 
+def rotation_allowed(doc):
+    """The planning preference never restricts physical Retour Terrain actions."""
+    return str(doc.get("mcp_mode") or "").strip() == "Retour Terrain" or bool(flt(doc.get("allow_rotation")))
+
+
 def _child_id(child) -> str:
     return str(child.get("id") or child.get("piece_uid") or "").strip()
 
@@ -78,7 +83,7 @@ def build_incident_map(doc, *, validate_rotation=True) -> dict:
         if flt(row.get("is_active") or 0) != 1:
             continue
         action = (row.get("incident_action") or "").strip()
-        if action == "Move" and validate_rotation and doc.get("allow_rotation") is not None and not flt(doc.get("allow_rotation")):
+        if action == "Move" and validate_rotation and doc.get("allow_rotation") is not None and not rotation_allowed(doc):
             length, width = flt(row.get("original_length_mm")), flt(row.get("original_width_mm"))
             swapped = length > 0 and width > 0 and length != width and abs(flt(row.get("new_length_mm"))-width)<0.001 and abs(flt(row.get("new_width_mm"))-length)<0.001
             if move_rotation_degrees(row) == 90 or swapped:

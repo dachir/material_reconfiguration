@@ -8,5 +8,5 @@ export function createFrappeClient(frappe,mcpName){
   if(value.valid===false){const error=new Error((value.errors||[]).join('\n')||'Opération refusée par Python.');error.conflict=!!value.conflict;throw error;}
   return value;
  }
- return {load:()=>call('load_mcp_effective_plan'),preview:payload=>call('preview_mcp_action',payload),prepare:payload=>call('prepare_mcp_incidents',payload),compensationLoad:()=>call('load_compensation',{},true),compensationPreview:payload=>call('preview_compensation',payload,true),compensationApply:payload=>call('apply_compensation',payload,true)};
+ return {reset:payload=>call('reset_mcp_incidents',payload),load:()=>call('load_mcp_effective_plan'),preview:payload=>call('preview_mcp_action',payload),prepare:payload=>call('prepare_mcp_incidents',payload),compensationLoad:()=>call('load_compensation',{},true),compensationPreview:payload=>call('preview_compensation',payload,true),compensationApply:payload=>call('apply_compensation',payload,true)};
 }

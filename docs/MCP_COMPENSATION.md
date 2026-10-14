@@ -252,7 +252,7 @@ vérifications exécutées. La recette complète ne doit pas être annoncée acq
 
 Aucune migration de schéma ni nouvelle dépendance n'est introduite. Déployer les
 sources Python, les sources Vue, le script DocType et le bundle modal synchronisé
-ensemble. La version de cache est `20261014_move_cursor_1`.
+ensemble. La version de cache est `20261014_terrain_rotation_1`.
 
 Le bundle Vue se compile avec `npm --prefix … run build` ci-dessus. Les assets
 actifs sont sous `apps/mat_reco/mat_reco/public/js/`, accessibles par le lien
@@ -264,3 +264,34 @@ marqueur `/* UX 2.0 modal integration */` dans `mcp_ux20.bundle.js` avant diffus
 Redémarrer ensuite les workers web par le circuit d'exploitation habituel et
 rafraîchir les caches du site cible. Ces actions n'ont pas été exécutées ici.
 Aucune compensation ne soumet automatiquement le MCP ou un Stock Entry.
+
+
+## Réinitialiser l’atelier
+
+Le bouton **Réinitialiser** supprime tous les incidents du MCP brouillon et
+restaure exactement `result_json`, le plan conservé après Planification. Le
+résultat effectif, les lignes de plaques, les indicateurs de stock actif et le
+résumé sont restaurés ensemble. Les compensations présentes dans l’arbre
+courant sont abandonnées; les incidents en attente et l’historique Vue sont
+vidés après confirmation serveur. Le modal reste ouvert et les données du
+formulaire sont rechargées.
+
+L’endpoint `mcp_action_preview.reset_mcp_incidents` contrôle les permissions,
+le mode Retour Terrain, le statut brouillon et la version du document sous
+verrou MCP. Des entrées/sorties déjà enregistrées dans un Repack soumis bloquent
+la restauration. Un conflit ou un échec conserve l’interface courante; les
+écritures serveur sont transactionnelles. Le planificateur n’est pas relancé.
+
+Vérifications supplémentaires : 5 tests Python et 4 tests Node de réinitialisation,
+un parcours Chromium du bouton (conflit, succès, réouverture) et un hook Frappe
+réel exécuté sur une copie en mémoire avec toute écriture en base interdite.
+Les suites complètes passent : 87 tests Python et 42 tests Node.
+
+Avant toute réinitialisation, une confirmation prévient de la suppression des
+incidents, compensations et modifications en attente. Annuler conserve l’état
+courant et n’envoie aucune requête de réinitialisation.
+
+En Retour Terrain, les déplacements et compensations autorisent toujours la
+rotation à 90°, indépendamment de `allow_rotation` en Planification. La
+compatibilité des chutes stock suit cette même règle. Le réglage du MCP conserve
+sa valeur et continue de piloter uniquement le calcul initial de Planification.

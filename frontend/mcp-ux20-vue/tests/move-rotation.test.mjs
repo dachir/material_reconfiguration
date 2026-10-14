@@ -32,7 +32,7 @@ test('a move into a Single keeps its cutout forbidden and conserves the two phys
  assert.equal(next.nodes[1].children.flatMap(regions).some(r=>overlaps(r,{x:0,y:0,length_mm:900,width_mm:800})),false);
 });
 test('source selection survives navigation and changing orientation invalidates an impossible preview',async()=>{
- setActivePinia(createPinia());const s=useCuttingStore();s.load(fixture());s.configureServer(null);
+ setActivePinia(createPinia());const s=useCuttingStore();const tree=fixture();tree.options.allow_rotation=false;s.load(tree);s.configureServer(null);assert.equal(s.allowRotation,true);
  s.select('p');s.choose('Move');assert.deepEqual(s.candidateNodeIds,['zone']);
  s.setSheet(1);assert.equal(s.sourceNodeId,'p');s.select('zone');assert.ok(s.previewState);
  s.parameters.rotation_degrees=0;s.updateMoveOrientation();assert.equal(s.previewState,null);assert.deepEqual(s.targetNodeIds,[]);assert.deepEqual(s.candidateNodeIds,[]);
