@@ -302,6 +302,8 @@ def _ensure_output_serial_exists_or_create(
             )
 
         updates = {}
+        if node_type in ("leftover", "waste", "finished_good") and frappe.db.has_column("Serial No", "custom_material_status"):
+            updates["custom_material_status"] = "Partial" if node_type in ("leftover", "waste") else "Full"
         if frappe.db.has_column("Serial No", "custom_material_cutting_plan"):
             updates["custom_material_cutting_plan"] = material_cutting_plan
         if frappe.db.has_column("Serial No", "custom_stock_entry_row_name"):
@@ -352,6 +354,9 @@ def _ensure_output_serial_exists_or_create(
         serial_doc.custom_surface_mm2 = stock_area_or_zero(length_mm, width_mm, removed_length_mm, removed_width_mm)
     if frappe.db.has_column("Serial No", "custom_cutting_node_type") and node_type:
         serial_doc.custom_cutting_node_type = node_type
+
+    if node_type in ("leftover", "waste", "finished_good") and frappe.db.has_column("Serial No", "custom_material_status"):
+        serial_doc.custom_material_status = "Partial" if node_type in ("leftover", "waste") else "Full"
 
     serial_doc.insert(ignore_permissions=True)
 
@@ -1391,13 +1396,18 @@ def ensure_mcp_bundles_for_stock_entry(doc):
     # Block stale Repack drafts BEFORE creating output Serial Nos or bundles.
     validate_single_output_rows_before_submit(doc)
 
+    # The optional node-type field on Stock Entry Detail is not installed on
+    # every site. The approved MCP is authoritative for output classification.
+    from mat_reco.material_reconfiguration.services.serial_creation_service import _get_mcp_serial_dimension_map
+    serial_metadata = _get_mcp_serial_dimension_map(mcp_name)
+
     created_serials: list[str] = []
     created_bundles: list[str] = []
 
     for it in (doc.items or []):
         # Skip rows that are already bound to a bundle
         existing_bundle = (it.get("serial_and_batch_bundle") or it.get("serial_batch_bundle") or "").strip()
-        if existing_bundle:
+        if existing_bundle and not it.get("t_warehouse"):
             continue
 
         # Determine row type
@@ -1433,6 +1443,8 @@ def ensure_mcp_bundles_for_stock_entry(doc):
         # Remove duplicates while preserving order
         if serials:
             serials = list(dict.fromkeys(serials))
+        if existing_bundle:
+            serials = sorted(_extract_serial_nos_from_stock_entry_detail(it))
         if not serials:
             continue
 
@@ -1498,14 +1510,16 @@ def ensure_mcp_bundles_for_stock_entry(doc):
                     warehouse=warehouse,
                     material_cutting_plan=mcp_name or None,
                     custom_stock_entry_row_name=it.name,
-                    length_mm=length_mm,
-                    width_mm=width_mm,
-                    node_type=node_type,
-                    removed_length_mm=removed_length_mm,
-                    removed_width_mm=removed_width_mm,
+                    length_mm=serial_metadata.get(sn, {}).get("length_mm", length_mm),
+                    width_mm=serial_metadata.get(sn, {}).get("width_mm", width_mm),
+                    node_type=serial_metadata.get(sn, {}).get("node_type", node_type),
+                    removed_length_mm=serial_metadata.get(sn, {}).get("removed_length_mm", removed_length_mm),
+                    removed_width_mm=serial_metadata.get(sn, {}).get("removed_width_mm", removed_width_mm),
                 )
                 if not result.get("already_exists"):
                     newly_created.append(result["serial_no"])
+            if existing_bundle:
+                continue  # Metadata is reconciled; keep the existing ledger bundle.
             # Create a bundle that references all serials (existing and newly created). Output
             # bundles are linked to the voucher for complete traceability.
             bundle_name = _create_bundle(
