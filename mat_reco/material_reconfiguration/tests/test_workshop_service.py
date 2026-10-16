@@ -19,6 +19,13 @@ def work(name, children=(), ratio=1, final=False):
 
 
 class WorkshopServiceTests(unittest.TestCase):
+    def test_receipts_need_no_quality_fields_or_inspection(self):
+        detail=frappe._dict(item_code='GLASS',qty=4,transfer_qty=4)
+        with patch.object(frappe,'get_cached_doc',side_effect=AssertionError('No quality lookup')), \
+             patch.object(frappe,'get_meta',side_effect=AssertionError('No inspection lookup')):
+            self.assertEqual(service._quality_qty(detail,Doc(name='SE')),4)
+            self.assertEqual(service._pending_qty(detail,Doc(name='SE'),4),0)
+
     def test_recursive_repack_consumes_new_intermediate_then_parent(self):
         cut=work('cut');triplex=work('triplex',[cut]);parent=work('double',[triplex],final=True)
         root={'id':'SO-1','children':[parent]};pool=Pool([{**cut,'qty':1,'serial_no':'CUT-1','warehouse':'Stores'}])
@@ -45,13 +52,13 @@ class WorkshopServiceTests(unittest.TestCase):
         self.assertEqual(result['stock_entries'],['SE-first','SE-second'])
         self.assertEqual(adapter.call_count,2)
 
-    def test_intermediate_quality_requires_its_own_approval(self):
+    def test_legacy_quality_flag_does_not_block_assembly(self):
         cut=work('cut');triplex={**work('triplex',[cut]),'quality_required':True}
         parent=work('double',[triplex],final=True)
         request=plan(parent,1,Pool([{**cut,'qty':1}]),consume_existing=False)
         preview=service._preview({'id':'SO-1','children':[parent]},parent,request)
-        self.assertEqual(preview['action'],'blocked')
-        self.assertIn('quality',[s['kind'] for s in preview['shortages']])
+        self.assertEqual(preview['action'],'repack')
+        self.assertNotIn('quality',[s['kind'] for s in preview['shortages']])
 
     def test_mcp_has_priority_over_planned_assemblies(self):
         cut=work('cut');parent=work('double',[cut],final=True);root={'id':'SO-1','children':[parent]}

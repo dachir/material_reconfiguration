@@ -29,7 +29,7 @@ LABELS = {'children': 'Composants', 'nodes': 'Éléments', 'item_code': 'Article
           'proposed_code': 'Code proposé', 'item_name': 'Désignation', 'item_type': 'Type',
           'qty_factor': 'Quantité par parent', 'warehouse': 'Entrepôt', 'stock_uom': 'Unité',
           'length_mm': 'Longueur (mm)', 'width_mm': 'Hauteur (mm)', 'thickness_mm': 'Épaisseur (mm)',
-          'quality_required': 'Contrôle qualité requis', 'mode': 'Mode', 'node_type': 'Type',
+          'mode': 'Mode', 'node_type': 'Type',
           'sales_order': 'Commande', 'serial_no': 'N° de série', 'x': 'X (mm)', 'y': 'Y (mm)'}
 
 

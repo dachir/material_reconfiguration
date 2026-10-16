@@ -589,9 +589,6 @@
 .ug-workshop .blocked {
 	color: var(--red);
 }
-.ug-workshop .quality {
-	color: #9cabc7;
-}
 .ug-quantities {
 	margin: 0 0 16px;
 }

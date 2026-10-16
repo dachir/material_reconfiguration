@@ -149,7 +149,7 @@ doc_events = {
     },
     **{dt: {event: "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change"
             for event in ("on_submit", "on_cancel")}
-       for dt in ("Quality Inspection", "Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
+       for dt in ("Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
     "Sales Order": {
         "after_mapping": "mat_reco.material_reconfiguration.services.chantier_service.map_chantier",
         "validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",

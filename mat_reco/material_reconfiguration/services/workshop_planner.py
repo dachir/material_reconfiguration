@@ -71,9 +71,6 @@ def plan(node, qty, pool, *, consume_existing=True):
         branch = plan(child, missing * whole(child['ratio']), pool)
         result['children'].append(branch)
         result['shortages'].extend(branch['shortages'])
-        if branch['produce_qty'] and child.get('quality_required'):
-            result['shortages'].append({'node_id':child['id'],'item_code':child['item_code'],
-                'qty':branch['produce_qty'],'kind':'quality'})
         result['tasks'].extend(branch['tasks'])
     result['tasks'].append({'node_id': node['id'], 'qty': missing})
     return result

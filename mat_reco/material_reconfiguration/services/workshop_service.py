@@ -70,7 +70,6 @@ def _tree(order, row, item_code=None, path=(), ancestors=(), allow_invalid=False
                 thickness_mm=flt(item.get('custom_thickness_mm') or row.get('custom_client_thickness_mm')) if path else flt(row.get('custom_client_thickness_mm')),
                 children=[], is_final=not path, warehouse=_get_default_target_warehouse(item_code, order.company),
                 has_serial_no=bool(item.has_serial_no), has_batch_no=bool(item.has_batch_no),
-                quality_required=bool(item.get('custom_control_quality')),
                 stock_uom=item.stock_uom, primary_item=None, section=row.get('custom_chantier_section'), repere=row.get('custom_repere'), chantier=order.get('custom_chantier'))
     if node['item_type'] == 'OUVRAGE':
         components = get_ouvrage_components(item)
@@ -111,44 +110,12 @@ def _tree(order, row, item_code=None, path=(), ancestors=(), allow_invalid=False
 
 
 def _quality_qty(detail, se, lock=False):
-    """Historical acceptance, independent of the stock balance or deliveries."""
-    item = frappe.get_cached_doc('Item', detail.item_code)
-    qty = flt(detail.get('transfer_qty') or detail.qty)
-    requires = bool(item.get('custom_control_quality') or se.get('inspection_required')
-                    or detail.get('to_quality_status') in ('Q', 'R'))
-    if not requires:
-        return qty
-    if detail.get('to_quality_status') == 'A':
-        return qty
-    if detail.get('quality_inspection'):
-        qi = frappe.get_doc('Quality Inspection', detail.quality_inspection, for_update=lock)
-        if qi.docstatus == 1 and qi.status == 'Accepted':
-            amount = qi.get('custom_process_qty')
-            return min(qty, flt(amount)) if amount is not None else qty
-    # The installed quality workflow references the originating detail row.
-    if frappe.get_meta('Quality Inspection').has_field('custom_process_qty'):
-        meta = frappe.get_meta('Quality Inspection')
-        references = [field for field in ('detail_name', 'child_row_reference', 'reference_row') if meta.has_field(field)]
-        rows = frappe.db.get_values('Quality Inspection', filters={
-            'docstatus': 1, 'status': 'Accepted', 'reference_type': 'Stock Entry',
-            'reference_name': se.name, 'item_code': detail.item_code},
-            fieldname=['name', 'custom_process_qty', *references],as_dict=True,for_update=lock)
-        rows = [r for r in rows if any(r.get(field) == detail.name for field in references)]
-        return min(qty, sum(flt(r.custom_process_qty) for r in rows))
+    """Submitted output quantity; mat_reco does not require quality inspection."""
+    return flt(detail.get('transfer_qty') or detail.qty)
+
+
+def _pending_qty(detail, se, accepted, lock=False):
     return 0
-
-
-def _pending_qty(detail,se,accepted,lock=False):
-    qty=flt(detail.get('transfer_qty') or detail.qty)
-    if accepted>=qty or detail.get('to_quality_status')=='R':return 0
-    meta=frappe.get_meta('Quality Inspection')
-    if not meta.has_field('custom_process_qty'):return max(0,qty-accepted)
-    references=[f for f in ('detail_name','child_row_reference','reference_row') if meta.has_field(f)]
-    rejected=frappe.db.get_values('Quality Inspection',filters={'docstatus':1,'status':'Rejected',
-        'reference_type':'Stock Entry','reference_name':se.name,'item_code':detail.item_code},
-        fieldname=['custom_process_qty',*references],as_dict=True,for_update=lock)
-    rejected_qty=sum(flt(q.custom_process_qty) for q in rejected if any(q.get(f)==detail.name for f in references))
-    return max(0,qty-accepted-rejected_qty)
 
 
 def _serials(detail):
@@ -269,7 +236,7 @@ def _receipts(orders, lock=False):
                     owner[sn] = piece_line
                     if piece and item_rows[piece_line].item_code == detail.item_code and line != piece_line:
                         # Aggregated MCP output rows do not carry a single SO line.
-                        # Do not attribute partial quality acceptance to arbitrary serials.
+                        # Do not attribute partial output quantities to arbitrary serials.
                         if good == qty and _output_matches_line(detail,item_rows[piece_line]):
                             accepted[piece_line] += 1
                         else:
@@ -285,20 +252,6 @@ def _receipts(orders, lock=False):
                     and d.item_code==output['item_code']
                     and d.get('custom_sales_order_item')==output['node_id'].split(':')[0])
     return accepted, pending, node_history, owner
-
-
-def _serial_quality(serial, item_code, warehouse, lock=False):
-    if not frappe.get_meta('Stock Ledger Entry').has_field('quality_status'):
-        return None
-    pattern=serial.replace('\\','\\\\').replace('%','\\%').replace('_','\\_')
-    rows=frappe.db.sql("""SELECT sle.quality_status FROM `tabStock Ledger Entry` sle
-        WHERE sle.item_code=%s AND sle.warehouse=%s AND sle.is_cancelled=0
-          AND (sle.serial_no=%s OR sle.serial_no LIKE %s OR sle.serial_no LIKE %s OR sle.serial_no LIKE %s
-               OR EXISTS (SELECT 1 FROM `tabSerial and Batch Entry` b
-                          WHERE b.parent=sle.serial_and_batch_bundle AND b.serial_no=%s))
-        ORDER BY sle.posting_date DESC,sle.posting_time DESC,sle.creation DESC LIMIT 1""" + (' FOR UPDATE' if lock else ''),
-        (item_code,warehouse,serial,pattern+'\n%', '%\n'+pattern,'%\n'+pattern+'\n%',serial))
-    return rows[0][0] if rows else None
 
 
 def _inventory(nodes, company, ownership, *, lock=False):
@@ -346,11 +299,10 @@ def _inventory(nodes, company, ownership, *, lock=False):
                     continue
                 if flt(sn.get('custom_removed_length_mm')) or flt(sn.get('custom_removed_width_mm')):
                     continue
-                quality=_serial_quality(row.name,code,row.warehouse,lock=lock)
                 records.append(dict(item_code=code, warehouse=row.warehouse, serial_no=row.name, qty=1,
                     length_mm=flt(row.custom_dimension_length_mm), width_mm=flt(row.custom_dimension_width_mm),
                     thickness_mm=flt(row.custom_dimension_thickness_mm) or _item_thickness(code), owner=ownership.get(row.name),
-                    reserved=row.name in reserved_serials,blocked_quality=bool(quality in ('Q','R') or item.get('custom_control_quality') and quality!='A'),quality_status=quality,batch_no=sn.get('batch_no')))
+                    reserved=row.name in reserved_serials,batch_no=sn.get('batch_no')))
         elif item.has_batch_no:
             from erpnext.stock.doctype.batch.batch import get_batch_qty
             meta=frappe.get_meta('Batch')
@@ -362,35 +314,21 @@ def _inventory(nodes, company, ownership, *, lock=False):
                     doc=frappe.get_doc('Batch',batch.batch_no,for_update=lock)
                     doc.check_permission('read')
                     if doc.disabled:continue
-                    quality=doc.get('quality_status')
                     records.append(dict(item_code=code,warehouse=warehouse,qty=math.floor(max(0,flt(batch.qty))),
                         batch_no=batch.batch_no,length_mm=flt(doc.get(dimensions[0])),width_mm=flt(doc.get(dimensions[1])),
-                        thickness_mm=flt(doc.get(dimensions[2])),owner=ownership.get('batch:'+batch.batch_no),reserved=False,blocked_quality=bool(quality in ('Q','R') or item.get('custom_control_quality') and quality!='A'),quality_status=quality))
+                        thickness_mm=flt(doc.get(dimensions[2])),owner=ownership.get('batch:'+batch.batch_no),reserved=False))
         else:
             for row in frappe.db.get_values('Bin', filters={'item_code': code,'warehouse': ['in', warehouses]}, fieldname=['warehouse','actual_qty'],as_dict=True,for_update=lock):
                 # Dimensioned glass without serials cannot be matched safely.
                 if item.get('custom_item_types') in ('OUVRAGE','DECOUPE'):
                     continue
                 remaining=max(0,flt(row.actual_qty))
-                if frappe.get_meta('Stock Ledger Entry').has_field('quality_status'):
-                    balances=frappe.db.sql("""SELECT quality_status, SUM(actual_qty) AS qty FROM `tabStock Ledger Entry`
-                        WHERE item_code=%s AND warehouse=%s AND is_cancelled=0 GROUP BY quality_status""",
-                        (code,row.warehouse),as_dict=True)
-                else:
-                    balances=[frappe._dict(quality_status=None,qty=remaining)]
-                balances.sort(key=lambda r:(r.quality_status not in ('A',None,''),str(r.quality_status)))
-                for balance in balances:
-                    qty=min(remaining,max(0,flt(balance.qty)))
-                    remaining-=qty
-                    quality=balance.quality_status
-                    records.append(dict(item_code=code,warehouse=row.warehouse,qty=math.floor(qty),
-                        length_mm=0,width_mm=0,thickness_mm=0,owner=None,reserved=False,
-                        blocked_quality=bool(quality in ('Q','R') or item.get('custom_control_quality') and quality!='A'),
-                        quality_status=quality))
+                records.append(dict(item_code=code,warehouse=row.warehouse,qty=math.floor(remaining),
+                    length_mm=0,width_mm=0,thickness_mm=0,owner=None,reserved=False))
     physical = Pool(records)
     free = []
     for row in records:
-        if row['reserved'] or row.get('blocked_quality'):
+        if row['reserved']:
             continue
         row={**row,'qty':row.get('free_qty',row['qty'])}
         key = row['item_code'], row['warehouse']
@@ -471,8 +409,6 @@ def _load(company=None, *, lock=False):
             original_remaining = branch['remaining_qty']
             annotate(branch,allocation,before,final=True)
             branch['remaining_qty'] = original_remaining
-            if branch['pending_quality_qty'] and not branch['manufacture_qty']:
-                branch.update(state='quality',state_label='En attente de conformité',fabricable_qty=0)
         root['manufacture_qty'] = sum(n['manufacture_qty'] for n in root['children'])
         root['fabricable_qty'] = sum(n['fabricable_qty'] for n in root['children'])
         root['requires_mcp'] = any(n['requires_mcp'] for n in root['children'])
@@ -650,7 +586,7 @@ def _preview(root,node,request):
         movements=movements(request),shortages=request['shortages'],
         tasks=[dict(**t,item_code=by_id[t['node_id']]['item_code'],label=by_id[t['node_id']]['label'],warehouse=by_id[t['node_id']]['warehouse']) for t in request['tasks']],
         message='Préparer les découpes dans le MCP, puis revenir pour assembler.' if cutting else
-                ('Un sous-ouvrage doit être fabriqué puis accepté en qualité séparément.' if any(s['kind']=='quality' for s in blocked) else 'Composant indisponible : fabrication impossible.') if blocked else 'Assemblages des sous-ouvrages vers le parent.')
+                'Composant indisponible : fabrication impossible.' if blocked else 'Assemblages des sous-ouvrages vers le parent.')
 
 
 @frappe.whitelist()
@@ -691,8 +627,8 @@ def _repack(root,node,qty,inputs,operation,sequence):
     for child,stocks in inputs:
         groups=defaultdict(list)
         for stock in stocks:
-            groups[(stock['warehouse'],stock.get('batch_no'),stock.get('quality_status'))].append(stock)
-        for (warehouse,batch,quality),rows in groups.items():
+            groups[(stock['warehouse'],stock.get('batch_no'))].append(stock)
+        for (warehouse,batch),rows in groups.items():
             req=dict(item_code=child['item_code'],item_name=child['label'],warehouse=warehouse,
                 qty=sum(r['qty'] for r in rows),length_mm=child['length_mm'],width_mm=child['width_mm'],
                 thickness_mm=child['thickness_mm'],serials=[r['serial_no'] for r in rows if r.get('serial_no')])
@@ -701,18 +637,12 @@ def _repack(root,node,qty,inputs,operation,sequence):
                 detail.use_serial_batch_fields=1
             if batch:
                 detail.batch_no=batch
-            if hasattr(detail,'quality_status'):
-                detail.quality_status=quality
-                detail.to_quality_status=quality or 'A'
     detail=se.append('items',dict(item_code=node['item_code'],t_warehouse=target,
         custom_sales_order_item=node['sales_order_item']))
     _set_stock_uom_fields(detail,node['item_code'],qty)
     for field,value in [('custom_dimension_length_mm',node['length_mm']),('custom_dimension_width_mm',node['width_mm']),
                          ('custom_dimension_thickness_mm',node['thickness_mm'])]:
         if hasattr(detail,field):setattr(detail,field,value)
-    if hasattr(detail,'quality_status'):
-        detail.quality_status='Q' if node['quality_required'] else 'A'
-        detail.to_quality_status=detail.quality_status
     if node['has_batch_no']:
         batch=frappe.get_doc(dict(doctype='Batch',item=node['item_code'],
             batch_id='WREP-'+hashlib.sha256(f'{operation.name}:{sequence}'.encode()).hexdigest()[:18]))
@@ -739,10 +669,10 @@ def _repack(root,node,qty,inputs,operation,sequence):
     serials=_serials(detail)
     stocks=[dict(item_code=node['item_code'],warehouse=target,qty=1,serial_no=s,
         length_mm=node['length_mm'],width_mm=node['width_mm'],thickness_mm=node['thickness_mm'],
-        owner=node['sales_order_item'],batch_no=detail.get('batch_no'),quality_status=detail.get('to_quality_status')) for s in serials]
+        owner=node['sales_order_item'],batch_no=detail.get('batch_no')) for s in serials]
     if not node['has_serial_no']:
         stocks=[dict(item_code=node['item_code'],warehouse=target,qty=qty,length_mm=0,width_mm=0,thickness_mm=0,
-                     owner=node['sales_order_item'],batch_no=detail.get('batch_no'),quality_status=detail.get('to_quality_status'))]
+                     owner=node['sales_order_item'],batch_no=detail.get('batch_no'))]
     return se,stocks
 
 
@@ -761,10 +691,6 @@ def _assemble(root,node,request,operation):
             inputs = [(n, branch['assignment_inputs'])]
         if not inputs:
             frappe.throw('Découpe manquante : aucun MCP ne peut être exécuté pendant un assemblage.')
-        # A produced intermediate requiring inspection must be accepted through
-        # the normal quality process before it can be consumed by its parent.
-        if not n['is_final'] and n['id'] != node['id'] and n['quality_required']:
-            frappe.throw(f"{n['label']} nécessite une validation qualité avant l’assemblage parent. Fabriquez ce sous-ouvrage séparément.")
         try:
             se,produced=_repack(root,n,branch['produce_qty'],inputs,operation,len(outputs))
         except (frappe.ValidationError,frappe.PermissionError) as exc:

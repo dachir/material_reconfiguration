@@ -200,7 +200,7 @@ def frozen_tree(order, row):
         node.update(sales_order=order.name, sales_order_item=row.name, chantier=order.get('custom_chantier'),
             section=row.get('custom_chantier_section'), repere=row.get('custom_repere'), company=order.company,
             warehouse=_get_default_target_warehouse(node['item_code'], order.company), has_serial_no=bool(item.has_serial_no),
-            has_batch_no=bool(item.has_batch_no), quality_required=bool(item.get('custom_control_quality')))
+            has_batch_no=bool(item.has_batch_no))
         for idx, child in enumerate(node['children']):
             bind(child, path + (idx,))
     bind(tree)

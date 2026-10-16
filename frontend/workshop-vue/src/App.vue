@@ -597,10 +597,6 @@ function wheel(e) {
 							<dt>Stock allouable affecté</dt>
 							<dd>{{ selected.allocatable_qty ?? "—" }}</dd>
 						</div>
-						<div v-if="selected.pending_quality_qty">
-							<dt>En attente qualité</dt>
-							<dd>{{ selected.pending_quality_qty }}</dd>
-						</div>
 					</dl>
 					<template v-if="selected.item_type !== 'STOCK' && !selected.invalid_message"
 						><label v-if="selected.item_type !== 'ORDER'" class="ug-quantity"
@@ -660,7 +656,6 @@ function wheel(e) {
 				><span><i class="ready"></i>Fabrication disponible</span
 				><span><i class="partial"></i>Partiellement réalisable</span
 				><span><i class="blocked"></i>Manquant / bloqué</span
-				><span><i class="quality"></i>Attente qualité</span
 				><small>{{ asOf ? "Actualisé : " + asOf.slice(11, 19) : "" }}</small>
 			</footer>
 		</main>
