@@ -5,7 +5,7 @@ import uuid
 
 import frappe
 from frappe.utils import flt, cint, nowdate, add_days
-from mat_reco.material_reconfiguration.services.chantier_service import fingerprint, chantier_doc, section_matches
+from mat_reco.material_reconfiguration.services.chantier_service import fingerprint, chantier_doc, section_matches, get_quotation_usage
 from mat_reco.material_reconfiguration.services import chantier_extras
 
 GLASS = ('PRIMAIRE', 'DECOUPE', 'OUVRAGE')
@@ -427,14 +427,21 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
     frappe.db.get_value('Chantier',dossier.name,'name',for_update=True)
     study=approved_study(dossier,lock=True)
     if not request_key or len(request_key)>100:frappe.throw('Clé de génération requise.')
-    selection=frappe.parse_json(selections) if selections else [dict(line_id=r.line_id,qty=r.qty) for r in dossier.lines]
-    if not isinstance(selection,list) or not selection or any(not isinstance(r,dict) or not r.get('line_id') for r in selection):frappe.throw('Sélection invalide.')
-    scope=fingerprint(dict(chantier=chantier,selection=sorted([dict(line_id=r['line_id'],qty=flt(r.get('qty'))) for r in selection],key=lambda r:r['line_id']),submit=cint(submit)))
+    selection=frappe.parse_json(selections) if selections is not None else None
+    if selection is not None and (not isinstance(selection,list) or not selection or any(not isinstance(r,dict) or not r.get('line_id') for r in selection)):frappe.throw('Sélection invalide.')
+    # Sign the request intent before deriving the residual. A retry must return
+    # its original quote even though that quote has now consumed the balance.
+    scope=fingerprint(dict(chantier=chantier,selection=None if selection is None else sorted([dict(line_id=r['line_id'],qty=flt(r.get('qty'))) for r in selection],key=lambda r:r['line_id']),submit=cint(submit)))
     key=fingerprint(dict(user=frappe.session.user,key=request_key))
     existing=frappe.db.get_value('Quotation',{'custom_chantier_request_key':key},['name','custom_chantier','docstatus','custom_chantier_request_scope'],as_dict=True,for_update=True)
     if existing:
         if existing.custom_chantier!=chantier or existing.docstatus==2 or existing.custom_chantier_request_scope!=scope:frappe.throw('Cette clé correspond à une autre opération ou à un devis annulé.')
         frappe.get_doc('Quotation',existing.name).check_permission('read');return existing.name
+    if selection is None:
+        usage=get_quotation_usage(dossier)
+        selection=[dict(line_id=r.line_id,qty=max(0,flt(r.qty)-flt(usage.get(r.line_id)))) for r in dossier.lines]
+        selection=[r for r in selection if r['qty']>0]
+        if not selection:frappe.throw('Tous les ouvrages de ce chantier sont déjà au devis.')
     definitions=quotation_rows(dossier,study)
     if not isinstance(selection,list) or not selection or len(selection)>500 or len({r.get('line_id') for r in selection})!=len(selection):frappe.throw('Sélection de lignes invalide.')
     quote=frappe.new_doc('Quotation')

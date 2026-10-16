@@ -279,6 +279,17 @@ def section_scope(section, chantier=None):
     return set(frappe.get_list('Chantier Section', filters={'chantier':doc.chantier, 'lft':['>=',doc.lft], 'rgt':['<=',doc.rgt]}, pluck='name', limit_page_length=0))
 
 
+def get_quotation_usage(dossier):
+    """Quantities claimed by draft or submitted quotes, including legacy repères."""
+    quote_usage = {}
+    for r in frappe.db.sql('''SELECT i.custom_chantier_line, i.custom_repere, SUM(i.qty) qty FROM `tabQuotation Item` i
+        JOIN tabQuotation q ON q.name=i.parent WHERE q.custom_chantier=%s AND q.docstatus<2
+        GROUP BY i.custom_chantier_line,i.custom_repere''',dossier.name,as_dict=True):
+        identity=r.custom_chantier_line or next((l.line_id for l in dossier.lines if l.repere==r.custom_repere),None)
+        if identity:quote_usage[identity]=quote_usage.get(identity,0)+r.qty
+    return quote_usage
+
+
 @frappe.whitelist()
 def get_dossier(chantier=None):
     dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status', 'docstatus'], order_by='modified desc', limit_page_length=0)
@@ -292,12 +303,7 @@ def get_dossier(chantier=None):
     current_hash = source_hash(dossier)
     relevant = next((r for r in studies if r.source_hash == current_hash), studies[0] if studies else None)
     technical = frappe.get_doc('Chantier Technical Study',relevant.name).as_dict() if relevant else None
-    quote_usage = {}
-    for r in frappe.db.sql('''SELECT i.custom_chantier_line, i.custom_repere, SUM(i.qty) qty FROM `tabQuotation Item` i
-        JOIN tabQuotation q ON q.name=i.parent WHERE q.custom_chantier=%s AND q.docstatus<2
-        GROUP BY i.custom_chantier_line,i.custom_repere''',chantier,as_dict=True):
-        identity=r.custom_chantier_line or next((l.line_id for l in dossier.lines if l.repere==r.custom_repere),None)
-        if identity:quote_usage[identity]=quote_usage.get(identity,0)+r.qty
+    quote_usage = get_quotation_usage(dossier)
     sections = frappe.get_list('Chantier Section', filters={'chantier':chantier}, fields=['name','section_name','parent_chantier_section','lft'], order_by='lft', limit_page_length=0)
     quotations = frappe.get_list('Quotation', filters={'custom_chantier':chantier}, fields=['name','docstatus','status','grand_total','currency','amended_from'], order_by='modified desc', limit_page_length=0)
     orders = [frappe.get_doc('Sales Order', n) for n in frappe.get_list('Sales Order', filters={'custom_chantier':chantier,'docstatus':1}, pluck='name', limit_page_length=0)]
