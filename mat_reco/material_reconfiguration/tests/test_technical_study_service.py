@@ -225,6 +225,17 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertEqual(snapshot['children'][0]['ratio'],2)
         self.assertEqual(frappe.get_doc('Item','QA-TECH-RAW').custom_thickness_mm,6)
 
+    def test_total_thickness_must_include_glass_and_air(self):
+        tree=self.definition();tree['air_gap_mm']=12
+        study=self.study(tree)
+        study.lines[0].thickness_mm=24
+        study.save()
+        with self.assertRaisesRegex(frappe.ValidationError,'20 mm calculés'):
+            study.submit()
+        self.assertFalse(frappe.db.exists('Item','QA-TECH-FG'))
+        study.reload();study.lines[0].thickness_mm=20
+        study.save();study.submit()
+
     def test_air_gap_must_fit_inside_total_thickness(self):
         for gap in (-1,24,25):
             with self.subTest(gap=gap):
@@ -383,3 +394,24 @@ class TechnicalStudyTests(unittest.TestCase):
         self.doc.save()
         result=service.designation_suggestions('QA-AUTOCOMPLETE-')
         self.assertEqual(result,[f'QA-AUTOCOMPLETE-{i:02}' for i in range(10)])
+
+    def test_air_component_counts_thickness_without_creating_stock_item(self):
+        tree=self.definition()
+        tree['children'].append(dict(mode='air',item_type='AIR',thickness_mm=12,qty_factor=1,children=[]))
+        study=self.study(tree);study.lines[0].thickness_mm=20
+        study.save();study.submit()
+        snapshot=json.loads(study.lines[0].snapshot_json)
+        self.assertEqual(snapshot['air_gap_mm'],12)
+        self.assertEqual(snapshot['air_layers'][0]['thickness_mm'],12)
+        self.assertEqual(len(frappe.get_doc('Item','QA-TECH-FG').custom_composite_items),1)
+        self.assertEqual(len(snapshot['children']),1)
+        existing=service.seed_item('QA-TECH-FG')
+        existing['children'].append(dict(mode='air',item_type='AIR',thickness_mm=12,qty_factor=1,children=[]))
+        service.validate_node(existing)
+        self.assertEqual(service._resolve(existing,self.company,[]),'QA-TECH-FG')
+
+    def test_air_component_requires_positive_thickness_and_no_children(self):
+        for thickness,children in [(0,[]),(-2,[]),(12,[dict(item_type='AIR')])]:
+            tree=self.definition()
+            tree['children'].append(dict(mode='air',item_type='AIR',thickness_mm=thickness,children=children))
+            with self.assertRaises(frappe.ValidationError):service.validate_node(tree)

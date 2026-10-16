@@ -155,7 +155,7 @@ def _signature(node):
     """Commercial labels and parent usage ratios do not define the Item itself."""
     return dict(type=node['item_type'],uom=node.get('stock_uom'),
         dimensions=[flt(node.get(k)) for k in ('length_mm','width_mm','thickness_mm')] if node['item_type']=='PRIMAIRE' else [],
-        components=[dict(code=c.get('item_code') or c.get('proposed_code'),qty=flt(c.get('qty_factor',1))) for c in node.get('children',[])])
+        components=[dict(code=c.get('item_code') or c.get('proposed_code'),qty=flt(c.get('qty_factor',1))) for c in node.get('children',[]) if c.get('item_type')!='AIR'])
 
 
 def validate_node(node, depth=0, ancestors=(), budget=None):
@@ -163,6 +163,11 @@ def validate_node(node, depth=0, ancestors=(), budget=None):
     budget[0]+=1
     if not isinstance(node,dict) or budget[0]>1000 or depth>20:
         frappe.throw('Définition technique invalide ou trop volumineuse.')
+    if node.get('item_type')=='AIR':
+        thickness=flt(node.get('thickness_mm'))
+        if depth==0 or node.get('children') or not math.isfinite(thickness) or thickness<=0:
+            frappe.throw('La lame d’air doit avoir une épaisseur strictement positive et aucun enfant.')
+        return
     code=node.get('item_code') if node.get('mode')=='existing' else node.get('proposed_code')
     if not code or code in ancestors:
         frappe.throw('Code article manquant ou composition cyclique.')
@@ -173,7 +178,7 @@ def validate_node(node, depth=0, ancestors=(), budget=None):
         # Validate descendants as well; UI may not modify a reused Item's children.
         # Browser JSON turns whole-valued floats into integers (4.0 -> 4).
         # Structural equality preserves numeric equivalence.
-        if [_signature(c) for c in current['children']] != [_signature(c) for c in node.get('children',[])]:
+        if [_signature(c) for c in current['children']] != [_signature(c) for c in node.get('children',[]) if c.get('item_type')!='AIR']:
             frappe.throw(f'{code} : les composants d’un Item réutilisé ne peuvent pas être modifiés ici.')
     elif node.get('mode')=='new':
         if node.get('item_type') not in GLASS or not node.get('item_name') or not node.get('stock_uom') or not node.get('item_group') or not node.get('warehouse'):
@@ -189,13 +194,36 @@ def validate_node(node, depth=0, ancestors=(), budget=None):
         frappe.throw(f'{code} : format nominal positif requis et aucun composant autorisé.')
     if kind=='DECOUPE' and (len(children)!=1 or children[0].get('item_type')!='PRIMAIRE'):
         frappe.throw(f'{code} : définir exactement une matière PRIMAIRE.')
-    if kind=='OUVRAGE' and (not children or any(c.get('item_type') not in ('OUVRAGE','DECOUPE','ACCESSOIRE') for c in children)):
+    if kind=='OUVRAGE' and (not any(c.get('item_type')!='AIR' for c in children) or any(c.get('item_type') not in ('OUVRAGE','DECOUPE','ACCESSOIRE','AIR') for c in children)):
         frappe.throw(f'{code} : ajouter des ouvrages, découpes ou accessoires comme composants.')
     for child in children:
         factor=flt(child.get('qty_factor',1))
         if factor<=0 or factor!=cint(factor):
             frappe.throw('Les ratios des composants doivent être des entiers positifs.')
         validate_node(child,depth+1,ancestors+(code,),budget)
+
+
+def composition_thickness(node):
+    """Thickness of glass layers and air; a cutting source is not another layer."""
+    kind=node.get('item_type')
+    if kind in ('PRIMAIRE','AIR'):return flt(node.get('thickness_mm'))
+    if kind=='DECOUPE':return composition_thickness(node['children'][0])
+    if kind=='OUVRAGE':
+        return flt(node.get('air_gap_mm'))+sum(
+            composition_thickness(child)*flt(child.get('qty_factor',1))
+            for child in node.get('children',[]))
+    return 0
+
+
+def air_layers(node, path=(), ratio=1):
+    layers=[]
+    if node.get('item_type')=='AIR':
+        return [dict(path=list(path),thickness_mm=flt(node.get('thickness_mm')),qty=ratio)]
+    if flt(node.get('air_gap_mm')):
+        layers.append(dict(path=list(path),thickness_mm=flt(node['air_gap_mm']),qty=ratio))
+    for i,child in enumerate(node.get('children',[])):
+        layers.extend(air_layers(child,path+(i,),ratio*flt(child.get('qty_factor',1))))
+    return layers
 
 
 def validate_study(doc):
@@ -228,6 +256,9 @@ def validate_study(doc):
             if air_gap and node.get('item_type')!='OUVRAGE':
                 frappe.throw(f'{row.repere} : utiliser un OUVRAGE pour un vitrage avec lame d’air.')
             validate_node(node)
+            calculated=composition_thickness(node)
+            if not math.isfinite(calculated) or abs(calculated-flt(row.thickness_mm))>0.001:
+                frappe.throw(f'{row.repere} : épaisseur totale incompatible : {flt(row.thickness_mm):g} mm saisis, {calculated:g} mm calculés (verres et lame d’air).')
             if expected[row.line_id].uom and expected[row.line_id].uom!=node['stock_uom']:
                 frappe.throw('L’unité technique doit correspondre à l’unité de prix commerciale.')
 
@@ -235,8 +266,9 @@ def validate_study(doc):
 def _resolve(node, company, created):
     code=node.get('item_code') if node['mode']=='existing' else node['proposed_code']
     if node['mode']=='existing':return code
-    children=[(_resolve(c,company,created),c.get('qty_factor',1)) for c in node.get('children',[])]
-    spec=dict(node,children=[dict(c,item_code=resolved) for c,(resolved,_) in zip(node.get('children',[]),children)])
+    material_children=[c for c in node.get('children',[]) if c.get('item_type')!='AIR']
+    children=[(_resolve(c,company,created),c.get('qty_factor',1)) for c in material_children]
+    spec=dict(node,children=[dict(c,item_code=resolved) for c,(resolved,_) in zip(material_children,children)])
     if frappe.db.exists('Item',code):
         if _signature(seed_item(code))!=_signature(spec):
             frappe.throw(f'Le code {code} existe avec une définition différente. Aucun Item existant ne sera écrasé.')
@@ -278,7 +310,9 @@ def submit_study(doc):
             source=frappe._dict(name=row.line_id,idx=row.idx,item_code=row.result_item,
                 custom_client_length_mm=row.length_mm,custom_client_width_mm=row.width_mm,custom_client_thickness_mm=row.thickness_mm)
             tree=_tree(frappe._dict(name=chantier.name,company=chantier.company),source,item_code=row.result_item)
-            tree['air_gap_mm']=flt(frappe.parse_json(row.tree_json).get('air_gap_mm'))
+            definition=frappe.parse_json(row.tree_json)
+            tree['air_layers']=air_layers(definition)
+            tree['air_gap_mm']=sum(layer['thickness_mm']*layer['qty'] for layer in tree['air_layers'])
             row.snapshot_json=json.dumps(tree,ensure_ascii=False);row.snapshot_hash=fingerprint(tree)
         doc.technical_hash=fingerprint([dict(id=r.line_id,item=r.result_item,hash=r.snapshot_hash) for r in doc.lines])
     except Exception:
