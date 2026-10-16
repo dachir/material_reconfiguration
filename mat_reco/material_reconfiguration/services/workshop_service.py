@@ -522,6 +522,65 @@ def _select(roots, order_name, node_id):
     return root,node
 
 
+def _open_mcp_coverage(company, exclude=None):
+    """Count actual pending placements, never the requested (possibly missing) cuts."""
+    from mat_reco.material_reconfiguration.services.repack_draft_service import build_effective_nodes
+    from mat_reco.material_reconfiguration.services.mcp_compensation_service import submitted_receipts
+    coverage = defaultdict(int)
+    filters = {'company': company, 'docstatus': ['<', 2],
+               'status': ['not in', ['Cancelled', 'Executed']]}
+    if exclude:
+        filters['name'] = ['!=', exclude]
+    for row in frappe.get_all('Material Cutting Plan', filters=filters, fields=['name']):
+        doc = frappe.get_doc('Material Cutting Plan', row.name)
+        scope = _json(doc.get('workshop_request_json'))
+        produced, _ = submitted_receipts(doc)
+        # Older cockpit plans encoded the occurrence only in their hashed UID.
+        legacy = {}
+        for need in scope.get('needs', []):
+            order = need.get('sales_order', scope.get('sales_order'))
+            for unit in range(_qty(need['qty'])):
+                identity = f"{scope['operation']}:{order}:{need['node_id']}:{unit}"
+                legacy['WC-' + hashlib.sha256(identity.encode()).hexdigest()[:28]] = (order, need['node_id'])
+        seen = set()
+        for sheet in build_effective_nodes(doc):
+            for piece in sheet.get('children', []):
+                uid = piece.get('piece_uid') or piece.get('id')
+                if piece.get('node_type') != 'finished_good' or not uid or uid in seen:
+                    continue
+                if (piece.get('id') or uid) in produced:
+                    continue  # Physical stock is already allocated by _inventory.
+                seen.add(uid)
+                key = legacy.get(uid)
+                if piece.get('workshop_node_id'):
+                    key = (piece.get('sales_order'), piece['workshop_node_id'])
+                if not key and not str(uid).startswith('WC-'):
+                    parts = str(uid).split('::')
+                    if len(parts) >= 5 and parts[4].startswith('root'):
+                        occurrence = parts[4].removeprefix('root.')
+                        key = (piece.get('sales_order'), f"{piece.get('sales_order_item')}:{occurrence}")
+                if key:
+                    coverage[key] += 1
+    return coverage
+
+
+def _uncovered_request(root, request):
+    coverage = _open_mcp_coverage(root['company'])
+    shortages = []
+    covered = 0
+    for shortage in request['shortages']:
+        row = dict(shortage)
+        if row['kind'] == 'cutting':
+            amount = min(row['qty'], coverage[(root['id'], row['node_id'])])
+            row['qty'] -= amount
+            covered += amount
+        if row['qty']:
+            shortages.append(row)
+    request['shortages'] = shortages
+    request['covered_cutting_qty'] = covered
+    return request
+
+
 def _fresh_request(sales_order,node_id,qty,lock=False,dimensions=None):
     so = frappe.get_doc('Sales Order',sales_order,for_update=lock)
     so.check_permission('read')
@@ -554,12 +613,12 @@ def _fresh_request(sales_order,node_id,qty,lock=False,dimensions=None):
                 request['children'].append(child)
                 request['tasks'].extend(child['tasks'])
                 request['shortages'].extend(child['shortages'])
-            return root,node,request
+            return root,node,_uncovered_request(root,request)
         for b in r['children']:
             if any(n['id']==node_id for n in _walk(b)):
                 request = plan(node,qty,pool,consume_existing=not node['is_final'])
                 request['accounting_dimensions'] = root['accounting_dimensions']
-                return root,node,request
+                return root,node,_uncovered_request(root,request)
             if not b.get('invalid_message'):
                 plan(b,b['manufacture_qty'],pool,consume_existing=False)
     frappe.throw('Branche introuvable.')
@@ -582,10 +641,11 @@ def _preview(root,node,request):
     cutting = any(s['kind']=='cutting' for s in request['shortages'])
     blocked = [s for s in request['shortages'] if s['kind']!='cutting']
     return dict(sales_order=root['id'],node_id=node['id'],qty=request['qty'],
-        action='mcp' if cutting else 'blocked' if blocked else 'repack',
+        action='mcp' if cutting else 'blocked' if blocked or request.get('covered_cutting_qty') else 'repack',
         movements=movements(request),shortages=request['shortages'],
         tasks=[dict(**t,item_code=by_id[t['node_id']]['item_code'],label=by_id[t['node_id']]['label'],warehouse=by_id[t['node_id']]['warehouse']) for t in request['tasks']],
         message='Préparer les découpes dans le MCP, puis revenir pour assembler.' if cutting else
+                'Découpes déjà planifiées dans un autre MCP : terminez ces découpes avant l’assemblage.' if request.get('covered_cutting_qty') else
                 'Composant indisponible : fabrication impossible.' if blocked else 'Assemblages des sous-ouvrages vers le parent.')
 
 
@@ -726,7 +786,7 @@ def _raw_bins(source,company):
         frappe.get_doc('Warehouse',row['warehouse']).check_permission('read')
         # Existing active MCP sources and ERP reservations must not be reused.
         busy=frappe.db.sql('''SELECT c.name FROM `tabMCP Stock Candidate` c JOIN `tabMaterial Cutting Plan` m ON m.name=c.parent
-            WHERE c.serial_no=%s AND c.is_qualified=1 AND m.docstatus<2
+            WHERE c.serial_no=%s AND c.is_active_input=1 AND m.docstatus<2
               AND COALESCE(m.status,'') NOT IN ('Cancelled','Executed') LIMIT 1 FOR UPDATE''',(row['serial_no'],))
         reserved=frappe.db.sql('''SELECT s.name FROM `tabSerial and Batch Entry` s
             JOIN `tabStock Reservation Entry` r ON r.name=s.parent
@@ -758,13 +818,6 @@ def _prepare_mcp(root,node,request,operation):
         groups[source].append({'sales_order':root['id'],'node_id':leaf['id'],'qty':shortage['qty']})
     names=[]
     for source,needs in sorted(groups.items()):
-        for existing in frappe.get_all('Material Cutting Plan',filters={'source_item':source,'docstatus':['<',2],
-                'status':['not in',['Cancelled','Executed']],'workshop_request_json':['is','set']},
-                fields=['name','workshop_request_json']):
-            scope=_json(existing.workshop_request_json)
-            if root['id'] in scope.get('orders',[scope.get('sales_order')]) and any(
-                    old['node_id']==need['node_id'] for old in scope.get('needs',[]) for need in needs):
-                frappe.throw(f"Un MCP existe déjà pour ces besoins : {existing.name}. Terminez-le ou annulez-le avant d’en préparer un autre.")
         thicknesses={by_id[n['node_id']]['thickness_mm'] for n in needs}
         if len(thicknesses)!=1:
             frappe.throw('Des épaisseurs différentes sont rattachées à la même matière. Corrigez les caractéristiques des articles.')
@@ -809,25 +862,37 @@ def workshop_cutting_demands(doc):
     import hmac
     if not hmac.compare_digest(spec.get('signature',''),_scope_signature(spec)):
         frappe.throw('Le périmètre du MCP cockpit a été modifié. Recréez la simulation depuis le cockpit.')
+    # Serialize scope changes and cockpit creation with the same company lock.
+    frappe.db.sql('SELECT name FROM `tabCompany` WHERE name=%s FOR UPDATE', doc.company)
     selected={r.sales_order for r in doc.selected_sales_orders if r.sales_order}
     previous=set(spec.get('orders',[spec['sales_order']]))
-    if selected!=previous:
+    planning = doc.get('mcp_mode') != 'Retour Terrain'
+    # Terrain pieces already exist: inventory changes must not erase their scope.
+    if planning or selected != previous:
+        roots,_,_ = _load(doc.company, lock=True)
+        residual = {(root['id'], leaf['id']): leaf['missing_qty']
+                    for root in roots for branch in root['children'] for leaf in _walk(branch)
+                    if leaf['item_type']=='DECOUPE' and not leaf.get('invalid_message')
+                    and leaf.get('primary_item')==doc.source_item}
+        coverage = _open_mcp_coverage(doc.company, exclude=doc.name)
         spec['needs']=[n for n in spec['needs'] if n.get('sales_order',spec['sales_order']) in selected]
         for name in sorted(selected-previous):
-            so=frappe.get_doc('Sales Order',name);so.check_permission('read')
-            if so.company!=doc.company or so.docstatus!=1:
-                frappe.throw('Les commandes regroupées doivent être validées et de la même société.')
-            roots,_,_=_load(so.company)
-            root=next((r for r in roots if r['id']==name),None)
-            if not root:continue
-            for branch in root['children']:
-                for leaf in _walk(branch):
-                    if leaf['item_type']=='DECOUPE' and leaf['primary_item']==doc.source_item:
-                        qty=max(0,leaf['remaining_qty']-leaf['allocatable_qty'])
-                        if qty:spec['needs'].append(dict(sales_order=name,node_id=leaf['id'],qty=qty))
-        spec['orders']=sorted(selected)
-        spec['signature']=_scope_signature(spec)
-        doc.workshop_request_json=json.dumps(spec,ensure_ascii=False)
+            for (order, node_id), qty in residual.items():
+                if order==name and qty:
+                    spec['needs'].append(dict(sales_order=name,node_id=node_id,qty=qty))
+        # Each MCP may claim only cuts not actually placed in the other plans.
+        # A missing cut in another MCP remains available for a second MCP.
+        claimed = defaultdict(int)
+        for need in spec['needs']:
+            if not planning and need.get('sales_order',spec['sales_order']) in previous:
+                continue
+            key = (need.get('sales_order',spec['sales_order']), need['node_id'])
+            available = max(0, residual.get(key,0)-coverage[key]-claimed[key])
+            need['qty'] = min(_qty(need['qty']), available)
+            claimed[key] += need['qty']
+    spec['orders']=sorted(selected)
+    spec['signature']=_scope_signature(spec)
+    doc.workshop_request_json=json.dumps(spec,ensure_ascii=False)
     from mat_reco.material_reconfiguration.services.order_explosion_service import build_unit_cutting_demands
     contexts={}
     for name in selected:
@@ -842,6 +907,7 @@ def workshop_cutting_demands(doc):
         if name not in contexts:continue
         so,trees,by_id=contexts[name]
         leaf=by_id.get(need['node_id']);qty=_qty(need['qty'])
+        if not qty:continue
         if not leaf or leaf.get('invalid_message') or leaf['item_type']!='DECOUPE' or leaf['primary_item']!=doc.source_item:
             frappe.throw('Besoin de découpe incompatible avec le MCP.')
         row=next(r for r in so.items if r.name==leaf['sales_order_item'])
@@ -862,6 +928,7 @@ def workshop_cutting_demands(doc):
         for unit,piece in enumerate(pieces):
             identity=f"{spec['operation']}:{name}:{leaf['id']}:{unit}"
             piece['piece_uid']='WC-'+hashlib.sha256(identity.encode()).hexdigest()[:28]
+            piece['workshop_node_id']=leaf['id']
         demands.extend(pieces)
     return demands
 

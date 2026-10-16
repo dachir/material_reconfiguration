@@ -30,6 +30,7 @@ from mat_reco.material_reconfiguration.services.order_explosion_service import (
 )
 from mat_reco.material_reconfiguration.services.stock_candidate_service import (
     get_available_cutting_bins,
+    get_other_mcp_input_serials,
 )
 
 MCP_MODE_PLANIFICATION = "Planification"
@@ -71,6 +72,8 @@ class MaterialCuttingPlan(Document):
             self._clear_plan_results()
             return
 
+        # Use the cockpit's company lock for manual simulations as well.
+        frappe.db.sql('SELECT name FROM `tabCompany` WHERE name=%s FOR UPDATE', self.company)
         selected_serials = self._get_selected_input_serial_nos()
         if not selected_serials:
             frappe.throw(self._get_missing_input_message())
@@ -98,6 +101,9 @@ class MaterialCuttingPlan(Document):
         )
 
         mode = self._get_mcp_mode()
+        if mode == MCP_MODE_PLANIFICATION:
+            committed = get_other_mcp_input_serials(self.company, self.name)
+            bins = [b for b in bins if b['serial_no'] not in committed]
 
         existing_tree = {}
         try:

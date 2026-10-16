@@ -2,6 +2,7 @@
 import {printDocument} from "./printing.js";
 import { ref, reactive, computed, onBeforeUnmount } from "vue";
 import { flatten, layout, routeFor } from "./layout.js";
+import { defaultQuantity } from "./quantity.js";
 const api = "mat_reco.material_reconfiguration.services.workshop_service.";
 const roots = ref([]),
 	errors = ref([]),
@@ -134,10 +135,7 @@ async function toggle(node) {
 }
 function select(node) {
 	selectedId.value = node.id;
-	quantity.value = Math.max(
-		1,
-		Math.min(node.manufacture_qty ?? node.remaining_qty ?? 1, node.fabricable_qty || 1)
-	);
+	quantity.value = defaultQuantity(node);
 }
 async function expandAll() {
 	roots.value.forEach((r) => loadedOrders.add(r.id));

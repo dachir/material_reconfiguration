@@ -204,3 +204,13 @@ def get_available_cutting_bins(
     return results
 
 
+
+
+def get_other_mcp_input_serials(company, plan_name=None):
+    """Only sheets used by a live plan are committed; unused candidates stay free."""
+    return set(frappe.db.sql("""SELECT DISTINCT c.serial_no
+        FROM `tabMCP Stock Candidate` c
+        JOIN `tabMaterial Cutting Plan` m ON m.name=c.parent
+        WHERE m.company=%s AND m.name!=%s AND m.docstatus<2
+          AND COALESCE(m.status,'') NOT IN ('Cancelled','Executed')
+          AND c.is_active_input=1""", (company, plan_name or ''), pluck=True))
