@@ -15,7 +15,7 @@ const {chromium}=require(path.resolve(root,'../crm/node_modules/playwright'));
  const interval=window.setInterval;window.setInterval=(fn,ms)=>{window.testInterval=fn;return interval(fn,ms);};
  const all=Array.from({length:10000},(_,i)=>({serial_no:'TEST-'+String(i).padStart(5,'0'),item_code:'RAW',length_mm:2000,width_mm:1000,thickness_mm:6,warehouse:i%2?'B':'A',area_m2:2,classification:i%2?'chutes':'volumes'}));
  const filtered=a=>all.filter(r=>(!a.warehouse||r.warehouse===a.warehouse)&&(!a.search||r.serial_no.includes(a.search)));
- window.frappe={realtime:{on(name,fn){window.testEvents[name]=fn;},off(name){delete window.testEvents[name];},socket:{connected:true,on(){},off(){}}},async call({method,args:a}){window.testCalls++;await new Promise(r=>setTimeout(r,80));if(method.endsWith('get_warehouses'))return {message:['A','B']};const rows=filtered(a),volumes=rows.filter(r=>r.classification==='volumes').length;if(method.endsWith('get_stock_overview'))return {message:{volumes,chutes:rows.length-volumes,total:rows.length,surface_m2:rows.length*2,as_of:'2026-10-16 12:00:00',groups:rows.length?[{item_code:'RAW',item_name:'Verre clair — données de test',volumes,chutes:rows.length-volumes,total:rows.length,surface_m2:rows.length*2,warehouse:a.warehouse||'—'}]:[],diagnostics:{}}};const remaining=rows.map(r=>({...r,area_m2:2+window.testVersion})).filter(r=>!a.cursor||r.serial_no>a.cursor);return {message:{rows:remaining.slice(0,100),next_cursor:remaining.length>100?remaining[99].serial_no:null,total:rows.length}};}};
+ window.frappe={realtime:{on(name,fn){window.testEvents[name]=fn;},off(name){delete window.testEvents[name];},socket:{connected:true,on(){},off(){}}},async call({method,args:a}){window.testCalls++;await new Promise(r=>setTimeout(r,80));if(method.endsWith('get_warehouses'))return {message:['A','B']};const rows=filtered(a),volumes=rows.filter(r=>r.classification==='volumes').length;if(method.endsWith('get_stock_overview'))return {message:{volumes,chutes:rows.length-volumes,total:rows.length,surface_m2:rows.length*2,as_of:'2026-10-16 12:00:00',groups:rows.length?[{item_code:'RAW',item_name:'Verre clair — données de test',volumes,chutes:rows.length-volumes,total:rows.length,surface_m2:rows.length*2,warehouse:a.warehouse||'—'}]:[],diagnostics:{}}};const remaining=rows.filter(r=>r.classification==='chutes').map(r=>({...r,area_m2:2+window.testVersion})).filter(r=>!a.cursor||r.serial_no>a.cursor);return {message:{rows:remaining.slice(0,100),next_cursor:remaining.length>100?remaining[99].serial_no:null,total:rows.length}};}};
  });
  // Exercise the actual Frappe loader and page lifecycle, without authentication.
  await page.route('**/assets/mat_reco/js/glass_stock_dist/**',route=>{
@@ -40,6 +40,7 @@ const {chromium}=require(path.resolve(root,'../crm/node_modules/playwright'));
  await page.getByRole('button',{name:'Charger les pièces suivantes'}).click();
  await page.waitForFunction(()=>!document.querySelector('.glass-more button')?.disabled);
  await page.locator('.glass-viewport').evaluate(e=>e.scrollTop=600);
+ assert.ok((await page.locator('.glass-serial').allTextContents()).every(s=>Number(s.split('-')[1])%2===1),'Only cuts have serial detail');
  await page.locator('.glass-serial').nth(5).click();
  const before=await page.locator('.glass-viewport').evaluate(e=>e.scrollTop);
  const chosen=await page.locator('.glass-selected .glass-serial').textContent();
@@ -63,6 +64,10 @@ const {chromium}=require(path.resolve(root,'../crm/node_modules/playwright'));
   await page.locator('.glass-viewport').evaluate((e,y)=>e.scrollTop=y,before);
   console.log(source+': open group, selection, scroll, loaded pages and updated data retained');
  }
+ await page.getByRole('combobox',{name:'Warehouse',exact:true}).selectOption('A');
+ await page.waitForFunction(()=>!document.querySelector('.glass-refresh').disabled);
+ assert.equal(await page.locator('.glass-toggle').isDisabled(),true);
+ assert.equal(await page.locator('.glass-serial').count(),0);
  await page.getByRole('combobox',{name:'Warehouse',exact:true}).selectOption('B');await page.waitForFunction(()=>document.querySelector('.glass-kpis strong')?.textContent==='0');
  console.log('Filtered KPIs',await page.locator('.glass-kpis strong').allTextContents());
  await page.getByRole('textbox').fill('TEST-00001');await page.waitForFunction(()=>document.querySelectorAll('.glass-kpis strong')[1]?.textContent==='1');

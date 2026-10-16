@@ -34,7 +34,7 @@ const fmt=(n)=>Number(n||0).toLocaleString('fr-FR',{maximumFractionDigits:2});
 function open(dt,name){frappe.set_route('Form',dt,name);}
 function form(title,fields,onSave) {const dialog=new frappe.ui.Dialog({title,fields,primary_action_label:'Enregistrer',async primary_action(values){dialog.disable_primary_action();try{await onSave(values);dialog.hide();await refresh();}catch(e){frappe.msgprint(describe(e));}finally{dialog.enable_primary_action();}}});dialog.show();}
 function newChantier(){form('Nouveau chantier',[
- {fieldname:'reference',label:'Référence',fieldtype:'Data',reqd:1},{fieldname:'designation',label:'Désignation',fieldtype:'Data',reqd:1},
+ {fieldname:'reference',label:'Référence',fieldtype:'Data',read_only:1,description:'Numéro automatique attribué à l’enregistrement (YYCHANTMM#####).'},{fieldname:'designation',label:'Désignation',fieldtype:'Data',reqd:1},
  {fieldname:'company',label:'Société',fieldtype:'Link',options:'Company',reqd:1,default:frappe.defaults.get_user_default('Company')},
  {fieldname:'customer',label:'Client',fieldtype:'Link',options:'Customer',reqd:1},{fieldname:'responsible',label:'Responsable',fieldtype:'Link',options:'User',default:frappe.session.user},
  {fieldname:'expected_start_date',label:'Début prévu',fieldtype:'Date'},{fieldname:'expected_end_date',label:'Fin de fabrication prévue',fieldtype:'Date'}

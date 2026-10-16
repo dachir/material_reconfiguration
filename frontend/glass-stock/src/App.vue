@@ -20,7 +20,7 @@ async function refresh(){
   const result=await call('get_stock_overview',args);
   if(token!==generation)return;
   // Refresh every already loaded page while the existing table stays visible.
-  const updates=await Promise.all(result.groups.filter(g=>expanded.value[g.item_code]).map(async g=>{
+  const updates=await Promise.all(result.groups.filter(g=>g.chutes>0&&expanded.value[g.item_code]).map(async g=>{
    const state=expanded.value[g.item_code],rows=[];
    const count=Math.max(100,state.rows.length);
    let cursor=null;
@@ -33,7 +33,7 @@ async function refresh(){
   }));
   if(token!==generation)return;
   const top=viewport.value?.scrollTop||0;
-  const groups=new Set(result.groups.map(g=>g.item_code));
+  const groups=new Set(result.groups.filter(g=>g.chutes>0).map(g=>g.item_code));
   for(const code of Object.keys(expanded.value)){if(!groups.has(code))delete expanded.value[code];}
   for(const update of updates){
    if(update&&expanded.value[update.code]===update.state){Object.assign(update.state,{rows:update.rows,next:update.next,loading:false,error:''});}
@@ -47,7 +47,7 @@ async function refresh(){
 }
 function queueRefresh(){clearTimeout(debounce);debounce=setTimeout(()=>{if(active.value)refresh();},350);}
 async function load(g){const token=generation;const state=expanded.value[g.item_code];if(!state||state.loading)return;state.loading=true;state.error='';try{const result=await call('get_stock_serials',{item_code:g.item_code,search:search.value,warehouse:warehouse.value,cursor:state.next,page_size:100});if(token===generation&&expanded.value[g.item_code]===state){state.rows.push(...result.rows);state.next=result.next_cursor;}}catch(e){state.error='Chargement impossible — réessayer';}finally{state.loading=false;}}
-function toggle(g){if(expanded.value[g.item_code])delete expanded.value[g.item_code];else{expanded.value[g.item_code]={rows:[],next:null,loading:false,error:''};load(g);}}
+function toggle(g){if(!g.chutes)return;if(expanded.value[g.item_code])delete expanded.value[g.item_code];else{expanded.value[g.item_code]={rows:[],next:null,loading:false,error:''};load(g);}}
 function stockChanged(){if(!busy.value)queueRefresh();}
 function connection(){connected.value=true;}
 function disconnection(){connected.value=false;}
@@ -69,7 +69,7 @@ onBeforeUnmount(hide);defineExpose({show,hide});
      <div v-if="busy&&!data.groups.length" class="glass-empty" role="status">Chargement du stock…</div><div v-else-if="!data.groups.length" class="glass-empty">{{error?'Stock inaccessible.':'Aucune pièce en stock pour ces filtres.'}}</div>
      <div v-else :style="{height:flat.total+'px',position:'relative'}">
       <div v-for="line in visible" :key="line.key" class="glass-grid glass-row" :class="{'glass-group':line.kind==='group','glass-selected':line.kind==='serial'&&selected===line.r.serial_no}" :style="{position:'absolute',top:line.y+'px',height:line.h+'px',width:'100%'}" role="row" :aria-selected="line.kind==='serial'?selected===line.r.serial_no:undefined">
-       <template v-if="line.kind==='group'"><span role="cell"><button class="glass-toggle" :aria-expanded="!!expanded[line.g.item_code]" @click="toggle(line.g)"><span>{{expanded[line.g.item_code]?'⌄':'›'}}</span><span class="glass-thumbnail">▱</span><b>{{line.g.item_name}}</b><small>{{fmt(line.g.volumes)}} volumes · {{fmt(line.g.chutes)}} chutes</small></button></span><span role="cell"></span><span role="cell">{{fmt(line.g.total)}}</span><span role="cell">{{fmt(line.g.surface_m2,2)}}</span><span role="cell">{{line.g.warehouse}}</span></template>
+       <template v-if="line.kind==='group'"><span role="cell"><button class="glass-toggle" :disabled="!line.g.chutes" :title="line.g.chutes?'Afficher les découpes et chutes':'Volumes entiers : total regroupé'" :aria-expanded="line.g.chutes?!!expanded[line.g.item_code]:undefined" @click="toggle(line.g)"><span>{{line.g.chutes?(expanded[line.g.item_code]?'⌄':'›'):''}}</span><span class="glass-thumbnail">▱</span><b>{{line.g.item_name}}</b><small>{{fmt(line.g.volumes)}} volumes · {{fmt(line.g.chutes)}} chutes</small></button></span><span role="cell"></span><span role="cell">{{fmt(line.g.total)}}</span><span role="cell">{{fmt(line.g.surface_m2,2)}}</span><span role="cell">{{line.g.warehouse}}</span></template>
        <template v-else-if="line.kind==='serial'"><span role="cell"><button class="glass-serial" @click="selected=line.r.serial_no">{{line.r.serial_no}}</button></span><span role="cell">{{fmt(line.r.length_mm)}} × {{fmt(line.r.width_mm)}} × {{line.r.thickness_mm>0?fmt(line.r.thickness_mm):'—'}}</span><span role="cell">1</span><span role="cell" :title="line.r.geometry_error||''">{{fmt(line.r.area_m2,2)}}</span><span role="cell">{{line.r.warehouse}}</span></template>
        <template v-else><span class="glass-more"><button :disabled="line.detail.loading" @click="load(line.g)">{{line.detail.loading?'Chargement…':line.detail.error||'Charger les pièces suivantes'}}</button></span></template>
       </div>

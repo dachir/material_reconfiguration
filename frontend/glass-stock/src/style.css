@@ -2,3 +2,5 @@ body.ug-glass-active .navbar,body.ug-glass-active .page-head,body.ug-glass-activ
 
 .ug-glass svg.glass-icon{width:40px;height:40px;flex-shrink:0;fill:none;stroke:var(--green);stroke-width:2.5;stroke-linejoin:round}.glass-bars{font-size:20px;opacity:.7}.glass-row{font-weight:400}.glass-group{font-weight:600}@media(max-width:700px){.ug-glass svg.glass-icon{width:24px;height:24px}}
 .glass-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.glass-kpis article,.glass-kpis article>div{min-width:0}@media(max-width:420px){.glass-kpis article{display:block;min-height:104px}.ug-glass svg.glass-icon{display:block;width:22px;height:22px;margin-bottom:6px}.glass-kpis strong{font-size:17px;overflow-wrap:anywhere}.glass-kpis article>div{font-size:10px}}
+
+.ug-glass .glass-toggle:disabled{opacity:1;cursor:default}

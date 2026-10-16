@@ -3,13 +3,16 @@
  "name": "Chantier",
  "module": "Material Reconfiguration",
  "engine": "InnoDB",
- "autoname": "field:reference",
+ "autoname": "YY.CHANT.MM.#####",
  "track_changes": 1,
  "fields": [
   {
    "fieldname": "reference",
    "label": "Référence",
    "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Générée automatiquement à l’enregistrement : YYCHANTMM#####.",
    "reqd": 1,
    "unique": 1
   },

@@ -44,7 +44,7 @@ class GlassStockTest(unittest.TestCase):
         self.assertIsNone(s.primary_for('ABSENT',items))
 
     def test_pagination(self):
-        rows=[dict(serial_no=f'SN{i:04}',primary_item='RAW') for i in range(240)]
+        rows=[dict(serial_no=f'SN{i:04}',primary_item='RAW',classification='chutes') for i in range(240)]
         with patch.object(s,'_inventory',return_value=(rows,{},ITEMS)):
             first=s.get_stock_serials.__wrapped__('RAW',page_size=100)
             second=s.get_stock_serials.__wrapped__('RAW',cursor=first['next_cursor'],page_size=100)
@@ -88,3 +88,16 @@ class GlassStockTest(unittest.TestCase):
             records.append(sn)
         rows,_=s.physical_rows(records,ITEMS,{'A'})
         self.assertAlmostEqual(s.overview(rows,ITEMS)['surface_m2'],.332667)
+
+    def test_serial_detail_only_contains_cuts(self):
+        cut=serial('CUT-FULL');cut.update(item_code='CUT')
+        partial=serial('PARTIAL');partial['custom_material_status']='Partial'
+        rows,_=s.physical_rows([serial('WHOLE'),cut,partial],ITEMS,{'A'})
+        totals=s.overview(rows,ITEMS)
+        self.assertEqual((totals['volumes'],totals['chutes'],totals['total']),(1,2,3))
+        with patch.object(s,'_inventory',return_value=(rows,{},ITEMS)):
+            details=s.get_stock_serials.__wrapped__('RAW')
+        self.assertEqual(details['total'],2)
+        self.assertEqual({r['serial_no'] for r in details['rows']},{'CUT-FULL','PARTIAL'})
+        with patch.object(s,'_inventory',return_value=([r for r in rows if r['classification']=='volumes'],{},ITEMS)):
+            self.assertEqual(s.get_stock_serials.__wrapped__('RAW')['rows'],[])

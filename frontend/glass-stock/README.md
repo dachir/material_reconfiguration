@@ -66,3 +66,7 @@ node apps/mat_reco/frontend/glass-stock/tests/refresh.cjs
 Vérifié : trois sources d’actualisation, conservation de deux pages chargées, volet ouvert, sélection et défilement, mise à jour effective des surfaces, filtres et recherche, absence d’erreur JavaScript.
 
 Le bundle courant est `glass-stock-r2.js`. Sa version est dans le nom de fichier : le chargeur `AssetManager.extn` de cette installation interprète incorrectement les URL contenant `?v=...` fournies directement à `frappe.require`. Le test navigateur utilise désormais le véritable `assets.js` de Frappe et le cycle de vie `glass_stock.js`, en plus des contrôles de conservation d’état, pour vérifier le montage et la disparition du masque de chargement.
+
+## Détail réservé aux découpes et chutes
+
+Les volumes entiers PRIMAIRE Full restent regroupés dans les totaux de famille et les KPI. Le volet n’affiche que les pièces classées `chutes` : articles DECOUPE, même Full, et primaires Partial. `get_stock_serials` pagine uniquement ces pièces ; son `total` correspond aux découpes/chutes. Une famille sans chute n’est pas dépliable. Les totaux parents continuent d’inclure volumes et chutes. Bundle courant : `glass-stock-r3.js`.

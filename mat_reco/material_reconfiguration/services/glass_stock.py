@@ -138,7 +138,8 @@ def get_stock_overview(search=None, warehouse=None):
 @frappe.whitelist()
 def get_stock_serials(item_code, warehouse=None, search=None, cursor=None, page_size=100):
     rows, _, _ = _inventory(search, warehouse)
-    rows = [r for r in rows if r['primary_item'] == item_code]
+    # Whole primary sheets are summarized by the family; only cuts need serial detail.
+    rows = [r for r in rows if r['primary_item'] == item_code and r['classification'] == 'chutes']
     total = len(rows)
     if cursor:
         rows = [r for r in rows if r['serial_no'] > cursor]

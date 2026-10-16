@@ -8,6 +8,10 @@ class Chantier(Document):
     def before_insert(self):
         before_insert_chantier(self)
 
+    def before_validate(self):
+        if self.is_new():
+            self.reference = self.name
+
     def validate(self):
         validate_chantier(self)
         validate_macro(self)
