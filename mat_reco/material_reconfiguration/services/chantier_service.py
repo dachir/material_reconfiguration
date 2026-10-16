@@ -23,6 +23,11 @@ def validate_chantier(doc):
     if doc.expected_start_date and doc.expected_end_date and getdate(doc.expected_end_date) < getdate(doc.expected_start_date):
         frappe.throw('La fin prévue doit être postérieure au début prévu.')
     old = doc.get_doc_before_save()
+    if doc.status=='Cancelled' and (not old or old.status!='Cancelled'):
+        from mat_reco.material_reconfiguration.services.technical_study_service import cancel_chantier
+        cancel_chantier(doc)
+    if old and old.status=='Cancelled' and doc.docstatus!=2:
+        frappe.throw('Un chantier annulé ne peut plus être modifié.')
     if old and (old.company != doc.company or old.customer != doc.customer):
         if any(frappe.db.exists(dt, {'custom_chantier':doc.name}) for dt in ('Quotation','Sales Order')):
             frappe.throw('Le client et la société ne peuvent plus changer après création des documents commerciaux.')
@@ -276,13 +281,13 @@ def section_scope(section, chantier=None):
 
 @frappe.whitelist()
 def get_dossier(chantier=None):
-    dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status'], order_by='modified desc', limit_page_length=0)
+    dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status', 'docstatus'], order_by='modified desc', limit_page_length=0)
     permissions = dict(section_template=frappe.has_permission('Chantier Section Template','create'),chantier=frappe.has_permission('Chantier','create'), section=frappe.has_permission('Chantier Section','create'), quotation=frappe.has_permission('Quotation','create'), mpp=frappe.has_permission('Material Production Plan','create'))
     if not chantier:
         return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], lines=[], summary={})
     dossier = chantier_doc(chantier)
     studies = frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash','technical_hash'],order_by='modified desc',limit_page_length=0) if frappe.has_permission('Chantier Technical Study','read') else []
-    permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')))
+    permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')),cancel=bool(dossier.has_permission('cancel')))
     from mat_reco.material_reconfiguration.services.technical_study_service import source_hash
     current_hash = source_hash(dossier)
     relevant = next((r for r in studies if r.source_hash == current_hash), studies[0] if studies else None)

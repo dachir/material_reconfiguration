@@ -1,5 +1,6 @@
 """Two standard submittable documents, sharing ERPNext Item and sales services."""
 import json
+import math
 import uuid
 
 import frappe
@@ -101,8 +102,8 @@ def submit_chantier(doc):
 def cancel_chantier(doc):
     if frappe.db.exists('Quotation',{'custom_chantier':doc.name,'docstatus':['!=',2]}) or frappe.db.exists('Sales Order',{'custom_chantier':doc.name,'docstatus':['!=',2]}):
         frappe.throw('Traiter les devis et commandes liés avant d’annuler le chantier ; supprimer les brouillons ou annuler les documents validés.')
-    if frappe.db.exists('Chantier Technical Study',{'chantier':doc.name,'docstatus':1}):
-        frappe.throw('Annuler l’étude technique liée avant d’annuler le chantier.')
+    if frappe.db.exists('Chantier Technical Study',{'chantier':doc.name,'docstatus':['!=',2]}):
+        frappe.throw('Supprimer les études en brouillon ou annuler les études validées avant d’annuler le chantier.')
 
 
 def cancel_study(doc):
@@ -170,7 +171,9 @@ def validate_node(node, depth=0, ancestors=(), budget=None):
         if _signature(current)!=_signature(node):
             frappe.throw(f'{code} : la définition diffère de l’Item existant. Recharger cet Item ou définir un nouvel article.')
         # Validate descendants as well; UI may not modify a reused Item's children.
-        if fingerprint([_signature(c) for c in current['children']])!=fingerprint([_signature(c) for c in node.get('children',[])]):
+        # Browser JSON turns whole-valued floats into integers (4.0 -> 4).
+        # Structural equality preserves numeric equivalence.
+        if [_signature(c) for c in current['children']] != [_signature(c) for c in node.get('children',[])]:
             frappe.throw(f'{code} : les composants d’un Item réutilisé ne peuvent pas être modifiés ici.')
     elif node.get('mode')=='new':
         if node.get('item_type') not in GLASS or not node.get('item_name') or not node.get('stock_uom') or not node.get('item_group') or not node.get('warehouse'):
@@ -197,7 +200,7 @@ def validate_node(node, depth=0, ancestors=(), budget=None):
 
 def validate_study(doc):
     chantier=chantier_doc(doc.chantier)
-    if chantier.docstatus!=0:
+    if chantier.docstatus!=0 or chantier.status=='Cancelled':
         frappe.throw('L’étude technique doit être préparée et validée avant la validation commerciale finale.')
     if not chantier.lines:
         frappe.throw('Ajouter les besoins commerciaux au chantier avant l’étude.')
@@ -219,6 +222,11 @@ def validate_study(doc):
             node=frappe.parse_json(row.tree_json or '{}')
             if node.get('item_type') not in ('OUVRAGE','DECOUPE'):
                 frappe.throw('L’ouvrage final doit être un OUVRAGE ou une DECOUPE.')
+            air_gap=flt(node.get('air_gap_mm'))
+            if not math.isfinite(air_gap) or air_gap<0 or air_gap>=flt(row.thickness_mm):
+                frappe.throw(f'{row.repere} : la lame d’air doit être positive ou nulle et inférieure à l’épaisseur totale.')
+            if air_gap and node.get('item_type')!='OUVRAGE':
+                frappe.throw(f'{row.repere} : utiliser un OUVRAGE pour un vitrage avec lame d’air.')
             validate_node(node)
             if expected[row.line_id].uom and expected[row.line_id].uom!=node['stock_uom']:
                 frappe.throw('L’unité technique doit correspondre à l’unité de prix commerciale.')
@@ -270,6 +278,7 @@ def submit_study(doc):
             source=frappe._dict(name=row.line_id,idx=row.idx,item_code=row.result_item,
                 custom_client_length_mm=row.length_mm,custom_client_width_mm=row.width_mm,custom_client_thickness_mm=row.thickness_mm)
             tree=_tree(frappe._dict(name=chantier.name,company=chantier.company),source,item_code=row.result_item)
+            tree['air_gap_mm']=flt(frappe.parse_json(row.tree_json).get('air_gap_mm'))
             row.snapshot_json=json.dumps(tree,ensure_ascii=False);row.snapshot_hash=fingerprint(tree)
         doc.technical_hash=fingerprint([dict(id=r.line_id,item=r.result_item,hash=r.snapshot_hash) for r in doc.lines])
     except Exception:
@@ -281,7 +290,7 @@ def submit_study(doc):
 @frappe.whitelist(methods=['POST'])
 def prepare_study(chantier):
     dossier=chantier_doc(chantier)
-    if dossier.docstatus!=0:frappe.throw('Le chantier commercial doit être en brouillon.')
+    if dossier.docstatus!=0 or dossier.status=='Cancelled':frappe.throw('Le chantier commercial doit être un brouillon actif.')
     frappe.db.get_value('Chantier',dossier.name,'name',for_update=True)
     if not dossier.lines:frappe.throw('Ajouter au moins un ouvrage commercial.')
     current=source_hash(dossier)
@@ -300,6 +309,8 @@ def prepare_study(chantier):
             tree=frappe.parse_json(prior.tree_json)
         else:
             tree=dict(mode='new',proposed_code='',item_name=row.designation,item_type='OUVRAGE',stock_uom=row.uom or '',item_group='',qty_factor=1,children=[])
+        if prior and 'air_gap_mm' in frappe.parse_json(prior.tree_json or '{}'):
+            tree['air_gap_mm']=flt(frappe.parse_json(prior.tree_json).get('air_gap_mm'))
         doc.append('lines',dict(line_id=row.line_id,repere=row.repere,
             length_mm=row.length_mm or (prior.length_mm if prior else 0),width_mm=row.width_mm or (prior.width_mm if prior else 0),
             thickness_mm=row.thickness_mm or (prior.thickness_mm if prior else 0),tree_json=json.dumps(tree,ensure_ascii=False)))
@@ -313,7 +324,7 @@ def get_study(name=None):
     doc=frappe.get_doc('Chantier Technical Study',name);doc.check_permission('read');chantier=chantier_doc(doc.chantier)
     return dict(studies=available,study=doc.as_dict(),chantier=chantier.as_dict(),stale=doc.source_hash!=source_hash(chantier),
         sections=frappe.get_list('Chantier Section',filters={'chantier':chantier.name},fields=['name','section_name','parent_chantier_section'],limit_page_length=0),
-        permissions=dict(write=doc.has_permission('write'),submit=doc.has_permission('submit'),cancel=doc.has_permission('cancel')))
+        permissions=dict(write=doc.has_permission('write'),submit=doc.has_permission('submit'),cancel=doc.has_permission('cancel'),delete=doc.has_permission('delete')))
 
 
 @frappe.whitelist(methods=['POST'])
@@ -465,3 +476,42 @@ def clone_sections(doc):
     for row in doc.lines:
         if row.section:
             row.section=mapping.get(row.section);frappe.db.set_value('Chantier Line',row.name,'section',row.section,update_modified=False)
+
+
+@frappe.whitelist(methods=['POST'])
+def delete_study(name, modified):
+    doc=frappe.get_doc('Chantier Technical Study',name,for_update=True)
+    doc.check_permission('delete')
+    if str(doc.modified)!=str(modified):
+        frappe.throw('L’étude a changé. Actualiser avant de la supprimer.')
+    if doc.docstatus==1:
+        frappe.throw('Annuler l’étude validée avant de la supprimer.')
+    chantier=doc.chantier
+    frappe.delete_doc(doc.doctype,doc.name)
+    return chantier
+
+
+@frappe.whitelist(methods=['POST'])
+def cancel_dossier(chantier, modified):
+    doc=frappe.get_doc('Chantier',chantier,for_update=True)
+    doc.check_permission('write' if doc.docstatus==0 else 'cancel')
+    if str(doc.modified)!=str(modified):
+        frappe.throw('Le chantier a changé. Actualiser avant de l’annuler.')
+    cancel_chantier(doc)
+    if doc.docstatus==0:
+        doc.status='Cancelled'
+        doc.save()
+    elif doc.docstatus==1:
+        doc.cancel()
+    return doc.name
+
+
+@frappe.whitelist()
+def designation_suggestions(txt=''):
+    # Query parents through get_list so document-level permissions still apply.
+    parents=frappe.get_list('Chantier',pluck='name',limit_page_length=0)
+    if not parents:return []
+    return frappe.get_all('Chantier Line',
+        filters={'parent':['in',parents],'parenttype':'Chantier','designation':['like','%'+txt+'%']},
+        fields=['designation'],group_by='designation',order_by='designation asc',limit_page_length=10,
+        pluck='designation')

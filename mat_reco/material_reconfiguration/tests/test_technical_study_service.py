@@ -197,6 +197,43 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertTrue(study.lines[0].snapshot_hash)
         self.assertEqual(study.lines[0].result_item,'QA-TECH-FG')
 
+    def test_reused_components_accept_browser_integer_dimensions(self):
+        self.study().submit()
+        tree=service.seed_item('QA-TECH-FG')
+        raw=tree['children'][0]['children'][0]['children'][0]
+        for field in ('length_mm','width_mm','thickness_mm'):
+            raw[field]=int(raw[field])
+        service.validate_node(tree)
+        raw['thickness_mm']+=1
+        with self.assertRaises(frappe.ValidationError):
+            service.validate_node(tree)
+
+    def test_double_glazing_keeps_total_and_glass_thickness_separate(self):
+        tree=self.definition()
+        cut=tree['children'][0]['children'][0]
+        cut['children'][0]['thickness_mm']=6
+        tree['children']=[cut]
+        tree['air_gap_mm']=12
+        study=self.study(tree)
+        study.lines[0].thickness_mm=24
+        study.notes='Double vitrage 6 / 12 / 6 : lame d’air de 12 mm.'
+        study.save();study.submit()
+        snapshot=json.loads(study.lines[0].snapshot_json)
+        self.assertEqual(snapshot['air_gap_mm'],12)
+        self.assertEqual(snapshot['thickness_mm'],24)
+        self.assertEqual(snapshot['children'][0]['thickness_mm'],6)
+        self.assertEqual(snapshot['children'][0]['ratio'],2)
+        self.assertEqual(frappe.get_doc('Item','QA-TECH-RAW').custom_thickness_mm,6)
+
+    def test_air_gap_must_fit_inside_total_thickness(self):
+        for gap in (-1,24,25):
+            with self.subTest(gap=gap):
+                tree=self.definition();tree['air_gap_mm']=gap
+                study=self.study(tree);study.lines[0].thickness_mm=24
+                study.save()
+                with self.assertRaises(frappe.ValidationError):study.submit()
+                study.reload()
+
     def test_failed_parent_creation_rolls_back_all_new_children(self):
         tree=self.definition();tree['proposed_code']='CVC0001'
         study=self.study(tree)
@@ -267,7 +304,7 @@ class TechnicalStudyTests(unittest.TestCase):
         self.doc.lines[0].section=section.name;self.doc.save()
         study=self.approve()
         study.cancel();self.doc.reload();self.doc.cancel()
-        amendment=frappe.copy_doc(self.doc,ignore_no_copy=False);amendment.amended_from=self.doc.name;amendment.insert()
+        amendment=frappe.copy_doc(self.doc,ignore_no_copy=False);amendment.amended_from=self.doc.name;amendment.docstatus=0;amendment.insert()
         self.assertEqual(amendment.docstatus,0)
         self.assertNotEqual(amendment.name,self.doc.name)
         self.assertNotEqual(amendment.lines[0].section,section.name)
@@ -302,3 +339,47 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertEqual(json.loads(current.lines[0].tree_json),json.loads(previous.lines[0].tree_json))
         current.submit()
         self.assertEqual(current.lines[0].result_item,'QA-TECH-FG')
+
+    def test_delete_draft_study_and_prepare_again(self):
+        study=self.study()
+        self.assertEqual(service.delete_study(study.name,str(study.modified)),self.doc.name)
+        self.assertFalse(frappe.db.exists(study.doctype,study.name))
+        self.assertFalse(frappe.db.exists('Item','QA-TECH-FG'))
+        replacement=self.study()
+        self.assertEqual(replacement.docstatus,0)
+
+    def test_approved_study_must_be_cancelled_before_deletion(self):
+        study=self.study();study.submit()
+        with self.assertRaises(frappe.ValidationError):
+            service.delete_study(study.name,str(study.modified))
+        study.cancel()
+        service.delete_study(study.name,str(study.modified))
+        self.assertFalse(frappe.db.exists(study.doctype,study.name))
+        self.assertTrue(frappe.db.exists('Item','QA-TECH-FG'))
+
+    def test_cancel_draft_chantier_requires_no_active_study(self):
+        study=self.study()
+        with self.assertRaises(frappe.ValidationError):
+            service.cancel_dossier(self.doc.name,str(self.doc.modified))
+        service.delete_study(study.name,str(study.modified))
+        service.cancel_dossier(self.doc.name,str(self.doc.modified))
+        self.doc.reload()
+        self.assertEqual(self.doc.status,'Cancelled')
+        with self.assertRaises(frappe.ValidationError):service.prepare_study(self.doc.name)
+        self.doc.designation='Modification interdite'
+        with self.assertRaises(frappe.ValidationError):self.doc.save()
+
+    def test_cancel_chantier_rejects_uncancelled_quotation(self):
+        self.approve()
+        quote=service.generate_quotation(self.doc.name,request_key='qa-cancel-block')
+        with self.assertRaises(frappe.ValidationError):
+            service.cancel_dossier(self.doc.name,str(self.doc.modified))
+        self.assertTrue(frappe.db.exists('Quotation',quote))
+
+    def test_designation_suggestions_are_unique_and_limited_to_ten(self):
+        for i in range(12):
+            self.doc.append('lines',dict(designation=f'QA-AUTOCOMPLETE-{i:02}',qty=1,uom='PC'))
+        self.doc.append('lines',dict(designation='QA-AUTOCOMPLETE-00',qty=1,uom='PC'))
+        self.doc.save()
+        result=service.designation_suggestions('QA-AUTOCOMPLETE-')
+        self.assertEqual(result,[f'QA-AUTOCOMPLETE-{i:02}' for i in range(10)])
