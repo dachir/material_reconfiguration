@@ -1,4 +1,5 @@
 <script setup>
+import {printDocument} from "./printing.js";
 import { ref, reactive, computed, onBeforeUnmount } from "vue";
 import { flatten, layout, routeFor } from "./layout.js";
 const api = "mat_reco.material_reconfiguration.services.workshop_service.";
@@ -745,6 +746,8 @@ function wheel(e) {
 					</p></template
 				>
 				<div v-else class="ug-result-links">
+ <button v-for="name in result.mcps" :key="'print-mcp-'+name" @click="printDocument('Material Cutting Plan',name)">Imprimer A4 · {{name}}</button>
+ <button v-for="name in result.stock_entries" :key="'print-stock-'+name" @click="printDocument('Stock Entry',name)">Imprimer A4 · {{name}}</button>
 					<a
 						v-for="name in result.mcps"
 						:key="name"

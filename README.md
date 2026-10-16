@@ -40,3 +40,32 @@ This app can use GitHub Actions for CI. The following workflows are configured:
 
 mit
 # material_reconfiguration
+
+### Documents imprimables A4
+
+Les formats `Mat Reco A4 - <DocType>` couvrent les chantiers, sections,
+modèles de sections, études techniques, plans de découpe/production/réception/sortie,
+reconfigurations, fabrications/refabrications, devis, commandes, mouvements de stock,
+contrôles qualité et fiches de série. Ils sont installés automatiquement après
+installation ou migration. Pour une installation ciblée sur un site existant :
+
+```sh
+bench --site <site> execute mat_reco.printing.install_print_formats
+bench --site <site> clear-cache
+```
+
+Dans Vue, utiliser « Imprimer A4 » ; depuis un formulaire ERPNext, sélectionner
+le format dans l’aperçu d’impression. Les modifications doivent être enregistrées
+avant impression. Dans l’éditeur de découpe, le bouton imprime explicitement le
+plan enregistré, et non la simulation locale. Le plan effectif enregistré prévaut
+sur la planification initiale ; les encoches des chutes en L sont conservées.
+Les schémas sont sans échelle. Les documents longs occupent plusieurs pages A4.
+
+Les droits de lecture, d’impression et les restrictions de champs Frappe restent
+appliqués. L’installation ne modifie ni les rôles ni les formats par défaut.
+La vue stock verre permet d’imprimer la fiche de la série sélectionnée ; elle ne
+crée pas de nouveau document de stock.
+
+Validation : `python -m unittest mat_reco.material_reconfiguration.tests.test_a4_printing`,
+puis `npm test` et `npm run build` dans les frontends atelier et découpe,
+et `npm run build` dans le frontend stock verre.

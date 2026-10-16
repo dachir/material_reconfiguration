@@ -1,4 +1,5 @@
 <script setup>
+import {printDocument} from "./printing.js";
 import {ref, computed, onBeforeUnmount} from 'vue';
 import {showSectionGenerator} from './section-generator.js';
 import CommercialExtrasPanel from './CommercialExtrasPanel.vue';
@@ -121,6 +122,7 @@ onBeforeUnmount(hide);defineExpose({show,hide});
  <button class="primary" :disabled="busy||!data.permissions?.chantier" @click="newChantier">+ Nouveau chantier</button>
  <button :disabled="busy" @click="refresh">{{busy?'Chargement…':'↻ Actualiser'}}</button>
  <template v-if="data.chantier?.name===selected">
+ <button :disabled="busy||dirty" title="Enregistrer les modifications avant impression" @click="printDocument('Chantier',selected)">Imprimer A4</button>
  <button @click="open('Chantier',selected)">Modifier le dossier</button>
  <template v-if="commercialDraft"><button :disabled="busy" @click="editMacro()">+ Ouvrage</button><button :disabled="dirty" @click="frappe.new_doc('Data Import',{reference_doctype:'Chantier',import_type:'Update Existing Records'})">Importer Excel</button><button class="primary" :disabled="busy||!dirty" @click="saveMacro">Enregistrer les ouvrages</button></template>
  <button v-if="data.technical" @click="viewTechnical">Voir l’étude technique</button><button v-if="commercialDraft&&(!data.technical||data.technical_stale)" :disabled="busy||!data.permissions?.technical" @click="technical">Préparer l’étude technique</button>

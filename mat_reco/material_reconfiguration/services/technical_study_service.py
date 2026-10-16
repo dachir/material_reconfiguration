@@ -127,7 +127,7 @@ def seed_item(code, ancestors=()):
         frappe.throw('Composition cyclique ou trop profonde.')
     item=frappe.get_doc('Item',code);item.check_permission('read');_ensure_serial(item)
     node=dict(mode='existing',item_code=item.name,item_name=item.item_name,item_type=item.custom_item_types,
-        stock_uom=item.stock_uom,item_group=item.item_group,quality_required=cint(item.custom_control_quality),
+        stock_uom=item.stock_uom,item_group=item.item_group,
         length_mm=flt(item.custom_sheet_length_mm),width_mm=flt(item.custom_sheet_width_mm),thickness_mm=flt(item.custom_thickness_mm),
         qty_factor=1,children=[])
     if item.custom_item_types=='OUVRAGE':
@@ -152,7 +152,7 @@ def get_item_definition(item_code):
 
 def _signature(node):
     """Commercial labels and parent usage ratios do not define the Item itself."""
-    return dict(type=node['item_type'],uom=node.get('stock_uom'),quality=cint(node.get('quality_required')),
+    return dict(type=node['item_type'],uom=node.get('stock_uom'),
         dimensions=[flt(node.get(k)) for k in ('length_mm','width_mm','thickness_mm')] if node['item_type']=='PRIMAIRE' else [],
         components=[dict(code=c.get('item_code') or c.get('proposed_code'),qty=flt(c.get('qty_factor',1))) for c in node.get('children',[])])
 
@@ -237,7 +237,7 @@ def _resolve(node, company, created):
     item.update(dict(item_code=code,item_name=node['item_name'],item_group=node['item_group'],stock_uom=node['stock_uom'],
         is_stock_item=1,has_serial_no=1,has_batch_no=0,custom_item_types=node['item_type'],
         custom_requires_dimensions=int(node['item_type']!='PRIMAIRE'),custom_is_reconfigurable=int(node['item_type']=='PRIMAIRE'),
-        custom_is_composite=int(node['item_type']=='OUVRAGE'),custom_control_quality=cint(node.get('quality_required'))))
+        custom_is_composite=int(node['item_type']=='OUVRAGE')))
     if node['item_type']=='PRIMAIRE':
         item.update(dict(custom_sheet_length_mm=node['length_mm'],custom_sheet_width_mm=node['width_mm'],custom_thickness_mm=node['thickness_mm']))
     if node['item_type']=='DECOUPE':item.custom_parent_item=children[0][0]
@@ -247,7 +247,7 @@ def _resolve(node, company, created):
         warehouse=frappe.get_doc('Warehouse',node['warehouse']);warehouse.check_permission('read')
         if warehouse.company!=company or warehouse.is_group:frappe.throw('Entrepôt incompatible avec la société.')
         item.append('item_defaults',dict(company=company,default_warehouse=warehouse.name))
-    item.insert()  # Run existing codification, stock and quality controllers with the operator's rights.
+    item.insert()  # Run existing codification, stock controllers with the operator's rights.
     created.append(item.name)
     return item.name
 

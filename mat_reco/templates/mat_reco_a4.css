@@ -1,0 +1,21 @@
+@page { size: A4 portrait; margin: 12mm; }
+.print-format { max-width: 186mm; padding: 0 !important; font-family: Arial, sans-serif; font-size: 10pt; color: #111; }
+.mat-reco-a4 { overflow-wrap: anywhere; word-wrap: break-word; }
+.mat-reco-a4 h1 { font-size: 20pt; border-bottom: 2px solid #222; padding-bottom: 3mm; }
+.mat-reco-a4 h2 { font-size: 13pt; margin-top: 6mm; border-bottom: 1px solid #999; }
+.mat-reco-a4 h3 { font-size: 11pt; margin-top: 4mm; }
+.mat-reco-a4 h1, .mat-reco-a4 h2, .mat-reco-a4 h3 { page-break-after: avoid; }
+.mat-reco-a4 .identity { font-weight: bold; }
+.mat-reco-a4 dl { margin: 0 0 3mm; }
+.mat-reco-a4 dt { font-weight: bold; margin-top: 1mm; page-break-after: avoid; }
+.mat-reco-a4 dd { margin-left: 4mm; white-space: normal; }
+.mat-reco-a4 .facts > dt { background: #f2f2f2; padding: 1mm; }
+.mat-reco-a4 ol { padding-left: 5mm; }
+.mat-reco-a4 svg { display: block; width: 100%; height: 100mm; margin: 3mm 0; page-break-inside: avoid; }
+.mat-reco-a4 footer { border-top: 1px solid #999; padding-top: 3mm; margin-top: 6mm; font-size: 8pt; }
+@media print { .print-format { width: auto; max-width: none; } }
+
+.mat-reco-a4 table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 3mm 0; font-size: 9pt; }
+.mat-reco-a4 th, .mat-reco-a4 td { border: 1px solid #999; padding: 1.5mm; vertical-align: top; overflow-wrap: anywhere; }
+.mat-reco-a4 thead { display: table-header-group; }
+.mat-reco-a4 tr { page-break-inside: avoid; }

@@ -1,4 +1,5 @@
 <script setup>
+import {printDocument} from "./printing.js";
 import {ref,computed,nextTick,onBeforeUnmount} from 'vue';
 const api='mat_reco.material_reconfiguration.services.glass_stock.';
 const search=ref(''),warehouse=ref(''),warehouses=ref([]),data=ref({groups:[],volumes:0,chutes:0,total:0,surface_m2:0,diagnostics:{}});
@@ -75,7 +76,7 @@ onBeforeUnmount(hide);defineExpose({show,hide});
       </div>
      </div>
     </div>
-    <footer><span>Affichage compact · lignes à hauteur réduite</span><span>{{fmt(data.total)}} pièces au total &nbsp; | &nbsp; {{selected?'1 ligne sélectionnée':'Aucune sélection'}}</span></footer>
+    <footer><button :disabled="!selected||busy" @click="printDocument('Serial No',selected)">Imprimer la fiche A4</button><span>Affichage compact · lignes à hauteur réduite</span><span>{{fmt(data.total)}} pièces au total &nbsp; | &nbsp; {{selected?'1 ligne sélectionnée':'Aucune sélection'}}</span></footer>
    </section>
   </section>
  </main>

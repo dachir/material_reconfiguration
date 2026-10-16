@@ -292,3 +292,8 @@ after_migrate = [
     "mat_reco.setup.sync_material_receipt_plan_accounting_dimensions",
     "mat_reco.material_reconfiguration.services.workshop_service.backfill_workshop_allocations",
 ]
+
+# Native print/PDF reports shared by Vue document actions and Desk.
+jinja = {"methods": ["mat_reco.printing.render_mat_reco_a4"]}
+after_migrate.append("mat_reco.printing.install_print_formats")
+after_install = "mat_reco.printing.install_print_formats"

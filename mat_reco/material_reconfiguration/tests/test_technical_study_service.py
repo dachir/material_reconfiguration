@@ -224,9 +224,10 @@ class TechnicalStudyTests(unittest.TestCase):
         before=frappe.db.count('Item')
         self.assertEqual(service._resolve(self.definition(),self.company,[]),'QA-TECH-FG')
         self.assertEqual(frappe.db.count('Item'),before)
-        different=self.definition();different['quality_required']=1
+        legacy=self.definition();legacy['quality_required']=1
+        self.assertEqual(service._resolve(legacy,self.company,[]),'QA-TECH-FG')
+        different=self.definition();different['children'][0]['qty_factor']=2
         with self.assertRaises(frappe.ValidationError):service._resolve(different,self.company,[])
-        self.assertEqual(frappe.db.get_value('Item','QA-TECH-FG','custom_control_quality'),0)
 
     def test_partial_quote_idempotence_capacity_and_confirmed_order(self):
         study=self.approve();line=self.doc.lines[0]
