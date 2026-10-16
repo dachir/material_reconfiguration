@@ -1,0 +1,79 @@
+[
+  [
+    "01",
+    "Comprendre",
+    "Comment fonctionne l’ensemble ?",
+    "G01 / G06",
+    "00–05"
+  ],
+  [
+    "02",
+    "Acheter",
+    "D’où vient la vitre ?",
+    "F02 / F04 / F05",
+    "F01–F06"
+  ],
+  [
+    "03",
+    "Identifier",
+    "Quelle plaque est disponible ?",
+    "F07 / F08 / F09",
+    "F07–F09"
+  ],
+  [
+    "04",
+    "Vendre",
+    "Que demande le client ?",
+    "C02 / C03 / C04",
+    "C01–C07"
+  ],
+  [
+    "05",
+    "Planifier",
+    "Comment satisfaire la commande ?",
+    "A03 / A04 / A07",
+    "A01–A08"
+  ],
+  [
+    "06",
+    "Découper",
+    "Que fait l’atelier ?",
+    "A10 / A11",
+    "A09–A11"
+  ],
+  [
+    "07",
+    "Corriger",
+    "Que faire face à un écart ?",
+    "A12–A18 / G07",
+    "A12–A19"
+  ],
+  [
+    "08",
+    "Compenser",
+    "Comment remplacer une pièce cassée ?",
+    "A20–A25 / G05",
+    "A19–A27"
+  ],
+  [
+    "09",
+    "Produire",
+    "Comment enregistrer la transformation ?",
+    "S02–S11 / G06",
+    "A28 / S01–S14"
+  ],
+  [
+    "10",
+    "Livrer",
+    "Comment remettre les bons produits ?",
+    "S14 / C10 / C11",
+    "C08–C11"
+  ],
+  [
+    "11",
+    "Facturer",
+    "Comment clôturer le cycle ?",
+    "C12 / C13",
+    "C12–C13"
+  ]
+]

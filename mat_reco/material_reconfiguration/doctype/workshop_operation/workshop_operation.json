@@ -1,0 +1,80 @@
+{
+  "doctype": "DocType",
+  "name": "Workshop Operation",
+  "module": "Material Reconfiguration",
+  "engine": "InnoDB",
+  "autoname": "hash",
+  "fields": [
+    {
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "reqd": 1,
+      "read_only": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "request_key",
+      "label": "Request Key",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "sales_order",
+      "label": "Sales Order",
+      "fieldtype": "Link",
+      "options": "Sales Order",
+      "reqd": 1
+    },
+    {
+      "fieldname": "node_id",
+      "label": "Node",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "requested_qty",
+      "label": "Quantity",
+      "fieldtype": "Int",
+      "reqd": 1
+    },
+    {
+      "fieldname": "result_json",
+      "label": "Result",
+      "fieldtype": "Long Text",
+      "read_only": 1
+    }
+  ],
+  "field_order": [
+    "company",
+    "request_key",
+    "sales_order",
+    "node_id",
+    "requested_qty",
+    "result_json"
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Stock Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    },
+    {
+      "role": "Stock User",
+      "read": 1,
+      "create": 1
+    }
+  ],
+  "is_submittable": 0,
+  "track_changes": 1
+}

@@ -1,0 +1,19 @@
+{
+  "doctype": "Page",
+  "name": "workshop-cockpit",
+  "page_name": "workshop-cockpit",
+  "title": "Atelier Univers Glass",
+  "module": "Material Reconfiguration",
+  "standard": "Yes",
+  "roles": [
+    {
+      "role": "System Manager"
+    },
+    {
+      "role": "Stock Manager"
+    },
+    {
+      "role": "Stock User"
+    }
+  ]
+}

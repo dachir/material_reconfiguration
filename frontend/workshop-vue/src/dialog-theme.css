@@ -1,0 +1,84 @@
+/* Native Frappe dialogs opened from the Univers Glass Vue screens. */
+body.ug-vue-dialogs-active .modal {
+ --bg-color: #03131e;
+ --fg-color: #061c29;
+ --modal-bg: #061c29;
+ --control-bg: #092536;
+ --disabled-control-bg: #071e2b;
+ --text-color: #edf3ff;
+ --heading-color: #edf3ff;
+ --text-muted: #a3bdd1;
+ --text-light: #a3bdd1;
+ --border-color: #204255;
+ --dark-border-color: #204255;
+ --primary: #008cff;
+ --btn-primary: #ffffff;
+ --btn-primary-bg: #006aff;
+ --neutral: #092536;
+ --awesomplete-hover-bg: #10394d;
+ color: #edf3ff;
+ color-scheme: dark;
+}
+body.ug-vue-dialogs-active .modal-content {
+ background: #061c29;
+ color: #edf3ff;
+ border: 1px solid #204255;
+ box-shadow: 0 20px 70px #0009;
+ border-radius: 12px;
+}
+body.ug-vue-dialogs-active .modal-header,
+body.ug-vue-dialogs-active .modal-footer {
+ background: #071e2b;
+ border-color: #204255;
+}
+body.ug-vue-dialogs-active .modal-title,
+body.ug-vue-dialogs-active .modal .control-label,
+body.ug-vue-dialogs-active .modal .section-head { color: #edf3ff; }
+body.ug-vue-dialogs-active .modal .form-control,
+body.ug-vue-dialogs-active .modal .like-disabled-input {
+ background: #092536;
+ color: #edf3ff;
+ border: 1px solid #204255;
+}
+body.ug-vue-dialogs-active .modal .form-control::placeholder { color: #9eb9cc; }
+body.ug-vue-dialogs-active .modal .form-control:focus {
+ border-color: #00caff;
+ box-shadow: 0 0 0 2px #00caff26;
+}
+body.ug-vue-dialogs-active .modal .form-control:disabled,
+body.ug-vue-dialogs-active .modal .form-control[readonly] { background: #071e2b; color: #a3bdd1; }
+body.ug-vue-dialogs-active .modal .text-muted,
+body.ug-vue-dialogs-active .modal .help-box { color: #a3bdd1 !important; }
+body.ug-vue-dialogs-active .modal .btn-default,
+body.ug-vue-dialogs-active .modal .btn-secondary {
+ background: #092536;
+ color: #edf3ff;
+ border: 1px solid #204255;
+}
+body.ug-vue-dialogs-active .modal .btn-primary {
+ background: #006aff;
+ color: #fff;
+ border: 1px solid #008cff;
+}
+body.ug-vue-dialogs-active .modal .btn-primary:hover { background: #008cff; }
+body.ug-vue-dialogs-active .modal .btn:focus-visible { outline: 2px solid #00caff; outline-offset: 2px; }
+body.ug-vue-dialogs-active .modal .icon { --icon-stroke: #a3bdd1; }
+body.ug-vue-dialogs-active .modal input[type=checkbox] { accent-color: #008cff; }
+body.ug-vue-dialogs-active .modal .awesomplete > ul {
+ background: #092536;
+ color: #edf3ff;
+ border-color: #204255;
+}
+body.ug-vue-dialogs-active .modal .awesomplete > ul > li:hover,
+body.ug-vue-dialogs-active .modal .awesomplete > ul > li[aria-selected=true] { background: #10394d; }
+body.ug-vue-dialogs-active .modal .link-option { border-color: #204255; }
+body.ug-vue-dialogs-active .datepicker {
+ --bg-color: #061c29;
+ --fg-color: #061c29;
+ --text-color: #edf3ff;
+ --text-muted: #a3bdd1;
+ --border-color: #204255;
+ background: #061c29;
+ color: #edf3ff;
+ border-color: #204255;
+}

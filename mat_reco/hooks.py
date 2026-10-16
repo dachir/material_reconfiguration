@@ -44,6 +44,8 @@ app_license = "mit"
 
 # include js in doctype views
 doctype_js = {
+    "Quotation": "public/js/chantier_commercial.js",
+    "Sales Order": "public/js/chantier_commercial.js",
     "Delivery Note": "public/js/dimension_from_serial.js",
     "Sales Invoice": "public/js/dimension_from_serial.js",
     "Stock Entry": "public/js/stock_entry_repack_from_so.js",
@@ -142,10 +144,27 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
+    "Stock Ledger Entry": {
+        "after_insert": "mat_reco.material_reconfiguration.services.glass_stock.notify_stock_change",
+    },
+    **{dt: {event: "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change"
+            for event in ("on_submit", "on_cancel")}
+       for dt in ("Quality Inspection", "Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
+    "Sales Order": {
+        "after_mapping": "mat_reco.material_reconfiguration.services.chantier_service.map_chantier",
+        "validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
+        "before_update_after_submit": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
+        "before_cancel": "mat_reco.material_reconfiguration.services.chantier_service.protect_produced_order",
+        "on_submit": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+        "on_cancel": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+    },
+    "Quotation": {"validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial"},
     "Stock Entry": {
         "before_validate": "mat_reco.stock_hooks.stock_entry_before_validate",
         "validate": "mat_reco.stock_hooks.stock_entry_validate",
-        "before_submit": "mat_reco.stock_hooks.stock_entry_before_submit"
+        "before_submit": "mat_reco.stock_hooks.stock_entry_before_submit",
+        "on_submit": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+        "on_cancel": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change"
     },
 # 	"*": {
 # 		"on_update": "method",
@@ -252,6 +271,7 @@ doc_events = {
 # }
 
 fixtures = [
+    {"dt": "Property Setter", "filters": [["module", "=", "Material Reconfiguration"]]},
     {"dt": "Custom Field", "filters": [["module", "=", "Material Reconfiguration"]]},
     {"dt": "Client Script", "filters": [["enabled", "=", 1],["module", "=", "Material Reconfiguration"]]},
     {"dt": "Server Script", "filters": [["disabled", "=", 0],["module", "=", "Material Reconfiguration"]]},
@@ -270,4 +290,5 @@ accounting_dimension_doctypes = [
 # fields after migrate as well.
 after_migrate = [
     "mat_reco.setup.sync_material_receipt_plan_accounting_dimensions",
+    "mat_reco.material_reconfiguration.services.workshop_service.backfill_workshop_allocations",
 ]

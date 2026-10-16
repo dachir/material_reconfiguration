@@ -1,0 +1,98 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier Technical Study",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "autoname": "hash",
+ "fields": [
+  {
+   "fieldname": "chantier",
+   "label": "Chantier",
+   "fieldtype": "Link",
+   "options": "Chantier",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "source_hash",
+   "label": "Empreinte des besoins",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "technical_hash",
+   "label": "Empreinte technique validée",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "lines",
+   "label": "Ouvrages à étudier",
+   "fieldtype": "Table",
+   "options": "Chantier Technical Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notes",
+   "label": "Notes techniques",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Révision précédente",
+   "fieldtype": "Link",
+   "options": "Chantier Technical Study",
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "field_order": [
+  "chantier",
+  "source_hash",
+  "technical_hash",
+  "lines",
+  "notes",
+  "amended_from"
+ ],
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "is_submittable": 1
+}

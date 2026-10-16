@@ -23,7 +23,11 @@
   "column_break_ltrb",
   "fg_thickness_mm",
   "section_break_e7ro",
-  "amended_from"
+  "amended_from",
+  "chantier",
+  "snapshot_hash",
+  "nodes",
+  "quotation_item"
  ],
  "fields": [
   {
@@ -126,13 +130,40 @@
    "fieldname": "section_break_bcdm",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "fieldname": "chantier",
+   "label": "Chantier",
+   "fieldtype": "Link",
+   "options": "Chantier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "snapshot_hash",
+   "label": "Empreinte technique",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nodes",
+   "label": "D\u00e9composition",
+   "fieldtype": "Table",
+   "options": "Material Production Plan Node",
+   "read_only": 1,
+   "description": "Composition et quantit\u00e9s planifi\u00e9es. Consulter le cockpit atelier pour les stocks, r\u00e9servations et quantit\u00e9s r\u00e9alisables actualis\u00e9es."
+  },
+  {
+   "fieldname": "quotation_item",
+   "label": "Ligne du devis",
+   "fieldtype": "Data",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-10 06:28:36.493810",
+ "modified": "2026-10-15 22:31:32.646427",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Material Production Plan",
@@ -150,10 +181,25 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 0
   }
  ],
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

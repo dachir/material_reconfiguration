@@ -1,0 +1,10 @@
+MANUEL UTILISATEUR MAT_RECO — V0.1 À VALIDER
+Public : opérateurs atelier et responsables de stock.
+
+Le Word est modifiable. Le PDF est une version de lecture.
+Les captures de l’atelier utilisent le code réel et des données fictives.
+Les vues de formulaires reconstituées sont explicitement identifiées.
+Deux flowcharts sont fournis en PNG et SVG modifiable.
+La grille de validation est au chapitre 28.
+
+Aucune donnée métier réelle n’est incluse.

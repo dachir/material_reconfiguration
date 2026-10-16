@@ -1,0 +1,116 @@
+{
+  "intro": [
+    [
+      "00",
+      "Bienvenue dans mat_reco : objectifs et fonctionnement"
+    ],
+    [
+      "01",
+      "Carte globale des trois flux"
+    ],
+    [
+      "02",
+      "Les documents ERPNext et leurs relations"
+    ],
+    [
+      "03",
+      "Rôles et responsabilités"
+    ],
+    [
+      "04",
+      "Comment lire les graphes, captures et repères visuels"
+    ],
+    [
+      "05",
+      "Cas pratique fil rouge : de la commande à la facture"
+    ]
+  ],
+  "chapitres": {
+    "F": [
+      "Identifier le besoin d’approvisionnement",
+      "Créer une commande fournisseur",
+      "Préparer la réception physique",
+      "Réceptionner avec Purchase Receipt",
+      "Réceptionner via Material Receipt Plan",
+      "Comprendre les deux circuits de réception",
+      "Contrôler les Serial No générés",
+      "Contrôler dimensions, épaisseur et qualité",
+      "Vérifier le dépôt et la disponibilité"
+    ],
+    "C": [
+      "Comprendre la demande client",
+      "Créer un devis",
+      "Saisir dimensions et quantités",
+      "Ajouter services et accessoires",
+      "Définir les articles DECOUPE et OUVRAGE",
+      "Transformer le devis en Sales Order",
+      "Transmettre les besoins à l’atelier",
+      "Suivre l’état de fabrication",
+      "Vérifier les produits finis disponibles",
+      "Préparer et soumettre Delivery Note",
+      "Contrôler les Serial No et les dimensions livrées",
+      "Créer Sales Invoice",
+      "Contrôler facture, quantités et références"
+    ],
+    "A": [
+      "Comprendre les besoins issus des commandes",
+      "Créer Material Cutting Plan",
+      "Charger les commandes client",
+      "Charger les matières disponibles",
+      "Qualifier les plaques",
+      "Paramétrer la découpe",
+      "Générer et lire le plan initial",
+      "Comprendre produits finis, chutes et déchets",
+      "Passer en Retour Terrain",
+      "Ouvrir Atelier UX 2.0",
+      "Sélectionner une pièce et utiliser le menu contextuel",
+      "Déplacer une pièce",
+      "Tourner une pièce à 90°",
+      "Redimensionner",
+      "Détruire une pièce cassée",
+      "Fusionner deux zones",
+      "Créer une Chute en L",
+      "Prévisualiser, confirmer et appliquer",
+      "Identifier les besoins manquants",
+      "Ouvrir la compensation",
+      "Réutiliser une chute du MCP",
+      "Utiliser une chute du stock",
+      "Ajouter une plaque entière",
+      "Calculer et valider la compensation",
+      "Gérer les casses successives",
+      "Contrôler le plan effectif",
+      "Réinitialiser en sécurité",
+      "Préparer la clôture et la soumission MCP"
+    ],
+    "S": [
+      "Comprendre le rôle du Repack",
+      "Créer Draft Repack depuis MCP",
+      "Contrôler les matières consommées",
+      "Contrôler les pièces produites",
+      "Contrôler les chutes générées",
+      "Comprendre les déchets",
+      "Contrôler les surfaces",
+      "Contrôler les coûts et valeurs",
+      "Soumettre Stock Entry Repack",
+      "Recomposition depuis une Sales Order",
+      "Contrôler les composants d’un OUVRAGE",
+      "Comprendre Material Reconfiguration historique",
+      "Suivre les nouveaux Serial No",
+      "Mettre les produits à disposition du Flux Client"
+    ],
+    "E": [
+      "Commande introuvable",
+      "Matière insuffisante",
+      "Dimensions incompatibles",
+      "Pièce cassée",
+      "Compensation impossible",
+      "Chute en L non exploitable",
+      "Conflit entre deux utilisateurs",
+      "Serial No indisponible",
+      "Repack refusé",
+      "Différence de surface ou de valeur",
+      "Annulation et réinitialisation",
+      "Document déjà soumis"
+    ]
+  }
+}

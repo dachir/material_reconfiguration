@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1370" viewBox="0 0 1320 1370"><defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5b7083" stroke-width="1.5"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="28" x="660.0" y="42"><tspan x="660.0" dy="0">G05 · Compensation : du besoin au résultat</tspan></text>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="17" x="660.0" y="75"><tspan x="660.0" dy="0">A19 à A25 · Rotation permise en Retour Terrain, indépendamment de la Planification.</tspan></text>
+<rect x="430" y="120" width="460" height="80" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="153.8"><tspan x="660.0" dy="0">Ouvrir Compenser</tspan><tspan x="660.0" dy="26.0">Lire les besoins et les sources</tspan></text>
+<rect x="430" y="250" width="460" height="80" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="283.8"><tspan x="660.0" dy="0">Choisir Automatique ou Manuel</tspan><tspan x="660.0" dy="26.0">Manuel : sources et justification</tspan></text>
+<polyline points="660,200 660,250" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="430" y="380" width="460" height="80" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="413.8"><tspan x="660.0" dy="0">Cliquer Calculer</tspan><tspan x="660.0" dy="26.0">Début du calcul automatique</tspan></text>
+<polyline points="660,330 660,380" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="430" y="545" width="460" height="75" rx="12" fill="#eff3f7" stroke="#455b6d" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="589.3"><tspan x="660.0" dy="0">1 · Affecter les chutes du MCP</tspan></text>
+<rect x="430" y="680" width="460" height="75" rx="12" fill="#eff3f7" stroke="#455b6d" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="724.3"><tspan x="660.0" dy="0">2 · Chutes du stock pour le reste</tspan></text>
+<rect x="430" y="815" width="460" height="75" rx="12" fill="#eff3f7" stroke="#455b6d" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="859.3"><tspan x="660.0" dy="0">3 · Plaques entières pour le reste</tspan></text>
+<polyline points="660,460 660,545" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="660,620 660,680" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="660,755 660,815" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="430" y="955" width="460" height="90" rx="12" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="993.8"><tspan x="660.0" dy="0">Contrôler la proposition</tspan><tspan x="660.0" dy="26.0">Pièces remplacées + besoins restants</tspan></text>
+<polyline points="660,890 660,955" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="430" y="1130" width="460" height="80" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="660.0" y="1163.8"><tspan x="660.0" dy="0">Valider la compensation</tspan><tspan x="660.0" dy="26.0">Sauvegarde confirmée → atelier</tspan></text>
+<polyline points="660,1045 660,1130" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="950" y="955" width="320" height="90" rx="12" fill="#eff3f7" stroke="#455b6d" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="1110.0" y="993.8"><tspan x="1110.0" dy="0">Annuler la proposition</tspan><tspan x="1110.0" dy="26.0">Retour sans application</tspan></text>
+<polyline points="890,1000 950,1000" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="6 5"/>
+<rect x="45" y="955" width="320" height="130" rx="12" fill="#fff0ef" stroke="#b94646" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="19.528619528619526" x="205.0" y="1001.2525252525252"><tspan x="205.0" dy="0">Besoin restant non couvert</tspan><tspan x="205.0" dy="25.387205387205384">Actualiser / approvisionner</tspan><tspan x="205.0" dy="25.387205387205384">Ne pas forcer la clôture</tspan></text>
+<polyline points="430,1000 365,1000" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="205,955 205,420 430,420" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="6 5"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="16" x="222" y="565"><tspan x="222" dy="0">Recalculer</tspan></text>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="16" x="660.0" y="1320"><tspan x="660.0" dy="0">Le calcul n’est pas une validation. Une compensation validée ne soumet ni le MCP ni un Repack.</tspan></text></svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1280" viewBox="0 0 1240 1280"><defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5b7083" stroke-width="1.5"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="28" x="620.0" y="42"><tspan x="620.0" dy="0">G02 · Flux Fournisseur</tspan></text>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="17" x="620.0" y="75"><tspan x="620.0" dy="0">F01 à F09 · Choisir le circuit avant de constater l’entrée de stock.</tspan></text>
+<rect x="430" y="130" width="380" height="75" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="161.3"><tspan x="620.0" dy="0">F01 · Besoin matière</tspan><tspan x="620.0" dy="26.0">Article, dimensions, quantité</tspan></text>
+<path d="M620.0 250L810 305.0L620.0 360L430 305.0Z" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="18" x="620.0" y="311.12"><tspan x="620.0" dy="0">Circuit d’approvisionnement ?</tspan></text>
+<polyline points="620,205 620,250" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="90" y="420" width="430" height="80" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="305.0" y="453.8"><tspan x="305.0" dy="0">F02 · Purchase Order</tspan><tspan x="305.0" dy="26.0">Circuit fournisseur standard ERPNext</tspan></text>
+<polyline points="430,305 305,305 305,420" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="16" x="297" y="385"><tspan x="297" dy="0">Achat fournisseur</tspan></text>
+<rect x="90" y="555" width="430" height="80" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="305.0" y="588.8"><tspan x="305.0" dy="0">F03 / F04 · Purchase Receipt</tspan><tspan x="305.0" dy="26.0">Contrôle physique + séries / bundles</tspan></text>
+<polyline points="305,500 305,555" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="720" y="420" width="430" height="80" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="18.18181818181818" x="935.0" y="454.3636363636364"><tspan x="935.0" dy="0">F05 · Material Receipt Plan</tspan><tspan x="935.0" dy="23.636363636363633">Réception dimensionnée hors ce chemin PO</tspan></text>
+<polyline points="810,305 935,305 935,420" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="16" x="938" y="385"><tspan x="938" dy="0">Autre circuit autorisé</tspan></text>
+<rect x="720" y="555" width="430" height="80" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="935.0" y="588.8"><tspan x="935.0" dy="0">Soumettre le Receipt Plan</tspan><tspan x="935.0" dy="26.0">Crée et soumet Material Receipt</tspan></text>
+<polyline points="935,500 935,555" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="425" y="740" width="390" height="90" rx="12" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="778.8"><tspan x="620.0" dy="0">F07 / F08 · Contrôler les séries</tspan><tspan x="620.0" dy="26.0">Dimensions, épaisseur, qualité</tspan></text>
+<polyline points="305,635 305,710 620,710 620,740" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="935,635 935,710 620,710" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="425" y="895" width="390" height="90" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="933.8"><tspan x="620.0" dy="0">F09 · Dépôt et disponibilité</tspan><tspan x="620.0" dy="26.0">Matière admissible au MCP</tspan></text>
+<polyline points="620,830 620,895" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="425" y="1050" width="390" height="75" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="1081.3"><tspan x="620.0" dy="0">Passage vers A04 / A05</tspan><tspan x="620.0" dy="26.0">Charger et qualifier la matière</tspan></text>
+<polyline points="620,985 620,1050" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="16" x="620.0" y="1230"><tspan x="620.0" dy="0">F06 : ne pas recevoir deux fois les mêmes unités par les deux chemins.</tspan><tspan x="620.0" dy="20.8">Purchase Order n’est pas imposé par mat_reco à toute réception.</tspan></text></svg>

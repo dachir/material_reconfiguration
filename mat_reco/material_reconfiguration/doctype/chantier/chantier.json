@@ -1,0 +1,187 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "autoname": "field:reference",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "reference",
+   "label": "Référence",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "designation",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "responsible",
+   "label": "Responsable",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "expected_start_date",
+   "label": "Début prévu",
+   "fieldtype": "Date"
+  },
+  {
+   "fieldname": "expected_end_date",
+   "label": "Fin de fabrication prévue",
+   "fieldtype": "Date"
+  },
+  {
+   "fieldname": "status",
+   "label": "État du dossier",
+   "fieldtype": "Select",
+   "options": "Preparation\nQuotation\nConfirmed\nIn Production\nCompleted\nOn Hold\nCancelled",
+   "default": "Preparation"
+  },
+  {
+   "fieldname": "description",
+   "label": "Description",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "currency",
+   "label": "Devise",
+   "fieldtype": "Link",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "selling_price_list",
+   "label": "Liste de prix",
+   "fieldtype": "Link",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "lines",
+   "label": "Ouvrages proposés",
+   "fieldtype": "Table",
+   "options": "Chantier Line"
+  },
+  {
+   "fieldname": "technical_study",
+   "label": "Étude technique validée",
+   "fieldtype": "Link",
+   "options": "Chantier Technical Study",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "commercial_hash",
+   "label": "Empreinte commerciale approuvée",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "terms",
+   "label": "Conditions commerciales",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Révision précédente",
+   "fieldtype": "Link",
+   "options": "Chantier",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "commercial_extras",
+   "label": "Services et accessoires",
+   "fieldtype": "Table",
+   "options": "Chantier Commercial Extra"
+  }
+ ],
+ "field_order": [
+  "reference",
+  "designation",
+  "company",
+  "customer",
+  "responsible",
+  "expected_start_date",
+  "expected_end_date",
+  "status",
+  "description",
+  "currency",
+  "selling_price_list",
+  "lines",
+  "technical_study",
+  "commercial_hash",
+  "terms",
+  "amended_from"
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "title_field": "designation",
+ "search_fields": "reference,designation",
+ "is_submittable": 1,
+ "allow_import": 1
+}

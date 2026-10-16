@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1600" viewBox="0 0 1440 1600"><defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5b7083" stroke-width="1.5"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="28" x="720.0" y="42"><tspan x="720.0" dy="0">G04 · Flux Atelier / MCP / Repack</tspan></text>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="17" x="720.0" y="75"><tspan x="720.0" dy="0">A01 à A28, puis S01 à S14 · Le plan effectif conserve le lien aux besoins client.</tspan></text>
+<rect x="460" y="130" width="520" height="90" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="168.8"><tspan x="720.0" dy="0">A01–A06 · Préparer et charger</tspan><tspan x="720.0" dy="26.0">Besoins, commandes, matière, paramètres</tspan></text>
+<rect x="460" y="275" width="520" height="90" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="313.8"><tspan x="720.0" dy="0">A07 / A08 · Plan initial</tspan><tspan x="720.0" dy="26.0">Lire les pièces, chutes et déchets</tspan></text>
+<rect x="460" y="420" width="520" height="90" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="458.8"><tspan x="720.0" dy="0">A09–A11 · Retour Terrain / UX 2.0</tspan><tspan x="720.0" dy="26.0">Sélectionner et choisir une action</tspan></text>
+<rect x="460" y="610" width="520" height="90" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="648.8"><tspan x="720.0" dy="0">A18 · Confirmer puis appliquer</tspan><tspan x="720.0" dy="26.0">Enregistrer les incidents</tspan></text>
+<path d="M720.0 800L980 845.0L720.0 890L460 845.0Z" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="18" x="720.0" y="851.12"><tspan x="720.0" dy="0">A19 · Besoin non couvert ?</tspan></text>
+<rect x="460" y="990" width="520" height="90" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="1028.8"><tspan x="720.0" dy="0">A26 · Plan effectif contrôlé</tspan><tspan x="720.0" dy="26.0">Pièces conformes + remplacements</tspan></text>
+<rect x="460" y="1145" width="520" height="90" rx="12" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="1183.8"><tspan x="720.0" dy="0">A28 · Préparer la clôture MCP</tspan><tspan x="720.0" dy="26.0">Ordre de soumission à valider</tspan></text>
+<rect x="460" y="1300" width="520" height="90" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="1338.8"><tspan x="720.0" dy="0">S01–S09 · Repack de découpe</tspan><tspan x="720.0" dy="26.0">Contrôler puis soumettre le stock</tspan></text>
+<rect x="460" y="1450" width="520" height="90" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="720.0" y="1488.8"><tspan x="720.0" dy="0">S10–S14 · Recomposition si requise</tspan><tspan x="720.0" dy="26.0">Retour au Flux Client : C08 / C09</tspan></text>
+<polyline points="720,220 720,275" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,365 720,420" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,510 720,610" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,700 720,800" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,890 720,990" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,1080 720,1145" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,1235 720,1300" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="720,1390 720,1450" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="40" y="420" width="330" height="200" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="205.0" y="461.8"><tspan x="205.0" dy="0">A12 · Déplacer</tspan><tspan x="205.0" dy="26.0">A13 · Tourner à 90°</tspan><tspan x="205.0" dy="26.0">A14 · Redimensionner</tspan><tspan x="205.0" dy="26.0">A15 · Détruire</tspan><tspan x="205.0" dy="26.0">A16 · Fusionner</tspan><tspan x="205.0" dy="26.0">A17 · Chute en L</tspan></text>
+<polyline points="460,465 370,465" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="205,620 205,655 460,655" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="1080" y="765" width="320" height="175" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="1240.0" y="820.3"><tspan x="1240.0" dy="0">A20–A24 · Compenser</tspan><tspan x="1240.0" dy="26.0">Chute MCP → chute stock</tspan><tspan x="1240.0" dy="26.0">→ plaque entière</tspan><tspan x="1240.0" dy="26.0">Calculer puis valider</tspan></text>
+<polyline points="980,845 1080,845" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="16" x="1033" y="830"><tspan x="1033" dy="0">Oui</tspan></text>
+<polyline points="1240,940 1240,1035 980,1035" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="17" x="745" y="943"><tspan x="745" dy="0">Non</tspan></text>
+<rect x="40" y="840" width="330" height="115" rx="12" fill="#fff0ef" stroke="#b94646" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="205.0" y="878.3"><tspan x="205.0" dy="0">A25 · Casse successive</tspan><tspan x="205.0" dy="26.0">Nouvelle opération + bilan</tspan><tspan x="205.0" dy="26.0">Production soumise figée</tspan></text>
+<polyline points="1080,875 1030,875 1030,720 205,720 205,840" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="6 5"/>
+<rect x="40" y="1080" width="330" height="125" rx="12" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="205.0" y="1123.3"><tspan x="205.0" dy="0">A27 · Réinitialiser</tspan><tspan x="205.0" dy="26.0">Confirmation obligatoire</tspan><tspan x="205.0" dy="26.0">Plan initial restauré</tspan></text>
+<polyline points="460,1035 405,1035 405,1142 370,1142" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="6 5"/>
+<polyline points="40,1142 20,1142 20,250 460,250 460,320" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="6 5"/></svg>

@@ -81,7 +81,11 @@ def _get_generated_qty_by_so_item(so_item_name: str) -> float:
 
 
 def _build_context_from_so_row(so, row) -> dict:
+    from mat_reco.material_reconfiguration.services.chantier_service import frozen_tree
     return {
+        "frozen_tree": frozen_tree(so, row) if row.get("custom_technical_snapshot") else None,
+        "chantier": so.get("custom_chantier"),
+        "repere": row.get("custom_repere"),
         "sales_order": so.name,
         "sales_order_item": row.name,
         "root_item_code": row.item_code,

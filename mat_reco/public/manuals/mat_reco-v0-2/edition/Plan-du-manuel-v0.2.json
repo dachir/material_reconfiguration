@@ -1,0 +1,418 @@
+[
+  [
+    "cover",
+    "Manuel utilisateur global\nmat_reco"
+  ],
+  [
+    "sommaire",
+    "Sommaire des parcours"
+  ],
+  [
+    "00",
+    "00 · Bienvenue dans mat_reco"
+  ],
+  [
+    "01",
+    "01 · Carte globale des trois flux"
+  ],
+  [
+    "02",
+    "02 · Documents ERPNext et relations"
+  ],
+  [
+    "03",
+    "03 · Rôles et responsabilités"
+  ],
+  [
+    "04",
+    "04 · Lire les repères visuels"
+  ],
+  [
+    "05",
+    "05 · Cas pratique fil rouge"
+  ],
+  [
+    "part_F",
+    "Flux 1 · Fournisseur"
+  ],
+  [
+    "F01",
+    "F01 · Identifier le besoin d’approvisionnement"
+  ],
+  [
+    "F02",
+    "F02 · Créer une commande fournisseur"
+  ],
+  [
+    "F03",
+    "F03 · Préparer la réception physique"
+  ],
+  [
+    "F04",
+    "F04 · Réceptionner avec Purchase Receipt"
+  ],
+  [
+    "F05",
+    "F05 · Réceptionner via Material Receipt Plan"
+  ],
+  [
+    "F06",
+    "F06 · Comprendre les deux circuits de réception"
+  ],
+  [
+    "F07",
+    "F07 · Contrôler les Serial No générés"
+  ],
+  [
+    "F08",
+    "F08 · Contrôler dimensions, épaisseur et qualité"
+  ],
+  [
+    "F09",
+    "F09 · Vérifier le dépôt et la disponibilité"
+  ],
+  [
+    "part_C",
+    "Flux 2 · Client"
+  ],
+  [
+    "C01",
+    "C01 · Comprendre la demande client"
+  ],
+  [
+    "C02",
+    "C02 · Créer un devis"
+  ],
+  [
+    "C03",
+    "C03 · Saisir dimensions et quantités"
+  ],
+  [
+    "C04",
+    "C04 · Ajouter services et accessoires"
+  ],
+  [
+    "C05",
+    "C05 · Définir les articles DECOUPE et OUVRAGE"
+  ],
+  [
+    "C06",
+    "C06 · Transformer le devis en Sales Order"
+  ],
+  [
+    "C07",
+    "C07 · Transmettre les besoins à l’atelier"
+  ],
+  [
+    "C08",
+    "C08 · Suivre l’état de fabrication"
+  ],
+  [
+    "C09",
+    "C09 · Vérifier les produits finis disponibles"
+  ],
+  [
+    "C10",
+    "C10 · Préparer et soumettre Delivery Note"
+  ],
+  [
+    "C11",
+    "C11 · Contrôler les Serial No et les dimensions livrées"
+  ],
+  [
+    "C12",
+    "C12 · Créer Sales Invoice"
+  ],
+  [
+    "C13",
+    "C13 · Contrôler facture, quantités et références"
+  ],
+  [
+    "part_A",
+    "Flux 3 · Atelier"
+  ],
+  [
+    "A01",
+    "A01 · Comprendre les besoins issus des commandes"
+  ],
+  [
+    "A02",
+    "A02 · Créer Material Cutting Plan"
+  ],
+  [
+    "A03",
+    "A03 · Charger les commandes client"
+  ],
+  [
+    "A04",
+    "A04 · Charger les matières disponibles"
+  ],
+  [
+    "A05",
+    "A05 · Qualifier les plaques"
+  ],
+  [
+    "A06",
+    "A06 · Paramétrer la découpe"
+  ],
+  [
+    "A07",
+    "A07 · Générer et lire le plan initial"
+  ],
+  [
+    "A08",
+    "A08 · Comprendre produits finis, chutes et déchets"
+  ],
+  [
+    "A09",
+    "A09 · Passer en Retour Terrain"
+  ],
+  [
+    "A10",
+    "A10 · Ouvrir Atelier UX 2.0"
+  ],
+  [
+    "A11",
+    "A11 · Sélectionner une pièce et utiliser le menu contextuel"
+  ],
+  [
+    "A12",
+    "A12 · Déplacer une pièce"
+  ],
+  [
+    "A13",
+    "A13 · Tourner une pièce à 90°"
+  ],
+  [
+    "A14",
+    "A14 · Redimensionner"
+  ],
+  [
+    "graph_casse",
+    "G07 · Décision en cas de casse"
+  ],
+  [
+    "A15",
+    "A15 · Détruire une pièce cassée"
+  ],
+  [
+    "A16",
+    "A16 · Fusionner deux zones"
+  ],
+  [
+    "A17",
+    "A17 · Créer une Chute en L"
+  ],
+  [
+    "A18",
+    "A18 · Prévisualiser, confirmer et appliquer"
+  ],
+  [
+    "A19",
+    "A19 · Identifier les besoins manquants"
+  ],
+  [
+    "graph_comp",
+    "G05 · Compensation : priorités et validation"
+  ],
+  [
+    "A20",
+    "A20 · Ouvrir la compensation"
+  ],
+  [
+    "A21",
+    "A21 · Réutiliser une chute du MCP"
+  ],
+  [
+    "A22",
+    "A22 · Utiliser une chute du stock"
+  ],
+  [
+    "A23",
+    "A23 · Ajouter une plaque entière"
+  ],
+  [
+    "A24",
+    "A24 · Calculer et valider la compensation"
+  ],
+  [
+    "A25",
+    "A25 · Gérer les casses successives"
+  ],
+  [
+    "A26",
+    "A26 · Contrôler le plan effectif"
+  ],
+  [
+    "A27",
+    "A27 · Réinitialiser en sécurité"
+  ],
+  [
+    "A28",
+    "A28 · Préparer la clôture et la soumission MCP"
+  ],
+  [
+    "part_S",
+    "Flux 3 · Stock / Recomposition"
+  ],
+  [
+    "S01",
+    "S01 · Comprendre le rôle du Repack"
+  ],
+  [
+    "S02",
+    "S02 · Créer Draft Repack depuis MCP"
+  ],
+  [
+    "S03",
+    "S03 · Contrôler les matières consommées"
+  ],
+  [
+    "S04",
+    "S04 · Contrôler les pièces produites"
+  ],
+  [
+    "S05",
+    "S05 · Contrôler les chutes générées"
+  ],
+  [
+    "S06",
+    "S06 · Comprendre les déchets"
+  ],
+  [
+    "S07",
+    "S07 · Contrôler les surfaces"
+  ],
+  [
+    "S08",
+    "S08 · Contrôler les coûts et valeurs"
+  ],
+  [
+    "S09",
+    "S09 · Soumettre Stock Entry Repack"
+  ],
+  [
+    "S10",
+    "S10 · Recomposition depuis une Sales Order"
+  ],
+  [
+    "S11",
+    "S11 · Contrôler les composants d’un OUVRAGE"
+  ],
+  [
+    "S12",
+    "S12 · Comprendre Material Reconfiguration historique"
+  ],
+  [
+    "S13",
+    "S13 · Suivre les nouveaux Serial No"
+  ],
+  [
+    "S14",
+    "S14 · Mettre les produits à disposition du Flux Client"
+  ],
+  [
+    "part_E",
+    "Partie V · Gestion des exceptions"
+  ],
+  [
+    "E01",
+    "E01 · Commande introuvable"
+  ],
+  [
+    "E02",
+    "E02 · Matière insuffisante"
+  ],
+  [
+    "E03",
+    "E03 · Dimensions incompatibles"
+  ],
+  [
+    "E04",
+    "E04 · Pièce cassée"
+  ],
+  [
+    "E05",
+    "E05 · Compensation impossible"
+  ],
+  [
+    "E06",
+    "E06 · Chute en L non exploitable"
+  ],
+  [
+    "E07",
+    "E07 · Conflit entre deux utilisateurs"
+  ],
+  [
+    "E08",
+    "E08 · Serial No indisponible"
+  ],
+  [
+    "E09",
+    "E09 · Repack refusé"
+  ],
+  [
+    "E10",
+    "E10 · Différence de surface ou de valeur"
+  ],
+  [
+    "E11",
+    "E11 · Annulation et réinitialisation"
+  ],
+  [
+    "E12",
+    "E12 · Document déjà soumis"
+  ],
+  [
+    "part_X",
+    "Partie VI · Exercices et validation"
+  ],
+  [
+    "X01",
+    "X01 · Réception de plaques fournisseur"
+  ],
+  [
+    "X02",
+    "X02 · Commande client avec découpe réussie"
+  ],
+  [
+    "X03",
+    "X03 · Commande avec casse, compensation puis Repack"
+  ],
+  [
+    "V01",
+    "V01 · Validation et décisions ouvertes"
+  ],
+  [
+    "GLOSS",
+    "Glossaire"
+  ],
+  [
+    "N01",
+    "N01 · Annexes : réglages et circuits complémentaires"
+  ],
+  [
+    "N02",
+    "N02 · Sources, limites et contrôle documentaire"
+  ],
+  [
+    "I01",
+    "I01 · Index des captures et navigation des assets"
+  ],
+  [
+    "index_C",
+    "I01 · Index — Flux 2 · Client"
+  ],
+  [
+    "index_A",
+    "I01 · Index — Flux 3 · Atelier"
+  ],
+  [
+    "index_S",
+    "I01 · Index — Flux 3 · Stock / Recomposition"
+  ],
+  [
+    "index_E",
+    "I01 · Index — Exceptions"
+  ]
+]

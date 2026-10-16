@@ -1,0 +1,63 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"ug-header\", \"type\": \"header\", \"data\": {\"text\": \"Univers Glass\", \"col\": 12}}, {\"id\": \"ug-cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cockpit atelier\", \"col\": 4}}, {\"id\": \"univers-glass-chantiers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Chantiers\", \"col\": 3}}, {\"id\": \"ug-technical-study\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"\\u00c9tude technique\", \"col\": 4}}]",
+ "creation": "2026-10-15 21:31:00.636583",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "manufacturing",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Univers Glass",
+ "links": [],
+ "modified": "2026-10-16 07:18:58.991335",
+ "modified_by": "Administrator",
+ "module": "Material Reconfiguration",
+ "name": "Univers Glass",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  }
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "color": "Cyan",
+   "label": "Cockpit atelier",
+   "link_to": "workshop-cockpit",
+   "type": "Page"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Chantiers",
+   "link_to": "chantiers",
+   "type": "Page"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "\u00c9tude technique",
+   "link_to": "technical-study",
+   "type": "Page"
+  }
+ ],
+ "title": "Univers Glass"
+}

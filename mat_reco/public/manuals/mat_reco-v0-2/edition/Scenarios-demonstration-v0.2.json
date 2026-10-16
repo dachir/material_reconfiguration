@@ -1,0 +1,1902 @@
+{
+  "initial": {
+    "options": {
+      "allow_rotation": false,
+      "kerf_mm": 0
+    },
+    "nodes": [
+      {
+        "id": "PLAQUE-DEMO-001",
+        "serial_no": "PLAQUE-DEMO-001",
+        "node_type": "input_serial",
+        "item_code": "VERRE-CLAIR-6MM",
+        "thickness_mm": 6,
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "children": [
+          {
+            "id": "P1",
+            "piece_uid": "unite-1",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 0,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "P2",
+            "piece_uid": "unite-2",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 800,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "P3",
+            "piece_uid": "unite-3",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 1600,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "P4",
+            "piece_uid": "unite-4",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 2400,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "CHUTE-INTERNE",
+            "node_type": "leftover",
+            "x": 0,
+            "y": 600,
+            "length_mm": 3210,
+            "width_mm": 1400
+          },
+          {
+            "id": "BANDE-DECHET",
+            "node_type": "waste",
+            "x": 3200,
+            "y": 0,
+            "length_mm": 10,
+            "width_mm": 600
+          }
+        ]
+      }
+    ]
+  },
+  "broken": {
+    "options": {
+      "allow_rotation": false,
+      "kerf_mm": 0
+    },
+    "nodes": [
+      {
+        "id": "PLAQUE-DEMO-001",
+        "serial_no": "PLAQUE-DEMO-001",
+        "node_type": "input_serial",
+        "item_code": "VERRE-CLAIR-6MM",
+        "thickness_mm": 6,
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "children": [
+          {
+            "id": "P1",
+            "piece_uid": "unite-1",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 0,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false,
+            "effective_length_mm": 800.0,
+            "effective_width_mm": 600.0,
+            "effective_area_mm2": 480000.0
+          },
+          {
+            "id": "P2",
+            "piece_uid": "unite-2",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "destroyed",
+            "x": 800,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false,
+            "__original_length_mm": 800.0,
+            "__original_width_mm": 600.0,
+            "effective_length_mm": 0.0,
+            "effective_width_mm": 0.0,
+            "effective_area_mm2": 0.0,
+            "include_in_repack": 0,
+            "__incident_action": "Destroy"
+          },
+          {
+            "id": "P3",
+            "piece_uid": "unite-3",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 1600,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false,
+            "effective_length_mm": 800.0,
+            "effective_width_mm": 600.0,
+            "effective_area_mm2": 480000.0
+          },
+          {
+            "id": "P4",
+            "piece_uid": "unite-4",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 2400,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false,
+            "effective_length_mm": 800.0,
+            "effective_width_mm": 600.0,
+            "effective_area_mm2": 480000.0
+          },
+          {
+            "id": "BANDE-DECHET",
+            "node_type": "waste",
+            "x": 3200,
+            "y": 0,
+            "length_mm": 10,
+            "width_mm": 600,
+            "effective_length_mm": 10.0,
+            "effective_width_mm": 600.0,
+            "effective_area_mm2": 6000.0
+          },
+          {
+            "id": "CHUTE-INTERNE",
+            "node_type": "leftover",
+            "x": 0,
+            "y": 600,
+            "length_mm": 3210,
+            "width_mm": 1400,
+            "effective_length_mm": 3210.0,
+            "effective_width_mm": 1400.0,
+            "effective_area_mm2": 4494000.0
+          }
+        ]
+      }
+    ]
+  },
+  "move_tree": {
+    "options": {
+      "allow_rotation": false,
+      "kerf_mm": 0
+    },
+    "nodes": [
+      {
+        "id": "PLAQUE-DEMO-001",
+        "serial_no": "PLAQUE-DEMO-001",
+        "node_type": "input_serial",
+        "item_code": "VERRE-CLAIR-6MM",
+        "thickness_mm": 6,
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "children": [
+          {
+            "id": "P1",
+            "piece_uid": "unite-1",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 0,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "P2",
+            "piece_uid": "unite-2",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 800,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "P3",
+            "piece_uid": "unite-3",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 1600,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "P4",
+            "piece_uid": "unite-4",
+            "piece_item_code": "DECOUPE-6MM",
+            "sales_order": "SO-DEMO-001",
+            "node_type": "finished_good",
+            "x": 2400,
+            "y": 0,
+            "length_mm": 800,
+            "width_mm": 600,
+            "thickness_mm": 6,
+            "rotation": false
+          },
+          {
+            "id": "CHUTE-INTERNE",
+            "node_type": "leftover",
+            "x": 0,
+            "y": 600,
+            "length_mm": 3210,
+            "width_mm": 1400
+          },
+          {
+            "id": "BANDE-DECHET",
+            "node_type": "waste",
+            "x": 3200,
+            "y": 0,
+            "length_mm": 10,
+            "width_mm": 600
+          }
+        ]
+      },
+      {
+        "id": "CHUTE-STOCK-DEMO-001",
+        "serial_no": "CHUTE-STOCK-DEMO-001",
+        "node_type": "input_serial",
+        "item_code": "VERRE-CLAIR-6MM",
+        "thickness_mm": 6,
+        "length_mm": 600,
+        "width_mm": 800,
+        "children": [
+          {
+            "id": "CIBLE-ROTATION",
+            "node_type": "leftover",
+            "x": 0,
+            "y": 0,
+            "length_mm": 600,
+            "width_mm": 800
+          }
+        ]
+      }
+    ]
+  },
+  "l_tree": {
+    "nodes": [
+      {
+        "id": "CHUTE-DEMO-L",
+        "serial_no": "CHUTE-DEMO-L",
+        "node_type": "input_serial",
+        "length_mm": 1800,
+        "width_mm": 1500,
+        "children": [
+          {
+            "id": "PIECE-L",
+            "node_type": "finished_good",
+            "x": 0,
+            "y": 0,
+            "length_mm": 1500,
+            "width_mm": 1000
+          },
+          {
+            "id": "CHUTE-L",
+            "node_type": "leftover",
+            "x": 0,
+            "y": 1000,
+            "length_mm": 1500,
+            "width_mm": 500
+          },
+          {
+            "id": "DONNEUR",
+            "node_type": "waste",
+            "x": 1500,
+            "y": 0,
+            "length_mm": 300,
+            "width_mm": 1500
+          }
+        ]
+      }
+    ]
+  },
+  "internal": {
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "piece_uid": "unite-2",
+              "requirement_id": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "length_mm": 600.0,
+              "width_mm": 800.0,
+              "thickness_mm": 6,
+              "broken_operation_ids": [
+                "P2"
+              ],
+              "id": "CP-385b6bc8b969c4e9c0e610fe2021f19c",
+              "node_type": "finished_good",
+              "label": "Remplacement",
+              "x": 0.0,
+              "y": 600.0,
+              "effective_length_mm": 600.0,
+              "effective_width_mm": 800.0,
+              "effective_area_mm2": 480000.0,
+              "rotation": true,
+              "include_in_repack": 1,
+              "is_real": false,
+              "replacement_for": "unite-2",
+              "compensation_source_node_id": "CHUTE-INTERNE",
+              "compensation_source_serial_no": "PLAQUE-DEMO-001"
+            },
+            {
+              "id": "CF-0c2c5e3338a74c3710a69cc1c6684ff7",
+              "node_type": "leftover",
+              "x": 600.0,
+              "y": 600.0,
+              "length_mm": 2610.0,
+              "width_mm": 1400.0,
+              "effective_length_mm": 2610.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 3654000.0,
+              "include_in_repack": 1,
+              "compensation_residual": true
+            },
+            {
+              "id": "CF-2e3651cee97eac3050a13224b625c9f6",
+              "node_type": "leftover",
+              "x": 0.0,
+              "y": 1400.0,
+              "length_mm": 600.0,
+              "width_mm": 600.0,
+              "effective_length_mm": 600.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 360000.0,
+              "include_in_repack": 1,
+              "compensation_residual": true
+            }
+          ]
+        }
+      ]
+    },
+    "placements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 600.0,
+        "width_mm": 800.0,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "id": "CP-385b6bc8b969c4e9c0e610fe2021f19c",
+        "node_type": "finished_good",
+        "label": "Remplacement",
+        "x": 0.0,
+        "y": 600.0,
+        "effective_length_mm": 600.0,
+        "effective_width_mm": 800.0,
+        "effective_area_mm2": 480000.0,
+        "rotation": true,
+        "include_in_repack": 1,
+        "is_real": false,
+        "replacement_for": "unite-2",
+        "compensation_source_node_id": "CHUTE-INTERNE",
+        "compensation_source_serial_no": "PLAQUE-DEMO-001",
+        "source_serial_no": "PLAQUE-DEMO-001",
+        "candidate_id": "PLAQUE-DEMO-001/CHUTE-INTERNE/0",
+        "origin": "internal"
+      }
+    ],
+    "remaining_requirements": [],
+    "used_stock_sources": [],
+    "internal_candidates": [
+      {
+        "x": 0.0,
+        "y": 600.0,
+        "length_mm": 3210.0,
+        "width_mm": 1400.0,
+        "candidate_id": "PLAQUE-DEMO-001/CHUTE-INTERNE/0",
+        "source_serial_no": "PLAQUE-DEMO-001",
+        "source_node_id": "CHUTE-INTERNE",
+        "origin": "internal",
+        "priority": 1,
+        "item_code": "VERRE-CLAIR-6MM",
+        "thickness_mm": 6,
+        "warehouse": null,
+        "region_index": 0
+      }
+    ],
+    "warnings": [],
+    "summary": {
+      "replaced": 1,
+      "remaining": 0,
+      "additional_materials": 0,
+      "used_area_mm2": 480000.0,
+      "remaining_area_mm2": 4014000.0
+    },
+    "valid": true,
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "proposal_id": "demo-2",
+    "options": {
+      "strategy": "automatic",
+      "selected_sources": [],
+      "override_reason": ""
+    }
+  },
+  "stock_preview": {
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "id": "CHUTE-INTERNE",
+              "node_type": "waste",
+              "x": 0,
+              "y": 600,
+              "length_mm": 3210,
+              "width_mm": 1400,
+              "effective_length_mm": 3210.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 4494000.0,
+              "label": "Matière non conservable — scénario de stock"
+            }
+          ]
+        },
+        {
+          "serial_no": "CHUTE-STOCK-DEMO-001",
+          "item_code": "VERRE-CLAIR-6MM",
+          "warehouse": "MATIERE-DEMO",
+          "company": "SOCIETE-DEMO",
+          "length_mm": 600,
+          "width_mm": 800,
+          "area_mm2": 480000,
+          "thickness_mm": 6,
+          "material_status": "Partial",
+          "priority": 2,
+          "origin": "stock_leftover",
+          "compatible": true,
+          "status": "Disponible",
+          "id": "CHUTE-STOCK-DEMO-001",
+          "node_type": "input_serial",
+          "children": [
+            {
+              "piece_uid": "unite-2",
+              "requirement_id": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "length_mm": 600.0,
+              "width_mm": 800.0,
+              "thickness_mm": 6,
+              "broken_operation_ids": [
+                "P2"
+              ],
+              "id": "CP-21183bd9099895bb9885a9515aadd4b8",
+              "node_type": "finished_good",
+              "label": "Remplacement",
+              "x": 0.0,
+              "y": 0.0,
+              "effective_length_mm": 600.0,
+              "effective_width_mm": 800.0,
+              "effective_area_mm2": 480000.0,
+              "rotation": true,
+              "include_in_repack": 1,
+              "is_real": false,
+              "replacement_for": "unite-2",
+              "compensation_source_node_id": "CHUTE-STOCK-DEMO-001::COMP_FREE0",
+              "compensation_source_serial_no": "CHUTE-STOCK-DEMO-001",
+              "compensation_origin": "stock_leftover"
+            }
+          ]
+        }
+      ]
+    },
+    "placements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 600.0,
+        "width_mm": 800.0,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "id": "CP-21183bd9099895bb9885a9515aadd4b8",
+        "node_type": "finished_good",
+        "label": "Remplacement",
+        "x": 0.0,
+        "y": 0.0,
+        "effective_length_mm": 600.0,
+        "effective_width_mm": 800.0,
+        "effective_area_mm2": 480000.0,
+        "rotation": true,
+        "include_in_repack": 1,
+        "is_real": false,
+        "replacement_for": "unite-2",
+        "compensation_source_node_id": "CHUTE-STOCK-DEMO-001::COMP_FREE0",
+        "compensation_source_serial_no": "CHUTE-STOCK-DEMO-001",
+        "source_serial_no": "CHUTE-STOCK-DEMO-001",
+        "candidate_id": "CHUTE-STOCK-DEMO-001/CHUTE-STOCK-DEMO-001::COMP_FREE0/0",
+        "origin": "stock_leftover"
+      }
+    ],
+    "remaining_requirements": [],
+    "used_stock_sources": [
+      {
+        "serial_no": "CHUTE-STOCK-DEMO-001",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 600,
+        "width_mm": 800,
+        "area_mm2": 480000,
+        "thickness_mm": 6,
+        "material_status": "Partial",
+        "priority": 2,
+        "origin": "stock_leftover",
+        "compatible": true,
+        "status": "Disponible"
+      }
+    ],
+    "internal_candidates": [],
+    "warnings": [],
+    "summary": {
+      "replaced": 1,
+      "remaining": 0,
+      "additional_materials": 1,
+      "used_area_mm2": 480000.0,
+      "remaining_area_mm2": 0
+    },
+    "valid": true,
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "proposal_id": "demo-2",
+    "options": {
+      "strategy": "automatic",
+      "selected_sources": [],
+      "override_reason": ""
+    }
+  },
+  "full_preview": {
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "id": "CHUTE-INTERNE",
+              "node_type": "waste",
+              "x": 0,
+              "y": 600,
+              "length_mm": 3210,
+              "width_mm": 1400,
+              "effective_length_mm": 3210.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 4494000.0,
+              "label": "Matière non conservable — scénario de stock"
+            }
+          ]
+        },
+        {
+          "serial_no": "PLAQUE-DEMO-002",
+          "item_code": "VERRE-CLAIR-6MM",
+          "warehouse": "MATIERE-DEMO",
+          "company": "SOCIETE-DEMO",
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "area_mm2": 6420000,
+          "thickness_mm": 6,
+          "material_status": "Full",
+          "priority": 3,
+          "origin": "stock_sheet",
+          "compatible": true,
+          "status": "Disponible",
+          "id": "PLAQUE-DEMO-002",
+          "node_type": "input_serial",
+          "children": [
+            {
+              "piece_uid": "unite-2",
+              "requirement_id": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "length_mm": 600.0,
+              "width_mm": 800.0,
+              "thickness_mm": 6,
+              "broken_operation_ids": [
+                "P2"
+              ],
+              "id": "CP-28b6d9b38f7e4de145c540710b063755",
+              "node_type": "finished_good",
+              "label": "Remplacement",
+              "x": 0.0,
+              "y": 0.0,
+              "effective_length_mm": 600.0,
+              "effective_width_mm": 800.0,
+              "effective_area_mm2": 480000.0,
+              "rotation": true,
+              "include_in_repack": 1,
+              "is_real": false,
+              "replacement_for": "unite-2",
+              "compensation_source_node_id": "PLAQUE-DEMO-002::COMP_FREE0",
+              "compensation_source_serial_no": "PLAQUE-DEMO-002",
+              "compensation_origin": "stock_sheet"
+            },
+            {
+              "id": "CF-3f473320932c9c8bab3de5b01ec47c67",
+              "node_type": "leftover",
+              "x": 600.0,
+              "y": 0.0,
+              "length_mm": 2610.0,
+              "width_mm": 2000.0,
+              "effective_length_mm": 2610.0,
+              "effective_width_mm": 2000.0,
+              "effective_area_mm2": 5220000.0,
+              "include_in_repack": 1,
+              "compensation_residual": true
+            },
+            {
+              "id": "CF-5bbf4fc65c2922aaa74e6d58a46fcf7f",
+              "node_type": "leftover",
+              "x": 0.0,
+              "y": 800.0,
+              "length_mm": 600.0,
+              "width_mm": 1200.0,
+              "effective_length_mm": 600.0,
+              "effective_width_mm": 1200.0,
+              "effective_area_mm2": 720000.0,
+              "include_in_repack": 1,
+              "compensation_residual": true
+            }
+          ]
+        }
+      ]
+    },
+    "placements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 600.0,
+        "width_mm": 800.0,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "id": "CP-28b6d9b38f7e4de145c540710b063755",
+        "node_type": "finished_good",
+        "label": "Remplacement",
+        "x": 0.0,
+        "y": 0.0,
+        "effective_length_mm": 600.0,
+        "effective_width_mm": 800.0,
+        "effective_area_mm2": 480000.0,
+        "rotation": true,
+        "include_in_repack": 1,
+        "is_real": false,
+        "replacement_for": "unite-2",
+        "compensation_source_node_id": "PLAQUE-DEMO-002::COMP_FREE0",
+        "compensation_source_serial_no": "PLAQUE-DEMO-002",
+        "source_serial_no": "PLAQUE-DEMO-002",
+        "candidate_id": "PLAQUE-DEMO-002/PLAQUE-DEMO-002::COMP_FREE0/0",
+        "origin": "stock_sheet"
+      }
+    ],
+    "remaining_requirements": [],
+    "used_stock_sources": [
+      {
+        "serial_no": "PLAQUE-DEMO-002",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "area_mm2": 6420000,
+        "thickness_mm": 6,
+        "material_status": "Full",
+        "priority": 3,
+        "origin": "stock_sheet",
+        "compatible": true,
+        "status": "Disponible"
+      }
+    ],
+    "internal_candidates": [],
+    "warnings": [],
+    "summary": {
+      "replaced": 1,
+      "remaining": 0,
+      "additional_materials": 1,
+      "used_area_mm2": 480000.0,
+      "remaining_area_mm2": 5940000.0
+    },
+    "valid": true,
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "proposal_id": "demo-1",
+    "options": {
+      "strategy": "automatic",
+      "selected_sources": [],
+      "override_reason": ""
+    }
+  },
+  "unavailable": {
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "id": "CHUTE-INTERNE",
+              "node_type": "waste",
+              "x": 0,
+              "y": 600,
+              "length_mm": 3210,
+              "width_mm": 1400,
+              "effective_length_mm": 3210.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 4494000.0,
+              "label": "Matière non conservable — scénario de stock"
+            }
+          ]
+        }
+      ]
+    },
+    "placements": [],
+    "remaining_requirements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "compensation_qty": 1
+      }
+    ],
+    "used_stock_sources": [],
+    "internal_candidates": [],
+    "warnings": [],
+    "summary": {
+      "replaced": 0,
+      "remaining": 1,
+      "additional_materials": 0,
+      "used_area_mm2": 0,
+      "remaining_area_mm2": 0
+    },
+    "valid": true,
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "proposal_id": "demo-0",
+    "options": {
+      "strategy": "automatic",
+      "selected_sources": [],
+      "override_reason": ""
+    }
+  },
+  "loaded": {
+    "valid": true,
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "id": "CHUTE-INTERNE",
+              "node_type": "leftover",
+              "x": 0,
+              "y": 600,
+              "length_mm": 3210,
+              "width_mm": 1400,
+              "effective_length_mm": 3210.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 4494000.0
+            }
+          ]
+        }
+      ]
+    },
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "requirements": [
+      {
+        "piece_uid": "unite-2",
+        "operations": []
+      }
+    ],
+    "compensation_requirements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "compensation_qty": 1
+      }
+    ],
+    "broken_pieces": [
+      {
+        "id": "P2",
+        "piece_uid": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "node_type": "destroyed",
+        "x": 800,
+        "y": 0,
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "rotation": false,
+        "__original_length_mm": 800.0,
+        "__original_width_mm": 600.0,
+        "effective_length_mm": 0.0,
+        "effective_width_mm": 0.0,
+        "effective_area_mm2": 0.0,
+        "include_in_repack": 0,
+        "__incident_action": "Destroy"
+      }
+    ],
+    "replacement_pieces": [],
+    "internal_candidates": [
+      {
+        "x": 0.0,
+        "y": 600.0,
+        "length_mm": 3210.0,
+        "width_mm": 1400.0,
+        "candidate_id": "PLAQUE-DEMO-001/CHUTE-INTERNE/0",
+        "source_serial_no": "PLAQUE-DEMO-001",
+        "source_node_id": "CHUTE-INTERNE",
+        "origin": "internal",
+        "priority": 1,
+        "item_code": "VERRE-CLAIR-6MM",
+        "thickness_mm": 6,
+        "warehouse": null,
+        "region_index": 0
+      }
+    ],
+    "stock_candidates": [
+      {
+        "serial_no": "CHUTE-STOCK-DEMO-001",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 600,
+        "width_mm": 800,
+        "area_mm2": 480000,
+        "thickness_mm": 6,
+        "material_status": "Partial",
+        "priority": 2,
+        "origin": "stock_leftover",
+        "compatible": true,
+        "status": "Disponible"
+      },
+      {
+        "serial_no": "PLAQUE-DEMO-002",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "area_mm2": 6420000,
+        "thickness_mm": 6,
+        "material_status": "Full",
+        "priority": 3,
+        "origin": "stock_sheet",
+        "compatible": true,
+        "status": "Disponible"
+      }
+    ],
+    "summary": {
+      "requested": 4,
+      "valid": 3,
+      "broken": 1,
+      "to_compensate": 1
+    },
+    "warnings": []
+  },
+  "loaded_stock": {
+    "valid": true,
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "id": "CHUTE-INTERNE",
+              "node_type": "waste",
+              "x": 0,
+              "y": 600,
+              "length_mm": 3210,
+              "width_mm": 1400,
+              "effective_length_mm": 3210.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 4494000.0,
+              "label": "Matière non conservable — scénario de stock"
+            }
+          ]
+        }
+      ]
+    },
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "requirements": [
+      {
+        "piece_uid": "unite-2",
+        "operations": []
+      }
+    ],
+    "compensation_requirements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "compensation_qty": 1
+      }
+    ],
+    "broken_pieces": [
+      {
+        "id": "P2",
+        "piece_uid": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "node_type": "destroyed",
+        "x": 800,
+        "y": 0,
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "rotation": false,
+        "__original_length_mm": 800.0,
+        "__original_width_mm": 600.0,
+        "effective_length_mm": 0.0,
+        "effective_width_mm": 0.0,
+        "effective_area_mm2": 0.0,
+        "include_in_repack": 0,
+        "__incident_action": "Destroy"
+      }
+    ],
+    "replacement_pieces": [],
+    "internal_candidates": [],
+    "stock_candidates": [
+      {
+        "serial_no": "CHUTE-STOCK-DEMO-001",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 600,
+        "width_mm": 800,
+        "area_mm2": 480000,
+        "thickness_mm": 6,
+        "material_status": "Partial",
+        "priority": 2,
+        "origin": "stock_leftover",
+        "compatible": true,
+        "status": "Disponible"
+      },
+      {
+        "serial_no": "PLAQUE-DEMO-002",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "area_mm2": 6420000,
+        "thickness_mm": 6,
+        "material_status": "Full",
+        "priority": 3,
+        "origin": "stock_sheet",
+        "compatible": true,
+        "status": "Disponible"
+      }
+    ],
+    "summary": {
+      "requested": 4,
+      "valid": 3,
+      "broken": 1,
+      "to_compensate": 1
+    },
+    "warnings": []
+  },
+  "loaded_repeat": {
+    "valid": true,
+    "effective_tree": {
+      "options": {
+        "allow_rotation": false,
+        "kerf_mm": 0
+      },
+      "nodes": [
+        {
+          "id": "PLAQUE-DEMO-001",
+          "serial_no": "PLAQUE-DEMO-001",
+          "node_type": "input_serial",
+          "item_code": "VERRE-CLAIR-6MM",
+          "thickness_mm": 6,
+          "length_mm": 3210,
+          "width_mm": 2000,
+          "children": [
+            {
+              "id": "P1",
+              "piece_uid": "unite-1",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 0,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P2",
+              "piece_uid": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "destroyed",
+              "x": 800,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "__original_length_mm": 800.0,
+              "__original_width_mm": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "include_in_repack": 0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "P3",
+              "piece_uid": "unite-3",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 1600,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "P4",
+              "piece_uid": "unite-4",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "node_type": "finished_good",
+              "x": 2400,
+              "y": 0,
+              "length_mm": 800,
+              "width_mm": 600,
+              "thickness_mm": 6,
+              "rotation": false,
+              "effective_length_mm": 800.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 480000.0
+            },
+            {
+              "id": "BANDE-DECHET",
+              "node_type": "waste",
+              "x": 3200,
+              "y": 0,
+              "length_mm": 10,
+              "width_mm": 600,
+              "effective_length_mm": 10.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 6000.0
+            },
+            {
+              "piece_uid": "unite-2",
+              "requirement_id": "unite-2",
+              "piece_item_code": "DECOUPE-6MM",
+              "sales_order": "SO-DEMO-001",
+              "length_mm": 600.0,
+              "width_mm": 800.0,
+              "thickness_mm": 6,
+              "broken_operation_ids": [
+                "P2"
+              ],
+              "id": "CP-385b6bc8b969c4e9c0e610fe2021f19c",
+              "node_type": "destroyed",
+              "label": "Remplacement",
+              "x": 0.0,
+              "y": 600.0,
+              "effective_length_mm": 0.0,
+              "effective_width_mm": 0.0,
+              "effective_area_mm2": 0.0,
+              "rotation": true,
+              "include_in_repack": 0,
+              "is_real": false,
+              "replacement_for": "unite-2",
+              "compensation_source_node_id": "CHUTE-INTERNE",
+              "compensation_source_serial_no": "PLAQUE-DEMO-001",
+              "__original_length_mm": 600.0,
+              "__original_width_mm": 800.0,
+              "__incident_action": "Destroy"
+            },
+            {
+              "id": "CF-0c2c5e3338a74c3710a69cc1c6684ff7",
+              "node_type": "leftover",
+              "x": 600.0,
+              "y": 600.0,
+              "length_mm": 2610.0,
+              "width_mm": 1400.0,
+              "effective_length_mm": 2610.0,
+              "effective_width_mm": 1400.0,
+              "effective_area_mm2": 3654000.0,
+              "include_in_repack": 1,
+              "compensation_residual": true
+            },
+            {
+              "id": "CF-2e3651cee97eac3050a13224b625c9f6",
+              "node_type": "leftover",
+              "x": 0.0,
+              "y": 1400.0,
+              "length_mm": 600.0,
+              "width_mm": 600.0,
+              "effective_length_mm": 600.0,
+              "effective_width_mm": 600.0,
+              "effective_area_mm2": 360000.0,
+              "include_in_repack": 1,
+              "compensation_residual": true
+            }
+          ]
+        }
+      ]
+    },
+    "document_version": {
+      "signature": "demo-in-memory",
+      "modified": "2026-10-14"
+    },
+    "requirements": [
+      {
+        "piece_uid": "unite-2",
+        "operations": []
+      }
+    ],
+    "compensation_requirements": [
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "compensation_qty": 1
+      }
+    ],
+    "broken_pieces": [
+      {
+        "id": "P2",
+        "piece_uid": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "node_type": "destroyed",
+        "x": 800,
+        "y": 0,
+        "length_mm": 800,
+        "width_mm": 600,
+        "thickness_mm": 6,
+        "rotation": false,
+        "__original_length_mm": 800.0,
+        "__original_width_mm": 600.0,
+        "effective_length_mm": 0.0,
+        "effective_width_mm": 0.0,
+        "effective_area_mm2": 0.0,
+        "include_in_repack": 0,
+        "__incident_action": "Destroy"
+      },
+      {
+        "piece_uid": "unite-2",
+        "requirement_id": "unite-2",
+        "piece_item_code": "DECOUPE-6MM",
+        "sales_order": "SO-DEMO-001",
+        "length_mm": 600.0,
+        "width_mm": 800.0,
+        "thickness_mm": 6,
+        "broken_operation_ids": [
+          "P2"
+        ],
+        "id": "CP-385b6bc8b969c4e9c0e610fe2021f19c",
+        "node_type": "destroyed",
+        "label": "Remplacement",
+        "x": 0.0,
+        "y": 600.0,
+        "effective_length_mm": 0.0,
+        "effective_width_mm": 0.0,
+        "effective_area_mm2": 0.0,
+        "rotation": true,
+        "include_in_repack": 0,
+        "is_real": false,
+        "replacement_for": "unite-2",
+        "compensation_source_node_id": "CHUTE-INTERNE",
+        "compensation_source_serial_no": "PLAQUE-DEMO-001",
+        "__original_length_mm": 600.0,
+        "__original_width_mm": 800.0,
+        "__incident_action": "Destroy"
+      }
+    ],
+    "replacement_pieces": [],
+    "internal_candidates": [],
+    "stock_candidates": [
+      {
+        "serial_no": "CHUTE-STOCK-DEMO-001",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 600,
+        "width_mm": 800,
+        "area_mm2": 480000,
+        "thickness_mm": 6,
+        "material_status": "Partial",
+        "priority": 2,
+        "origin": "stock_leftover",
+        "compatible": true,
+        "status": "Disponible"
+      },
+      {
+        "serial_no": "PLAQUE-DEMO-002",
+        "item_code": "VERRE-CLAIR-6MM",
+        "warehouse": "MATIERE-DEMO",
+        "company": "SOCIETE-DEMO",
+        "length_mm": 3210,
+        "width_mm": 2000,
+        "area_mm2": 6420000,
+        "thickness_mm": 6,
+        "material_status": "Full",
+        "priority": 3,
+        "origin": "stock_sheet",
+        "compatible": true,
+        "status": "Disponible"
+      }
+    ],
+    "summary": {
+      "requested": 4,
+      "valid": 3,
+      "broken": 1,
+      "to_compensate": 1
+    },
+    "warnings": []
+  },
+  "incidents": [
+    {
+      "plan_node_id": "P2",
+      "source_serial_no": "PLAQUE-DEMO-001",
+      "incident_action": "Destroy",
+      "original_node_type": "finished_good",
+      "original_item_code": "DECOUPE-6MM",
+      "original_length_mm": 800.0,
+      "original_width_mm": 600.0,
+      "original_area_mm2": 480000.0,
+      "new_node_type": "destroyed",
+      "new_length_mm": 0,
+      "new_width_mm": 0,
+      "new_area_mm2": 0,
+      "include_in_repack": 0,
+      "is_active": 1,
+      "remarks": "",
+      "affected_node_ids_json": "[\"P2\"]",
+      "group_area_mm2": 480000.0
+    }
+  ]
+}

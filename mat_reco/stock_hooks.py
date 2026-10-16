@@ -333,6 +333,8 @@ def stock_entry_before_submit(doc, method=None):
 
     _cleanup_legacy_serial_fields_when_bundle_exists(doc)
     validate_repack_totals_against_mcp_on_submit(doc)
+    from mat_reco.material_reconfiguration.services.workshop_service import freeze_mcp_allocations
+    freeze_mcp_allocations(doc)
 
     if _already_costed(doc):
         return

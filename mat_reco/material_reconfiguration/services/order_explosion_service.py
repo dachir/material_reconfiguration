@@ -149,7 +149,16 @@ def explode_sales_orders_into_cutting_demands(
                 # Skip non-cutting items
                 continue
 
-            if source_item:
+            frozen = None
+            if row.get('custom_technical_snapshot'):
+                from mat_reco.material_reconfiguration.services.chantier_service import frozen_tree
+                frozen = frozen_tree(so, row)
+            if source_item and frozen:
+                def has_raw(node):
+                    return node.get('primary_item') == source_item or any(has_raw(c) for c in node.get('children', []))
+                if not has_raw(frozen):
+                    continue
+            if source_item and not frozen:
                 keep_row = False
 
                 if item_type == "DECOUPE":
@@ -187,6 +196,9 @@ def explode_sales_orders_into_cutting_demands(
 
             # Build a context for downstream functions
             ctx = {
+                "frozen_tree": frozen,
+                "chantier": so.get("custom_chantier"),
+                "repere": row.get("custom_repere"),
                 "sales_order": so.name,
                 "sales_order_item": row.name,
                 "root_item_code": item_code,
@@ -250,6 +262,8 @@ def explode_item_to_decoupes(
         A list of unit cutting demands.  See
         :func:`build_unit_cutting_demands` for field details.
     """
+    if depth == 0 and context.get('frozen_tree'):
+        return explode_frozen_decoupes(context['frozen_tree'], parent_qty, context)
     if path is None:
         path = []
     if path_labels is None:
@@ -442,3 +456,23 @@ def build_unit_cutting_demands(
 
     return results
 
+
+
+def explode_frozen_decoupes(tree, qty, context):
+    """Use the existing unit-demand builder with the approved occurrence tree."""
+    results = []
+    def visit(node, quantity, codes, labels, occurrence):
+        codes = codes + [node['item_code']]
+        labels = labels + [node['label']]
+        if node['item_type'] == 'DECOUPE':
+            ctx = dict(context, base_length_mm=node['length_mm'], base_width_mm=node['width_mm'], base_thickness_mm=node['thickness_mm'])
+            piece = frappe._dict(name=node['item_code'], item_name=node['label'], stock_uom=node['stock_uom'])
+            demands = build_unit_cutting_demands(piece, quantity, ctx, codes, labels, len(codes)-1)
+            for demand in demands:
+                demand['piece_uid'] += '::' + occurrence
+                demand['source_context'].update(chantier=context.get('chantier'), repere=context.get('repere'), occurrence=occurrence)
+            results.extend(demands)
+        for idx, child in enumerate(node['children']):
+            visit(child, quantity*child['ratio'], codes, labels, occurrence+'.'+str(idx))
+    visit(tree, qty, [], [], 'root')
+    return results

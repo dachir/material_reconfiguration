@@ -1,0 +1,36 @@
+MANUEL UTILISATEUR GLOBAL MAT_RECO — V0.2
+BASE ÉDITORIALE À VALIDER — PRÉPARATION SKYWORK
+
+Commencer par Manuel-utilisateur-global-mat_reco-v0.2.docx ou sa version PDF.
+Le guide contient 64 fiches métier, 12 exceptions et 3 exercices guidés.
+
+Contenu principal :
+- Manuel Word modifiable et PDF de lecture (104 pages).
+- Points-a-valider : 16 décisions ouvertes, limites et preuves attendues.
+- Carte-des-flux : les 7 grands schémas en document Word / PDF.
+- MANUEL_GLOBAL_MAT_RECO : captures par flux, graphes PNG/SVG, 13 icônes,
+  storyboard et 64 textes de fiches séparés.
+- INDEX_CAPTURES.xlsx : 60 usages de figures, 54 images distinctes,
+  liens relatifs vers chaque image et 5 feuilles de contrôle.
+- édition : données éditoriales structurées, jeu de démonstration et plan.
+- validation : audit, sources, manifest et contrôles documentaires.
+
+PROVENANCE ET LIMITES
+Les interfaces atelier, services et dialogue Repack utilisent des composants
+réels exécutés en démonstration avec données / réponses simulées en mémoire.
+Les autres formulaires sont des illustrations reconstituées, identifiées.
+Aucune capture en session métier authentifiée n’est revendiquée.
+Aucun mouvement métier n’a été soumis pour produire ce pack.
+Les 60 usages indexés regroupent 26 usages de démonstration et 34 reconstitutions ;
+les images identiques ont été partagées pour éviter les fichiers redondants.
+
+L’ordre de soumission MCP / Repack et les chemins de facture restent à valider.
+Ne pas transformer ces décisions ouvertes en instructions officielles.
+Le PDF est une version de lecture Chromium du même contenu que le Word,
+avec une pagination susceptible de différer d’un rendu Microsoft Word.
+
+POUR SKYWORK
+Conserver codes de chapitres, numéros de figure, messages pédagogiques,
+mentions de provenance et liens C07 → A01 / S14 → C08.
+Les données sont fictives ; les variantes de scène sont signalées.
+Extraire tout le ZIP avant d’ouvrir les liens relatifs du classeur.

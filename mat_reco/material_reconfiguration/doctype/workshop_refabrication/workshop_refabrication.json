@@ -1,0 +1,104 @@
+{
+  "doctype": "DocType",
+  "name": "Workshop Refabrication",
+  "module": "Material Reconfiguration",
+  "engine": "InnoDB",
+  "autoname": "hash",
+  "fields": [
+    {
+      "fieldname": "company",
+      "label": "Société",
+      "fieldtype": "Link",
+      "options": "Company",
+      "reqd": 1,
+      "read_only": 1,
+      "search_index": 1,
+      "fetch_from": "sales_order.company",
+      "fetch_if_empty": 1
+    },
+    {
+      "fieldname": "sales_order",
+      "label": "Commande",
+      "fieldtype": "Link",
+      "options": "Sales Order",
+      "reqd": 1
+    },
+    {
+      "fieldname": "sales_order_item",
+      "label": "Ligne de commande",
+      "fieldtype": "Link",
+      "reqd": 1,
+      "options": "Sales Order Item"
+    },
+    {
+      "fieldname": "qty",
+      "label": "Quantité à refaire",
+      "fieldtype": "Int",
+      "reqd": 1
+    },
+    {
+      "fieldname": "source_stock_entry",
+      "label": "Production d’origine",
+      "fieldtype": "Link",
+      "options": "Stock Entry",
+      "reqd": 1
+    },
+    {
+      "fieldname": "incident_reference",
+      "label": "Référence de l’incident",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "reason",
+      "label": "Motif",
+      "fieldtype": "Small Text",
+      "reqd": 1
+    },
+    {
+      "fieldname": "amended_from",
+      "label": "Amended From",
+      "fieldtype": "Link",
+      "options": "Workshop Refabrication",
+      "read_only": 1
+    }
+  ],
+  "field_order": [
+    "company",
+    "sales_order",
+    "sales_order_item",
+    "qty",
+    "source_stock_entry",
+    "incident_reference",
+    "reason",
+    "amended_from"
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1
+    },
+    {
+      "role": "Stock Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1
+    },
+    {
+      "role": "Stock User",
+      "read": 1
+    }
+  ],
+  "is_submittable": 1,
+  "track_changes": 1
+}

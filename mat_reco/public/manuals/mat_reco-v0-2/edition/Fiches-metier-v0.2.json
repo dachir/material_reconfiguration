@@ -1,0 +1,2036 @@
+{
+  "F01": {
+    "id": "F01",
+    "title": "Identifier le besoin d’approvisionnement",
+    "group": "F",
+    "why": "Éviter de lancer la découpe sans matière adaptée. La demande d’achat vient d’un besoin à produire ou du réapprovisionnement.",
+    "objective": "Matière à acheter définie.",
+    "inputs": "Besoins dimensionnés ; stock disponible ; politique d’achat.",
+    "actions": [
+      "Lire les quantités à produire.",
+      "Comparer le stock utile dans le dépôt prévu.",
+      "Définir matière, épaisseur et quantité à approvisionner."
+    ],
+    "controls": [
+      "Article PRIMAIRE correct.",
+      "Dimension utile et épaisseur compatibles.",
+      "Quantité à acheter justifiée."
+    ],
+    "result": "Matière à acheter définie.",
+    "next": "F02 ou F05 selon circuit",
+    "attention": "Le besoin d’achat n’est pas un rectangle déjà disponible au MCP.",
+    "role": "Responsable stock / achats",
+    "document": "Demande d’approvisionnement / Item / stock",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Procédure proposée à valider",
+    "exceptions": [
+      "E02"
+    ]
+  },
+  "F02": {
+    "id": "F02",
+    "title": "Créer une commande fournisseur",
+    "group": "F",
+    "why": "Donner au fournisseur une commande traçable avant réception, lorsque le circuit achat le prévoit.",
+    "objective": "Purchase Order prêt à être réceptionné.",
+    "inputs": "Fournisseur, société, article, quantité, prix et date attendue.",
+    "actions": [
+      "Créer Purchase Order selon la procédure achat.",
+      "Renseigner les lignes et le dépôt prévu.",
+      "Contrôler les spécifications de matière et les dates.",
+      "Enregistrer puis soumettre selon les droits."
+    ],
+    "controls": [
+      "Fournisseur et société.",
+      "Quantité et unité d’achat.",
+      "Dimensions dans l’article ou la spécification d’achat."
+    ],
+    "result": "Purchase Order prêt à être réceptionné.",
+    "next": "F03",
+    "attention": "mat_reco n’impose pas Purchase Order à toutes les réceptions. Des colonnes de dimensions sur PO ne sont pas confirmées par les fixtures du module.",
+    "role": "Responsable stock / achats",
+    "document": "Purchase Order",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "erpnext/buying/doctype/purchase_order/purchase_order.js",
+      "erpnext/buying/doctype/purchase_order/purchase_order.json"
+    ],
+    "evidence": "Standard ERPNext · à confirmer sur site",
+    "exceptions": []
+  },
+  "F03": {
+    "id": "F03",
+    "title": "Préparer la réception physique",
+    "group": "F",
+    "why": "Vérifier que ce qui arrive correspond à ce qui sera enregistré en stock.",
+    "objective": "Livraison fournisseur contrôlée.",
+    "inputs": "Livraison physique ; commande ou justificatif ; article attendu.",
+    "actions": [
+      "Compter les plaques.",
+      "Mesurer longueur, largeur et épaisseur.",
+      "Constater la qualité et les éventuels dommages.",
+      "Choisir le circuit de réception avant saisie."
+    ],
+    "controls": [
+      "Quantité livrée contre quantité attendue.",
+      "Dimensions réelles.",
+      "Plaques détériorées identifiées."
+    ],
+    "result": "Livraison fournisseur contrôlée.",
+    "next": "F04 ou F05",
+    "attention": "Cette fiche est une procédure atelier proposée, pas un contrôle physique automatisé dans ERPNext.",
+    "role": "Responsable stock / achats",
+    "document": "Contrôle physique / justificatif",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Procédure proposée à valider",
+    "exceptions": []
+  },
+  "F04": {
+    "id": "F04",
+    "title": "Réceptionner avec Purchase Receipt",
+    "group": "F",
+    "why": "Constater la réception fournisseur et rendre les unités disponibles, avec leurs séries.",
+    "objective": "Réception d’achat enregistrée et séries à contrôler.",
+    "inputs": "Article sérialisé ; dépôt ; dimensions ; bundle / séries ; PO si applicable.",
+    "actions": [
+      "Depuis PO soumis, utiliser Create → Purchase Receipt si disponible, ou ouvrir le chemin réception autorisé.",
+      "Contrôler les quantités et le dépôt.",
+      "Renseigner dimensions et séries / bundle.",
+      "Enregistrer et soumettre selon la procédure stock."
+    ],
+    "controls": [
+      "Longueur et largeur positives.",
+      "Sérialisation de l’article reconfigurable.",
+      "Séries réellement reçues dans le dépôt."
+    ],
+    "result": "Réception d’achat enregistrée et séries à contrôler.",
+    "next": "F07",
+    "attention": "L’activation des scripts de report des dimensions est à confirmer. Ne pas dupliquer cette réception avec F05.",
+    "role": "Responsable stock / achats",
+    "document": "Purchase Receipt",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "erpnext/stock/doctype/purchase_receipt/purchase_receipt.js",
+      "mat_reco/fixtures/server_script.json",
+      "mat_reco/fixtures/client_script.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "F05": {
+    "id": "F05",
+    "title": "Réceptionner via Material Receipt Plan",
+    "group": "F",
+    "why": "Préparer une réception dimensionnée PRIMAIRE ou DECOUPE quand le circuit retenu n’utilise pas F04 pour ces unités.",
+    "objective": "Séries créées et entrée Material Receipt soumise.",
+    "inputs": "Société, dépôt cible, article, quantité entière, montant et dimensions.",
+    "actions": [
+      "Créer Material Receipt Plan.",
+      "Renseigner Quantity et Amount.",
+      "Contrôler les lignes : PRIMAIRE reprend Item ; DECOUPE permet des dimensions par unité.",
+      "Enregistrer puis soumettre le plan après contrôle."
+    ],
+    "controls": [
+      "Une ligne par série.",
+      "Longueur, largeur et épaisseur positives.",
+      "Total surface et somme des valeurs cohérents."
+    ],
+    "result": "Séries créées et entrée Material Receipt soumise.",
+    "next": "F07",
+    "attention": "Soumettre le plan crée et soumet le mouvement. Basic Rate représente ici la valeur de l’unité, pas un prix par m².",
+    "role": "Responsable stock / achats",
+    "document": "Material Receipt Plan",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_receipt_plan/material_receipt_plan.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "F06": {
+    "id": "F06",
+    "title": "Comprendre les deux circuits de réception",
+    "group": "F",
+    "why": "Choisir un seul chemin pour une même réception et éviter deux entrées de stock pour les mêmes plaques.",
+    "objective": "Circuit approprié identifié.",
+    "inputs": "Nature de l’approvisionnement ; procédure stock ; justificatif.",
+    "actions": [
+      "Identifier si les unités passent par Purchase Receipt.",
+      "Si le circuit autorisé est dimensionné hors ce chemin, utiliser Material Receipt Plan.",
+      "Ne pas ressaisir les mêmes unités dans l’autre document."
+    ],
+    "controls": [
+      "Le justificatif correspond au document choisi.",
+      "Une seule entrée réelle par unité.",
+      "Commande fournisseur non supposée obligatoire partout."
+    ],
+    "result": "Circuit approprié identifié.",
+    "next": "F04 ou F05",
+    "attention": "Les deux circuits convergent vers Serial No et stock ; ils ne sont pas deux étapes successives obligatoires.",
+    "role": "Responsable stock / achats",
+    "document": "Purchase Receipt / Material Receipt Plan",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "F07": {
+    "id": "F07",
+    "title": "Contrôler les Serial No générés",
+    "group": "F",
+    "why": "Chaque plaque doit rester identifiable après réception et durant sa transformation.",
+    "objective": "Plaques identifiées.",
+    "inputs": "Réception soumise ; identifiants de séries et bundle.",
+    "actions": [
+      "Lire les séries du mouvement réception.",
+      "Ouvrir les Serial No concernés.",
+      "Comparer le nombre de séries au nombre d’unités reçues."
+    ],
+    "controls": [
+      "Article de la série.",
+      "Absence de doublon.",
+      "Les identifiants prévus sont bien devenus des séries réelles."
+    ],
+    "result": "Plaques identifiées.",
+    "next": "F08",
+    "attention": "",
+    "role": "Responsable stock / achats",
+    "document": "Serial No / Serial and Batch Bundle",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "F08": {
+    "id": "F08",
+    "title": "Contrôler dimensions, épaisseur et qualité",
+    "group": "F",
+    "why": "Une plaque au mauvais format ou de mauvaise qualité ne doit pas être utilisée par erreur.",
+    "objective": "Matière physiquement qualifiée.",
+    "inputs": "Fiche Serial No ; plaque physique ; spécification de matière.",
+    "actions": [
+      "Comparer dimensions et épaisseur à la plaque.",
+      "Contrôler état matériel et qualité.",
+      "Faire corriger une incohérence de réception par le responsable avant planification."
+    ],
+    "controls": [
+      "Dimensions positives.",
+      "Épaisseur compatible.",
+      "État Full / Partial et matière utile correcte."
+    ],
+    "result": "Matière physiquement qualifiée.",
+    "next": "F09",
+    "attention": "Les champs et le report d’épaisseur doivent être contrôlés sur le site ; ne pas inventer une valeur pour rendre une plaque admissible.",
+    "role": "Responsable stock / achats",
+    "document": "Serial No",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "F09": {
+    "id": "F09",
+    "title": "Vérifier le dépôt et la disponibilité",
+    "group": "F",
+    "why": "Le MCP doit trouver une matière réellement disponible dans son dépôt, pas une simple série prévue.",
+    "objective": "Stock utilisable par le MCP.",
+    "inputs": "Séries contrôlées ; dépôt source du futur MCP.",
+    "actions": [
+      "Vérifier l’entrepôt et le mouvement soumis.",
+      "Contrôler la disponibilité des séries.",
+      "Mettre à disposition les informations matière pour A04 / A05."
+    ],
+    "controls": [
+      "Dépôt de la société.",
+      "Séries admissibles Full / Partial.",
+      "Aucune série déjà consommée dans la sélection."
+    ],
+    "result": "Stock utilisable par le MCP.",
+    "next": "A04 / A05",
+    "attention": "Un nom de série prévu pour une sortie ne prouve pas que la sortie est déjà disponible en stock.",
+    "role": "Responsable stock / achats",
+    "document": "Serial No / stock candidat",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E08"
+    ]
+  },
+  "C01": {
+    "id": "C01",
+    "title": "Comprendre la demande client",
+    "group": "C",
+    "why": "Définir ce que le client attend avant de calculer un devis ou un plan de découpe.",
+    "objective": "Nature du besoin définie.",
+    "inputs": "Client ; demande ; dimensions ; quantités ; finition souhaitée.",
+    "actions": [
+      "Identifier découpe simple ou ouvrage composé.",
+      "Confirmer les dimensions et l’épaisseur.",
+      "Préciser services, accessoires et quantité."
+    ],
+    "controls": [
+      "Nature de l’article.",
+      "Dimensions finales attendues.",
+      "Quantité commerciale claire."
+    ],
+    "result": "Nature du besoin définie.",
+    "next": "C02",
+    "attention": "",
+    "role": "Utilisateur commercial habilité",
+    "document": "Demande client / Quotation",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Procédure proposée à valider",
+    "exceptions": []
+  },
+  "C02": {
+    "id": "C02",
+    "title": "Créer un devis",
+    "group": "C",
+    "why": "Conserver la demande, les prix et les conditions dans un document commercial.",
+    "objective": "Quotation préparée.",
+    "inputs": "Client, société, articles et besoin confirmé.",
+    "actions": [
+      "Créer Quotation.",
+      "Renseigner les lignes et quantités.",
+      "Saisir les dimensions et services des étapes C03 / C04.",
+      "Contrôler et enregistrer le devis."
+    ],
+    "controls": [
+      "Client et validité du devis.",
+      "Articles corrects.",
+      "Conditions de vente selon procédure."
+    ],
+    "result": "Quotation préparée.",
+    "next": "C03",
+    "attention": "",
+    "role": "Utilisateur commercial habilité",
+    "document": "Quotation",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "erpnext/selling/doctype/quotation/quotation.js",
+      "mat_reco/fixtures/server_script.json"
+    ],
+    "evidence": "Standard ERPNext · à confirmer sur site",
+    "exceptions": []
+  },
+  "C03": {
+    "id": "C03",
+    "title": "Saisir dimensions et quantités",
+    "group": "C",
+    "why": "Les dimensions client guident la découpe et les contrôles de conformité.",
+    "objective": "Besoin dimensionné.",
+    "inputs": "Ligne DECOUPE ou OUVRAGE ; quantité finale.",
+    "actions": [
+      "Saisir longueur, largeur / hauteur et épaisseur en mm.",
+      "Vérifier la quantité de la ligne.",
+      "Contrôler le nom et la description dimensionnés lorsque les scripts les complètent."
+    ],
+    "controls": [
+      "Valeurs positives.",
+      "Aucune confusion mm / m.",
+      "Dimensions et quantité reprises dans la commande."
+    ],
+    "result": "Besoin dimensionné.",
+    "next": "C04 / C06",
+    "attention": "Les contrôles devis et commande ne sont pas identiques : contrôler l’épaisseur même si un formulaire ne bloque pas sa saisie.",
+    "role": "Utilisateur commercial habilité",
+    "document": "Quotation Item / Sales Order Item",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03"
+    ]
+  },
+  "C04": {
+    "id": "C04",
+    "title": "Ajouter services et accessoires",
+    "group": "C",
+    "why": "Associer à la ligne principale les prestations et accessoires qui complètent le besoin.",
+    "objective": "Devis complet.",
+    "inputs": "Ligne parent DECOUPE ou OUVRAGE avec dimensions et quantité.",
+    "actions": [
+      "Ouvrir Services / Accessoires sur la ligne si le bouton est actif.",
+      "Filtrer les éléments et lire la base de calcul.",
+      "Contrôler les quantités finales.",
+      "Sélectionner et insérer les lignes voulues."
+    ],
+    "controls": [
+      "Lien à la ligne parent.",
+      "SURFACE / PERIMETRE / PIECE / FIXE / MANUEL.",
+      "Prix et quantités après insertion."
+    ],
+    "result": "Devis complet.",
+    "next": "C06",
+    "attention": "Le calcul part de la ligne parent. Il ne multiplie pas automatiquement le périmètre par tous les composants internes d’un ouvrage.",
+    "role": "Utilisateur commercial habilité",
+    "document": "Quotation · Services / Accessoires",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/client_script.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "C05": {
+    "id": "C05",
+    "title": "Définir les articles DECOUPE et OUVRAGE",
+    "group": "C",
+    "why": "La structure des articles permet au système de convertir un ouvrage en découpes.",
+    "objective": "Besoin correctement structuré.",
+    "inputs": "Item de matière ; DECOUPE ; composants et facteurs d’OUVRAGE.",
+    "actions": [
+      "Faire contrôler les types PRIMAIRE, DECOUPE et OUVRAGE.",
+      "Vérifier Parent Item de la découpe.",
+      "Vérifier les composants et Qty Factor de l’ouvrage."
+    ],
+    "controls": [
+      "Descendance de la matière source.",
+      "Facteurs de quantité.",
+      "Absence de références circulaires."
+    ],
+    "result": "Besoin correctement structuré.",
+    "next": "C02 / C06",
+    "attention": "Le paramétrage d’article est un prérequis. L’opérateur ne doit pas modifier les composants pour contourner une rupture de stock.",
+    "role": "Responsable métier / administrateur articles",
+    "document": "Item / Composite Item Detail",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "C06": {
+    "id": "C06",
+    "title": "Transformer le devis en Sales Order",
+    "group": "C",
+    "why": "Confirmer le besoin commercial qui alimentera l’atelier et la livraison.",
+    "objective": "Sales Order confirmée.",
+    "inputs": "Devis contrôlé ; droits ; validation commerciale.",
+    "actions": [
+      "Soumettre le devis selon la procédure.",
+      "Utiliser Create → Sales Order si disponible.",
+      "Contrôler lignes, dimensions, quantités et références.",
+      "Enregistrer puis soumettre la commande selon les droits."
+    ],
+    "controls": [
+      "Validité et état du devis.",
+      "Dimensions conservées.",
+      "Bonne ligne de commande associée au produit."
+    ],
+    "result": "Sales Order confirmée.",
+    "next": "C07",
+    "attention": "ERPNext permet d’autres chemins de création de commande. Le parcours présenté ne les interdit pas.",
+    "role": "Utilisateur commercial habilité",
+    "document": "Quotation → Sales Order",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "erpnext/selling/doctype/quotation/quotation.js",
+      "erpnext/selling/doctype/sales_order/sales_order.js"
+    ],
+    "evidence": "Standard ERPNext · à confirmer sur site",
+    "exceptions": []
+  },
+  "C07": {
+    "id": "C07",
+    "title": "Transmettre les besoins à l’atelier",
+    "group": "C",
+    "why": "Transmettre au Flux 3 un besoin unitaire de découpe, lié à la commande.",
+    "objective": "Besoins disponibles pour le MCP.",
+    "inputs": "Sales Order ; article et composants ; matière source.",
+    "actions": [
+      "Identifier la ligne à produire.",
+      "Vérifier l’explosion des composants en DECOUPE.",
+      "Passer à A01 puis sélectionner la commande dans le MCP."
+    ],
+    "controls": [
+      "Référence Sales Order et ligne.",
+      "Quantité commerciale versus nombre de composants.",
+      "Matière source compatible."
+    ],
+    "result": "Besoins disponibles pour le MCP.",
+    "next": "A01 — entrer dans le Flux 3",
+    "attention": "Le flux commercial exprime le besoin ; il ne découpe pas lui-même les plaques.",
+    "role": "Utilisateur commercial habilité",
+    "document": "Sales Order → MCP",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E01"
+    ]
+  },
+  "C08": {
+    "id": "C08",
+    "title": "Suivre l’état de fabrication",
+    "group": "C",
+    "why": "Reprendre le flux commercial uniquement après contrôle des résultats atelier et stock.",
+    "objective": "Couverture des quantités connue.",
+    "inputs": "Retour S14 ; plan effectif ; mouvements soumis et besoins restants.",
+    "actions": [
+      "Lire le bilan de production.",
+      "Comparer quantités conformes et quantités demandées.",
+      "Faire traiter une insuffisance par A19 / A24.",
+      "Passer à C09 si les produits sont réellement disponibles."
+    ],
+    "controls": [
+      "Couverture du besoin.",
+      "Pièce détruite non comptée.",
+      "Recomposition achevée si l’article livré est un ouvrage."
+    ],
+    "result": "Couverture des quantités connue.",
+    "next": "C09 ou retour A19",
+    "attention": "Ce chapitre ne suppose pas un tableau automatique de suivi fabrication qui n’a pas été confirmé sur le site.",
+    "role": "Utilisateur commercial habilité",
+    "document": "Sales Order / MCP / Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Procédure proposée à valider",
+    "exceptions": []
+  },
+  "C09": {
+    "id": "C09",
+    "title": "Vérifier les produits finis disponibles",
+    "group": "C",
+    "why": "Éviter de livrer une prévision ou une pièce qui n’est pas dans l’entrepôt.",
+    "objective": "Pièces / ouvrages prêts à livrer.",
+    "inputs": "Produits ou ouvrages après Repack soumis.",
+    "actions": [
+      "Vérifier article et quantité disponibles.",
+      "Contrôler les Serial No dans le dépôt de livraison.",
+      "Préparer la sélection de séries / bundle."
+    ],
+    "controls": [
+      "Produit conforme.",
+      "Entrepôt correct.",
+      "Aucune série déjà sortie."
+    ],
+    "result": "Pièces / ouvrages prêts à livrer.",
+    "next": "C10",
+    "attention": "",
+    "role": "Responsable stock / expédition",
+    "document": "Serial No / Stock Entry / stock",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "C10": {
+    "id": "C10",
+    "title": "Préparer et soumettre Delivery Note",
+    "group": "C",
+    "why": "Constater les produits remis au client selon la procédure de livraison.",
+    "objective": "Delivery Note soumise.",
+    "inputs": "Commande ; produits disponibles ; séries / bundle ; dépôt.",
+    "actions": [
+      "Depuis Sales Order, utiliser Create → Delivery Note si autorisé.",
+      "Contrôler les lignes et quantités livrées.",
+      "Associer les séries / bundles corrects.",
+      "Enregistrer et soumettre après contrôle."
+    ],
+    "controls": [
+      "Quantité réellement livrée.",
+      "Dépôt source.",
+      "Référence de commande."
+    ],
+    "result": "Delivery Note soumise.",
+    "next": "C11 puis C12",
+    "attention": "La livraison de notre parcours principal est distincte de la facture. Contrôler les variantes site avant un autre chemin.",
+    "role": "Responsable expédition / stock",
+    "document": "Delivery Note",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "erpnext/selling/doctype/sales_order/sales_order.js",
+      "erpnext/stock/doctype/delivery_note/delivery_note.js"
+    ],
+    "evidence": "Standard ERPNext · à confirmer sur site",
+    "exceptions": []
+  },
+  "C11": {
+    "id": "C11",
+    "title": "Contrôler les Serial No et les dimensions livrées",
+    "group": "C",
+    "why": "Relier la livraison aux unités physiques et aux dimensions effectivement remises.",
+    "objective": "Traçabilité de livraison contrôlée.",
+    "inputs": "Delivery Note ; bundle de ses lignes ; Serial No.",
+    "actions": [
+      "Ouvrir le bundle.",
+      "Comparer chaque série à la livraison.",
+      "Vérifier longueur, largeur et épaisseur affichées sur les DECOUPE."
+    ],
+    "controls": [
+      "Groupement homogène.",
+      "Première série utilisée par le report de dimensions.",
+      "Article, série et commande cohérents."
+    ],
+    "result": "Traçabilité de livraison contrôlée.",
+    "next": "C12",
+    "attention": "Le report mat_reco depuis la première série vise DECOUPE. Ne pas généraliser ce comportement à OUVRAGE sans confirmation.",
+    "role": "Responsable expédition / stock",
+    "document": "Delivery Note Item / Serial and Batch Bundle",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/public/js/dimension_from_serial.js",
+      "mat_reco/fixtures/client_script.json"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E08"
+    ]
+  },
+  "C12": {
+    "id": "C12",
+    "title": "Créer Sales Invoice",
+    "group": "C",
+    "why": "Facturer le parcours commercial avec ses références et quantités livrées.",
+    "objective": "Sales Invoice préparée.",
+    "inputs": "Delivery Note contrôlée ; droits ; conditions de facturation.",
+    "actions": [
+      "Utiliser Create → Sales Invoice sur la livraison si disponible.",
+      "Contrôler les lignes et références reprises.",
+      "Vérifier le traitement stock de la facture avant validation."
+    ],
+    "controls": [
+      "Client.",
+      "Références de livraison et commande.",
+      "Quantité à facturer."
+    ],
+    "result": "Sales Invoice préparée.",
+    "next": "C13",
+    "attention": "Livraison → Facture est notre chemin pédagogique, pas une obligation universelle ERPNext. Les chemins directs depuis Sales Order restent à valider.",
+    "role": "Utilisateur facturation habilité",
+    "document": "Delivery Note → Sales Invoice",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "erpnext/accounts/doctype/sales_invoice/sales_invoice.js"
+    ],
+    "evidence": "Standard ERPNext · à confirmer sur site",
+    "exceptions": []
+  },
+  "C13": {
+    "id": "C13",
+    "title": "Contrôler facture, quantités et références",
+    "group": "C",
+    "why": "Terminer le cycle sans incohérence de quantité, de valeur ou de mouvement de stock.",
+    "objective": "Cycle commercial complété.",
+    "inputs": "Facture préparée ; commande et livraison de référence.",
+    "actions": [
+      "Comparer quantités, montants et références.",
+      "Contrôler dimensions et descriptions utiles.",
+      "Vérifier Update Stock au regard de la livraison déjà constatée.",
+      "Soumettre la facture selon la procédure de facturation."
+    ],
+    "controls": [
+      "Aucune double sortie des mêmes unités.",
+      "Conditions et montants approuvés.",
+      "Traçabilité vers le client."
+    ],
+    "result": "Cycle commercial complété.",
+    "next": "V01 — contrôle final",
+    "attention": "Le paiement et les régimes fiscaux ne sont pas traités par ce manuel mat_reco.",
+    "role": "Utilisateur facturation / responsable",
+    "document": "Sales Invoice",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/fixtures/custom_field.json"
+    ],
+    "evidence": "Standard ERPNext · à confirmer sur site",
+    "exceptions": []
+  },
+  "A01": {
+    "id": "A01",
+    "title": "Comprendre les besoins issus des commandes",
+    "group": "A",
+    "why": "Transformer la commande en pièces unitaires à positionner, sans perdre son identité commerciale.",
+    "objective": "Liste des découpes connue.",
+    "inputs": "Passage C07 ; commandes dimensionnées ; hiérarchie d’articles.",
+    "actions": [
+      "Lire les découpes issues des commandes.",
+      "Multiplier les composants d’ouvrage par leur quantité.",
+      "Contrôler matière et dimensions attendues."
+    ],
+    "controls": [
+      "Unité commerciale identifiée.",
+      "Dimensions et épaisseur.",
+      "Quantité de découpes versus quantité d’ouvrages."
+    ],
+    "result": "Liste des découpes connue.",
+    "next": "A02",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Sales Order / besoins MCP",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A02": {
+    "id": "A02",
+    "title": "Créer Material Cutting Plan",
+    "group": "A",
+    "why": "Rassembler les besoins et la matière dans un plan de découpe traçable.",
+    "objective": "MCP en préparation.",
+    "inputs": "Société ; dépôt ; article source PRIMAIRE.",
+    "actions": [
+      "Créer Material Cutting Plan.",
+      "Choisir Company, Source Warehouse et Source Item.",
+      "Laisser Mode à Planification.",
+      "Contrôler les variantes admises."
+    ],
+    "controls": [
+      "Dépôt de la société.",
+      "Source PRIMAIRE.",
+      "Périmètre matière clair."
+    ],
+    "result": "MCP en préparation.",
+    "next": "A03",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A03": {
+    "id": "A03",
+    "title": "Charger les commandes client",
+    "group": "A",
+    "why": "Limiter le calcul aux commandes à traiter pendant cette préparation.",
+    "objective": "Commandes sélectionnées.",
+    "inputs": "MCP avec Source Item ; commandes liées à cette matière.",
+    "actions": [
+      "Dans Outils, choisir Select Orders for Source Item.",
+      "Lire les commandes proposées.",
+      "Conserver le périmètre voulu."
+    ],
+    "controls": [
+      "Bonne commande.",
+      "Bonne matière parent.",
+      "Quantité demandée."
+    ],
+    "result": "Commandes sélectionnées.",
+    "next": "A04",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E01"
+    ]
+  },
+  "A04": {
+    "id": "A04",
+    "title": "Charger les matières disponibles",
+    "group": "A",
+    "why": "Présenter au calcul les séries utilisables, dans le dépôt choisi.",
+    "objective": "Serial No candidats chargés.",
+    "inputs": "Source Item ; Source Warehouse ; variantes.",
+    "actions": [
+      "Choisir Get Stock.",
+      "Contrôler les séries et dimensions chargées.",
+      "Actualiser si le stock a changé."
+    ],
+    "controls": [
+      "Séries Full / Partial.",
+      "Dimensions positives.",
+      "Épaisseur et dépôt cohérents."
+    ],
+    "result": "Serial No candidats chargés.",
+    "next": "A05",
+    "attention": "Les lignes chargées sont initialement qualifiées : revoir cette sélection avant calcul.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E02"
+    ]
+  },
+  "A05": {
+    "id": "A05",
+    "title": "Qualifier les plaques",
+    "group": "A",
+    "why": "Autoriser le calcul à utiliser uniquement les matières que l’atelier accepte.",
+    "objective": "Matières admissibles définies.",
+    "inputs": "Table MCP Stock Candidate ; matière physique contrôlée.",
+    "actions": [
+      "Relire chaque plaque ou chute.",
+      "Cocher / décocher Is Qualified selon le choix voulu.",
+      "Enregistrer avec la sélection vérifiée."
+    ],
+    "controls": [
+      "Is Qualified : admissible au calcul.",
+      "Is Active Input : réellement utilisé.",
+      "Les deux colonnes ne sont pas interchangeables."
+    ],
+    "result": "Matières admissibles définies.",
+    "next": "A06",
+    "attention": "Qualifier une série ne constitue pas une consommation de stock.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A06": {
+    "id": "A06",
+    "title": "Paramétrer la découpe",
+    "group": "A",
+    "why": "Prendre en compte les pertes de coupe et les options d’optimisation initiale.",
+    "objective": "Paramètres de découpe contrôlés.",
+    "inputs": "Valeur kerf réelle ; contraintes atelier ; choix du responsable.",
+    "actions": [
+      "Renseigner Kerf mm.",
+      "Choisir Allow Rotation pour la Planification.",
+      "Contrôler algorithme, heuristique et profondeur si nécessaire."
+    ],
+    "controls": [
+      "Unités mm.",
+      "Trait de coupe réaliste.",
+      "Options adaptées aux pratiques de l’atelier."
+    ],
+    "result": "Paramètres de découpe contrôlés.",
+    "next": "A07",
+    "attention": "Les scènes illustrées peuvent simplifier le kerf à 0. Ce n’est pas une recommandation de production ; utiliser la valeur réelle de l’atelier.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A07": {
+    "id": "A07",
+    "title": "Générer et lire le plan initial",
+    "group": "A",
+    "why": "Visualiser comment la matière proposée satisfait les commandes avant la coupe.",
+    "objective": "Plan initial lisible et contrôlé.",
+    "inputs": "MCP avec commandes, stock et paramètres.",
+    "actions": [
+      "Enregistrer pour générer le plan.",
+      "Parcourir les plaques.",
+      "Comparer demandé, planifié, manquant et restes."
+    ],
+    "controls": [
+      "Pièces positionnées.",
+      "Matières réellement utilisées.",
+      "Absence de besoin oublié."
+    ],
+    "result": "Plan initial lisible et contrôlé.",
+    "next": "A08",
+    "attention": "Le dessin d’optimisation ne certifie pas toutes les contraintes physiques de votre machine.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A08": {
+    "id": "A08",
+    "title": "Comprendre produits finis, chutes et déchets",
+    "group": "A",
+    "why": "Éviter de traiter un déchet ou une encoche comme une chute disponible.",
+    "objective": "Lecture correcte du dessin.",
+    "inputs": "Plan initial ; légende de l’atelier.",
+    "actions": [
+      "Repérer les produits finis bleus.",
+      "Identifier chutes grises, chutes en L vertes et déchets roses.",
+      "Lire les dimensions et la plaque courante."
+    ],
+    "controls": [
+      "Zone occupée différente d’une zone libre.",
+      "Surface utile d’une chute en L.",
+      "Zoom sans effet sur dimensions."
+    ],
+    "result": "Lecture correcte du dessin.",
+    "next": "A09",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A09": {
+    "id": "A09",
+    "title": "Passer en Retour Terrain",
+    "group": "A",
+    "why": "Conserver la Planification de référence et décrire ensuite les résultats réels de coupe.",
+    "objective": "MCP prêt aux incidents.",
+    "inputs": "Plan initial enregistré ; début des constats terrain.",
+    "actions": [
+      "Passer Mode à Retour Terrain.",
+      "Enregistrer le formulaire.",
+      "Vérifier que le plan effectif est disponible."
+    ],
+    "controls": [
+      "MCP brouillon.",
+      "Plan de Planification conservé.",
+      "Formulaire sans modification non enregistrée."
+    ],
+    "result": "MCP prêt aux incidents.",
+    "next": "A10",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan · Retour Terrain",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A10": {
+    "id": "A10",
+    "title": "Ouvrir Atelier UX 2.0",
+    "group": "A",
+    "why": "Accéder à la géométrie et aux actions dans l’écran atelier.",
+    "objective": "Interface de travail ouverte.",
+    "inputs": "MCP enregistré ; mode Retour Terrain ; droits.",
+    "actions": [
+      "Choisir Interface → UX 2.0 ou agrandir l’aperçu.",
+      "Vérifier la plaque affichée.",
+      "Repérer dessin à gauche et informations à droite."
+    ],
+    "controls": [
+      "Référence MCP.",
+      "Une plaque à la fois.",
+      "État d’enregistrement."
+    ],
+    "result": "Interface de travail ouverte.",
+    "next": "A11",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Atelier UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A11": {
+    "id": "A11",
+    "title": "Sélectionner une pièce et utiliser le menu contextuel",
+    "group": "A",
+    "why": "Préparer une action sur la bonne unité ou zone physique.",
+    "objective": "Action préparée.",
+    "inputs": "Plaque courante ; pièce / chute / déchet à traiter.",
+    "actions": [
+      "Cliquer la zone.",
+      "Lire ses dimensions.",
+      "Choisir dans le menu une action autorisée."
+    ],
+    "controls": [
+      "Bonne plaque et bonne unité.",
+      "Menus selon type de zone.",
+      "Curseur d’action et cible compatible."
+    ],
+    "result": "Action préparée.",
+    "next": "A12–A17 selon constat",
+    "attention": "Le curseur d’interdiction indique une cible incompatible, pas une défaillance du menu.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Atelier UX 2.0 · menu contextuel",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A12": {
+    "id": "A12",
+    "title": "Déplacer une pièce",
+    "group": "A",
+    "why": "Replacer une pièce dans une zone libre sans créer une autre unité commerciale.",
+    "objective": "Nouvelle position prévisualisée.",
+    "inputs": "Produit fini source ; chute compatible sur la même plaque ou une autre.",
+    "actions": [
+      "Sélectionner la pièce puis Déplacer.",
+      "Changer de plaque si nécessaire.",
+      "Choisir la cible libre.",
+      "Comparer puis confirmer."
+    ],
+    "controls": [
+      "Espace suffisant.",
+      "Source libérée.",
+      "Identité de pièce conservée."
+    ],
+    "result": "Nouvelle position prévisualisée.",
+    "next": "A18",
+    "attention": "Ne pas déplacer la pièce sur une zone détruite, occupée ou dans une encoche retirée.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03"
+    ]
+  },
+  "A13": {
+    "id": "A13",
+    "title": "Tourner une pièce à 90°",
+    "group": "A",
+    "why": "Utiliser un format de chute compatible en permutant les deux côtés de la pièce.",
+    "objective": "Orientation corrigée.",
+    "inputs": "Action Déplacer ; pièce et destination ; place utile.",
+    "actions": [
+      "Dans Orientation, choisir Automatique, Actuelle ou Tourner à 90°.",
+      "Lire les dimensions résultantes.",
+      "Contrôler le placement sur la cible.",
+      "Confirmer la proposition."
+    ],
+    "controls": [
+      "800 × 600 devient 600 × 800 dans l’exemple.",
+      "Aucun empiétement.",
+      "Orientation conforme au constat physique."
+    ],
+    "result": "Orientation corrigée.",
+    "next": "A18",
+    "attention": "La rotation à 90° est disponible en Retour Terrain même si Allow Rotation était décoché en Planification. Automatique essaie d’abord l’orientation actuelle.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03"
+    ]
+  },
+  "A14": {
+    "id": "A14",
+    "title": "Redimensionner",
+    "group": "A",
+    "why": "Décrire une dimension effectivement réduite sans la confondre avec une nouvelle commande.",
+    "objective": "Dimensions effectives prévisualisées.",
+    "inputs": "Zone dont le menu propose Redimensionner ; mesure réelle.",
+    "actions": [
+      "Choisir Redimensionner.",
+      "Saisir longueur et largeur.",
+      "Comparer la réduction et ses compléments.",
+      "Confirmer."
+    ],
+    "controls": [
+      "Valeurs positives.",
+      "Pas d’agrandissement au-delà de la matière source.",
+      "Besoin client encore satisfait ou à compenser."
+    ],
+    "result": "Dimensions effectives prévisualisées.",
+    "next": "A18",
+    "attention": "Une pièce plus petite peut ne plus couvrir le besoin initial. Relire le bilan après application.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03"
+    ]
+  },
+  "A15": {
+    "id": "A15",
+    "title": "Détruire une pièce cassée",
+    "group": "A",
+    "why": "Déclarer qu’une pièce n’est plus utilisable et déterminer si elle doit être remplacée.",
+    "objective": "Incident de casse confirmé dans la session.",
+    "inputs": "Pièce cassée ou zone inutilisable identifiée.",
+    "actions": [
+      "Sélectionner la pièce.",
+      "Choisir Détruire.",
+      "Vérifier la surface indisponible.",
+      "Choisir Confirmer la destruction."
+    ],
+    "controls": [
+      "Bonne pièce et bonne commande.",
+      "Zone conservée comme occupée.",
+      "Exclusion des sorties conformes."
+    ],
+    "result": "Incident de casse confirmé dans la session.",
+    "next": "A18 puis A19",
+    "attention": "Une zone détruite ne redevient pas une chute libre. Détruire ne crée pas automatiquement le remplacement.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03",
+      "E04"
+    ]
+  },
+  "A16": {
+    "id": "A16",
+    "title": "Fusionner deux zones",
+    "group": "A",
+    "why": "Conserver une chute rectangulaire en réunissant des régions libres contiguës.",
+    "objective": "Chute rectangulaire prévisualisée.",
+    "inputs": "Chute source ; zone libre adjacente sur la même plaque.",
+    "actions": [
+      "Choisir Fusionner.",
+      "Sélectionner le donneur compatible.",
+      "Vérifier la chute étendue et le reste du donneur.",
+      "Confirmer."
+    ],
+    "controls": [
+      "Même plaque.",
+      "Union rectangulaire.",
+      "Aucune matière retirée réintroduite."
+    ],
+    "result": "Chute rectangulaire prévisualisée.",
+    "next": "A18",
+    "attention": "Le donneur peut conserver un reste ; vérifier qu’il ne disparaît pas dans votre lecture du dessin.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03"
+    ]
+  },
+  "A17": {
+    "id": "A17",
+    "title": "Créer une Chute en L",
+    "group": "A",
+    "why": "Représenter une seule chute physique en L avec son encoche conservée.",
+    "objective": "Leftover physique unique prévisualisé.",
+    "inputs": "Deux régions libres compatibles ; au moins une chute.",
+    "actions": [
+      "Choisir Chute en L.",
+      "Sélectionner la deuxième zone.",
+      "Contrôler l’encoche supérieure gauche et la surface utile.",
+      "Confirmer."
+    ],
+    "controls": [
+      "Exactement deux zones.",
+      "Contiguïté.",
+      "L’encoche reste indisponible."
+    ],
+    "result": "Leftover physique unique prévisualisé.",
+    "next": "A18",
+    "attention": "Le grand rectangle extérieur n’est pas entièrement disponible pour une nouvelle coupe.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E03",
+      "E06"
+    ]
+  },
+  "A18": {
+    "id": "A18",
+    "title": "Prévisualiser, confirmer et appliquer",
+    "group": "A",
+    "why": "Séparer le choix local d’une opération de son enregistrement auprès du serveur.",
+    "objective": "Incidents enregistrés.",
+    "inputs": "Opération valide ; aperçu ; MCP brouillon.",
+    "actions": [
+      "Comparer Avant / Après / Superposer.",
+      "Confirmer l’action ou l’annuler.",
+      "Choisir Appliquer à l’aperçu → pour les incidents.",
+      "Attendre le succès d’enregistrement."
+    ],
+    "controls": [
+      "Message de réussite.",
+      "Version courante.",
+      "Pas d’opération encore active à appliquer."
+    ],
+    "result": "Incidents enregistrés.",
+    "next": "A19",
+    "attention": "Confirmer seul ne suffit pas. Un conflit nécessite de recharger et reprendre sur le plan courant.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E07",
+      "E11"
+    ]
+  },
+  "A19": {
+    "id": "A19",
+    "title": "Identifier les besoins manquants",
+    "group": "A",
+    "why": "Mesurer ce qui reste dû au client après les incidents, sans compter une casse comme une production.",
+    "objective": "Bilan après incidents connu.",
+    "inputs": "Plan effectif et incidents enregistrés ; besoin commercial.",
+    "actions": [
+      "Comparer unités conformes et unités requises.",
+      "Identifier les unités à remplacer.",
+      "Si un besoin reste, ouvrir la compensation."
+    ],
+    "controls": [
+      "Commande et unité commerciale.",
+      "Remplacements conformes seulement.",
+      "Aucune série prévue comptée comme réception exécutée."
+    ],
+    "result": "Bilan après incidents connu.",
+    "next": "A20 si besoin ; sinon A26",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E02"
+    ]
+  },
+  "A20": {
+    "id": "A20",
+    "title": "Ouvrir la compensation",
+    "group": "A",
+    "why": "Ouvrir la recherche des remplacements sans quitter la disposition de l’atelier.",
+    "objective": "Session de compensation ouverte.",
+    "inputs": "MCP Retour Terrain brouillon ; incidents appliqués.",
+    "actions": [
+      "Cliquer Compenser près de Réinitialiser.",
+      "Lire dimensions et quantité à compenser.",
+      "Lire les sources de stock à droite.",
+      "Choisir Automatique ou Manuel."
+    ],
+    "controls": [
+      "Bonne commande.",
+      "Stock admissible.",
+      "Mode de compensation."
+    ],
+    "result": "Session de compensation ouverte.",
+    "next": "A21 / A22 / A23 selon source",
+    "attention": "L’ajout matière est sélectionné dans le panneau de stock ; le dessin reste une plaque par page.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E05"
+    ]
+  },
+  "A21": {
+    "id": "A21",
+    "title": "Réutiliser une chute du MCP",
+    "group": "A",
+    "why": "Réutiliser la matière interne disponible avant d’ajouter du stock.",
+    "objective": "Compensation interne proposée.",
+    "inputs": "Chute interne utile ; besoin restant ; calcul de compensation.",
+    "actions": [
+      "Garder Automatique pour respecter la priorité.",
+      "Choisir Calculer.",
+      "Parcourir les placements proposés sur le MCP."
+    ],
+    "controls": [
+      "Pièce passe avec orientation permise.",
+      "Aucune pièce conforme modifiée.",
+      "Chute et reste cohérents."
+    ],
+    "result": "Compensation interne proposée.",
+    "next": "A24",
+    "attention": "La priorité interne ne dispense pas de vérifier dimensions, épaisseur et matière déjà consommée.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E05"
+    ]
+  },
+  "A22": {
+    "id": "A22",
+    "title": "Utiliser une chute du stock",
+    "group": "A",
+    "why": "Remplacer une unité quand les chutes du plan ne suffisent pas.",
+    "objective": "Matière supplémentaire sélectionnée.",
+    "inputs": "Chute stock disponible ; dépôt, matière, épaisseur compatibles.",
+    "actions": [
+      "Actualiser le stock si nécessaire.",
+      "Laisser le calcul automatique chercher une chute, ou sélectionner la source en Manuel.",
+      "Calculer et ouvrir la plaque ajoutée."
+    ],
+    "controls": [
+      "Origine stock.",
+      "Surface ET dimensions utiles.",
+      "Rotation autorisée en Retour Terrain."
+    ],
+    "result": "Matière supplémentaire sélectionnée.",
+    "next": "A24",
+    "attention": "Si un choix manuel écarte une source prioritaire, justifier ce contournement.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E05"
+    ]
+  },
+  "A23": {
+    "id": "A23",
+    "title": "Ajouter une plaque entière",
+    "group": "A",
+    "why": "Utiliser une plaque entière lorsque les chutes admissibles ne couvrent pas le reste.",
+    "objective": "Entrée complémentaire proposée.",
+    "inputs": "Besoin restant ; plaque entière disponible et compatible.",
+    "actions": [
+      "Laisser l’automatique rechercher la priorité 3 ou sélectionner une source admissible.",
+      "Calculer.",
+      "Contrôler la plaque ajoutée et ses nouveaux restes."
+    ],
+    "controls": [
+      "Plaque entière réellement disponible.",
+      "Unités remplacées.",
+      "Consommation additionnelle justifiée."
+    ],
+    "result": "Entrée complémentaire proposée.",
+    "next": "A24",
+    "attention": "Une plaque entière est une nouvelle matière à intégrer au futur Repack ; ne pas la confondre avec une simple page d’affichage.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E05"
+    ]
+  },
+  "A24": {
+    "id": "A24",
+    "title": "Calculer et valider la compensation",
+    "group": "A",
+    "why": "Enregistrer uniquement une proposition contrôlée qui remplace les bonnes unités.",
+    "objective": "Besoin compensé selon proposition confirmée.",
+    "inputs": "Proposition calculée ; sources encore disponibles.",
+    "actions": [
+      "Contrôler placements, besoins restants et avertissements.",
+      "Choisir Valider la compensation si le résultat convient.",
+      "Attendre la confirmation serveur et le retour atelier.",
+      "Ou Annuler pour revenir sans application."
+    ],
+    "controls": [
+      "Couverture.",
+      "Version document et stock.",
+      "Pas de soumission automatique MCP / Stock Entry."
+    ],
+    "result": "Besoin compensé selon proposition confirmée.",
+    "next": "A26",
+    "attention": "Calculer ne sauvegarde pas. Une compensation peut laisser des besoins restants : ne pas forcer la clôture.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E05",
+      "E07",
+      "E11"
+    ]
+  },
+  "A25": {
+    "id": "A25",
+    "title": "Gérer les casses successives",
+    "group": "A",
+    "why": "Garder la trace d’une nouvelle casse sur un remplacement sans dupliquer la demande client.",
+    "objective": "Reprise de production traçable.",
+    "inputs": "Remplacement identifié ; nouveau constat de casse.",
+    "actions": [
+      "Créer un nouvel incident sur la pièce concernée.",
+      "Confirmer et appliquer.",
+      "Relire le besoin restant.",
+      "Recalculer une compensation adaptée."
+    ],
+    "controls": [
+      "Opérations antérieures conservées.",
+      "Une seule unité commerciale due.",
+      "Production / consommation déjà soumises figées."
+    ],
+    "result": "Reprise de production traçable.",
+    "next": "A19",
+    "attention": "Ne pas supprimer les événements précédents pour fabriquer une seconde demande ; solliciter le responsable si la pièce est déjà engagée dans un Repack soumis.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E04"
+    ]
+  },
+  "A26": {
+    "id": "A26",
+    "title": "Contrôler le plan effectif",
+    "group": "A",
+    "why": "Préparer le stock à partir du résultat enregistré, pas d’une prévisualisation abandonnée.",
+    "objective": "Plan effectif cohérent.",
+    "inputs": "Plan effectif enregistré ; couverture et géométrie.",
+    "actions": [
+      "Parcourir les plaques utilisées et ajoutées.",
+      "Comparer conformes, remplacements et besoins.",
+      "Contrôler les restes et les zones détruites."
+    ],
+    "controls": [
+      "Toutes les unités dues couvertes.",
+      "Surface physique conservée.",
+      "Bonnes matières actives."
+    ],
+    "result": "Plan effectif cohérent.",
+    "next": "A28 ou A27 si restauration voulue",
+    "attention": "",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "A27": {
+    "id": "A27",
+    "title": "Réinitialiser en sécurité",
+    "group": "A",
+    "why": "Restaurer la référence juste après Planification quand la réinitialisation est appropriée.",
+    "objective": "Retour au plan initial.",
+    "inputs": "MCP brouillon ; décision de restauration ; absence de Repack soumis lié.",
+    "actions": [
+      "Cliquer Réinitialiser.",
+      "Lire le message de suppression.",
+      "Annuler pour conserver l’état, ou confirmer.",
+      "Contrôler le plan initial et les incidents supprimés."
+    ],
+    "controls": [
+      "Portée complète comprise.",
+      "Historique vidé après succès.",
+      "Conflit ou production soumise bloque la suppression."
+    ],
+    "result": "Retour au plan initial.",
+    "next": "A07",
+    "attention": "Supprime les incidents sauvegardés et en attente ainsi que les compensations. Ne relance pas l’optimisation et ne peut pas être annulé depuis l’historique.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E07",
+      "E11"
+    ]
+  },
+  "A28": {
+    "id": "A28",
+    "title": "Préparer la clôture et la soumission MCP",
+    "group": "A",
+    "why": "Clôturer les contrôles atelier sans inventer un ordre de soumission ERP non validé.",
+    "objective": "Plan contrôlé pour la phase stock.",
+    "inputs": "Plan effectif ; besoin couvert ; droits ; procédure interne.",
+    "actions": [
+      "Appliquer les incidents et contrôler les résultats.",
+      "Faire vérifier la couverture par le responsable.",
+      "Choisir le circuit de soumission MCP / Repack approuvé sur le site."
+    ],
+    "controls": [
+      "Besoins non couverts bloquants.",
+      "Document prêt pour les contrôles stock.",
+      "Responsable de validation connu."
+    ],
+    "result": "Plan contrôlé pour la phase stock.",
+    "next": "S01 / S02",
+    "attention": "L’ordre exact de soumission MCP et Repack reste une décision ouverte. La soumission MCP verrouille les modifications atelier.",
+    "role": "Opérateur ou responsable atelier habilité",
+    "document": "Material Cutting Plan / UX 2.0",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "frontend/mcp-ux20-vue/src/stores/cutting.js"
+    ],
+    "evidence": "Procédure proposée à valider",
+    "exceptions": [
+      "E12"
+    ]
+  },
+  "S01": {
+    "id": "S01",
+    "title": "Comprendre le rôle du Repack",
+    "group": "S",
+    "why": "Comprendre quand une prévision de découpe devient une consommation et une production de stock.",
+    "objective": "Entrées et sorties identifiées.",
+    "inputs": "Plan effectif enregistré ; séries source et sorties attendues.",
+    "actions": [
+      "Identifier les entrées à consommer.",
+      "Identifier les pièces, chutes et éventuels déchets à produire.",
+      "Distinguer plan, brouillon Repack et mouvement soumis."
+    ],
+    "controls": [
+      "Un Repack par transformation contrôlée.",
+      "Bonne société.",
+      "Séries traçables."
+    ],
+    "result": "Entrées et sorties identifiées.",
+    "next": "S02",
+    "attention": "Le Repack de découpe et celui de recomposition d’un ouvrage sont deux transformations distinctes.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "S02": {
+    "id": "S02",
+    "title": "Créer Draft Repack depuis MCP",
+    "group": "S",
+    "why": "Préparer les lignes de Stock Entry à partir du plan effectif sauvegardé.",
+    "objective": "Stock Entry brouillon.",
+    "inputs": "MCP enregistré ; incidents appliqués ; formulaire non modifié.",
+    "actions": [
+      "Choisir Create Draft Repack.",
+      "Ouvrir la Stock Entry préparée.",
+      "Contrôler type Repack et lien au MCP.",
+      "Enregistrer le brouillon pour les contrôles."
+    ],
+    "controls": [
+      "Résultat effectif chargé.",
+      "Aucun doublon de sorties.",
+      "Aucune soumission automatique."
+    ],
+    "result": "Stock Entry brouillon.",
+    "next": "S03",
+    "attention": "",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E09"
+    ]
+  },
+  "S03": {
+    "id": "S03",
+    "title": "Contrôler les matières consommées",
+    "group": "S",
+    "why": "Consommer les unités qui ont réellement fourni la matière au plan.",
+    "objective": "Serial No d’entrée contrôlés.",
+    "inputs": "Repack brouillon ; plan effectif ; séries disponibles.",
+    "actions": [
+      "Lire les lignes avec entrepôt source.",
+      "Vérifier article, quantité et séries.",
+      "Contrôler le bundle et la disponibilité."
+    ],
+    "controls": [
+      "Dépôt source.",
+      "Séries encore disponibles.",
+      "Pas de deuxième consommation d’une entrée déjà soumise."
+    ],
+    "result": "Serial No d’entrée contrôlés.",
+    "next": "S04",
+    "attention": "",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E08",
+      "E09"
+    ]
+  },
+  "S04": {
+    "id": "S04",
+    "title": "Contrôler les pièces produites",
+    "group": "S",
+    "why": "Produire seulement les pièces conformes au besoin et à l’état effectif.",
+    "objective": "Produits finis contrôlés.",
+    "inputs": "Repack ; pièces et remplacements du plan.",
+    "actions": [
+      "Lire les lignes avec entrepôt cible.",
+      "Comparer quantité et dimensions au plan effectif.",
+      "Vérifier les identifiants de sorties et la commande."
+    ],
+    "controls": [
+      "Pièces détruites exclues.",
+      "Quantités dues.",
+      "Identité commerciale conservée."
+    ],
+    "result": "Produits finis contrôlés.",
+    "next": "S05",
+    "attention": "",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E09"
+    ]
+  },
+  "S05": {
+    "id": "S05",
+    "title": "Contrôler les chutes générées",
+    "group": "S",
+    "why": "Enregistrer les chutes réutilisables avec leur géométrie physique.",
+    "objective": "Leftovers et chutes en L contrôlés.",
+    "inputs": "Restes du plan ; sorties de Repack ; éventuelles chutes en L.",
+    "actions": [
+      "Contrôler les sorties leftover.",
+      "Lire dimensions extérieures et retirées d’un L.",
+      "Vérifier la matière utile et le dépôt cible."
+    ],
+    "controls": [
+      "Encoche soustraite.",
+      "Chute unique si L.",
+      "Aucun reste donneur oublié."
+    ],
+    "result": "Leftovers et chutes en L contrôlés.",
+    "next": "S06",
+    "attention": "Une chute en L ne se valorise ni ne se réutilise comme son rectangle extérieur plein.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E06",
+      "E09"
+    ]
+  },
+  "S06": {
+    "id": "S06",
+    "title": "Comprendre les déchets",
+    "group": "S",
+    "why": "Traiter les pertes selon le choix de stock du circuit, sans les faire passer pour des pièces conformes.",
+    "objective": "Pertes correctement traitées.",
+    "inputs": "Option Add Waiste to stock du MCP ; déchets et destructions.",
+    "actions": [
+      "Lire l’option choisie.",
+      "Comparer les déchets du dessin aux sorties prévues.",
+      "Vérifier que les destructions restent exclues des produits conformes."
+    ],
+    "controls": [
+      "Déchet versus zone détruite.",
+      "Quantités / surfaces.",
+      "Politique stock validée."
+    ],
+    "result": "Pertes correctement traitées.",
+    "next": "S07",
+    "attention": "Le libellé anglais livré contient « Waiste ». Ne pas activer l’option pour faire disparaître un écart de surface.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E09"
+    ]
+  },
+  "S07": {
+    "id": "S07",
+    "title": "Contrôler les surfaces",
+    "group": "S",
+    "why": "Relier la matière consommée aux pièces, chutes et pertes effectives.",
+    "objective": "Bilan matière contrôlé.",
+    "inputs": "Toutes les lignes du Repack ; plan effectif ; unités de mesure.",
+    "actions": [
+      "Comparer surfaces des entrées.",
+      "Comparer sorties, restes et pertes.",
+      "Exclure les encoches déjà retirées des surfaces utiles."
+    ],
+    "controls": [
+      "mm² / m² cohérents.",
+      "Pertes de coupe.",
+      "Toutes les plaques et sources ajoutées prises en compte."
+    ],
+    "result": "Bilan matière contrôlé.",
+    "next": "S08",
+    "attention": "Le nombre de séries et la surface sont deux contrôles différents ; une ligne regroupée peut porter plusieurs unités.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E09",
+      "E10"
+    ]
+  },
+  "S08": {
+    "id": "S08",
+    "title": "Contrôler les coûts et valeurs",
+    "group": "S",
+    "why": "Préserver la cohérence de valorisation de la matière transformée.",
+    "objective": "Valorisation cohérente.",
+    "inputs": "Valeurs d’entrée ; surfaces utiles ; lignes de Repack.",
+    "actions": [
+      "Contrôler les coûts d’entrée.",
+      "Lire la répartition des coûts sur les sorties.",
+      "Faire vérifier les arrondis et toute valeur nulle."
+    ],
+    "controls": [
+      "Valeur d’entrée non nulle pour la répartition.",
+      "Surface utile des L.",
+      "Aucune correction manuelle sans analyse."
+    ],
+    "result": "Valorisation cohérente.",
+    "next": "S09",
+    "attention": "Les règles de coût sont des fonctions du module ; leur recette complète en mouvements soumis reste à valider sur le site.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E09",
+      "E10"
+    ]
+  },
+  "S09": {
+    "id": "S09",
+    "title": "Soumettre Stock Entry Repack",
+    "group": "S",
+    "why": "Constater le mouvement de consommation et de production réellement effectué.",
+    "objective": "Mouvement de stock réel.",
+    "inputs": "Brouillon contrôlé S03–S08 ; droits et validations internes.",
+    "actions": [
+      "Revoir société, date et séries.",
+      "Enregistrer le Stock Entry.",
+      "Soumettre selon procédure.",
+      "Vérifier le mouvement et les séries disponibles."
+    ],
+    "controls": [
+      "Doublons interdits.",
+      "Quantités / limites du MCP.",
+      "Bundles et valeurs cohérents."
+    ],
+    "result": "Mouvement de stock réel.",
+    "next": "S10 si recomposition ; sinon S13",
+    "attention": "La soumission Stock Entry et celle du MCP sont distinctes. Un brouillon seul ne rend pas les produits disponibles.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": [
+      "E09",
+      "E12"
+    ]
+  },
+  "S10": {
+    "id": "S10",
+    "title": "Recomposition depuis une Sales Order",
+    "group": "S",
+    "why": "Transformer des découpes déjà disponibles en produit / ouvrage de la ligne de commande.",
+    "objective": "Repack de recomposition préparé.",
+    "inputs": "Pièces en stock ; Sales Order avec quantité restante.",
+    "actions": [
+      "Ouvrir une Stock Entry brouillon Repack avec Company.",
+      "Choisir Get Pending SO Line.",
+      "Lire restant et satisfaisable ; sélectionner une ligne.",
+      "Créer le Repack proposé et contrôler ses lignes."
+    ],
+    "controls": [
+      "Quantité ne dépasse pas le restant.",
+      "Stock couvre les composants.",
+      "Circuit actif Create Repack ou variante Generate Repack."
+    ],
+    "result": "Repack de recomposition préparé.",
+    "next": "S11",
+    "attention": "Ce Repack ne doit pas consommer une deuxième fois la plaque du Repack de découpe.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Get Pending SO Line",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_from_sales_order_service.py",
+      "mat_reco/public/js/stock_entry_repack_from_so.js"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "S11": {
+    "id": "S11",
+    "title": "Contrôler les composants d’un OUVRAGE",
+    "group": "S",
+    "why": "Vérifier que l’ouvrage est produit avec la totalité des composants conformes.",
+    "objective": "Produit composite contrôlé et produit selon procédure.",
+    "inputs": "Repack de recomposition ; structure d’Item ; séries composantes.",
+    "actions": [
+      "Comparer composants et Qty Factor.",
+      "Vérifier quantité et dimensions des pièces allouées.",
+      "Contrôler dépôts et sorties ouvrage.",
+      "Soumettre selon les mêmes contrôles stock appropriés."
+    ],
+    "controls": [
+      "Composants complets.",
+      "Article et dimensions exacts.",
+      "Quantité d’ouvrage réellement réalisable."
+    ],
+    "result": "Produit composite contrôlé et produit selon procédure.",
+    "next": "S13",
+    "attention": "Si le stock ne couvre qu’une partie de la commande, la quantité satisfaisable limite la génération. Ne pas ignorer un composant manquant.",
+    "role": "Responsable stock habilité",
+    "document": "Stock Entry · Repack",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "S12": {
+    "id": "S12",
+    "title": "Comprendre Material Reconfiguration historique",
+    "group": "S",
+    "why": "Connaître un circuit ancien sans le mélanger avec le MCP UX 2.0.",
+    "objective": "Circuit historique identifié.",
+    "inputs": "Material Reconfiguration ; commande ; produit ; matière.",
+    "actions": [
+      "Lire le plan proposé et les lignes Detail.",
+      "Contrôler un éventuel plan partiel.",
+      "Soumettre uniquement selon le circuit historique validé.",
+      "Utiliser Create Repack (New, Bundled) pour le Stock Entry associé."
+    ],
+    "controls": [
+      "Raw Material / Finished Good / By Product.",
+      "Changement d’état de séries à la soumission historique.",
+      "Annulation spécifique."
+    ],
+    "result": "Circuit historique identifié.",
+    "next": "S13 si ce circuit est retenu",
+    "attention": "Ce document a une logique de soumission / annulation distincte. La procédure Réinitialiser du MCP ne s’y applique pas.",
+    "role": "Responsable stock habilité",
+    "document": "Material Reconfiguration",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/doctype/material_reconfiguration/material_reconfiguration.py"
+    ],
+    "evidence": "Historique · fonctionnement spécifique",
+    "exceptions": []
+  },
+  "S13": {
+    "id": "S13",
+    "title": "Suivre les nouveaux Serial No",
+    "group": "S",
+    "why": "Relier les nouvelles unités à la matière consommée et au mouvement exécuté.",
+    "objective": "Traçabilité de production contrôlée.",
+    "inputs": "Repack soumis ; Serial No et bundles de sortie.",
+    "actions": [
+      "Ouvrir les séries produites.",
+      "Vérifier article, dimensions et dépôt.",
+      "Lire liens MCP, mouvement, parent et racine quand renseignés."
+    ],
+    "controls": [
+      "Série réellement produite.",
+      "Liens présents et cohérents.",
+      "Pas de confusion nom prévu / unité disponible."
+    ],
+    "result": "Traçabilité de production contrôlée.",
+    "next": "S14",
+    "attention": "",
+    "role": "Responsable stock habilité",
+    "document": "Serial No / Serial and Batch Bundle",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Fonction mat_reco · déduite du code",
+    "exceptions": []
+  },
+  "S14": {
+    "id": "S14",
+    "title": "Mettre les produits à disposition du Flux Client",
+    "group": "S",
+    "why": "Redonner au Flux Client un résultat livrable, pas une promesse de fabrication.",
+    "objective": "Produits à disposition du client.",
+    "inputs": "Pièces ou ouvrages conformes ; mouvement soumis ; disponibilité.",
+    "actions": [
+      "Vérifier quantité disponible.",
+      "Identifier les unités livrables.",
+      "Transmettre les références au responsable livraison.",
+      "Reprendre le flux commercial en C08."
+    ],
+    "controls": [
+      "Bonne commande.",
+      "Bon article livré : découpe ou ouvrage.",
+      "Dépôt et séries disponibles."
+    ],
+    "result": "Produits à disposition du client.",
+    "next": "C08 / C09 — reprendre le Flux 2",
+    "attention": "",
+    "role": "Responsable stock habilité",
+    "document": "Serial No / stock / Sales Order",
+    "when": "Au passage indiqué du flux, après contrôle des entrées nécessaires.",
+    "sources": [
+      "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "mat_reco/stock_hooks.py"
+    ],
+    "evidence": "Procédure proposée à valider",
+    "exceptions": []
+  }
+}

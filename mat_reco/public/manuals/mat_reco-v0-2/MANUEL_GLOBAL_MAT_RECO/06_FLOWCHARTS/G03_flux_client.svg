@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1420" viewBox="0 0 1240 1420"><defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#5b7083" stroke-width="1.5"/></marker></defs><rect width="100%" height="100%" fill="white"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="28" x="620.0" y="42"><tspan x="620.0" dy="0">G03 · Flux Client</tspan></text>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="17" x="620.0" y="75"><tspan x="620.0" dy="0">C01 à C13 · Le besoin part à l’atelier ; seuls les produits disponibles reviennent vers la livraison.</tspan></text>
+<rect x="390" y="130" width="460" height="85" rx="12" fill="#f1edfa" stroke="#7355aa" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="179.3"><tspan x="620.0" dy="0">C01 / C02 · Demande → Devis</tspan></text>
+<rect x="390" y="260" width="460" height="85" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="296.3"><tspan x="620.0" dy="0">C03 / C04 · Dimensions</tspan><tspan x="620.0" dy="26.0">Services et accessoires</tspan></text>
+<rect x="390" y="390" width="460" height="85" rx="12" fill="#f1edfa" stroke="#7355aa" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="426.3"><tspan x="620.0" dy="0">C05 / C06 · Articles / composants</tspan><tspan x="620.0" dy="26.0">Commande client confirmée</tspan></text>
+<rect x="390" y="540" width="460" height="85" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="576.3"><tspan x="620.0" dy="0">C07 → A01 · Besoin dimensionné</tspan><tspan x="620.0" dy="26.0">Traiter dans le Flux 3</tspan></text>
+<rect x="390" y="740" width="460" height="85" rx="12" fill="#eaf7f0" stroke="#248767" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="776.3"><tspan x="620.0" dy="0">S14 → C08 / C09</tspan><tspan x="620.0" dy="26.0">Pièces / ouvrages disponibles</tspan></text>
+<rect x="390" y="920" width="460" height="85" rx="12" fill="#f1edfa" stroke="#7355aa" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="956.3"><tspan x="620.0" dy="0">C10 / C11 · Delivery Note</tspan><tspan x="620.0" dy="26.0">Séries et dimensions livrées</tspan></text>
+<rect x="390" y="1100" width="460" height="85" rx="12" fill="#f1edfa" stroke="#7355aa" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="20" x="620.0" y="1136.3"><tspan x="620.0" dy="0">C12 / C13 · Sales Invoice</tspan><tspan x="620.0" dy="26.0">Références, quantités, valeurs</tspan></text>
+<polyline points="620,215 620,260" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,345 620,390" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,475 620,540" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,625 620,740" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,825 620,920" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="620,1005 620,1100" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="35" y="540" width="280" height="110" rx="12" fill="#eaf3ff" stroke="#246fa9" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="17.48251748251748" x="175.0" y="578.2167832167831"><tspan x="175.0" dy="0">Atelier :</tspan><tspan x="175.0" dy="22.727272727272723">MCP → Repack découpe</tspan><tspan x="175.0" dy="22.727272727272723">→ Recomposition si requise</tspan></text>
+<polyline points="390,580 315,580" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<polyline points="175,650 175,780 390,780" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="905" y="1075" width="290" height="135" rx="12" fill="#fff3d9" stroke="#c38a26" stroke-width="2"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="700" font-size="18.909090909090907" x="1050.0" y="1124.3472727272729"><tspan x="1050.0" dy="0">Autres chemins de facture</tspan><tspan x="1050.0" dy="24.58181818181818">possibles dans ERPNext</tspan><tspan x="1050.0" dy="24.58181818181818">À confirmer sur le site</tspan></text>
+<polyline points="850,432 1050,432 1050,1075" fill="none" stroke="#5b7083" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="6 5"/>
+<text text-anchor="middle" font-family="Arial,sans-serif" fill="#193b55" font-weight="400" font-size="16" x="620.0" y="1370"><tspan x="620.0" dy="0">La séquence Livraison → Facture est le parcours pédagogique retenu, pas une obligation universelle.</tspan><tspan x="620.0" dy="20.8">Éviter de constater deux fois la même sortie avec Delivery Note et une facture Update Stock.</tspan></text></svg>

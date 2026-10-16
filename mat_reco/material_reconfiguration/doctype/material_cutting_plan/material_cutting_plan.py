@@ -75,11 +75,14 @@ class MaterialCuttingPlan(Document):
         if not selected_serials:
             frappe.throw(self._get_missing_input_message())
 
-        demands = explode_sales_orders_into_cutting_demands(
-            sales_order_names=sales_orders,
-            source_item=self.source_item,
-            max_depth=int(self.max_depth or 10),
-        )
+        from mat_reco.material_reconfiguration.services.workshop_service import workshop_cutting_demands
+        demands = workshop_cutting_demands(self) if self.get("workshop_request_json") else None
+        if demands is None:
+            demands = explode_sales_orders_into_cutting_demands(
+                sales_order_names=sales_orders,
+                source_item=self.source_item,
+                max_depth=int(self.max_depth or 10),
+            )
 
         variant_item_codes = [
             row.variant_item_code

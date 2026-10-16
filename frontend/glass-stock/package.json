@@ -1,0 +1,1 @@
+{"name":"ug-glass-stock","private":true,"type":"module","scripts":{"build":"node ../workshop-vue/node_modules/vite/bin/vite.js build"}}

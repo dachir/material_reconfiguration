@@ -59,7 +59,8 @@
   "col2",
   "plan_summary",
   "section_break_zfox",
-  "material_plan_incidents"
+  "material_plan_incidents",
+  "workshop_request_json"
  ],
  "fields": [
   {
@@ -354,6 +355,14 @@
    "fieldtype": "Table",
    "label": "Effective MCP Sheets",
    "options": "Effective MCP Sheet"
+  },
+  {
+   "fieldname": "workshop_request_json",
+   "fieldtype": "Long Text",
+   "label": "Workshop Demand Scope",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,

@@ -1,0 +1,117 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier Section",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "autoname": "hash",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "chantier",
+   "label": "Chantier",
+   "fieldtype": "Link",
+   "options": "Chantier",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_name",
+   "label": "D\u00e9signation",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_chantier_section",
+   "label": "Section parente",
+   "fieldtype": "Link",
+   "options": "Chantier Section"
+  },
+  {
+   "fieldname": "is_group",
+   "label": "Contient des sections",
+   "fieldtype": "Check",
+   "default": "1"
+  },
+  {
+   "fieldname": "lft",
+   "label": "Left",
+   "fieldtype": "Int",
+   "hidden": 1
+  },
+  {
+   "fieldname": "rgt",
+   "label": "Right",
+   "fieldtype": "Int",
+   "hidden": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "label": "Ancien parent",
+   "fieldtype": "Link",
+   "options": "Chantier Section",
+   "hidden": 1
+  }
+ ],
+ "field_order": [
+  "chantier",
+  "section_name",
+  "parent_chantier_section",
+  "is_group",
+  "lft",
+  "rgt",
+  "old_parent"
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Sales Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Sales User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "export": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "is_tree": 1,
+ "nsm_parent_field": "parent_chantier_section",
+ "title_field": "section_name",
+ "show_title_field_in_link": 1,
+ "search_fields": "section_name,chantier"
+}

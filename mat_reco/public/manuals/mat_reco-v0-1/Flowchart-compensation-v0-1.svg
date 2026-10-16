@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1190" viewBox="0 0 1040 1190"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#496883" stroke-width="2"/></marker></defs><rect width="100%" height="100%" fill="#fff"/>
+<text x="520.0" y="38" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Compensation des découpes · décisions</tspan></text>
+<text x="520.0" y="70" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Après les incidents du Retour Terrain, avant finalisation du MCP</tspan></text>
+<rect x="355" y="115" width="330" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="520.0" y="146.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Ouvrir Compenser</tspan><tspan x="520.0" dy="23.76">Lire les besoins à remplacer</tspan></text>
+<path d="M520.0,235 L660,290.0 L520.0,345 L380,290.0Z" fill="#fff4d9" stroke="#c79830" stroke-width="2"/>
+<text x="520.0" y="284.0" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Chute interne</tspan><tspan x="520.0" dy="23.76">compatible ?</tspan></text>
+<polyline points="520,190 520,235" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="65" y="253" width="265" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="197.5" y="284.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="197.5" dy="0">Chute du MCP</tspan><tspan x="197.5" dy="23.76">Priorité automatique 1</tspan></text>
+<polyline points="380,290 330,290" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="355" y="275" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="355" dy="0">Oui</tspan></text>
+<path d="M520.0,405 L660,460.0 L520.0,515 L380,460.0Z" fill="#fff4d9" stroke="#c79830" stroke-width="2"/>
+<text x="520.0" y="454.0" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Chute du stock</tspan><tspan x="520.0" dy="23.76">compatible ?</tspan></text>
+<polyline points="520,345 520,405" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="550" y="382" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="550" dy="0">Non</tspan></text>
+<rect x="65" y="423" width="265" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="197.5" y="454.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="197.5" dy="0">Chute du stock</tspan><tspan x="197.5" dy="23.76">Priorité automatique 2</tspan></text>
+<polyline points="380,460 330,460" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="355" y="445" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="355" dy="0">Oui</tspan></text>
+<path d="M520.0,575 L660,630.0 L520.0,685 L380,630.0Z" fill="#fff4d9" stroke="#c79830" stroke-width="2"/>
+<text x="520.0" y="624.0" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Plaque entière</tspan><tspan x="520.0" dy="23.76">compatible ?</tspan></text>
+<polyline points="520,515 520,575" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="550" y="552" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="550" dy="0">Non</tspan></text>
+<rect x="65" y="593" width="265" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="197.5" y="624.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="197.5" dy="0">Plaque entière</tspan><tspan x="197.5" dy="23.76">Priorité automatique 3</tspan></text>
+<polyline points="380,630 330,630" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="355" y="615" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="355" dy="0">Oui</tspan></text>
+<rect x="710" y="593" width="270" height="75" rx="12" fill="#fff0ef" stroke="#c96c61" stroke-width="2"/>
+<text x="845.0" y="612.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="845.0" dy="0">Besoin restant :</tspan><tspan x="845.0" dy="23.76">Actualiser le stock</tspan><tspan x="845.0" dy="23.76">ou approvisionner</tspan></text>
+<polyline points="660,630 710,630" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="685" y="615" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="685" dy="0">Non</tspan></text>
+<polyline points="65,290 35,290 35,752 355,752" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<polyline points="65,460 35,460 35,752 355,752" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<polyline points="65,630 35,630 35,752 355,752" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="355" y="715" width="330" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="520.0" y="746.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Calculer la proposition</tspan><tspan x="520.0" dy="23.76">Contrôler matière et couverture</tspan></text>
+<rect x="355" y="850" width="330" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="520.0" y="881.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Valider la compensation</tspan><tspan x="520.0" dy="23.76">Confirmation serveur</tspan></text>
+<polyline points="520,790 520,850" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="735" y="715" width="270" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="870.0" y="746.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="870.0" dy="0">Annuler la proposition</tspan><tspan x="870.0" dy="23.76">Sans application</tspan></text>
+<polyline points="685,752 735,752" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<rect x="735" y="850" width="270" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="870.0" y="881.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="870.0" dy="0">Retour à l’atelier</tspan><tspan x="870.0" dy="23.76">Plan précédent</tspan></text>
+<polyline points="870,790 870,850" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="355" y="985" width="330" height="75" rx="12" fill="#eaf3ff" stroke="#2c78c6" stroke-width="2"/>
+<text x="520.0" y="1016.5" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#15364f" text-anchor="middle"><tspan x="520.0" dy="0">Retour à l’atelier</tspan><tspan x="520.0" dy="23.76">Plan effectif enregistré</tspan></text>
+<polyline points="520,925 520,985" fill="none" stroke="#496883" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="520" y="1110" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#15364f" text-anchor="middle"><tspan x="520" dy="0">La rotation à 90° est toujours permise en Retour Terrain, même sans la case de Planification.</tspan></text>
+<text x="520" y="1144" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#15364f" text-anchor="middle"><tspan x="520" dy="0">En mode Manuel : choisir les sources ; justifier un contournement des priorités.</tspan></text>
+</svg>

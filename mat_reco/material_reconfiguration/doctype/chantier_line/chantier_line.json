@@ -1,0 +1,109 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier Line",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "autoname": "hash",
+ "fields": [
+  {
+   "fieldname": "line_id",
+   "label": "Identifiant besoin",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 0
+  },
+  {
+   "fieldname": "repere",
+   "label": "Repère",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "designation",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section",
+   "label": "Section",
+   "fieldtype": "Link",
+   "options": "Chantier Section"
+  },
+  {
+   "fieldname": "proposed_item",
+   "label": "Article existant (facultatif)",
+   "fieldtype": "Link",
+   "options": "Item"
+  },
+  {
+   "fieldname": "length_mm",
+   "label": "Longueur proposée (mm)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "width_mm",
+   "label": "Hauteur proposée (mm)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "thickness_mm",
+   "label": "Épaisseur proposée (mm)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "qty",
+   "label": "Quantité",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "default": "1",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "uom",
+   "label": "Unité",
+   "fieldtype": "Link",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "rate",
+   "label": "Prix unitaire proposé",
+   "fieldtype": "Currency",
+   "options": "currency",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "rate_set",
+   "label": "Prix confirmé",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "price_source",
+   "label": "Origine du prix",
+   "fieldtype": "Select",
+   "options": "Manual\nPrice List",
+   "read_only": 1
+  }
+ ],
+ "field_order": [
+  "line_id",
+  "repere",
+  "designation",
+  "section",
+  "proposed_item",
+  "length_mm",
+  "width_mm",
+  "thickness_mm",
+  "qty",
+  "uom",
+  "rate",
+  "rate_set",
+  "price_source"
+ ],
+ "track_changes": 1,
+ "permissions": [],
+ "istable": 1
+}

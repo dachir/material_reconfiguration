@@ -1,0 +1,80 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier Technical Line",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "autoname": "hash",
+ "fields": [
+  {
+   "fieldname": "line_id",
+   "label": "Identifiant besoin",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "repere",
+   "label": "Repère",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "length_mm",
+   "label": "Longueur (mm)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "width_mm",
+   "label": "Hauteur (mm)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "thickness_mm",
+   "label": "Épaisseur (mm)",
+   "fieldtype": "Float"
+  },
+  {
+   "fieldname": "tree_json",
+   "label": "Définition technique",
+   "fieldtype": "Long Text"
+  },
+  {
+   "fieldname": "result_item",
+   "label": "Article validé",
+   "fieldtype": "Link",
+   "options": "Item",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "snapshot_json",
+   "label": "Composition approuvée",
+   "fieldtype": "Long Text",
+   "read_only": 1,
+   "no_copy": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "snapshot_hash",
+   "label": "Empreinte",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "field_order": [
+  "line_id",
+  "repere",
+  "length_mm",
+  "width_mm",
+  "thickness_mm",
+  "tree_json",
+  "result_item",
+  "snapshot_json",
+  "snapshot_hash"
+ ],
+ "track_changes": 1,
+ "permissions": [],
+ "istable": 1
+}

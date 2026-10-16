@@ -1,0 +1,787 @@
+{
+  "version": "0.1",
+  "date": "14 octobre 2026",
+  "audience": "Opérateurs atelier et responsables de stock",
+  "status": "À valider",
+  "scope": "Analyse locale des DocTypes, services, scripts, hooks, fixtures et atelier Vue. Captures de démonstration ; aucun mouvement métier soumis.",
+  "source_files": [
+    {
+      "path": "mat_reco/__init__.py",
+      "sha256": "b172e1ee0dca0b84021717191814e91b6b1c47b866981b0c8eae8ba91a6d9118",
+      "bytes": 22
+    },
+    {
+      "path": "mat_reco/config/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/fixtures/client_script.json",
+      "sha256": "e7f6d63a26a924368d1a08a583f2f35362775279703c439a58d8071d6d4819e2",
+      "bytes": 40397
+    },
+    {
+      "path": "mat_reco/fixtures/custom_field.json",
+      "sha256": "1625fdde3766998a47d893abee9b693a43d248ea2655be6ac2dabc70dceb1c23",
+      "bytes": 79043
+    },
+    {
+      "path": "mat_reco/fixtures/print_format.json",
+      "sha256": "1dc5e04a84d320c24f5c3cd6f673d25bfbac3bcdbe5e74deb58efae5ac78dc3a",
+      "bytes": 32129
+    },
+    {
+      "path": "mat_reco/fixtures/server_script.json",
+      "sha256": "72a5aa59b95b2a7c87375dc880e2408860fa356ebbaaeb12398c4abdcc066cdd",
+      "bytes": 7267
+    },
+    {
+      "path": "mat_reco/hooks.py",
+      "sha256": "cc425e83016ab4e673ef44b4337a00782846116363c1d9cc3a971d6126603b9a",
+      "bytes": 7184
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/api.py",
+      "sha256": "eb258c4837c4cd039f60f17cd75605a8f40038c75515d94968123cbbc9739a8f",
+      "bytes": 21730
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/composite_item_detail/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/composite_item_detail/composite_item_detail.json",
+      "sha256": "69d6f2cb2797aaffabf51714527d8abf843b221888fac016088ed1f1622fa504",
+      "bytes": 869
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/composite_item_detail/composite_item_detail.py",
+      "sha256": "866b11209bd413446aa36b0cced8bab9c4dff617a786e1840034919426d407ba",
+      "bytes": 210
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/effective_mcp_sheet/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/effective_mcp_sheet/effective_mcp_sheet.json",
+      "sha256": "5f266bb2ab66997ed7318e747ffae4e11c92a13943812edcaa44eae15795d51a",
+      "bytes": 2743
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/effective_mcp_sheet/effective_mcp_sheet.py",
+      "sha256": "61e4e6a22eb8be81389f95452333bb94ed1d553a085de80708898e4b93022c6b",
+      "bytes": 208
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/item_variant_detail/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/item_variant_detail/item_variant_detail.js",
+      "sha256": "2c8d3b2076cca511e15cc7f90c0ac3ae6b9ee7a8f0f2ad8f40c46b22d244bbd7",
+      "bytes": 188
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/item_variant_detail/item_variant_detail.json",
+      "sha256": "1bab9e4fd40b560a2a96efa1d26125aad18f070f99f860caf1647e6232891c6c",
+      "bytes": 807
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/item_variant_detail/item_variant_detail.py",
+      "sha256": "cc76d111c047e90a3543e613873174469a84f46af5df886be7089334170ff82a",
+      "bytes": 1144
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/item_variant_detail/test_item_variant_detail.py",
+      "sha256": "c66ad7885f8a35a28fcab5d84c39e9949d73f90eb1131f3e515f3c5011e38a7b",
+      "bytes": 189
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "sha256": "64c1f4b24e89929fef13ade138163fbe99cbaf993fd2b501d731dba81ae94e92",
+      "bytes": 93271
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.json",
+      "sha256": "f9c0c4d5757058d24c145482d765c856e256de3b133fdefebd7ca89c3ccc057f",
+      "bytes": 8398
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "sha256": "8bc16f036358cf77486aa28b64da491a2b325462ebe1812920ac95004dfc3a13",
+      "bytes": 17444
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan_ui.js",
+      "sha256": "4f00269a9ba3eb1e77c9c287508de580fb95ea5c3d667068d6aea9379b5d2ddd",
+      "bytes": 57373
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/mcp_sheet_sync.py",
+      "sha256": "80a8e4b7c2446a1bdd146ab366aad59068409aa679e8663b459cc0c5ee2d8138",
+      "bytes": 5004
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/test_material_cutting_plan.py",
+      "sha256": "2797d10517a92a0d32c5bad36b80303ab55e60c74554084e1c31bfa59a27bcc6",
+      "bytes": 191
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_canvas_renderer.js",
+      "sha256": "3691c7989e44f28d9dc89419ca6a4e9a1881e028abd838e41640573d423c0a4d",
+      "bytes": 7431
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_context_panel.js",
+      "sha256": "abf34fceb27fbde73bcc72aa811a63fcc3b550cbd20c302d1cb66d06576817e1",
+      "bytes": 1756
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_context_toolbar.js",
+      "sha256": "ca613ef2d80681cc8dd89b93407ab818fde5f6857bfaa185beedc55a7e34f0c9",
+      "bytes": 1220
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_interaction_controller.js",
+      "sha256": "dd6a9366ab44e57e7ae4c6c4f25ccd4c34cd6a89f7507e0663b76b51c2d74146",
+      "bytes": 3357
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_state_store.js",
+      "sha256": "ecfd2c245c8ebcb2d743a9ca6967791bf84d079af27ededa1991de3a4e1b8c80",
+      "bytes": 2148
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux03_preview.js",
+      "sha256": "6485bc329a6f70ca7f53a4d81d8f28fba311af1e5ab7bf931644eccac5c9fd04",
+      "bytes": 2143
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux04_interactions.js",
+      "sha256": "c5f164c41d9a3b57c7d956b801292e6fab197956e498cafc1bdd983e5211badb",
+      "bytes": 5199
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux04_preview.js",
+      "sha256": "0e1bafbdc30542ad9ef6c764e50ca47c6845de42b1c4dbaa7ff5752d5ef6e248",
+      "bytes": 6389
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux05_action_adapter.js",
+      "sha256": "f284eb9a58926ab95fc33f4a0dc7578ff68238b4ed8fe0c07e05a5b816de504f",
+      "bytes": 6785
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux05_draft_bridge.js",
+      "sha256": "06aa03b04b80b32bb9f334db7347f82e012b94afb1b385429e5af84c0b28f297",
+      "bytes": 1487
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux06_move_adapter.js",
+      "sha256": "0fd1178d27d58c0966d41760adb340957bcbed6fec12356de1a7877385e4fdc7",
+      "bytes": 4691
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux06_move_bridge.js",
+      "sha256": "5d0519dde181e68b47d7a61d9787a9a675703f4a79a7ff128f8f29cfe81d78c1",
+      "bytes": 1122
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux07_frappe_bridge.js",
+      "sha256": "4f912bc146800043bcb3cc1a6988345e1cbf7c7a14b157a2c7c1438d7c1f5f70",
+      "bytes": 3447
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux20_editor.js",
+      "sha256": "eea0fc965542c275a1d448fa5f41c84468b9aaefd9a3e20c62d195610cd6fdf0",
+      "bytes": 13175
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux20_modal.js",
+      "sha256": "805d32add740c47f72bac006208c9ec04257eb8f695b1b8cb77ed54e0a7d3736",
+      "bytes": 15401
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_workspace.js",
+      "sha256": "244d83ce93b921cdf5c8efccd12098278a8cb8465cdce10a4c6d8f7ac876ff1d",
+      "bytes": 1686
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan_detail/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan_detail/material_cutting_plan_detail.json",
+      "sha256": "fdc9a15b35ad6f745fdb8d2d919c2639fe80cf9da9929c27ce03fb238059a904",
+      "bytes": 1456
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_cutting_plan_detail/material_cutting_plan_detail.py",
+      "sha256": "bbb60f44f70a862d743bb26bc303da5f9c5cb857d6fff6b27bb4095aaa13de2d",
+      "bytes": 216
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_candidate/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_candidate/material_issue_candidate.json",
+      "sha256": "47c7145da5cc915f69bd6bb9191efe548605d1aa1999b553ed4fd045fdda9389",
+      "bytes": 1715
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_candidate/material_issue_candidate.py",
+      "sha256": "4c5d1d67e31896bd00e50cd82d67f00398775fc0eab6534f56e04e712486440a",
+      "bytes": 213
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_plan/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_plan/material_issue_plan.js",
+      "sha256": "19d9f1ddc449b2a7db4635e319047db6755602bd94d6323b719f3f29eb5a829c",
+      "bytes": 188
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_plan/material_issue_plan.json",
+      "sha256": "ff116da22aa8bfdcaf343a70507655f93536cb89d997067f3c6d76421e551f7d",
+      "bytes": 2874
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_plan/material_issue_plan.py",
+      "sha256": "af6ac0d6f7964cb99b761ffb69cbc03edbfed34ccfa2d911b4f9d2a5437e61a7",
+      "bytes": 3932
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_issue_plan/test_material_issue_plan.py",
+      "sha256": "cabbd32fe93b508eeb87154afcadf4c803bad793442e6d86f493af3678dbe232",
+      "bytes": 189
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_plan_incidents/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_plan_incidents/material_plan_incidents.json",
+      "sha256": "674240bf9e06be42199e2f1b48760ae0ffcc321282550a718ca5c77c3a9c59a6",
+      "bytes": 3323
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_plan_incidents/material_plan_incidents.py",
+      "sha256": "7a11fbedfd4667e8ce6b6930acd1ea8ad9f3ecab7e3c0311d8212197b044d9b9",
+      "bytes": 212
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan/material_production_plan.js",
+      "sha256": "2a2a0d8a71010856393f6ce10f64a6c8f8a1a82099fcbbc507b94fc30031af4d",
+      "bytes": 193
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan/material_production_plan.json",
+      "sha256": "fd9ff056fefc68f816c1cf196a2668f4b454efa8493ae9886592692f4c2d6a01",
+      "bytes": 3166
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan/material_production_plan.py",
+      "sha256": "0f1d957153b49c00fc14181f939dda4b7b8222e07974bbf4d33da44edc7e3627",
+      "bytes": 213
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan/test_material_production_plan.py",
+      "sha256": "7494b5459a8569bd26d5f45c4b14fe169b20c9b7724b018e68d9dfd3f76eb00c",
+      "bytes": 194
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan_node/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan_node/material_production_plan_node.json",
+      "sha256": "9131aa8d70531268e122f40d128a509166bd398dcc51109817663e4268531e2d",
+      "bytes": 3107
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_production_plan_node/material_production_plan_node.py",
+      "sha256": "7a3f85ccb70a662560e8598186bcff46e361156c71df18b70ee041e63fd0d8fe",
+      "bytes": 217
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/material_receipt_plan.js",
+      "sha256": "995cc4b50419110b3adab23bdd23e14a8f928dd7e09a79b88237582b326c87c3",
+      "bytes": 4291
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/material_receipt_plan.json",
+      "sha256": "8ab0b11e7c176b5bcc99725d1f5860b6b673bcf02f8c505037a6d916edcf84a5",
+      "bytes": 2689
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/material_receipt_plan.py",
+      "sha256": "5c15f33d31f19d66fde7173a6ea32194dce9b01453c3ed5594fed01e5caed6c7",
+      "bytes": 12741
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/test_material_receipt_plan.py",
+      "sha256": "f5a4674c4d9a2a00226b687d2fca568930e78e6995d056d730a6de54a66e3faa",
+      "bytes": 191
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan_serial/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan_serial/material_receipt_plan_serial.json",
+      "sha256": "16eeb12ca13b44d2ed879e3675502c84847fba99321f6af163d96ba3215e10fa",
+      "bytes": 1361
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_receipt_plan_serial/material_receipt_plan_serial.py",
+      "sha256": "c0cb6c2c6de3900706732301231a7986fec55ad7ee2531723691259e90448ee6",
+      "bytes": 216
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration/material_reconfiguration.js",
+      "sha256": "a5958ea28d2b6f50a30eb0249307d151e1322c8f7626ba65f41f9e5a4f2c5ea8",
+      "bytes": 8079
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration/material_reconfiguration.json",
+      "sha256": "30b42c65559eb8420dd43916fc9fb01a01ec504273b6fa5d889a16e475001b63",
+      "bytes": 3400
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration/material_reconfiguration.py",
+      "sha256": "4f788b97f92d9f749d0b61ff9260a797bf32d047563eafb12a0e7f58c7f1f8e8",
+      "bytes": 17030
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration/test_material_reconfiguration.py",
+      "sha256": "bc1d51c3eb19d22036aa12d79934f5f281b385265440db3b7ff02f9aea600384",
+      "bytes": 195
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration_line/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration_line/material_reconfiguration_line.json",
+      "sha256": "afa55d9de175fd2cab72f9bd3829a4ecda0f31209f3ccab520fe33a476b37f06",
+      "bytes": 2469
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/material_reconfiguration_line/material_reconfiguration_line.py",
+      "sha256": "56e30b4bd2532c8cca37fe91d1ab966661b52a2b5c655f4c3718601f1118d702",
+      "bytes": 218
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_sales_order/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_sales_order/mcp_sales_order.json",
+      "sha256": "2220c2dc449a912d7bcb1a2fb3699de2d06a2568ef8da70e9396a38182959889",
+      "bytes": 710
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_sales_order/mcp_sales_order.py",
+      "sha256": "97a1d171ef55d37a1fa6f5f4da1b3cb4ddc12b03d9d94c9c84793bd49c54ac39",
+      "bytes": 204
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_sheet/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_sheet/mcp_sheet.json",
+      "sha256": "a4156ee6b9301be6029fab928ecfdc53f38000b3f8570f884186cca3344e765e",
+      "bytes": 2733
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_sheet/mcp_sheet.py",
+      "sha256": "445ed72aba4bb0e8d116434726d1825dd4c5a0911daf12ddcdaae6f96bf24247",
+      "bytes": 199
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_stock_candidate/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_stock_candidate/mcp_stock_candidate.json",
+      "sha256": "5afa243a9122c3d8b3bb3f9ef7a75894f0f900f703199a75c25f372e34c5fb53",
+      "bytes": 1754
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/mcp_stock_candidate/mcp_stock_candidate.py",
+      "sha256": "00ad94a8d4970fe0aa932f0c9861ffa0c4411ebcccf9535ae0e45800a8c8209b",
+      "bytes": 208
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/reconfiguration_settings/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/reconfiguration_settings/reconfiguration_settings.js",
+      "sha256": "95009480d717d22759b39a9b2eec738b7b7bc0537d1d869b6913d73c0005f5b3",
+      "bytes": 193
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/reconfiguration_settings/reconfiguration_settings.json",
+      "sha256": "5c79471cae5430fff7348c6a66a10bdaa24b59d808ae10d78104a8e6c207cb55",
+      "bytes": 3217
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/reconfiguration_settings/reconfiguration_settings.py",
+      "sha256": "685963be9d5f60cb65af939b6030502d1e2eee337f590203bc74621243165c56",
+      "bytes": 214
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/doctype/reconfiguration_settings/test_reconfiguration_settings.py",
+      "sha256": "4ea19e220fdfcfab36661a524dc7b3ec15d9d8ff55e34a7bd82dc4f522a8c195",
+      "bytes": 195
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/engines/cut_engine.py",
+      "sha256": "49004a1a61d4f96de93c63b36fe39b55bfd3668b5f306f05c5839b3fd5987d17",
+      "bytes": 10567
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/engines/selection_engine.py",
+      "sha256": "ce9705244937eed9ec89afcaea03469f35e7826e7f06a58e19d65d4aac877df7",
+      "bytes": 2681
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/extension/stock_entry.py",
+      "sha256": "d70592a58e5b3691635a5b0e34086068e643095577f0a453b9a9da31a9f4a89d",
+      "bytes": 3038
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/extension/utils.py",
+      "sha256": "dbb3310f7fb491f7b2827fbdef03848546000599f736acb7c559712a55f16c83",
+      "bytes": 692
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/cutting_plan_service.py",
+      "sha256": "a655711a30d903a05394883b6d5ed3b559570581b4ad06369a3bfb06004f81df",
+      "bytes": 43109
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/material_issue_plan_service.py",
+      "sha256": "1bd58923a16c812f4bce6f76d9e71cf0e9670df65fc5367968e8d04049a71a6f",
+      "bytes": 4446
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/mcp_action_preview.py",
+      "sha256": "496869144e5ae08190187fc7336aa11e64d38f5243a35df086639ee7c8e064aa",
+      "bytes": 30729
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/mcp_compensation_geometry.py",
+      "sha256": "6f30ae2132fa73f264aeaf4c78a8a27f4d24ccea8c12483103125660ee280792",
+      "bytes": 10019
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/mcp_compensation_service.py",
+      "sha256": "30e53709f8853e459abab62dc0253de1a6ad36b630f6cf2c2bce1b3fd2222c7f",
+      "bytes": 33122
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/mcp_incident_service.py",
+      "sha256": "4396914fb91d80274dc0e48479030367e3bd5ff1b47b43084d9514802c67a477",
+      "bytes": 38521
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/mr_service.py",
+      "sha256": "226324e2b9a25122ef2a188dbcb31b487880d608ed89bf65a5da8dd841ff6ef2",
+      "bytes": 2944
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/order_explosion_service.py",
+      "sha256": "9115a72afcfd811aad82817905e0fa59028a7d76b4b295542cedb13fd4e151ff",
+      "bytes": 15460
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "sha256": "62575fa23411e89ce11f8166c80a78f96210cfed51720366a9a846d57e81650a",
+      "bytes": 64983
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/repack_from_sales_order_service.py",
+      "sha256": "c25f54f6a543f1307655521959ec23e837c3db175ac17a7cefbd7c2647f142a4",
+      "bytes": 23440
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/serial_creation_service.py",
+      "sha256": "c96223d187849b70c3e431e278ef7c0a830514a7874bd90cbb6db60276a8c234",
+      "bytes": 12821
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/serial_service.py",
+      "sha256": "7ef48fa321182d48b9cf3ebd347581129f9013fd998f421c509b53716468211a",
+      "bytes": 595
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/serial_service_internal.py",
+      "sha256": "20a03e1cefe1f82653ad37ca3702c7abd93bfad3f9cdccf60c79ea2161d3c726",
+      "bytes": 9825
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/single_geometry.py",
+      "sha256": "ef581e50893e8a971b329c8d2e8501e06efe844b8dca33873da54ee6cdcf4d97",
+      "bytes": 5684
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/services/stock_candidate_service.py",
+      "sha256": "b30757fa543344242b9725e6680b462f32f1d41a802ea7220da1b25c8dd0b633",
+      "bytes": 6487
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_action_preview.py",
+      "sha256": "5f5661381c5d4b6344f115b2fbd1acb6f1101c2f6452de447a52292c9a34a5f2",
+      "bytes": 16670
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_compensation_geometry.py",
+      "sha256": "e326e6bcd10075e2aa7bf7896ab38065538d43bfec974f1b0dfc6d6933ea9c5f",
+      "bytes": 3990
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_compensation_persistence.py",
+      "sha256": "b28918ba74055daf6e693935280f666e5a7656729d710c65e3d7761d72118f8b",
+      "bytes": 13916
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_compensation_priority.py",
+      "sha256": "a0bbfaeb163cf8a4f463fb564f73bad64c5a9a6edeba64446bd242c5637020e2",
+      "bytes": 3896
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_compensation_service.py",
+      "sha256": "627ccbba9cb545bce597a421aaa6b70de88cc051f8ed022f8920248227080cd0",
+      "bytes": 5194
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_move_rotation.py",
+      "sha256": "1586633344eb255cffd66ca14855793429279ba86b890c4d0b6cad20013b5165",
+      "bytes": 12523
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/tests/test_mcp_reset.py",
+      "sha256": "65ba37b321ddec990b2eacb2bd075d2bec691bc67a813b7fa8d3270407c27246",
+      "bytes": 3648
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/utils/accounting_dimensions.py",
+      "sha256": "fb59b741e984e084c54e663718cf47e392de86e1bd557caa1ae10ac4199420eb",
+      "bytes": 5677
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/utils/costing.py",
+      "sha256": "c78e0e1389c03bcffdf1ad8b9a80c61ad491455ffdf1ca4779421461112b7f2f",
+      "bytes": 6553
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/utils/dimensions.py",
+      "sha256": "17d5ea92f531da121a51dd985c17cf7337c834c66442e5cd4b2ce40eec73a687",
+      "bytes": 5203
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/utils/mcp_costing.py",
+      "sha256": "4eb4934ee1f34bbd3694ae61b97e5fd99a9816bee9b3bb98475e012dbd140349",
+      "bytes": 17149
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/utils/serial_naming.py",
+      "sha256": "7aaf701c4c75f8990ff2a281418dceeafdd009b0ba008584b092b16e17ced6c7",
+      "bytes": 2782
+    },
+    {
+      "path": "mat_reco/material_reconfiguration/utils/settings.py",
+      "sha256": "e9ad1d0a83cc475d2a793bca722a2fe9cb135f9ad4988cdf54e0cd8a4baa4c1c",
+      "bytes": 2232
+    },
+    {
+      "path": "mat_reco/public/css/app.css",
+      "sha256": "83fe4fa2c5abd763a2fed998c6587aa3c88c0d2f9046e487ad5c7cb681bd5263",
+      "bytes": 800
+    },
+    {
+      "path": "mat_reco/public/dist/js/material_cutting_plan_ui.bundle.WXMQLEXC.js",
+      "sha256": "5e48dd269cfc5e1a85f691aa1add226a1f584941a5fc089283b4084727ce5d32",
+      "bytes": 53069
+    },
+    {
+      "path": "mat_reco/public/dist/js/mcp_ux20.bundle.KRKEMVEB.js",
+      "sha256": "b7b5ae86b14420585019bcd137197d86db2e12d6e7bc06560f9a56041854dd39",
+      "bytes": 82894
+    },
+    {
+      "path": "mat_reco/public/js/dimension_from_serial.js",
+      "sha256": "ab8db93ae606a66fada10b874fa8b5749b78db3c7f6028f7a1c67a7f2932bbed",
+      "bytes": 1736
+    },
+    {
+      "path": "mat_reco/public/js/stock_entry_repack_from_so.js",
+      "sha256": "18c511a9ab5d4a26910461cd1bc2a9de2fd71ea75028dab0b83b6fb4078e2684",
+      "bytes": 4387
+    },
+    {
+      "path": "mat_reco/setup.py",
+      "sha256": "4f8704344fb3a51395c6df7df0caa41b30f23e8a096ec246aea814597458cb66",
+      "bytes": 745
+    },
+    {
+      "path": "mat_reco/stock_bundle_hooks.py",
+      "sha256": "07a2bd099a6010d4a062a4ba42c86e39e454911ec2a86939f4017d948ddb7d35",
+      "bytes": 2838
+    },
+    {
+      "path": "mat_reco/stock_hooks.py",
+      "sha256": "0e223642b333e9a9fc0892238ed0568fe8952c66d8ff7ea1bd9fbbee25ac6230",
+      "bytes": 13377
+    },
+    {
+      "path": "mat_reco/templates/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "mat_reco/templates/pages/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/App.vue",
+      "sha256": "97c11a4bd4ee518e3c77c1fdd04f77f084cbe63876732ab7641a3ddff923a838",
+      "bytes": 5049
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/ActionPreview.vue",
+      "sha256": "4eb78184fbf1c747e859be2ae6c7f4dd9f66526b25126cca68987d30471e68ff",
+      "bytes": 5856
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/CompensationPanel.vue",
+      "sha256": "0e55ad4fd70008796f6d6b501d009071a3da8895e7da89fc92d2de7d05df39ce",
+      "bytes": 6511
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/ContextMenu.vue",
+      "sha256": "b0f0300bc82b197fa9d584c7ceced5060636eda7a102d46c4937b7359979281c",
+      "bytes": 1251
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/CuttingCanvas.vue",
+      "sha256": "127701a9057c1082fcdc396fb40b9ff94327b5740dc1d18403fb466c5a91d809",
+      "bytes": 5874
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/EditorHeader.vue",
+      "sha256": "bfde7190bbc2adbef1a74352b6c399ec9b7f882c78538f9612e5e6967ed058b7",
+      "bytes": 545
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/PreviewFooter.vue",
+      "sha256": "f66dbc39883d6da59a424fd077b695c4dec6827a48d4ccc1187bece11adc6ba7",
+      "bytes": 2133
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/SelectionPanel.vue",
+      "sha256": "735bf8eae8e88c5b10c666b36d6368ef31b4a2a6a9831cba2177de2602c7c827",
+      "bytes": 2833
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/components/SheetNavigator.vue",
+      "sha256": "8fd37bae021b7c3798d1d4c982a54e95c067702c39d4e26505686c3c4233ca6b",
+      "bytes": 1981
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/lib/cursors.js",
+      "sha256": "effd5ad15d417abd8eea003b67821bc176deb775e53148af349e752fd06c2bf8",
+      "bytes": 871
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/lib/geometry.js",
+      "sha256": "7d090c0cdb859c6af798c50e48ca05c6e0db83e86f046a180b9f0958eb141a67",
+      "bytes": 11129
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/lib/palette.js",
+      "sha256": "4b594823e57eb19202865790883163b7a96535548d2a696de2aae2682b3173d2",
+      "bytes": 376
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/lib/preview.js",
+      "sha256": "d2e871ea63a379a913d2b8e3a022b5276f19d3f5ca445199418f7dc4fcd24d24",
+      "bytes": 1643
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/main.js",
+      "sha256": "63171b2c0059c45eb09ab6a06830a3e6c94394bef97526dabc4390f831ba2a42",
+      "bytes": 1099
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/services/frappeClient.js",
+      "sha256": "59b2c8f2dcb27aac6e27584dba73a1a17ce96644bb7af3758f26d8a3a9e35674",
+      "bytes": 1255
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/stores/cutting.js",
+      "sha256": "39c53a36ab60d076e85ad3c18b34026d871db680557782709a545cc15cc1d6ed",
+      "bytes": 14458
+    },
+    {
+      "path": "frontend/mcp-ux20-vue/src/styles/editor.css",
+      "sha256": "adf54c16276779abde069d0f8485bca1fb322f47153e38b4ea6f5619fd3587e3",
+      "bytes": 5669
+    }
+  ],
+  "chapters": 29,
+  "figures": 14,
+  "flowcharts": 2
+}

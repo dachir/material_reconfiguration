@@ -1,9 +1,6 @@
-# Copyright (c) 2026, Richard Amouzou and contributors
-# For license information, please see license.txt
-
-# import frappe
 from frappe.model.document import Document
-
+from mat_reco.material_reconfiguration.services.chantier_service import populate_mpp
 
 class MaterialProductionPlan(Document):
-	pass
+    def validate(self):
+        populate_mpp(self)

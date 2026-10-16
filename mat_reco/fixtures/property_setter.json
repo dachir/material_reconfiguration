@@ -1,0 +1,18 @@
+[
+ {
+  "default_value": null,
+  "doc_type": "Quotation",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocType",
+  "field_name": null,
+  "is_system_generated": 1,
+  "modified": "2026-10-15 23:29:47.924510",
+  "module": "Material Reconfiguration",
+  "name": "Quotation-main-track_changes",
+  "property": "track_changes",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
+ }
+]

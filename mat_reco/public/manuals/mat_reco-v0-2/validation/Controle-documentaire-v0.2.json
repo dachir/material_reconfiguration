@@ -1,0 +1,44 @@
+{
+  "version": "0.2",
+  "checks": [
+    {
+      "fichier": "Points-a-valider-mat_reco-v0.2.docx",
+      "controle": "ZIP intègre, XML valides, signets uniques",
+      "resultat": "OK"
+    },
+    {
+      "fichier": "Manuel-utilisateur-global-mat_reco-v0.2.docx",
+      "controle": "ZIP intègre, XML valides, signets uniques",
+      "resultat": "OK"
+    },
+    {
+      "fichier": "Carte-des-flux-mat_reco-v0.2.docx",
+      "controle": "ZIP intègre, XML valides, signets uniques",
+      "resultat": "OK"
+    },
+    {
+      "fichier": "Points-a-valider-mat_reco-v0.2.pdf",
+      "pages": 7,
+      "controle": "Lecture PDF et absence de page quasi vide",
+      "resultat": "OK"
+    },
+    {
+      "fichier": "Carte-des-flux-mat_reco-v0.2.pdf",
+      "pages": 8,
+      "controle": "Lecture PDF et absence de page quasi vide",
+      "resultat": "OK"
+    },
+    {
+      "fichier": "Manuel-utilisateur-global-mat_reco-v0.2.pdf",
+      "pages": 104,
+      "controle": "Lecture PDF et absence de page quasi vide",
+      "resultat": "OK"
+    },
+    {
+      "controle": "60 lignes indexées, 54 images distinctes, 64 repères, 64 fiches présentes",
+      "resultat": "OK"
+    }
+  ],
+  "mutualisations": [],
+  "limites": "Validation documentaire locale, pas une recette de transactions métier ni un rendu Word contrôlé dans Microsoft Word."
+}

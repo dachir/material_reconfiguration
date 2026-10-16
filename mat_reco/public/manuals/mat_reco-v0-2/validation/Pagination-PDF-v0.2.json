@@ -1,0 +1,522 @@
+[
+  {
+    "page": 1,
+    "text_length": 612,
+    "debut": "Manuel utilisateur global mat_reco | V0.2 · Base éditoriale pour Codex, contrôle documentaire et Skywork"
+  },
+  {
+    "page": 2,
+    "text_length": 1004,
+    "debut": "Sommaire des parcours | Codes stables pour naviguer et commenter le document."
+  },
+  {
+    "page": 3,
+    "text_length": 862,
+    "debut": "00 · Bienvenue dans mat_reco | Objectif  Comprendre le parcours complet avant les écrans."
+  },
+  {
+    "page": 4,
+    "text_length": 212,
+    "debut": "01 · Carte globale des trois ﬂux | Schéma G01 · Deux entrées convergent vers le MCP : matière disponible et besoin dimensionné."
+  },
+  {
+    "page": 5,
+    "text_length": 300,
+    "debut": "02 · Documents ERPNext et relations | Schéma G06 · Repack de découpe et Repack de recomposition sont deux opérations distinctes."
+  },
+  {
+    "page": 6,
+    "text_length": 840,
+    "debut": "03 · Rôles et responsabilités | Tableau 3 — Responsabilités à approuver"
+  },
+  {
+    "page": 7,
+    "text_length": 1007,
+    "debut": "04 · Lire les repères visuels | Position  Le mini-graphe marque la phase courante et le code de ﬁche."
+  },
+  {
+    "page": 8,
+    "text_length": 966,
+    "debut": "05 · Cas pratique ﬁl rouge | Tableau 5 — Jeu cohérent de formation"
+  },
+  {
+    "page": 9,
+    "text_length": 178,
+    "debut": "Flux 1 · Fournisseur | Approvisionner la matière"
+  },
+  {
+    "page": 10,
+    "text_length": 1213,
+    "debut": "F01 · Identiﬁer le besoin d’approvisionnement | Procédure proposée à valider"
+  },
+  {
+    "page": 11,
+    "text_length": 1314,
+    "debut": "F02 · Créer une commande fournisseur | Standard ERPNext · à conﬁrmer sur site"
+  },
+  {
+    "page": 12,
+    "text_length": 1188,
+    "debut": "F03 · Préparer la réception physique | Procédure proposée à valider"
+  },
+  {
+    "page": 13,
+    "text_length": 1360,
+    "debut": "F04 · Réceptionner avec Purchase Receipt | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 14,
+    "text_length": 1350,
+    "debut": "F05 · Réceptionner via Material Receipt Plan | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 15,
+    "text_length": 1294,
+    "debut": "F06 · Comprendre les deux circuits de réception | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 16,
+    "text_length": 1130,
+    "debut": "F07 · Contrôler les Serial No générés | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 17,
+    "text_length": 1218,
+    "debut": "F08 · Contrôler dimensions, épaisseur et qualité | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 18,
+    "text_length": 1201,
+    "debut": "F09 · Vériﬁer le dépôt et la disponibilité | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 19,
+    "text_length": 213,
+    "debut": "Flux 2 · Client | De la demande à la facture, avec passage explicite par le Flux 3"
+  },
+  {
+    "page": 20,
+    "text_length": 1085,
+    "debut": "C01 · Comprendre la demande client | Procédure proposée à valider"
+  },
+  {
+    "page": 21,
+    "text_length": 1057,
+    "debut": "C02 · Créer un devis | Standard ERPNext · à conﬁrmer sur site"
+  },
+  {
+    "page": 22,
+    "text_length": 1217,
+    "debut": "C03 · Saisir dimensions et quantités | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 23,
+    "text_length": 1273,
+    "debut": "C04 · Ajouter services et accessoires | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 24,
+    "text_length": 1244,
+    "debut": "C05 · Déﬁnir les articles DECOUPE et OUVRAGE | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 25,
+    "text_length": 1199,
+    "debut": "C06 · Transformer le devis en Sales Order | Standard ERPNext · à conﬁrmer sur site"
+  },
+  {
+    "page": 26,
+    "text_length": 1175,
+    "debut": "C07 · Transmettre les besoins à l’atelier | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 27,
+    "text_length": 1261,
+    "debut": "C08 · Suivre l’état de fabrication | Procédure proposée à valider"
+  },
+  {
+    "page": 28,
+    "text_length": 1097,
+    "debut": "C09 · Vériﬁer les produits ﬁnis disponibles | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 29,
+    "text_length": 1204,
+    "debut": "C10 · Préparer et soumettre Delivery Note | Standard ERPNext · à conﬁrmer sur site"
+  },
+  {
+    "page": 30,
+    "text_length": 1233,
+    "debut": "C11 · Contrôler les Serial No et les dimensions | livrées"
+  },
+  {
+    "page": 31,
+    "text_length": 1203,
+    "debut": "C12 · Créer Sales Invoice | Standard ERPNext · à conﬁrmer sur site"
+  },
+  {
+    "page": 32,
+    "text_length": 1260,
+    "debut": "C13 · Contrôler facture, quantités et références | Standard ERPNext · à conﬁrmer sur site"
+  },
+  {
+    "page": 33,
+    "text_length": 208,
+    "debut": "Flux 3 · Atelier | Cœur du guide : planiﬁer, constater, corriger et compenser"
+  },
+  {
+    "page": 34,
+    "text_length": 1174,
+    "debut": "A01 · Comprendre les besoins issus des | commandes"
+  },
+  {
+    "page": 35,
+    "text_length": 1050,
+    "debut": "A02 · Créer Material Cutting Plan | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 36,
+    "text_length": 1059,
+    "debut": "A03 · Charger les commandes client | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 37,
+    "text_length": 1095,
+    "debut": "A04 · Charger les matières disponibles | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 38,
+    "text_length": 1136,
+    "debut": "A05 · Qualiﬁer les plaques | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 39,
+    "text_length": 1211,
+    "debut": "A06 · Paramétrer la découpe | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 40,
+    "text_length": 1105,
+    "debut": "A07 · Générer et lire le plan initial | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 41,
+    "text_length": 1119,
+    "debut": "A08 · Comprendre produits ﬁnis, chutes et | déchets"
+  },
+  {
+    "page": 42,
+    "text_length": 1095,
+    "debut": "A09 · Passer en Retour Terrain | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 43,
+    "text_length": 1060,
+    "debut": "A10 · Ouvrir Atelier UX 2.0 | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 44,
+    "text_length": 1081,
+    "debut": "A11 · Sélectionner une pièce et utiliser le menu | contextuel"
+  },
+  {
+    "page": 45,
+    "text_length": 1132,
+    "debut": "A12 · Déplacer une pièce | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 46,
+    "text_length": 1262,
+    "debut": "A13 · Tourner une pièce à 90° | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 47,
+    "text_length": 1177,
+    "debut": "A14 · Redimensionner | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 48,
+    "text_length": 192,
+    "debut": "G07 · Décision en cas de casse | Schéma G07 · Incidents, couverture et reprise en cas de casse successive."
+  },
+  {
+    "page": 49,
+    "text_length": 1210,
+    "debut": "A15 · Détruire une pièce cassée | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 50,
+    "text_length": 1156,
+    "debut": "A16 · Fusionner deux zones | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 51,
+    "text_length": 1129,
+    "debut": "A17 · Créer une Chute en L | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 52,
+    "text_length": 1285,
+    "debut": "A18 · Prévisualiser, conﬁrmer et appliquer | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 53,
+    "text_length": 1219,
+    "debut": "A19 · Identiﬁer les besoins manquants | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 54,
+    "text_length": 210,
+    "debut": "G05 · Compensation : priorités et validation | Schéma G05 · Cliquer Calculer déclenche la recherche prioritaire des sources."
+  },
+  {
+    "page": 55,
+    "text_length": 1181,
+    "debut": "A20 · Ouvrir la compensation | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 56,
+    "text_length": 1156,
+    "debut": "A21 · Réutiliser une chute du MCP | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 57,
+    "text_length": 1166,
+    "debut": "A22 · Utiliser une chute du stock | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 58,
+    "text_length": 1239,
+    "debut": "A23 · Ajouter une plaque entière | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 59,
+    "text_length": 1329,
+    "debut": "A24 · Calculer et valider la compensation | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 60,
+    "text_length": 1293,
+    "debut": "A25 · Gérer les casses successives | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 61,
+    "text_length": 1150,
+    "debut": "A26 · Contrôler le plan eﬀectif | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 62,
+    "text_length": 1284,
+    "debut": "A27 · Réinitialiser en sécurité | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 63,
+    "text_length": 1280,
+    "debut": "A28 · Préparer la clôture et la soumission MCP | Procédure proposée à valider"
+  },
+  {
+    "page": 64,
+    "text_length": 242,
+    "debut": "Flux 3 · Stock / Recomposition | Prolongement du Flux 3 : matérialiser la transformation et retourner au client"
+  },
+  {
+    "page": 65,
+    "text_length": 1131,
+    "debut": "S01 · Comprendre le rôle du Repack | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 66,
+    "text_length": 1121,
+    "debut": "S02 · Créer Draft Repack depuis MCP | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 67,
+    "text_length": 1091,
+    "debut": "S03 · Contrôler les matières consommées | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 68,
+    "text_length": 1079,
+    "debut": "S04 · Contrôler les pièces produites | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 69,
+    "text_length": 1123,
+    "debut": "S05 · Contrôler les chutes générées | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 70,
+    "text_length": 1186,
+    "debut": "S06 · Comprendre les déchets | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 71,
+    "text_length": 1139,
+    "debut": "S07 · Contrôler les surfaces | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 72,
+    "text_length": 1163,
+    "debut": "S08 · Contrôler les coûts et valeurs | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 73,
+    "text_length": 1191,
+    "debut": "S09 · Soumettre Stock Entry Repack | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 74,
+    "text_length": 1253,
+    "debut": "S10 · Recomposition depuis une Sales Order | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 75,
+    "text_length": 1302,
+    "debut": "S11 · Contrôler les composants d’un OUVRAGE | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 76,
+    "text_length": 1297,
+    "debut": "S12 · Comprendre Material Reconﬁguration | historique"
+  },
+  {
+    "page": 77,
+    "text_length": 1134,
+    "debut": "S13 · Suivre les nouveaux Serial No | Fonction mat_reco · déduite du code"
+  },
+  {
+    "page": 78,
+    "text_length": 1193,
+    "debut": "S14 · Mettre les produits à disposition du Flux | Client"
+  },
+  {
+    "page": 79,
+    "text_length": 720,
+    "debut": "Partie V · Gestion des exceptions | Revenir à la ﬁche d’origine après correction, sans contourner les contrôles."
+  },
+  {
+    "page": 80,
+    "text_length": 671,
+    "debut": "E01 · Commande introuvable | Vous êtes dans une exception du parcours : C07, A03"
+  },
+  {
+    "page": 81,
+    "text_length": 686,
+    "debut": "E02 · Matière insuﬃsante | Vous êtes dans une exception du parcours : F01, A04, A19"
+  },
+  {
+    "page": 82,
+    "text_length": 714,
+    "debut": "E03 · Dimensions incompatibles | Vous êtes dans une exception du parcours : C03, A12–A17"
+  },
+  {
+    "page": 83,
+    "text_length": 642,
+    "debut": "E04 · Pièce cassée | Vous êtes dans une exception du parcours : A15, A25"
+  },
+  {
+    "page": 84,
+    "text_length": 799,
+    "debut": "E05 · Compensation impossible | Vous êtes dans une exception du parcours : A20–A24"
+  },
+  {
+    "page": 85,
+    "text_length": 687,
+    "debut": "E06 · Chute en L non exploitable | Vous êtes dans une exception du parcours : A17, S05"
+  },
+  {
+    "page": 86,
+    "text_length": 821,
+    "debut": "E07 · Conﬂit entre deux utilisateurs | Vous êtes dans une exception du parcours : A18, A24, A27"
+  },
+  {
+    "page": 87,
+    "text_length": 792,
+    "debut": "E08 · Serial No indisponible | Vous êtes dans une exception du parcours : F09, S03, C11"
+  },
+  {
+    "page": 88,
+    "text_length": 697,
+    "debut": "E09 · Repack refusé | Vous êtes dans une exception du parcours : S02–S09"
+  },
+  {
+    "page": 89,
+    "text_length": 706,
+    "debut": "E10 · Diﬀérence de surface ou de valeur | Vous êtes dans une exception du parcours : S07, S08"
+  },
+  {
+    "page": 90,
+    "text_length": 717,
+    "debut": "E11 · Annulation et réinitialisation | Vous êtes dans une exception du parcours : A18, A24, A27"
+  },
+  {
+    "page": 91,
+    "text_length": 809,
+    "debut": "E12 · Document déjà soumis | Vous êtes dans une exception du parcours : A28, S09"
+  },
+  {
+    "page": 92,
+    "text_length": 407,
+    "debut": "Partie VI · Exercices et validation | Jeu de recette isolé ; aucun exercice ci-dessous n’a été soumis sur des documents métier pour ce guide."
+  },
+  {
+    "page": 93,
+    "text_length": 910,
+    "debut": "X01 · Réception de plaques fournisseur | F01 → F02 → F03 → F04 → F07 → F08 → F09"
+  },
+  {
+    "page": 94,
+    "text_length": 1090,
+    "debut": "X02 · Commande client avec découpe réussie | C01–C07 → A01–A10 → A26 → S02–S11 → S14 → C08–C13"
+  },
+  {
+    "page": 95,
+    "text_length": 1334,
+    "debut": "X03 · Commande avec casse, compensation puis | Repack"
+  },
+  {
+    "page": 96,
+    "text_length": 1071,
+    "debut": "V01 · Validation et décisions ouvertes | La version v0.2 est une base éditoriale, pas une procédure approuvée."
+  },
+  {
+    "page": 97,
+    "text_length": 1561,
+    "debut": "Glossaire | Tableau 8 — Lexique métier"
+  },
+  {
+    "page": 98,
+    "text_length": 942,
+    "debut": "N01 · Annexes : réglages et circuits | complémentaires"
+  },
+  {
+    "page": 99,
+    "text_length": 1531,
+    "debut": "N02 · Sources, limites et contrôle documentaire | La refonte suit les deux architectures fournies le 14 octobre 2026. Les règles propres au module"
+  },
+  {
+    "page": 100,
+    "text_length": 747,
+    "debut": "I01 · Index des captures et navigation des assets | Le ﬁchier INDEX_CAPTURES.xlsx est à la racine de MANUEL_GLOBAL_MAT_RECO. Il contient"
+  },
+  {
+    "page": 101,
+    "text_length": 665,
+    "debut": "I01 · Index — Flux 2 · Client | Tableau 11 — Flux 2 · Client"
+  },
+  {
+    "page": 102,
+    "text_length": 1492,
+    "debut": "I01 · Index — Flux 3 · Atelier | Tableau 12 — Flux 3 · Atelier"
+  },
+  {
+    "page": 103,
+    "text_length": 887,
+    "debut": "I01 · Index — Flux 3 · Stock / Recomposition | Tableau 13 — Flux 3 · Stock / Recomposition"
+  },
+  {
+    "page": 104,
+    "text_length": 360,
+    "debut": "I01 · Index — Exceptions | Tableau 14 — Exceptions"
+  }
+]

@@ -1,0 +1,90 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier Commercial Extra",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "istable": 1,
+ "autoname": "hash",
+ "fields": [
+  {
+   "fieldname": "line_id",
+   "label": "Identifiant",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parent_line_id",
+   "label": "Ouvrage commercial",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "label": "Article",
+   "fieldtype": "Link",
+   "options": "Item",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "item_name",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_type",
+   "label": "Type",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "calculation_basis",
+   "label": "Base de calcul",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "manual_qty",
+   "label": "Ajuster la quantité manuellement",
+   "fieldtype": "Check"
+  },
+  {
+   "fieldname": "calculated_qty",
+   "label": "Quantité calculée",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "label": "Quantité",
+   "fieldtype": "Float",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "uom",
+   "label": "Unité",
+   "fieldtype": "Link",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "label": "Prix unitaire",
+   "fieldtype": "Currency",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "rate_set",
+   "label": "Prix confirmé",
+   "fieldtype": "Check"
+  },
+  {
+   "fieldname": "price_source",
+   "label": "Origine du prix",
+   "fieldtype": "Data"
+  }
+ ],
+ "permissions": []
+}

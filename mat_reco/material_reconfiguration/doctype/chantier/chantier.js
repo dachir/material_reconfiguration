@@ -1,0 +1,1 @@
+frappe.ui.form.on('Chantier', {refresh(frm){if(!frm.is_new())frm.add_custom_button(__('Vue chantier'),()=>{sessionStorage.setItem('univers-chantier-selected',frm.doc.name);frappe.set_route('chantiers');});}});

@@ -1,0 +1,237 @@
+{
+  "version": "0.2",
+  "date": "2026-10-14",
+  "statut": "Base éditoriale à valider",
+  "fiches_metier": 64,
+  "exceptions": 12,
+  "captures": {
+    "démonstration": 26,
+    "reconstituée": 34
+  },
+  "captures_session_metier_reelle": 0,
+  "graphes_principaux": 7,
+  "reperes_position": 64,
+  "icones": 13,
+  "sources": [
+    {
+      "reference": "erpnext/accounts/doctype/sales_invoice/sales_invoice.js",
+      "sha256": "5cd4855951417f6105028455961b26a895400942107520e997174d80ce621004",
+      "bytes": 31889
+    },
+    {
+      "reference": "erpnext/accounts/doctype/sales_invoice/sales_invoice.json",
+      "sha256": "3551ed2a56ff88f892e080590ce79acb8a056262616bd3e2d6da40e3d43dec22",
+      "bytes": 51264
+    },
+    {
+      "reference": "erpnext/buying/doctype/purchase_order/purchase_order.js",
+      "sha256": "76d7d8201fe113386140ce6a8f068de5f4f6d06092eb04aef9e745cdf4a70a09",
+      "bytes": 22236
+    },
+    {
+      "reference": "erpnext/buying/doctype/purchase_order/purchase_order.json",
+      "sha256": "85b2e0c9dc5111e1154ce056288230f8e0bd579bc63152b82bae35fa1f23b55d",
+      "bytes": 30913
+    },
+    {
+      "reference": "erpnext/selling/doctype/quotation/quotation.js",
+      "sha256": "79fc348519c1acd21c86a9831a2f784c5a225014cf1be425572ef7ddc3b8f505",
+      "bytes": 11078
+    },
+    {
+      "reference": "erpnext/selling/doctype/quotation/quotation.json",
+      "sha256": "ed9045c3cc4417cb9009988255984d3ef043696415e0279ae6eb308cde8df530",
+      "bytes": 26403
+    },
+    {
+      "reference": "erpnext/selling/doctype/sales_order/sales_order.js",
+      "sha256": "67cda5ccdd3ac4cef2fe7e690cd6bcc0a44120b5c6ada5baa3551202a943c49f",
+      "bytes": 37896
+    },
+    {
+      "reference": "erpnext/selling/doctype/sales_order/sales_order.json",
+      "sha256": "859ace5cf0b27f9b815d01d0f4e466c5b94a98e939ffa488b3dc0a7007b101cc",
+      "bytes": 38756
+    },
+    {
+      "reference": "erpnext/stock/doctype/delivery_note/delivery_note.js",
+      "sha256": "f641ba7fbdb7635a974f2efc5b3c405f5e53fe7a6836199db6dcbc4ba2171bcd",
+      "bytes": 13653
+    },
+    {
+      "reference": "erpnext/stock/doctype/delivery_note/delivery_note.json",
+      "sha256": "078d9deb69a266da6f86441b5c0bfc55d9b9879e5deb1d2f891a4963c0141ecf",
+      "bytes": 33175
+    },
+    {
+      "reference": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "2dd2f040a28c477012ff8d980169eed5fb8acd3dd2308886ed1a4c6e6e6b7d50",
+      "bytes": 45450
+    },
+    {
+      "reference": "erpnext/stock/doctype/purchase_receipt/purchase_receipt.js",
+      "sha256": "7b740a434596d772d395b6300712373f09279e9b5d784ed77a6009285a5a5cd8",
+      "bytes": 12755
+    },
+    {
+      "reference": "erpnext/stock/doctype/purchase_receipt/purchase_receipt.json",
+      "sha256": "9750961a953a55b888ed691676108afc813e0c2777a3ad8b5c286337d14bce87",
+      "bytes": 30768
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/App.vue",
+      "sha256": "97c11a4bd4ee518e3c77c1fdd04f77f084cbe63876732ab7641a3ddff923a838",
+      "bytes": 5049
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/components/ActionPreview.vue",
+      "sha256": "4eb78184fbf1c747e859be2ae6c7f4dd9f66526b25126cca68987d30471e68ff",
+      "bytes": 5856
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/components/CompensationPanel.vue",
+      "sha256": "0e55ad4fd70008796f6d6b501d009071a3da8895e7da89fc92d2de7d05df39ce",
+      "bytes": 6511
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/components/ContextMenu.vue",
+      "sha256": "b0f0300bc82b197fa9d584c7ceced5060636eda7a102d46c4937b7359979281c",
+      "bytes": 1251
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/components/CuttingCanvas.vue",
+      "sha256": "127701a9057c1082fcdc396fb40b9ff94327b5740dc1d18403fb466c5a91d809",
+      "bytes": 5874
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/components/PreviewFooter.vue",
+      "sha256": "f66dbc39883d6da59a424fd077b695c4dec6827a48d4ccc1187bece11adc6ba7",
+      "bytes": 2133
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/lib/geometry.js",
+      "sha256": "7d090c0cdb859c6af798c50e48ca05c6e0db83e86f046a180b9f0958eb141a67",
+      "bytes": 11129
+    },
+    {
+      "reference": "frontend/mcp-ux20-vue/src/stores/cutting.js",
+      "sha256": "39c53a36ab60d076e85ad3c18b34026d871db680557782709a545cc15cc1d6ed",
+      "bytes": 14458
+    },
+    {
+      "reference": "mat_reco/fixtures/client_script.json",
+      "sha256": "e7f6d63a26a924368d1a08a583f2f35362775279703c439a58d8071d6d4819e2",
+      "bytes": 40397
+    },
+    {
+      "reference": "mat_reco/fixtures/custom_field.json",
+      "sha256": "1625fdde3766998a47d893abee9b693a43d248ea2655be6ac2dabc70dceb1c23",
+      "bytes": 79043
+    },
+    {
+      "reference": "mat_reco/fixtures/server_script.json",
+      "sha256": "72a5aa59b95b2a7c87375dc880e2408860fa356ebbaaeb12398c4abdcc066cdd",
+      "bytes": 7267
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.js",
+      "sha256": "64c1f4b24e89929fef13ade138163fbe99cbaf993fd2b501d731dba81ae94e92",
+      "bytes": 93271
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.json",
+      "sha256": "f9c0c4d5757058d24c145482d765c856e256de3b133fdefebd7ca89c3ccc057f",
+      "bytes": 8398
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/material_cutting_plan.py",
+      "sha256": "8bc16f036358cf77486aa28b64da491a2b325462ebe1812920ac95004dfc3a13",
+      "bytes": 17444
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_cutting_plan/ui/mcp_ux20_modal.js",
+      "sha256": "805d32add740c47f72bac006208c9ec04257eb8f695b1b8cb77ed54e0a7d3736",
+      "bytes": 15401
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_issue_plan/material_issue_plan.py",
+      "sha256": "af6ac0d6f7964cb99b761ffb69cbc03edbfed34ccfa2d911b4f9d2a5437e61a7",
+      "bytes": 3932
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/material_receipt_plan.json",
+      "sha256": "8ab0b11e7c176b5bcc99725d1f5860b6b673bcf02f8c505037a6d916edcf84a5",
+      "bytes": 2689
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_receipt_plan/material_receipt_plan.py",
+      "sha256": "5c15f33d31f19d66fde7173a6ea32194dce9b01453c3ed5594fed01e5caed6c7",
+      "bytes": 12741
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/doctype/material_reconfiguration/material_reconfiguration.py",
+      "sha256": "4f788b97f92d9f749d0b61ff9260a797bf32d047563eafb12a0e7f58c7f1f8e8",
+      "bytes": 17030
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/mcp_action_preview.py",
+      "sha256": "496869144e5ae08190187fc7336aa11e64d38f5243a35df086639ee7c8e064aa",
+      "bytes": 30729
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/mcp_compensation_service.py",
+      "sha256": "30e53709f8853e459abab62dc0253de1a6ad36b630f6cf2c2bce1b3fd2222c7f",
+      "bytes": 33122
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/order_explosion_service.py",
+      "sha256": "9115a72afcfd811aad82817905e0fa59028a7d76b4b295542cedb13fd4e151ff",
+      "bytes": 15460
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/repack_draft_service.py",
+      "sha256": "62575fa23411e89ce11f8166c80a78f96210cfed51720366a9a846d57e81650a",
+      "bytes": 64983
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/repack_from_sales_order_service.py",
+      "sha256": "c25f54f6a543f1307655521959ec23e837c3db175ac17a7cefbd7c2647f142a4",
+      "bytes": 23440
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/serial_creation_service.py",
+      "sha256": "c96223d187849b70c3e431e278ef7c0a830514a7874bd90cbb6db60276a8c234",
+      "bytes": 12821
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/single_geometry.py",
+      "sha256": "ef581e50893e8a971b329c8d2e8501e06efe844b8dca33873da54ee6cdcf4d97",
+      "bytes": 5684
+    },
+    {
+      "reference": "mat_reco/material_reconfiguration/services/stock_candidate_service.py",
+      "sha256": "b30757fa543344242b9725e6680b462f32f1d41a802ea7220da1b25c8dd0b633",
+      "bytes": 6487
+    },
+    {
+      "reference": "mat_reco/public/js/dimension_from_serial.js",
+      "sha256": "ab8db93ae606a66fada10b874fa8b5749b78db3c7f6028f7a1c67a7f2932bbed",
+      "bytes": 1736
+    },
+    {
+      "reference": "mat_reco/public/js/stock_entry_repack_from_so.js",
+      "sha256": "18c511a9ab5d4a26910461cd1bc2a9de2fd71ea75028dab0b83b6fb4078e2684",
+      "bytes": 4387
+    },
+    {
+      "reference": "mat_reco/stock_hooks.py",
+      "sha256": "0e223642b333e9a9fc0892238ed0568fe8952c66d8ff7ea1bd9fbbee25ac6230",
+      "bytes": 13377
+    }
+  ],
+  "limites": [
+    "Pas de capture en session métier authentifiée.",
+    "Pas de soumission de mouvements métier pour produire le guide.",
+    "Procédures de soumission et chemins de facturation à valider."
+  ]
+}

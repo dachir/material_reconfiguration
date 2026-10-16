@@ -1,0 +1,3 @@
+const {chromium}=require('/home/marsavco/frappe-bench/apps/crm/node_modules/playwright');const path=require('node:path'),fs=require('node:fs');
+const out=path.resolve(__dirname,'../../mat_reco/public/manuals/mat_reco-v0-1');
+(async()=>{const b=await chromium.launch({args:['--no-sandbox']});try{const p=await b.newPage({deviceScaleFactor:2});for(const name of ['Flowchart-mat_reco-v0-1','Flowchart-compensation-v0-1']){const svg=fs.readFileSync(path.join(out,name+'.svg'),'utf8');await p.setContent('<style>body{margin:0}</style>'+svg);await p.locator('svg').screenshot({path:path.join(out,name+'.png')});}}finally{await b.close();}})();

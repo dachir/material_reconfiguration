@@ -118,9 +118,12 @@ def get_requirements_for_doc(doc):
     from mat_reco.material_reconfiguration.services.order_explosion_service import explode_sales_orders_into_cutting_demands
     from mat_reco.material_reconfiguration.services.repack_draft_service import build_effective_nodes
 
-    demands = explode_sales_orders_into_cutting_demands(
-        sales_order_names=[row.get("sales_order") for row in doc.get("selected_sales_orders") or [] if row.get("sales_order")],
-        source_item=doc.get("source_item"), max_depth=int(doc.get("max_depth") or 10))
+    from mat_reco.material_reconfiguration.services.workshop_service import workshop_cutting_demands
+    demands = workshop_cutting_demands(doc) if doc.get("workshop_request_json") else None
+    if demands is None:
+        demands = explode_sales_orders_into_cutting_demands(
+            sales_order_names=[row.get("sales_order") for row in doc.get("selected_sales_orders") or [] if row.get("sales_order")],
+            source_item=doc.get("source_item"), max_depth=int(doc.get("max_depth") or 10))
     submitted, _ = submitted_receipts(doc)
     result = reconcile_requirements(demands, build_effective_nodes(doc),
                                     doc.get("material_plan_incidents") or [], submitted)
