@@ -104,6 +104,12 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
 
     for node in effective_nodes:
         source_item_code = node.get("item_code") or mcp.get("source_item")
+        source_thickness = flt(node.get("thickness_mm"))
+        source_serial = node.get("serial_no") or node.get("id")
+        if source_thickness <= 0 and source_serial:
+            source_thickness = flt(frappe.db.get_value("Serial No", source_serial, "custom_dimension_thickness_mm"))
+        if source_thickness <= 0:
+            source_thickness = flt(frappe.db.get_value("Item", source_item_code, "custom_thickness_mm"))
 
         for child in (node.get("children") or []):
             serial_no = (child.get("id") or child.get("piece_uid") or "").strip()
@@ -126,6 +132,7 @@ def _get_mcp_serial_dimension_map(mcp_name: str) -> dict:
             result[serial_no] = {
                 "item_code": item_code,
                 "node_type": node_type,
+                "thickness_mm": flt(child.get("thickness_mm")) or source_thickness,
                 "length_mm": length_mm,
                 "width_mm": width_mm,
                 "removed_length_mm": removed_l,
@@ -145,6 +152,7 @@ def _create_or_update_serial_no(
     material_cutting_plan: str | None = None,
     removed_length_mm: float = 0,
     removed_width_mm: float = 0,
+    thickness_mm: float | None = None,
 ):
     if not serial_no or not item_code:
         return None
@@ -166,6 +174,9 @@ def _create_or_update_serial_no(
 
     if hasattr(serial_doc, "custom_dimension_width_mm"):
         serial_doc.custom_dimension_width_mm = flt(width_mm)
+
+    if flt(thickness_mm) > 0 and hasattr(serial_doc, "custom_dimension_thickness_mm"):
+        serial_doc.custom_dimension_thickness_mm = flt(thickness_mm)
 
     if hasattr(serial_doc, "custom_removed_length_mm"):
         serial_doc.custom_removed_length_mm = flt(removed_length_mm)
@@ -316,6 +327,7 @@ def _ensure_output_serials(doc, material_cutting_plan: str | None = None):
                 node_type=node_type,
                 length_mm=length_mm,
                 width_mm=width_mm,
+                thickness_mm=flt(mcp_row.get("thickness_mm") or it.get("custom_dimension_thickness_mm")),
                 material_cutting_plan=mcp_name or None,
             )
             if serial_doc:

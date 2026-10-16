@@ -151,13 +151,15 @@ def _set_item_uom_fields(row, item_code):
     row.conversion_factor = 1
 
 
-def _append_custom_output_fields(item_row, length_mm, width_mm, node_type, removed_length_mm=0, removed_width_mm=0):
+def _append_custom_output_fields(item_row, length_mm, width_mm, node_type, removed_length_mm=0, removed_width_mm=0, thickness_mm=None):
     length_mm, width_mm, removed_length_mm, removed_width_mm = normalize_single_dimensions(
         length_mm, width_mm, removed_length_mm, removed_width_mm
     )
 
     item_row.custom_dimension_length_mm = length_mm
     item_row.custom_dimension_width_mm = width_mm
+    if flt(thickness_mm) > 0 and hasattr(item_row, "custom_dimension_thickness_mm"):
+        item_row.custom_dimension_thickness_mm = flt(thickness_mm)
 
     if removed_length_mm or removed_width_mm:
         # Never silently lose Single dimensions when fixtures have not been
@@ -277,6 +279,7 @@ def _ensure_output_serial_exists_or_create(
     node_type=None,
     removed_length_mm=0,
     removed_width_mm=0,
+    thickness_mm=None,
 ):
     length_mm, width_mm, removed_length_mm, removed_width_mm = normalize_single_dimensions(
         length_mm, width_mm, removed_length_mm, removed_width_mm
@@ -302,6 +305,8 @@ def _ensure_output_serial_exists_or_create(
             )
 
         updates = {}
+        if flt(thickness_mm) > 0 and frappe.db.has_column("Serial No", "custom_dimension_thickness_mm"):
+            updates["custom_dimension_thickness_mm"] = flt(thickness_mm)
         if node_type in ("leftover", "waste", "finished_good") and frappe.db.has_column("Serial No", "custom_material_status"):
             updates["custom_material_status"] = "Partial" if node_type in ("leftover", "waste") else "Full"
         if frappe.db.has_column("Serial No", "custom_material_cutting_plan"):
@@ -357,6 +362,9 @@ def _ensure_output_serial_exists_or_create(
 
     if node_type in ("leftover", "waste", "finished_good") and frappe.db.has_column("Serial No", "custom_material_status"):
         serial_doc.custom_material_status = "Partial" if node_type in ("leftover", "waste") else "Full"
+
+    if flt(thickness_mm) > 0 and frappe.db.has_column("Serial No", "custom_dimension_thickness_mm"):
+        serial_doc.custom_dimension_thickness_mm = flt(thickness_mm)
 
     serial_doc.insert(ignore_permissions=True)
 
@@ -572,12 +580,13 @@ def _build_output_rows(se, doc, effective_nodes):
             if serial_no in submitted:
                 continue
             length_mm, width_mm = _get_effective_dims(child)
+            thickness_mm = flt(child.get("thickness_mm") or node.get("thickness_mm"))
 
             if not item_code or not warehouse or not serial_no:
                 continue
 
             if node_type == "finished_good":
-                key = (item_code, warehouse, length_mm, width_mm, node_type)
+                key = (item_code, warehouse, length_mm, width_mm, node_type, thickness_mm)
                 fg_groups[key].append(serial_no)
             else:
                 removed_l = flt(child.get("removed_length_mm") or 0)
@@ -596,11 +605,12 @@ def _build_output_rows(se, doc, effective_nodes):
                         "length_mm": length_mm,
                         "width_mm": width_mm,
                         "node_type": node_type,
+                        "thickness_mm": thickness_mm,
                     }
                 )
 
     # Handle finished goods rows
-    for (item_code, warehouse, length_mm, width_mm, node_type), serials in fg_groups.items():
+    for (item_code, warehouse, length_mm, width_mm, node_type, thickness_mm), serials in fg_groups.items():
         # Ensure deterministic ordering and remove duplicates
         serials = list(dict.fromkeys(serials))
         if not serials:
@@ -630,7 +640,7 @@ def _build_output_rows(se, doc, effective_nodes):
             pass
 
         # Append custom dimension and node type fields
-        _append_custom_output_fields(row, length_mm, width_mm, node_type)
+        _append_custom_output_fields(row, length_mm, width_mm, node_type, thickness_mm=thickness_mm)
 
     # Handle leftovers, waste, and other node types one by one
     for out in other_rows:
@@ -663,6 +673,7 @@ def _build_output_rows(se, doc, effective_nodes):
             out["node_type"],
             out["removed_length_mm"],
             out["removed_width_mm"],
+            thickness_mm=out["thickness_mm"],
         )
 
 def _apply_rate_on_row(it, new_vr: float):
@@ -1513,6 +1524,7 @@ def ensure_mcp_bundles_for_stock_entry(doc):
                     length_mm=serial_metadata.get(sn, {}).get("length_mm", length_mm),
                     width_mm=serial_metadata.get(sn, {}).get("width_mm", width_mm),
                     node_type=serial_metadata.get(sn, {}).get("node_type", node_type),
+                    thickness_mm=serial_metadata.get(sn, {}).get("thickness_mm") or it.get("custom_dimension_thickness_mm"),
                     removed_length_mm=serial_metadata.get(sn, {}).get("removed_length_mm", removed_length_mm),
                     removed_width_mm=serial_metadata.get(sn, {}).get("removed_width_mm", removed_width_mm),
                 )
