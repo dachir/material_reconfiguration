@@ -435,100 +435,19 @@ def get_non_processed_orders(source_item: str | None = None) -> list[dict[str, o
 
 
 @frappe.whitelist()
-def get_orders_by_source_item(source_item: str) -> list[dict[str, object]]:
-    """Return Sales Orders containing decoupe/ouvrage items linked to a given raw material.
+def get_orders_by_source_item(source_item: str, company: str | None = None,
+                              plan_name: str | None = None) -> list[dict[str, object]]:
+    """Select readable orders with uncovered cuts, including partially planned orders."""
+    from mat_reco.material_reconfiguration.services.workshop_service import orders_for_source_item
+    exclude_plan = None
+    if plan_name:
+        doc = frappe.get_doc('Material Cutting Plan', plan_name)
+        doc.check_permission('read')
+        company = company or doc.company
+        if doc.source_item == source_item and doc.company == company:
+            exclude_plan = plan_name
+    return orders_for_source_item(source_item, company=company, exclude_plan=exclude_plan)
 
-    Excludes Sales Orders already linked to a non-cancelled Material Cutting Plan.
-    Only Sales Orders with ``docstatus`` 1 are considered.  An order is
-    included in the result if it contains at least one Sales Order Item
-    whose associated Item has ``custom_item_types = 'DECOUPE'`` and a
-    ``custom_parent_item`` field equal to the provided ``source_item``.  The
-    returned dicts contain basic Sales Order information so that a client
-    can populate a selection list.
-
-    Args:
-        source_item: The item code of the raw material used to filter
-            decoupe items.  If empty, the function returns an empty list.
-
-    Returns:
-        A list of dicts with keys ``name``, ``customer`` and
-        ``transaction_date`` for each qualifying Sales Order.
-    """
-    if not source_item:
-        return []
-
-    # Récupérer les Sales Orders déjà utilisés dans un MCP non annulé
-    linked_sales_orders = set(
-        frappe.db.sql(
-            """
-            select distinct mcp_so.sales_order
-            from `tabMCP Sales Order` mcp_so
-            inner join `tabMaterial Cutting Plan` mcp
-                on mcp.name = mcp_so.parent
-            where ifnull(mcp_so.sales_order, '') != ''
-              and ifnull(mcp.docstatus, 0) < 2
-              and ifnull(mcp.source_item, '') = %(source_item)s
-              and ifnull(mcp.status, '') not in ('Closed', 'Completed', 'Cancelled')
-            """,
-            {"source_item": source_item},
-            as_dict=False,
-        )
-    )
-    linked_sales_orders = {row[0] for row in linked_sales_orders if row and row[0]}
-
-    # Fetch all submitted Sales Orders
-    sales_orders = frappe.get_all(
-        "Sales Order",
-        filters={"docstatus": 1},
-        fields=["name", "customer", "transaction_date"],
-        order_by="transaction_date asc",
-    )
-
-    result: list[dict[str, object]] = []
-
-    for so in sales_orders:
-        so_name = so.get("name")
-        if not so_name:
-            continue
-
-        # Exclure les SO déjà liés à un MCP non annulé
-        if so_name in linked_sales_orders:
-            continue
-
-        # Retrieve items for this Sales Order
-        rows = frappe.get_all(
-            "Sales Order Item",
-            filters={"parent": so_name},
-            fields=["item_code"],
-        )
-
-        keep = False
-        for row in rows:
-            item_code = row.get("item_code")
-            if not item_code:
-                continue
-
-            item_type = (
-                frappe.db.get_value("Item", item_code, "custom_item_types") or ""
-            ).strip()
-
-            if item_type == "DECOUPE":
-                if _is_descendant_of_raw(item_code=item_code, raw_item_code=source_item):
-                    keep = True
-                    break
-
-            elif item_type == "OUVRAGE":
-                if _ouvrage_has_decoupe_for_raw(item_code=item_code, raw_item_code=source_item):
-                    keep = True
-                    break
-
-        if keep:
-            result.append(so)
-
-    if not result:
-        frappe.msgprint("No Sales Orders found for the selected source item.")
-
-    return result
 
 def _is_descendant_of_raw(item_code: str, raw_item_code: str, *, max_depth: int = 10) -> bool:
     """Return True if the given item descends from the specified raw material.

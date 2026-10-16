@@ -79,6 +79,20 @@ def _get_effective_children(mcp):
 
     return result
 
+def _get_total_input_cost(items):
+    """ERPNext has valued the inputs before this hook; zero is a valid cost."""
+    inputs = [row for row in items if row.get("s_warehouse")]
+    if not inputs:
+        frappe.throw("No input rows found; cannot allocate repack costs.")
+    for row in inputs:
+        qty = flt(row.get("transfer_qty") or row.get("qty"))
+        if qty <= 0:
+            frappe.throw("Input quantity must be positive for repack costing.")
+        if row.get("basic_amount") is None:
+            frappe.throw("Input basic_amount is missing; calculate stock rates before allocating repack costs.")
+    return sum(abs(flt(row.get("basic_amount"))) for row in inputs)
+
+
 def _allocate_area_repack_costs_from_stock_entry(
     doc,
     *,
@@ -103,13 +117,7 @@ def _allocate_area_repack_costs_from_stock_entry(
     # ---------------------------------------------------------
     # 1) Total input cost
     # ---------------------------------------------------------
-    total_input_cost = 0.0
-    for it in items:
-        if it.get("s_warehouse"):
-            total_input_cost += abs(flt(it.get("basic_amount") or 0))
-
-    if total_input_cost <= 0:
-        frappe.throw("Input basic_amount is zero; cannot allocate repack costs.")
+    total_input_cost = _get_total_input_cost(items)
 
     # ---------------------------------------------------------
     # 2) Total input area from input serials
@@ -328,13 +336,7 @@ def allocate_sales_order_repack_costs_from_stock_entry(doc) -> dict:
     items = doc.get("items") or []
 
     # 1) Total input cost: sum of absolute basic_amount on input rows
-    total_input_cost = 0.0
-    for it in items:
-        if it.get("s_warehouse"):
-            total_input_cost += abs(flt(it.get("basic_amount") or 0))
-
-    if total_input_cost <= 0:
-        frappe.throw("Input basic_amount is zero; cannot allocate repack costs.")
+    total_input_cost = _get_total_input_cost(items)
 
     # 2) Collect output rows and total output quantity
     output_rows = []

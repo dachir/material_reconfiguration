@@ -353,7 +353,7 @@ def _load(company=None, *, lock=False):
     roots, errors = [], []
     for order in orders:
         root = dict(id=order.name,label=order.name,item_type='ORDER',sales_order=order.name,
-                    company=order.company,customer=order.customer,chantier=order.get('custom_chantier'),delivery_date=str(order.delivery_date or ''),
+                    company=order.company,customer=order.customer,status=order.status,chantier=order.get('custom_chantier'),delivery_date=str(order.delivery_date or ''),
                     transaction_date=str(order.transaction_date),children=[],required_qty=0,produced_qty=0,remaining_qty=0)
         for row in order.items:
             kind = _json(row.get('custom_technical_snapshot')).get('item_type') if row.get('custom_technical_snapshot') else frappe.get_cached_value('Item',row.item_code,'custom_item_types')
@@ -805,6 +805,28 @@ def _scope_signature(spec):
     return hmac.new(get_encryption_key().encode(),payload.encode(),hashlib.sha256).hexdigest()
 
 
+def orders_for_source_item(source_item, company=None, exclude_plan=None):
+    """Use residual workshop demand for both the MCP button and cockpit handoff."""
+    if not source_item:
+        return []
+    roots, _, _ = _load(company)
+    coverage = {}
+    result = []
+    for root in roots:
+        if (company and root['company'] != company) or root.get('status') in ('Closed', 'On Hold', 'Cancelled'):
+            continue
+        comp = root['company']
+        if comp not in coverage:
+            coverage[comp] = _open_mcp_coverage(comp, exclude=exclude_plan)
+        if any(leaf['item_type']=='DECOUPE' and leaf.get('primary_item')==source_item
+               and not leaf.get('invalid_message')
+               and leaf.get('missing_qty',0)>coverage[comp][(root['id'],leaf['id'])]
+               for branch in root['children'] for leaf in _walk(branch)):
+            result.append(dict(name=root['id'], customer=root.get('customer'),
+                               transaction_date=root.get('transaction_date')))
+    return result
+
+
 def _prepare_mcp(root,node,request,operation):
     _permission('Material Cutting Plan','create')
     by_id={n['id']:n for b in root['children'] for n in _walk(b)}
@@ -832,13 +854,18 @@ def _prepare_mcp(root,node,request,operation):
         for serial in sorted(b['serial_no'] for b in bins):
             frappe.db.sql('SELECT name FROM `tabSerial No` WHERE name=%s FOR UPDATE',serial)
         mcp=frappe.new_doc('Material Cutting Plan')
-        scope=dict(sales_order=root['id'],orders=[root['id']],node_id=node['id'],qty=request['qty'],needs=needs,operation=operation.name)
+        # Run the same source-item selection as the MCP form before its first
+        # save. Empty signed scope makes every selected order expand in full.
+        orders = orders_for_source_item(source, company=root['company'])
+        selected_orders = list(dict.fromkeys([root['id']] + [row['name'] for row in orders]))
+        scope=dict(sales_order=root['id'],orders=[],node_id=node['id'],qty=request['qty'],needs=[],operation=operation.name)
         scope['signature']=_scope_signature(scope)
         mcp.update(dict(company=root['company'],source_item=source,source_warehouse=warehouse,
             posting_date=now_datetime(),mcp_mode='Planification',status='Draft',max_depth=20,
             packing_algorithm='maxrects',packing_heuristic='best_area_fit',allow_rotation=1,
             workshop_request_json=json.dumps(scope,ensure_ascii=False)))
-        mcp.append('selected_sales_orders',{'sales_order':root['id']})
+        for order in selected_orders:
+            mcp.append('selected_sales_orders',{'sales_order':order})
         for code in sorted({b['item_code'] for b in bins if b['item_code']!=source}):
             mcp.append('item_variant_detail',{'variant_item_code':code})
         for b in bins:

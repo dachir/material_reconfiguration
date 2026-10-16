@@ -143,7 +143,9 @@ frappe.ui.form.on('Material Cutting Plan', {
                 frappe.call({
                     method: 'mat_reco.material_reconfiguration.api.get_orders_by_source_item',
                     args: {
-                        source_item: frm.doc.source_item
+                        source_item: frm.doc.source_item,
+                        company: frm.doc.company,
+                        plan_name: frm.is_new() ? null : frm.doc.name
                     },
                     callback(r) {
                         if (!r.message) return;

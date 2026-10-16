@@ -681,8 +681,8 @@ def _apply_rate_on_row(it, new_vr: float):
     it.basic_amount = flt(it.basic_rate) * stock_qty
     it.amount = it.basic_amount
 
-    if hasattr(it, "allow_zero_valuation_rate") and new_vr > 0:
-        it.allow_zero_valuation_rate = 0
+    if hasattr(it, "allow_zero_valuation_rate"):
+        it.allow_zero_valuation_rate = int(new_vr == 0)
 
 def _extract_serial_nos_from_stock_entry_detail(row) -> set[str]:
     serial_nos = set()

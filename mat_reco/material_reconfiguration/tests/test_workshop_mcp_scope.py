@@ -2,6 +2,7 @@
 from collections import defaultdict
 from contextlib import ExitStack
 import hashlib
+import inspect
 import json
 import unittest
 from unittest.mock import MagicMock, patch
@@ -30,7 +31,7 @@ class WorkshopMCPScopeTests(unittest.TestCase):
                    'remaining_qty': 10, 'allocatable_qty': 0, 'missing_qty': 10}
             parent = {**work(line+':root', [cut], final=True), 'sales_order_item': line}
             self.trees[order] = parent
-            self.roots.append({'id': order, 'children': [parent]})
+            self.roots.append({'id': order, 'company':'UG', 'children': [parent]})
 
     def scope(self, orders=('SO-1',), qty=10, operation='OP-1'):
         return {'sales_order': 'SO-1', 'orders': list(orders), 'operation': operation,
@@ -151,14 +152,56 @@ class WorkshopMCPScopeTests(unittest.TestCase):
              patch.object(service, 'now_datetime', return_value='2026-10-16 19:00:00'), \
              patch.object(service, '_raw_bins', return_value=bins), \
              patch.object(service, '_scope_signature', return_value='signed'), \
+             patch.object(service, 'orders_for_source_item', return_value=[{'name':'SO-1'},{'name':'SO-2'}]) as select_orders, \
              patch.object(frappe, 'db', new=MagicMock()), \
              patch.object(frappe, 'new_doc', return_value=mcp), \
              patch.object(frappe, 'get_all', return_value=[Doc(name='MCP-1', workshop_request_json=json.dumps(self.scope()))]):
             result = service._prepare_mcp(root, leaf, request, Doc(name='OP-2'))
         self.assertEqual(result['mcps'], ['MCP-2'])
         scope = json.loads(mcp.update.call_args.args[0]['workshop_request_json'])
-        self.assertEqual(scope['needs'][0]['qty'], 6)
+        self.assertEqual(scope['needs'], [])
+        self.assertEqual(scope['orders'], [])
+        select_orders.assert_called_once_with('RAW', company='UG')
+        selected = [call.args[1]['sales_order'] for call in mcp.append.call_args_list if call.args[0]=='selected_sales_orders']
+        self.assertEqual(selected, ['SO-1','SO-2'])
         mcp.insert.assert_called_once()
+
+    def test_cockpit_initial_scope_expands_all_selected_orders_including_origin(self):
+        scope = self.scope(qty=1)
+        scope.update(orders=[], needs=[])
+        demands, doc = self.demands(scope, selected=['SO-1','SO-2'],
+                                   coverage={('SO-1','line-1:0'):4})
+        self.assertEqual(sum(d['sales_order']=='SO-1' for d in demands), 6)
+        self.assertEqual(sum(d['sales_order']=='SO-2' for d in demands), 10)
+        self.assertEqual(json.loads(doc.workshop_request_json)['orders'], ['SO-1','SO-2'])
+
+    def test_mcp_button_uses_same_selector_and_excludes_its_own_plan(self):
+        from mat_reco.material_reconfiguration import api
+        doc = Doc(company='UG',source_item='RAW',check_permission=MagicMock())
+        with patch.object(frappe, 'get_doc', return_value=doc), \
+             patch.object(service, 'orders_for_source_item', return_value=[{'name':'SO-1'}]) as select:
+            orders = inspect.unwrap(api.get_orders_by_source_item)('RAW', company='UG', plan_name='SELF')
+        self.assertEqual(orders, [{'name':'SO-1'}])
+        select.assert_called_once_with('RAW', company='UG', exclude_plan='SELF')
+        doc.check_permission.assert_called_once_with('read')
+
+    def test_source_selection_keeps_partially_planned_orders(self):
+        coverage = defaultdict(int, {('SO-1','line-1:0'):4, ('SO-2','line-2:0'):10})
+        with patch.object(service, '_load', return_value=(self.roots,[],{})) as load, \
+             patch.object(service, '_open_mcp_coverage', return_value=coverage) as covered:
+            orders = service.orders_for_source_item('RAW', company='UG', exclude_plan='SELF')
+        self.assertEqual([o['name'] for o in orders], ['SO-1'])
+        load.assert_called_once_with('UG')
+        covered.assert_called_once_with('UG', exclude='SELF')
+
+    def test_source_selection_ignores_other_materials_companies_and_closed_orders(self):
+        self.roots[0]['status']='Closed'
+        self.roots[1]['company']='OTHER'
+        with patch.object(service, '_load', return_value=(self.roots,[],{})), \
+             patch.object(service, '_open_mcp_coverage', return_value=defaultdict(int)):
+            self.assertEqual(service.orders_for_source_item('RAW', company='UG'), [])
+            self.roots[0]['status']='To Deliver'
+            self.assertEqual(service.orders_for_source_item('OTHER-RAW', company='UG'), [])
 
     def test_unused_candidate_sheet_remains_free_but_active_input_is_blocked(self):
         row = dict(serial_no='SHEET', item_code='RAW', warehouse='Stores', thickness_mm=6)
