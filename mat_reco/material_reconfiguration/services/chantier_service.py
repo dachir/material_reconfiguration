@@ -277,7 +277,7 @@ def section_scope(section, chantier=None):
 @frappe.whitelist()
 def get_dossier(chantier=None):
     dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status'], order_by='modified desc', limit_page_length=0)
-    permissions = dict(chantier=frappe.has_permission('Chantier','create'), section=frappe.has_permission('Chantier Section','create'), quotation=frappe.has_permission('Quotation','create'), mpp=frappe.has_permission('Material Production Plan','create'))
+    permissions = dict(section_template=frappe.has_permission('Chantier Section Template','create'),chantier=frappe.has_permission('Chantier','create'), section=frappe.has_permission('Chantier Section','create'), quotation=frappe.has_permission('Quotation','create'), mpp=frappe.has_permission('Material Production Plan','create'))
     if not chantier:
         return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], lines=[], summary={})
     dossier = chantier_doc(chantier)

@@ -1,5 +1,6 @@
 <script setup>
 import {ref, computed, onBeforeUnmount} from 'vue';
+import {showSectionGenerator} from './section-generator.js';
 import CommercialExtrasPanel from './CommercialExtrasPanel.vue';
 const frappe = window.frappe;
 const api='mat_reco.material_reconfiguration.services.chantier_service.';
@@ -39,6 +40,17 @@ function newChantier(){form('Nouveau chantier',[
  {fieldname:'customer',label:'Client',fieldtype:'Link',options:'Customer',reqd:1},{fieldname:'responsible',label:'Responsable',fieldtype:'Link',options:'User',default:frappe.session.user},
  {fieldname:'expected_start_date',label:'Début prévu',fieldtype:'Date'},{fieldname:'expected_end_date',label:'Fin de fabrication prévue',fieldtype:'Date'}
  ],async(values)=>{const result=await frappe.call({method:'frappe.client.insert',args:{doc:{doctype:'Chantier',...values}}});selected.value=result.message.name;section.value='';});}
+const templateApi='mat_reco.material_reconfiguration.services.chantier_templates.';
+function saveSectionTemplate(){form('Enregistrer les sections comme modèle',[
+ {fieldname:'template_name',label:'Nom du modèle',fieldtype:'Data',reqd:1}
+ ],async(values)=>{const result=await frappe.call({method:templateApi+'save_template',args:{chantier:selected.value,...values}});frappe.show_alert({message:'Modèle enregistré : '+result.message,indicator:'green'});});}
+function importSections(){form('Récupérer une arborescence de sections',[
+ {fieldname:'source_type',label:'Source',fieldtype:'Select',options:'Modèle\nAutre chantier',default:'Modèle',reqd:1},
+ {fieldname:'template',label:'Modèle',fieldtype:'Link',options:'Chantier Section Template',depends_on:'eval:doc.source_type === "Modèle"',mandatory_depends_on:'eval:doc.source_type === "Modèle"'},
+ {fieldname:'source_chantier',label:'Chantier source',fieldtype:'Link',options:'Chantier',depends_on:'eval:doc.source_type === "Autre chantier"',mandatory_depends_on:'eval:doc.source_type === "Autre chantier"',get_query:()=>({filters:{name:['!=',selected.value]}})},
+ {fieldtype:'HTML',fieldname:'explanation',options:'<p>Les sections et sous-sections seront ajoutées au chantier, dans leur ordre d’origine. Les sections existantes sont conservées. Aucun ouvrage ne sera copié.</p>'}
+ ],async(values)=>{const result=await frappe.call({method:templateApi+'apply_sections',args:{chantier:selected.value,...(values.source_type==='Modèle'?{template:values.template}:{source_chantier:values.source_chantier})}});section.value='';frappe.show_alert({message:result.message.count+' section(s) ajoutée(s)',indicator:'green'});});}
+function generateSections(){showSectionGenerator(selected.value,async()=>{section.value='';await refresh();},describe);}
 function newSection(){form('Nouvelle section',[
  {fieldname:'section_name',label:'Désignation',fieldtype:'Data',reqd:1},
  {fieldname:'parent_chantier_section',label:'Section parente (facultatif)',fieldtype:'Link',options:'Chantier Section',default:section.value||undefined,get_query:()=>({filters:{chantier:selected.value,is_group:1}})}
@@ -121,7 +133,7 @@ onBeforeUnmount(hide);defineExpose({show,hide});
  <div v-if="!selected" class="empty">Sélectionnez un chantier ou créez un nouveau dossier.</div>
  <template v-else-if="data.chantier?.name===selected">
  <section class="dossier"><h2>{{data.chantier.designation}}</h2><span>{{data.chantier.customer}} · {{['Brouillon commercial','Commercial validé','Annulé'][data.chantier.docstatus]}}</span></section>
- <div class="body" :class="{'with-extras':commercialDraft}"><section class="sections"><div class="heading"><h2>Sections</h2><button :disabled="busy || dirty || !data.permissions?.section || data.chantier.docstatus!==0" @click="newSection">+</button></div><button :class="{active:!section}" @click="section=''">Tout le chantier</button><button v-for="s in data.sections" :key="s.name" :class="{active:section===s.name}" :style="{paddingLeft:(12+depth(s)*16)+'px'}" @click="section=s.name">{{s.section_name}}</button><p v-if="!data.sections.length">Les sections sont facultatives.</p><button v-if="section" @click="open('Chantier Section',section)">Modifier la section</button></section>
+ <div class="body" :class="{'with-extras':commercialDraft}"><section class="sections"><div class="heading"><h2>Sections</h2><button :disabled="busy || dirty || !data.permissions?.section || data.chantier.docstatus!==0" @click="newSection">+</button></div><button :class="{active:!section}" @click="section=''">Tout le chantier</button><button v-for="s in data.sections" :key="s.name" :class="{active:section===s.name}" :style="{paddingLeft:(12+depth(s)*16)+'px'}" @click="section=s.name">{{s.section_name}}</button><p v-if="!data.sections.length">Les sections sont facultatives.</p><button v-if="commercialDraft&&data.permissions?.section" :disabled="busy||dirty" @click="importSections">Récupérer des sections</button><button v-if="commercialDraft&&data.permissions?.section" :disabled="busy||dirty" @click="generateSections">Générer avec le LLM</button><button v-if="data.permissions?.section_template&&data.sections.length" :disabled="busy||dirty" @click="saveSectionTemplate">Enregistrer comme modèle</button><button v-if="section" @click="open('Chantier Section',section)">Modifier la section</button></section>
  <main>
  <section class="panel macro"><div class="heading"><h2>Articles</h2></div>
  <div v-if="data.technical_stale" class="alert">Les besoins ont changé depuis l’étude technique : une nouvelle validation technique est nécessaire.</div>

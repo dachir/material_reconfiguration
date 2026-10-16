@@ -1,0 +1,101 @@
+{
+ "doctype": "DocType",
+ "name": "Mat Reco Settings",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "issingle": 1,
+ "fields": [
+  {
+   "fieldname": "llm_section",
+   "label": "LLM",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "enabled",
+   "label": "Activer la génération de sections par LLM",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "api_format",
+   "label": "Format de l’API",
+   "fieldtype": "Select",
+   "options": "OpenAI compatible",
+   "default": "OpenAI compatible",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_base_url",
+   "label": "URL de base de l’API",
+   "fieldtype": "Data",
+   "description": "URL de base fournie par votre service, avec son préfixe de version si nécessaire. Sans chemin de génération.",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "model",
+   "label": "Identifiant du modèle",
+   "fieldtype": "Data",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "api_key",
+   "label": "Clé API",
+   "fieldtype": "Password",
+   "description": "Stockée chiffrée. Facultative pour un serveur sans authentification."
+  },
+  {
+   "fieldname": "supports_images",
+   "label": "Le modèle accepte les images de plans",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "timeout_seconds",
+   "label": "Délai maximal de réponse (secondes)",
+   "fieldtype": "Int",
+   "default": "120",
+   "reqd": 1
+  },
+  {
+   "fieldname": "max_output_tokens",
+   "label": "Nombre maximal de tokens en sortie",
+   "fieldtype": "Int",
+   "default": "4096",
+   "reqd": 1
+  },
+  {
+   "fieldname": "temperature",
+   "label": "Température",
+   "fieldtype": "Float",
+   "default": "0.2",
+   "description": "Entre 0 et 2, selon les possibilités du modèle."
+  },
+  {
+   "fieldname": "section_instructions",
+   "label": "Instructions pour les sections",
+   "fieldtype": "Long Text",
+   "default": "Proposer uniquement une arborescence de sections et sous-sections de chantier. Conserver les noms et l’ordre présents dans le descriptif ou les plans. Ne pas créer d’ouvrages. Signaler les ambiguïtés et les libellés illisibles sans inventer de pièces. La proposition doit être validée par l’utilisateur avant création."
+  }
+ ],
+ "field_order": [
+  "llm_section",
+  "enabled",
+  "api_format",
+  "api_base_url",
+  "model",
+  "api_key",
+  "supports_images",
+  "timeout_seconds",
+  "max_output_tokens",
+  "temperature",
+  "section_instructions"
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  }
+ ]
+}

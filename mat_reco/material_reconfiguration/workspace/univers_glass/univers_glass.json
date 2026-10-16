@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"ug-header\", \"type\": \"header\", \"data\": {\"text\": \"Univers Glass\", \"col\": 12}}, {\"id\": \"ug-cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cockpit atelier\", \"col\": 4}}, {\"id\": \"univers-glass-chantiers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Chantiers\", \"col\": 3}}, {\"id\": \"ug-technical-study\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"\\u00c9tude technique\", \"col\": 4}}]",
+ "content": "[{\"id\": \"ug-header\", \"type\": \"header\", \"data\": {\"text\": \"Univers Glass\", \"col\": 12}}, {\"id\": \"ug-cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cockpit atelier\", \"col\": 4}}, {\"id\": \"univers-glass-chantiers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Chantiers\", \"col\": 3}}, {\"id\": \"ug-technical-study\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"\u00c9tude technique\", \"col\": 4}}, {\"id\": \"ug-llm-settings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mat Reco Settings\", \"col\": 4}}]",
  "creation": "2026-10-15 21:31:00.636583",
  "custom_blocks": [],
  "docstatus": 0,
@@ -11,7 +11,7 @@
  "is_hidden": 0,
  "label": "Univers Glass",
  "links": [],
- "modified": "2026-10-16 07:18:58.991335",
+ "modified": "2026-10-16 11:18:46.313794",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Univers Glass",
@@ -57,6 +57,13 @@
    "label": "\u00c9tude technique",
    "link_to": "technical-study",
    "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "",
+   "label": "Mat Reco Settings",
+   "link_to": "Mat Reco Settings",
+   "type": "DocType"
   }
  ],
  "title": "Univers Glass"
