@@ -301,7 +301,7 @@ def get_dossier(chantier=None):
     dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status', 'docstatus'], order_by='modified desc', limit_page_length=0)
     permissions = dict(section_template=frappe.has_permission('Chantier Section Template','create'),chantier=frappe.has_permission('Chantier','create'), section=frappe.has_permission('Chantier Section','create'), quotation=frappe.has_permission('Quotation','create'), mpp=frappe.has_permission('Material Production Plan','create'))
     if not chantier:
-        return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], lines=[], summary={})
+        return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], sales_orders=[], lines=[], summary={})
     dossier = chantier_doc(chantier)
     studies = frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash','technical_hash'],order_by='modified desc',limit_page_length=0) if frappe.has_permission('Chantier Technical Study','read') else []
     permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')),cancel=bool(dossier.has_permission('cancel')))
@@ -312,12 +312,13 @@ def get_dossier(chantier=None):
     quote_usage = get_quotation_usage(dossier)
     sections = frappe.get_list('Chantier Section', filters={'chantier':chantier}, fields=['name','section_name','parent_chantier_section','lft'], order_by='lft', limit_page_length=0)
     quotations = frappe.get_list('Quotation', filters={'custom_chantier':chantier}, fields=['name','docstatus','status','grand_total','currency','amended_from'], order_by='modified desc', limit_page_length=0)
-    orders = [frappe.get_doc('Sales Order', n) for n in frappe.get_list('Sales Order', filters={'custom_chantier':chantier,'docstatus':1}, pluck='name', limit_page_length=0)]
+    sales_orders = frappe.get_list('Sales Order', filters={'custom_chantier':chantier}, fields=['name','docstatus','status','grand_total','currency'], order_by='modified desc', limit_page_length=0) if frappe.has_permission('Sales Order','read') else []
+    orders = [frappe.get_doc('Sales Order', row.name) for row in sales_orders if row.docstatus == 1]
     from mat_reco.material_reconfiguration.services.workshop_service import _receipts, _load
     # Financial roles may read dossiers and quotes without access to stock operations.
     production_visible = frappe.has_permission('Stock Entry','read')
     if not production_visible:
-        return dict(technical=technical,technical_stale=bool(relevant and relevant.source_hash!=current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,lines=[],summary={},production_visible=False)
+        return dict(technical=technical,technical_stale=bool(relevant and relevant.source_hash!=current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,sales_orders=sales_orders,lines=[],summary={},production_visible=False)
     accepted, pending, _, _ = _receipts(orders)
     roots, errors, _ = _load(dossier.company)
     live = {b['sales_order_item']:b for root in roots for b in root['children']}
@@ -347,7 +348,7 @@ def get_dossier(chantier=None):
     for section in sections:
         descendants = section_scope(section.name,chantier)
         by_section[section.name] = summarize([r for r in lines if r['section'] in descendants])
-    return dict(technical=technical,technical_stale=bool(relevant and relevant.source_hash!=current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,lines=lines,
+    return dict(technical=technical,technical_stale=bool(relevant and relevant.source_hash!=current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,sales_orders=sales_orders,lines=lines,
         summary=summary,by_section=by_section,production_visible=True,errors=[e for e in errors if e['sales_order'] in {o.name for o in orders}])
 
 

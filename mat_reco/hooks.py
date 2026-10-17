@@ -151,6 +151,7 @@ doc_events = {
             for event in ("on_submit", "on_cancel")}
        for dt in ("Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
     "Sales Order": {
+        "on_update": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
         "after_mapping": "mat_reco.material_reconfiguration.services.chantier_service.map_chantier",
         "validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
         "before_update_after_submit": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",

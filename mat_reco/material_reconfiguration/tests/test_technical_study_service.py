@@ -214,6 +214,27 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertTrue(study.lines[0].snapshot_hash)
         self.assertEqual(study.lines[0].result_item,'QA-TECH-FG')
 
+    def test_shared_technical_definition_keeps_each_work_dimensions(self):
+        self.doc.append('lines',dict(repere='V-2',designation='Autre dimension',qty=3,uom='PC',
+            length_mm=900,width_mm=600,thickness_mm=6,rate=100,rate_set=1))
+        self.doc.save()
+        study=frappe.get_doc('Chantier Technical Study',service.prepare_study(self.doc.name))
+        definition=self.definition()
+        payload=[dict(line_id=row.line_id,length_mm=row.length_mm,width_mm=row.width_mm,
+            thickness_mm=8,tree_json=json.dumps(definition)) for row in study.lines]
+        result=service.save_study(study.name,str(study.modified),json.dumps(payload))
+        self.assertEqual([(r['length_mm'],r['width_mm']) for r in result['study']['lines']],[(1200,1500),(900,600)])
+        study.reload()
+        self.assertEqual([row.repere for row in study.lines],['V-1','V-2'])
+        study.submit()
+        self.assertEqual([row.result_item for row in study.lines],['QA-TECH-FG','QA-TECH-FG'])
+        self.assertEqual(frappe.db.count('Item',{'name':'QA-TECH-FG'}),1)
+        snapshots=[json.loads(row.snapshot_json) for row in study.lines]
+        self.assertEqual([(row['length_mm'],row['width_mm']) for row in snapshots],[(1200,1500),(900,600)])
+        self.doc.reload()
+        self.assertEqual([row.qty for row in self.doc.lines],[4,3])
+        self.assertEqual(frappe.db.count('Serial No',{'item_code':'QA-TECH-FG'}),0)
+
     def test_reused_components_accept_browser_integer_dimensions(self):
         self.study().submit()
         tree=service.seed_item('QA-TECH-FG')
@@ -311,6 +332,31 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertEqual(order.items[0].custom_chantier_line,line.line_id)
         self.assertEqual(service.confirm_order(quote,'QA acceptation client',add_days(nowdate(),7),'qa-so-confirm'),name)
         self.assertFalse(frappe.db.count('Serial No',{'item_code':'QA-TECH-FG'}))
+
+    def test_dossier_shows_native_draft_and_submitted_orders(self):
+        from erpnext.selling.doctype.quotation.quotation import make_sales_order
+        from mat_reco.material_reconfiguration.services.chantier_service import get_dossier
+        from unittest.mock import patch
+        self.approve()
+        quote=service.generate_quotation(self.doc.name,request_key='qa-native-dossier-order',submit=True)
+        order=make_sales_order(quote)
+        order.custom_customer_acceptance='Accord client via ERPNext'
+        order.delivery_date=add_days(nowdate(),7)
+        for row in order.items:row.delivery_date=order.delivery_date
+        order.insert()
+        draft=get_dossier(self.doc.name)
+        self.assertEqual([(row.name,row.docstatus) for row in draft['sales_orders']],[(order.name,0)])
+        self.assertEqual(draft['summary']['ordered_qty'],0)
+        permission=frappe.has_permission
+        with patch.object(frappe,'has_permission',side_effect=lambda dt,*a,**kw: False if dt=='Stock Entry' else permission(dt,*a,**kw)):
+            financial=get_dossier(self.doc.name)
+        self.assertFalse(financial['production_visible'])
+        self.assertEqual(financial['sales_orders'][0].name,order.name)
+        order.submit()
+        submitted=get_dossier(self.doc.name)
+        self.assertEqual(submitted['sales_orders'][0].docstatus,1)
+        self.assertEqual(submitted['summary']['ordered_qty'],self.doc.lines[0].qty)
+        self.assertIsNone(frappe.db.get_value('Sales Order Item',order.items[0].name,'custom_chantier_section'))
 
     def test_native_order_save_accepts_empty_section_from_quotation(self):
         from erpnext.selling.doctype.quotation.quotation import make_sales_order
