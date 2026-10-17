@@ -72,6 +72,10 @@ def map_chantier(doc, method, source_doc):
                 if other != value:
                     frappe.throw('Les devis regroupés doivent appartenir au même chantier.')
         doc.custom_chantier = value
+        # Sections organize the chantier and quote only, never the Sales Order.
+        if doc.get('doctype') == 'Sales Order':
+            for row in doc.get('items', []):
+                row.custom_chantier_section = None
 
 
 def _validate_geometry(row):
@@ -89,8 +93,8 @@ def _check_source(row, source):
     for field, _ in DIMENSIONS:
         if abs(flt(row.get(field)) - flt(source.get(field))) > .001:
             frappe.throw('Dimensions différentes du devis accepté : une révision commerciale est nécessaire.')
-    if row.get('custom_repere') != source.get('custom_repere') or row.get('custom_chantier_section') != source.get('custom_chantier_section'):
-        frappe.throw('Repère ou section différent du devis accepté.')
+    if row.get('custom_repere') != source.get('custom_repere'):
+        frappe.throw('Repère différent du devis accepté.')
     if not source.get('custom_technical_snapshot'):
         frappe.throw('La ligne du devis ne possède pas de composition technique validée.')
     tree = json.loads(source.custom_technical_snapshot)
@@ -121,6 +125,8 @@ def validate_commercial(doc, method=None):
         map_order_extras(doc)
     seen, quotations = set(), {}
     for row in doc.get('items', []):
+        if doc.doctype == 'Sales Order':
+            row.custom_chantier_section = None
         section_matches(row.get('custom_chantier_section'), chantier.name)
         origin = None
         if doc.doctype == 'Sales Order':

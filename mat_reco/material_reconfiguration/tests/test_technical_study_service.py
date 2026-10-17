@@ -124,6 +124,23 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertEqual(self.doc.docstatus,1)
         self.assertEqual(self.doc.commercial_extras[0].rate_set,0)
 
+    def test_commercial_header_and_lines_save_atomically(self):
+        payload = json.dumps([row.as_dict() for row in self.doc.lines])
+        result = service.save_commercial(self.doc.name, str(self.doc.modified), payload,
+            currency=self.doc.currency, selling_price_list=self.doc.selling_price_list,
+            header=json.dumps(dict(designation='Chantier modifié', expected_start_date='2026-10-20',
+                expected_end_date='2026-11-03', status='Cancelled')))
+        self.doc.reload()
+        self.assertEqual(self.doc.designation, 'Chantier modifié')
+        self.assertEqual(str(self.doc.expected_start_date), '2026-10-20')
+        self.assertEqual(self.doc.status, 'Preparation')
+        self.assertEqual(result['lines'][0]['line_id'], self.doc.lines[0].line_id)
+        with self.assertRaises(frappe.ValidationError):
+            service.save_commercial(self.doc.name, 'obsolete', payload,
+                header=json.dumps(dict(designation='Écrasement interdit')))
+        self.doc.reload()
+        self.assertEqual(self.doc.designation, 'Chantier modifié')
+
     def test_browser_integer_numbers_reuse_approved_technical_dimensions(self):
         self.extras();self.doc.set('commercial_extras',[])
         self.doc.lines[0].length_mm=0;self.doc.lines[0].width_mm=0;self.doc.lines[0].thickness_mm=0
@@ -294,6 +311,50 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertEqual(order.items[0].custom_chantier_line,line.line_id)
         self.assertEqual(service.confirm_order(quote,'QA acceptation client',add_days(nowdate(),7),'qa-so-confirm'),name)
         self.assertFalse(frappe.db.count('Serial No',{'item_code':'QA-TECH-FG'}))
+
+    def test_native_order_save_accepts_empty_section_from_quotation(self):
+        from erpnext.selling.doctype.quotation.quotation import make_sales_order
+        self.approve()
+        quote=frappe.get_doc('Quotation',service.generate_quotation(self.doc.name,
+            request_key='qa-empty-section-quote',submit=True))
+        # Link controls may persist an empty string; native mapping skips empty fields.
+        frappe.db.set_value('Quotation Item',quote.items[0].name,'custom_chantier_section','',update_modified=False)
+        quote.reload()
+        self.assertEqual(quote.items[0].custom_chantier_section,'')
+        order=make_sales_order(quote.name)
+        self.assertIsNone(order.items[0].custom_chantier_section)
+        order.custom_customer_acceptance='Accord QA sans section'
+        order.delivery_date=add_days(nowdate(),7)
+        for row in order.items:row.delivery_date=order.delivery_date
+        order.insert()
+        order.reload()
+        self.assertFalse(order.items[0].custom_chantier_section)
+        self.assertEqual(order.items[0].custom_repere,quote.items[0].custom_repere)
+        self.assertEqual(order.items[0].custom_technical_snapshot,quote.items[0].custom_technical_snapshot)
+
+    def test_quote_keeps_section_while_native_order_discards_it(self):
+        from erpnext.selling.doctype.quotation.quotation import make_sales_order
+        section=frappe.get_doc(dict(doctype='Chantier Section',chantier=self.doc.name,
+            section_name='Section au devis',is_group=1)).insert()
+        self.doc.lines[0].section=section.name
+        self.doc.save()
+        self.extras()
+        self.approve()
+        quote=frappe.get_doc('Quotation',service.generate_quotation(self.doc.name,
+            request_key='qa-section-quote-only',submit=True))
+        self.assertTrue(all(row.custom_chantier_section==section.name for row in quote.items))
+        order=make_sales_order(quote.name)
+        self.assertTrue(all(not row.custom_chantier_section for row in order.items))
+        order.custom_customer_acceptance='Accord QA section au devis uniquement'
+        order.delivery_date=add_days(nowdate(),7)
+        for row in order.items:
+            row.delivery_date=order.delivery_date
+            row.custom_chantier_section=section.name  # A stale browser draft must be cleaned too.
+        order.insert()
+        order.reload()
+        self.assertTrue(all(not row.custom_chantier_section for row in order.items))
+        quote.reload()
+        self.assertTrue(all(row.custom_chantier_section==section.name for row in quote.items))
 
     def test_commercial_approval_preserves_unconfirmed_price(self):
         study=self.study();study.submit();self.doc.reload();self.doc.lines[0].rate_set=0;self.doc.save()

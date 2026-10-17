@@ -466,7 +466,7 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
 
 
 @frappe.whitelist(methods=['POST'])
-def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None):
+def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None, header=None):
     doc=frappe.get_doc('Chantier',chantier,for_update=True);doc.check_permission('write')
     if doc.docstatus!=0 or str(doc.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant de l’enregistrer.')
     incoming=frappe.parse_json(lines)
@@ -477,6 +477,13 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
         supplements=frappe.parse_json(commercial_extras)
         if not isinstance(supplements,list) or len(supplements)>2000:frappe.throw('Liste de compléments invalide (maximum 2000).')
         doc.set('commercial_extras',[{k:r.get(k) for k in chantier_extras.FIELDS} for r in supplements])
+    if header is not None:
+        values = frappe.parse_json(header)
+        if not isinstance(values, dict):
+            frappe.throw('En-tête de chantier invalide.')
+        for field in ('customer', 'designation', 'responsible', 'expected_start_date', 'expected_end_date'):
+            if field in values:
+                doc.set(field, values[field])
     doc.currency=currency;doc.selling_price_list=selling_price_list;doc.terms=terms;doc.save();return doc.as_dict()
 
 

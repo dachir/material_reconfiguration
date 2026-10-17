@@ -145,7 +145,7 @@ def map_order_extras(order):
         row.custom_is_accessory_row=origin.custom_is_accessory_row
         row.custom_item_types=origin.custom_item_types
         row.custom_chantier_line=origin.custom_chantier_line
-        row.custom_repere=origin.custom_repere;row.custom_chantier_section=origin.custom_chantier_section
+        row.custom_repere=origin.custom_repere;row.custom_chantier_section=None
     for source in sources.values():
         for origin in source.items:
             if origin.custom_parent_row and (source.name,origin.custom_parent_row) in mapped and (source.name,origin.name) not in mapped:

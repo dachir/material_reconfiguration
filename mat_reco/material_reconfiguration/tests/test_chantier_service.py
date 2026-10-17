@@ -64,6 +64,33 @@ class ChantierServiceTests(unittest.TestCase):
         with self.assertRaises(frappe.ValidationError):
             service._check_source(target,source)
 
+    def test_absent_sections_match_across_mapping_and_json(self):
+        source=frappe._dict(item_code='A',uom='Nos',custom_repere='V1',
+            custom_technical_snapshot='{}',custom_technical_hash=service.fingerprint({}))
+        for original, mapped in ((None, ''), ('', None), (None, None), ('', '')):
+            with self.subTest(original=original, mapped=mapped):
+                source.custom_chantier_section=original
+                target=frappe._dict(source)
+                target.custom_chantier_section=mapped
+                self.assertEqual(service._check_source(target,source),{})
+
+    def test_quote_section_is_not_required_on_order_but_repere_is(self):
+        source=frappe._dict(item_code='A',uom='Nos',custom_repere='V1',
+            custom_chantier_section='SECTION-A',custom_technical_snapshot='{}',
+            custom_technical_hash=service.fingerprint({}))
+        target=frappe._dict(source)
+        target.custom_chantier_section=None
+        self.assertEqual(service._check_source(target,source),{})
+        target.custom_repere='V2'
+        with self.assertRaises(frappe.ValidationError):service._check_source(target,source)
+
+    def test_mapping_drops_order_sections_only(self):
+        source=frappe._dict(doctype='Quotation',custom_chantier='C')
+        target=frappe._dict(doctype='Sales Order',items=[frappe._dict(custom_chantier_section='S')])
+        service.map_chantier(target,'after_mapping',source)
+        self.assertIsNone(target['items'][0].custom_chantier_section)
+        self.assertEqual(target.custom_chantier,'C')
+
     def test_tampered_snapshot_is_rejected(self):
         source=frappe._dict(item_code='A',uom='Nos',custom_technical_snapshot='{}',custom_technical_hash='forged')
         with self.assertRaises(frappe.ValidationError):
