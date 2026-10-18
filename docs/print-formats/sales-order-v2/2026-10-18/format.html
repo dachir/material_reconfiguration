@@ -1,0 +1,50 @@
+{% macro number(value, precision=2) -%}{{ ('%.*f' % (precision, (value or 0)|float)).rstrip('0').rstrip('.') if precision else '%d' % ((value or 0)|float) }}{%- endmacro %}
+{% macro unit(row) -%}{% set u = row.get('uom') or row.get('stock_uom') or '' %}{{ 'm' if u in ['Meter', 'Mètre'] else 'u' if u in ['Nos', 'PC', 'Unit'] else 'm²' if u == 'Square Meter' else u }}{%- endmacro %}
+{% macro operation(row) -%}
+{% if not row.get('custom_is_accessory_row') and (row.get('custom_is_service_row') or row.get('custom_item_type') == 'SERVICE') %}
+{% set label = ((row.get('item_name') or '') ~ ' ' ~ (row.get('description') or '')|striptags)|upper|replace('É','E')|replace('È','E') %}
+{% if 'RABOT' in label %}rabotage{% elif 'TROU' in label or 'PERCAGE' in label %}trous{% elif 'ENCOCH' in label %}encoche{% elif 'BISOT' in label or 'BISEAU' in label %}biseautage{% elif 'SABL' in label %}sablage{% elif 'TREMP' in label %}trempe{% endif %}
+{% endif %}
+{%- endmacro %}
+{% macro operation_cell(parent, key) -%}
+{% set ns=namespace(found=false) %}
+{% for service in doc.items %}{% if service.get('custom_parent_row') == parent.name and operation(service)|trim == key %}
+{% set ns.found=true %}<div class="operation-value">{{ number(service.qty) }} {{ unit(service) }}</div>
+{% endif %}{% endfor %}{% if not ns.found %}<span class="absent">—</span>{% endif %}
+{%- endmacro %}
+{% set row_names=doc.items|map(attribute='name')|list %}
+<div class="production-sheet">
+<table class="outer logo"><tr><td><img src="https://fimaci.frappe.cloud/files/UG.jpeg" alt="Univers Glass"></td></tr></table>
+<h1>Fiche de production</h1>
+<table class="outer information"><tr><td>
+<div><strong>N° Proforma :</strong> {% if doc.get('custom_quotation') %}{{ doc.custom_quotation }}{% else %}{% set refs=namespace(values=[]) %}{% for row in doc.items %}{% if row.get('prevdoc_docname') and row.prevdoc_docname not in refs.values %}{% set refs.values=refs.values+[row.prevdoc_docname] %}{% endif %}{% endfor %}{{ refs.values|join(', ') or '—' }}{% endif %}</div>
+<div><strong>Commande client :</strong> {{ doc.name }}</div>
+<div><strong>Référence :</strong> {{ doc.get('custom_reference') or doc.get('reference') or doc.get('custom_chantier') or doc.get('po_no') or '—' }}</div>
+</td><td><div><strong>Client :</strong> {{ doc.get('customer_name') or doc.customer }}</div>
+<div><strong>Date :</strong> {{ doc.get_formatted('transaction_date') }}</div>
+{% if doc.get('delivery_date') %}<div><strong>Livraison prévue :</strong> {{ doc.get_formatted('delivery_date') }}</div>{% endif %}
+</td></tr></table>
+{% if doc.get('custom_description') %}<div class="description">{{ doc.custom_description }}</div>{% endif %}
+<table class="data-table"><colgroup><col style="width:30%"><col style="width:5%"><col style="width:7%"><col style="width:7%"><col style="width:8%">{% for i in range(6) %}<col style="width:7.1666%">{% endfor %}</colgroup>
+<thead><tr><th>Désignation / repère</th><th>Qté</th><th>L<br><small>mm</small></th><th>H<br><small>mm</small></th><th>m²/u</th><th>Rabotage</th><th>Trous</th><th>Encoche</th><th>Biseautage</th><th>Sablage</th><th>Trempe</th></tr></thead>
+<tbody>{% set totals=namespace(qty=0,area=0) %}
+{% for row in doc.items %}
+{% if not row.get('custom_parent_row') or row.custom_parent_row not in row_names %}
+{% set extra=row.get('custom_is_service_row') or row.get('custom_is_accessory_row') %}
+{% set l=(row.get('custom_client_length_mm') or 0)|float %}{% set h=(row.get('custom_client_width_mm') or 0)|float %}
+{% set area=l*h/1000000 %}
+{% if not extra %}{% set totals.qty=totals.qty+row.qty %}{% set totals.area=totals.area+area*row.qty %}{% endif %}
+<tr data-row="{{ row.name }}"><td class="designation"><strong>{{ row.get('item_name') or row.item_code }}</strong>
+<div class="detail">{{ row.get('custom_repere') or row.item_code }}{% if row.get('custom_client_thickness_mm') %} · Ép. {{ number(row.custom_client_thickness_mm) }} mm{% endif %}</div>
+{% if extra %}<div class="detail">{{ 'Accessoire' if row.get('custom_is_accessory_row') else 'Service' }} non affecté à un ouvrage · {{ number(row.qty) }} {{ unit(row) }}</div>{% endif %}
+{% for child in doc.items %}{% if child.get('custom_parent_row') == row.name %}
+<div class="associated">{{ 'Accessoire' if child.get('custom_is_accessory_row') else 'Service' }} : {{ child.get('item_name') or child.item_code }} — {{ number(child.qty) }} {{ unit(child) }}</div>
+{% endif %}{% endfor %}
+</td><td class="numeric">{{ number(row.qty) }}{% if extra %}<br>{{ unit(row) }}{% endif %}</td><td class="numeric">{{ number(l) if l else '—' }}</td><td class="numeric">{{ number(h) if h else '—' }}</td><td class="numeric">{{ number(area,4) if area else '—' }}</td>
+{% for key in ['rabotage','trous','encoche','biseautage','sablage','trempe'] %}<td>{{ operation_cell(row,key) }}</td>{% endfor %}</tr>
+{% endif %}{% endfor %}</tbody>
+<tfoot><tr><td class="designation">Total ouvrages</td><td>{{ number(totals.qty) }}</td><td colspan="2">Surface totale</td><td class="numeric">{{ number(totals.area,4) }}</td><td colspan="6" class="total-unit">m²</td></tr></tfoot></table>
+<div class="legend">L et H : dimensions d’une pièce en mm. m²/u : surface d’une pièce. Opérations : quantités totales commandées pour la ligne, dans l’unité indiquée. — : aucune opération associée.</div>
+<div class="terms">Les articles vendus ne sont ni repris ni échangés.</div>
+<div class="footer">Abidjan Yopougon Zone Industrielle entre le GS les Saints Anges et Airplast - 01 BP 1107 Abidjan 01,<br>Tél: (225) 27 23 50 61 02 - Fax: (225) 27 23 50 61 02<br>R.C. N°: CI-YOP-2008-B-312 - ECOBANK N°: CI 059010011210773180154,<br>E-mail: univers.glass@hotmail.fr</div>
+</div>

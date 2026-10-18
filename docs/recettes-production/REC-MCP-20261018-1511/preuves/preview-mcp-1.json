@@ -1,0 +1,65 @@
+{
+  "sales_order": "SAL-ORD-2026-00024",
+  "node_id": "SAL-ORD-2026-00024",
+  "qty": 20,
+  "action": "mcp",
+  "movements": [],
+  "shortages": [
+    {
+      "node_id": "5kpk9vst89:root",
+      "item_code": "DVC10MMC",
+      "qty": 8,
+      "kind": "cutting"
+    },
+    {
+      "node_id": "5kpkbesf95:0",
+      "item_code": "DVC10MMC",
+      "qty": 12,
+      "kind": "cutting"
+    },
+    {
+      "node_id": "5kpk8c6rks:root",
+      "item_code": "DVC10MMC",
+      "qty": 4,
+      "kind": "cutting"
+    },
+    {
+      "node_id": "5kpkefc7qj:0",
+      "item_code": "DVC10MMC",
+      "qty": 4,
+      "kind": "cutting"
+    }
+  ],
+  "tasks": [
+    {
+      "node_id": "5kpk9vst89:root",
+      "qty": 8,
+      "item_code": "DVC10MMC",
+      "label": "DECOUPE VITRE CLAIRE 10 MM",
+      "warehouse": "Stores - UG"
+    },
+    {
+      "node_id": "5kpkbesf95:root",
+      "qty": 6,
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+      "warehouse": "Stores - UG"
+    },
+    {
+      "node_id": "5kpk8c6rks:root",
+      "qty": 4,
+      "item_code": "DVC10MMC",
+      "label": "DECOUPE VITRE CLAIRE 10 MM",
+      "warehouse": "Stores - UG"
+    },
+    {
+      "node_id": "5kpkefc7qj:root",
+      "qty": 2,
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+      "warehouse": "Stores - UG"
+    }
+  ],
+  "message": "Préparer les découpes dans le MCP, puis revenir pour assembler.",
+  "version": "608716928859f368c01488d4f159998f8c4e9d7f455fda3f938ba8f9491d2d9e"
+}

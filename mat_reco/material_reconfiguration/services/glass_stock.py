@@ -87,7 +87,9 @@ def physical_rows(serials, items, warehouses, search=""):
             issues['invalid_geometry'] += 1
         rows.append(dict(serial_no=sn['name'], item_code=code, primary_item=root,
                          length_mm=dims[0], width_mm=dims[1], thickness_mm=dims[2],
-                         area_m2=area, geometry_error=error, warehouse=sn['warehouse'], classification=classification))
+                         area_m2=area, geometry_error=error, warehouse=sn['warehouse'], classification=classification,
+                         removed_length_mm=sn.get('custom_removed_length_mm') or 0,
+                         removed_width_mm=sn.get('custom_removed_width_mm') or 0))
     return sorted(rows, key=lambda r: r['serial_no']), dict(issues)
 
 

@@ -6,6 +6,10 @@ from frappe.utils import cint, flt
 
 
 class MatRecoSettings(Document):
+    def on_update(self):
+        from mat_reco.material_reconfiguration.services.task_notifications import install_workspace_tasks
+        install_workspace_tasks()
+
     def validate(self):
         self.api_base_url = (self.api_base_url or '').strip().rstrip('/')
         self.model = (self.model or '').strip()

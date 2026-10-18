@@ -1,0 +1,540 @@
+{
+  "run": "REC-MCP-20261018-1511",
+  "at": "2026-10-18T18:13:02.343839+00:00",
+  "orders": [
+    {
+      "label": "G1",
+      "name": "SAL-ORD-2026-00024",
+      "chantier": "26CHANT1000010",
+      "status": "To Bill",
+      "workflow_state": "Approved",
+      "docstatus": 1,
+      "qty": 20.0,
+      "delivered_qty": 20.0,
+      "per_delivered": 100.0,
+      "grand_total": 467100.0,
+      "lines": [
+        {
+          "name": "5kpk9vst89",
+          "repere": "G01",
+          "item_code": "DVC10MMC",
+          "qty": 8.0,
+          "delivered_qty": 8.0,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "5kpkbesf95",
+          "repere": "G02",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 6.0,
+          "delivered_qty": 6.0,
+          "length_mm": 1000.0,
+          "width_mm": 800.0,
+          "thickness_mm": 32.0
+        },
+        {
+          "name": "5kpk8c6rks",
+          "repere": "G03",
+          "item_code": "DVC10MMC",
+          "qty": 4.0,
+          "delivered_qty": 4.0,
+          "length_mm": 1500.0,
+          "width_mm": 1000.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "5kpkefc7qj",
+          "repere": "G04",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 2.0,
+          "delivered_qty": 2.0,
+          "length_mm": 700.0,
+          "width_mm": 500.0,
+          "thickness_mm": 32.0
+        }
+      ]
+    },
+    {
+      "label": "G2",
+      "name": "SAL-ORD-2026-00025",
+      "chantier": "26CHANT1000010",
+      "status": "To Bill",
+      "workflow_state": "Approved",
+      "docstatus": 1,
+      "qty": 20.0,
+      "delivered_qty": 20.0,
+      "per_delivered": 100.0,
+      "grand_total": 467100.0,
+      "lines": [
+        {
+          "name": "9ktecc1iek",
+          "repere": "G01",
+          "item_code": "DVC10MMC",
+          "qty": 8.0,
+          "delivered_qty": 8.0,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "9kteu5ku7u",
+          "repere": "G02",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 6.0,
+          "delivered_qty": 6.0,
+          "length_mm": 1000.0,
+          "width_mm": 800.0,
+          "thickness_mm": 32.0
+        },
+        {
+          "name": "9ktea9escr",
+          "repere": "G03",
+          "item_code": "DVC10MMC",
+          "qty": 4.0,
+          "delivered_qty": 4.0,
+          "length_mm": 1500.0,
+          "width_mm": 1000.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "9ktet6knc5",
+          "repere": "G04",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 2.0,
+          "delivered_qty": 2.0,
+          "length_mm": 700.0,
+          "width_mm": 500.0,
+          "thickness_mm": 32.0
+        }
+      ]
+    },
+    {
+      "label": "A1",
+      "name": "SAL-ORD-2026-00026",
+      "chantier": "26CHANT1000011",
+      "status": "To Bill",
+      "workflow_state": "Approved",
+      "docstatus": 1,
+      "qty": 4.0,
+      "delivered_qty": 4.0,
+      "per_delivered": 100.0,
+      "grand_total": 70200.0,
+      "lines": [
+        {
+          "name": "3l0pldconh",
+          "repere": "A01",
+          "item_code": "DVC10MMC",
+          "qty": 3.0,
+          "delivered_qty": 3.0,
+          "length_mm": 800.0,
+          "width_mm": 600.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "3l0prhcder",
+          "repere": "A02",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 1.0,
+          "delivered_qty": 1.0,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 32.0
+        }
+      ]
+    },
+    {
+      "label": "B1",
+      "name": "SAL-ORD-2026-00027",
+      "chantier": "26CHANT1000012",
+      "status": "To Bill",
+      "workflow_state": "Approved",
+      "docstatus": 1,
+      "qty": 6.0,
+      "delivered_qty": 6.0,
+      "per_delivered": 100.0,
+      "grand_total": 84000.0,
+      "lines": [
+        {
+          "name": "9l2vhaiaab",
+          "repere": "B01",
+          "item_code": "DVC10MMC",
+          "qty": 4.0,
+          "delivered_qty": 4.0,
+          "length_mm": 500.0,
+          "width_mm": 400.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "9l2v8ov3rr",
+          "repere": "B02",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 2.0,
+          "delivered_qty": 2.0,
+          "length_mm": 1000.0,
+          "width_mm": 800.0,
+          "thickness_mm": 32.0
+        }
+      ]
+    },
+    {
+      "label": "G3",
+      "name": "SAL-ORD-2026-00028",
+      "chantier": "26CHANT1000010",
+      "status": "To Bill",
+      "workflow_state": "Approved",
+      "docstatus": 1,
+      "qty": 20.0,
+      "delivered_qty": 20.0,
+      "per_delivered": 100.0,
+      "grand_total": 467100.0,
+      "lines": [
+        {
+          "name": "6nt85tt34m",
+          "repere": "G01",
+          "item_code": "DVC10MMC",
+          "qty": 8.0,
+          "delivered_qty": 8.0,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "6nt87d6naj",
+          "repere": "G02",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 6.0,
+          "delivered_qty": 6.0,
+          "length_mm": 1000.0,
+          "width_mm": 800.0,
+          "thickness_mm": 32.0
+        },
+        {
+          "name": "6nt805cs1l",
+          "repere": "G03",
+          "item_code": "DVC10MMC",
+          "qty": 4.0,
+          "delivered_qty": 4.0,
+          "length_mm": 1500.0,
+          "width_mm": 1000.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "6nt806o57m",
+          "repere": "G04",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 2.0,
+          "delivered_qty": 2.0,
+          "length_mm": 700.0,
+          "width_mm": 500.0,
+          "thickness_mm": 32.0
+        }
+      ]
+    },
+    {
+      "label": "A2",
+      "name": "SAL-ORD-2026-00029",
+      "chantier": "26CHANT1000011",
+      "status": "To Bill",
+      "workflow_state": "Approved",
+      "docstatus": 1,
+      "qty": 4.0,
+      "delivered_qty": 4.0,
+      "per_delivered": 100.0,
+      "grand_total": 111600.0,
+      "lines": [
+        {
+          "name": "bnvrm1ah08",
+          "repere": "A01",
+          "item_code": "DVC10MMC",
+          "qty": 2.0,
+          "delivered_qty": 2.0,
+          "length_mm": 800.0,
+          "width_mm": 600.0,
+          "thickness_mm": 10.0
+        },
+        {
+          "name": "bnvrsb8s9e",
+          "repere": "A02",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "qty": 2.0,
+          "delivered_qty": 2.0,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 32.0
+        }
+      ]
+    }
+  ],
+  "deliveries": [
+    {
+      "name": "MAT-DN-2026-00006",
+      "docstatus": 1,
+      "qty": 10.0,
+      "orders": [
+        "SAL-ORD-2026-00024"
+      ],
+      "serials": [
+        "WC-0fd779c82631b3fa9f9bc24f37f5",
+        "WC-2caf254af788c07603738f9fb385",
+        "WC-4abd4e0b244adba4c84e60f2e844",
+        "WC-74df3ee7f301f056f43fd1e7010a",
+        "WREP-86d5a34e8937c0fb2b-1",
+        "WREP-86d5a34e8937c0fb2b-2",
+        "WREP-86d5a34e8937c0fb2b-3",
+        "WC-7dd5ffdc983c92c15fbcecad11b4",
+        "WC-8441d4fe0e008bf3433ea6fd89f9",
+        "WREP-037b905dc49ff9555e-1"
+      ],
+      "remarks": null
+    },
+    {
+      "name": "MAT-DN-2026-00007",
+      "docstatus": 1,
+      "qty": 20.0,
+      "orders": [
+        "SAL-ORD-2026-00025"
+      ],
+      "serials": [
+        "WC-0045a5844bb0e36c92f42e3d4c9e",
+        "WC-01f9f2d23913b9789fe90a68bf1f",
+        "WC-32ea564fcb352fcf39b451c27271",
+        "WC-5836e32b281cc11a6e1f3f274e03",
+        "WC-6089c4d059b4bc9b74e9a1e295a6",
+        "WC-62d4beae23a0ff1ab3df26c0400a",
+        "WC-69e932f184ae5b1cd31d63fc89ea",
+        "WC-7cafc9bc4df50ee43a0fd116105d",
+        "WREP-2821665aec1787b67d-1",
+        "WREP-2821665aec1787b67d-2",
+        "WREP-2821665aec1787b67d-3",
+        "WREP-2821665aec1787b67d-4",
+        "WREP-2821665aec1787b67d-5",
+        "WREP-2821665aec1787b67d-6",
+        "WC-166e6835ad08cedd81f1cbd4dbdc",
+        "WC-58390e7557531251e38797ae34c3",
+        "WC-971dc2e772187b5985508d545b9a",
+        "WC-d6cac19666c22c2c09bfea142984",
+        "WREP-22db4e59d5afa66854-1",
+        "WREP-22db4e59d5afa66854-2"
+      ],
+      "remarks": null
+    },
+    {
+      "name": "MAT-DN-2026-00008",
+      "docstatus": 1,
+      "qty": 4.0,
+      "orders": [
+        "SAL-ORD-2026-00026"
+      ],
+      "serials": [
+        "WC-257f5c71bcdd56d819f272ed8a27",
+        "WC-817e69fb7ce03c8005fcd836c79f",
+        "WC-f56dfb0180c57b6b848dbd4748e7",
+        "WREP-01480f0e876ae624e3-1"
+      ],
+      "remarks": null
+    },
+    {
+      "name": "MAT-DN-2026-00009",
+      "docstatus": 1,
+      "qty": 6.0,
+      "orders": [
+        "SAL-ORD-2026-00027"
+      ],
+      "serials": [
+        "WC-00fa232fa3f874b9033cd2aa22e7",
+        "WC-a078d129e59c1a03eead9092421f",
+        "WC-ba72792d4ea19b9a173d9e66d2c9",
+        "WC-d02eee8a7894e2a5b46d8f539b63",
+        "WREP-c28695298f5ff19d3d-1",
+        "WREP-c28695298f5ff19d3d-2"
+      ],
+      "remarks": null
+    },
+    {
+      "name": "MAT-DN-2026-00010",
+      "docstatus": 1,
+      "qty": 20.0,
+      "orders": [
+        "SAL-ORD-2026-00028"
+      ],
+      "serials": [
+        "WC-3c256468e3af50422942f91e5e8f",
+        "WC-5d433f672b98daef95813b852f45",
+        "WC-6aab6b81682ee27ccba20483291c",
+        "WC-7558624a1c1426181a5cf6a21112",
+        "WC-a060b7357df31019e8369363cf5b",
+        "WC-dbba6f80408e5832f903b2510afa",
+        "WC-eb1a47e833f7d90a605dd138bd46",
+        "WC-f62c9c27674217dbc2b0192d3a42",
+        "WREP-d81f3d810429f97cad-1",
+        "WREP-d81f3d810429f97cad-2",
+        "WREP-d81f3d810429f97cad-3",
+        "WREP-d81f3d810429f97cad-4",
+        "WREP-d81f3d810429f97cad-5",
+        "WREP-d81f3d810429f97cad-6",
+        "WC-4ffe400b3c4fef74b1f845cef385",
+        "WC-8af89213126e1e2e854f5ab15712",
+        "WC-da689c9c2ba31c67fdf169a860ab",
+        "WC-e5b68c8d29866ceba63beaf3f505",
+        "WREP-52a933d6143eba77e5-1",
+        "WREP-52a933d6143eba77e5-2"
+      ],
+      "remarks": null
+    },
+    {
+      "name": "MAT-DN-2026-00011",
+      "docstatus": 1,
+      "qty": 4.0,
+      "orders": [
+        "SAL-ORD-2026-00029"
+      ],
+      "serials": [
+        "WC-0dc01afb49f08c086fc754da7393",
+        "WC-cebe22e49ad026c690dfe1632fe3",
+        "WREP-e710159a61e173b17f-1",
+        "WREP-e710159a61e173b17f-2"
+      ],
+      "remarks": null
+    },
+    {
+      "name": "MAT-DN-2026-00012",
+      "docstatus": 1,
+      "qty": 10.0,
+      "orders": [
+        "SAL-ORD-2026-00024"
+      ],
+      "serials": [
+        "WC-5a994bd1cd7c559789cff5049448",
+        "WC-c93ab3b33b6d32c4d5d92ea21c51",
+        "WC-d43914cb1982bcc52bff9a31b918",
+        "WC-e7c947a9789477e781370a4185f2",
+        "WREP-86d5a34e8937c0fb2b-4",
+        "WREP-86d5a34e8937c0fb2b-5",
+        "WREP-86d5a34e8937c0fb2b-6",
+        "WC-b84940ff5f316da436d3901ca6a9",
+        "WC-f3be04e5667844961d8e0e9f2df8",
+        "WREP-037b905dc49ff9555e-2"
+      ],
+      "remarks": null
+    }
+  ],
+  "mcps": [
+    {
+      "name": "26MCP1000137",
+      "requested_piece_count": 69,
+      "planned_piece_count": 69,
+      "missing_piece_count": 0,
+      "used_input_serial_count": 9,
+      "leftover_count": 1,
+      "total_required_area_m2": 58.88,
+      "total_used_input_area_m2": 70.4916,
+      "total_leftover_area_m2": 5.0504,
+      "total_waste_area_m2": 6.5612,
+      "status": "Executed",
+      "orders": [
+        "SAL-ORD-2026-00024",
+        "SAL-ORD-2026-00025",
+        "SAL-ORD-2026-00026",
+        "SAL-ORD-2026-00027"
+      ],
+      "inputs": [
+        "S-VC10MMC-20261009-1007-00001",
+        "S-VC10MMC-20261009-1007-00002",
+        "S-VC10MMC-20261009-1007-00003",
+        "S-VC10MMC-20261009-1007-00004",
+        "S-VC10MMC-20261009-1007-00005",
+        "S-VC10MMC-20261009-1007-00006",
+        "S-VC10MMC-20261009-1007-00007",
+        "S-VC10MMC-20261009-1007-00008",
+        "S-VC10MMC-20261009-1007-00009"
+      ]
+    },
+    {
+      "name": "26MCP1000138",
+      "requested_piece_count": 34,
+      "planned_piece_count": 34,
+      "missing_piece_count": 0,
+      "used_input_serial_count": 5,
+      "leftover_count": 1,
+      "total_required_area_m2": 30.92,
+      "total_used_input_area_m2": 36.38,
+      "total_leftover_area_m2": 1.28,
+      "total_waste_area_m2": 4.18,
+      "status": "Executed",
+      "orders": [
+        "SAL-ORD-2026-00028",
+        "SAL-ORD-2026-00029"
+      ],
+      "inputs": [
+        "S-VC10MMC-20261009-1007-00009::L1",
+        "S-VC10MMC-20261009-1007-00010",
+        "S-VC10MMC-20261009-1007-00011",
+        "S-VC10MMC-20261009-1007-00012",
+        "S-VC10MMC-20261009-1007-00013"
+      ]
+    }
+  ],
+  "mismatches": [
+    {
+      "stock_entry": "MAT-STE-2026-00071",
+      "assembly_order": "SAL-ORD-2026-00026",
+      "serial_no": "WC-82504f54b463639c236b40889661",
+      "original_sales_order_item": "5kpk9vst89",
+      "consuming_sales_order_item": "3l0prhcder",
+      "length_mm": 1200.0,
+      "width_mm": 900.0
+    },
+    {
+      "stock_entry": "MAT-STE-2026-00071",
+      "assembly_order": "SAL-ORD-2026-00026",
+      "serial_no": "WC-5eb1bc802dabcb815f3049007727",
+      "original_sales_order_item": "5kpk9vst89",
+      "consuming_sales_order_item": "3l0prhcder",
+      "length_mm": 1200.0,
+      "width_mm": 900.0
+    },
+    {
+      "stock_entry": "MAT-STE-2026-00076",
+      "assembly_order": "SAL-ORD-2026-00029",
+      "serial_no": "WC-f78562c6af85b4a1e2a4b5d4d2b1",
+      "original_sales_order_item": "5kpk9vst89",
+      "consuming_sales_order_item": "bnvrsb8s9e",
+      "length_mm": 1200.0,
+      "width_mm": 900.0
+    },
+    {
+      "stock_entry": "MAT-STE-2026-00076",
+      "assembly_order": "SAL-ORD-2026-00029",
+      "serial_no": "WC-ad346fe37409317b18ac4d0f51c9",
+      "original_sales_order_item": "5kpk9vst89",
+      "consuming_sales_order_item": "bnvrsb8s9e",
+      "length_mm": 1200.0,
+      "width_mm": 900.0
+    },
+    {
+      "stock_entry": "MAT-STE-2026-00076",
+      "assembly_order": "SAL-ORD-2026-00029",
+      "serial_no": "WC-5d4fbeabc893fcd2a2bf9cbeed9c",
+      "original_sales_order_item": "3l0prhcder",
+      "consuming_sales_order_item": "bnvrsb8s9e",
+      "length_mm": 1200.0,
+      "width_mm": 900.0
+    },
+    {
+      "stock_entry": "MAT-STE-2026-00076",
+      "assembly_order": "SAL-ORD-2026-00029",
+      "serial_no": "WC-0fbb9345c158ef8f254b34b1c97e",
+      "original_sales_order_item": "3l0prhcder",
+      "consuming_sales_order_item": "bnvrsb8s9e",
+      "length_mm": 1200.0,
+      "width_mm": 900.0
+    }
+  ],
+  "total_qty": 74.0,
+  "delivered_qty": 74.0,
+  "remaining_qty": 0.0,
+  "stock_ledger_entries": 55,
+  "general_ledger_entries": 0
+}

@@ -1,0 +1,16 @@
+{
+  "action": "repack",
+  "stock_entries": [
+    "MAT-STE-2026-00076"
+  ],
+  "outputs": [
+    {
+      "stock_entry": "MAT-STE-2026-00076",
+      "node_id": "bnvrsb8s9e:root",
+      "qty": 2,
+      "item_code": "REC-MCP-20261018-1511-DV32"
+    }
+  ],
+  "message": "Assemblages validés.",
+  "operation": "3p4pr1vdol"
+}

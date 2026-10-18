@@ -1,0 +1,26 @@
+[
+  {
+    "item_code": "DVC10MMC",
+    "warehouse": "Stores - UG",
+    "actual_qty": 20.0,
+    "reserved_qty": 20.0,
+    "valuation_rate": 0.0,
+    "stock_value": 0.0
+  },
+  {
+    "item_code": "REC-MCP-20261018-1511-DV32",
+    "warehouse": "Stores - UG",
+    "actual_qty": 14.0,
+    "reserved_qty": 14.0,
+    "valuation_rate": 0.0,
+    "stock_value": 0.0
+  },
+  {
+    "item_code": "VC10MMC",
+    "warehouse": "Stores - UG",
+    "actual_qty": 170.0,
+    "reserved_qty": 0.0,
+    "valuation_rate": 0.0,
+    "stock_value": 0.0
+  }
+]

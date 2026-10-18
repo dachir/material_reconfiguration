@@ -25,6 +25,45 @@ class TechnicalStudyTests(unittest.TestCase):
         for code in ('QA-TECH-RAW','QA-TECH-CUT','QA-TECH-SUB','QA-TECH-FG','QA-EXTRA-SERVICE','QA-EXTRA-ACCESSORY'):
             frappe.clear_document_cache('Item',code)
 
+    def tax_template(self):
+        account=frappe.db.get_value('Account',{'company':self.company,'account_type':'Tax','is_group':0},'name')
+        if not account:self.skipTest('Requires a tax account for the test company')
+        return frappe.get_doc(dict(doctype='Sales Taxes and Charges Template',title='QA Chantier TVA 18',company=self.company,
+            taxes=[dict(charge_type='On Net Total',account_head=account,description='QA TVA 18 %',rate=18)])).insert()
+
+    def test_selected_tax_template_applies_to_successive_quotations(self):
+        template=self.tax_template();self.doc.taxes_and_charges=template.name;self.doc.save();self.approve()
+        for number in (1,2):
+            quote=frappe.get_doc('Quotation',service.generate_quotation(self.doc.name,
+                json.dumps([dict(line_id=self.doc.lines[0].line_id,qty=2)]),f'qa-tax-quote-{number}'))
+            self.assertEqual(quote.taxes_and_charges,template.name)
+            self.assertEqual(len(quote.taxes),1)
+            self.assertAlmostEqual(quote.net_total,200)
+            self.assertAlmostEqual(quote.total_taxes_and_charges,36)
+            self.assertAlmostEqual(quote.grand_total,236)
+            quote.submit()
+            order=frappe.get_doc('Sales Order',service.confirm_order(quote.name,'Accord QA taxes',
+                add_days(nowdate(),7),f'qa-tax-order-{number}'))
+            self.assertEqual(order.taxes_and_charges,template.name)
+            self.assertEqual(len(order.taxes),1)
+            self.assertAlmostEqual(order.net_total,200)
+            self.assertAlmostEqual(order.total_taxes_and_charges,36)
+            self.assertAlmostEqual(order.grand_total,236)
+
+    def test_tax_template_does_not_invalidate_technical_definition(self):
+        template=self.tax_template();original=service.source_hash(self.doc)
+        self.doc.taxes_and_charges=template.name;self.doc.save()
+        self.assertEqual(service.source_hash(self.doc),original)
+        selected_hash=service.commercial_hash(self.doc,frappe._dict(technical_hash='technical'))
+        self.doc.taxes_and_charges=None
+        self.assertNotEqual(service.commercial_hash(self.doc,frappe._dict(technical_hash='technical')),selected_hash)
+
+    def test_disabled_tax_template_is_rejected_on_chantier(self):
+        template=self.tax_template();template.disabled=1;template.save()
+        self.doc.taxes_and_charges=template.name
+        with self.assertRaisesRegex(frappe.ValidationError,'modèle de taxes actif'):
+            self.doc.save()
+
     def test_commercial_identifiers_are_automatic_unique_and_stable(self):
         original = self.doc.lines[0].repere
         for repere in ('OUV-001', None, None):

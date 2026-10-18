@@ -1,0 +1,21 @@
+{
+  "name": "3ugeuteodt",
+  "owner": "richard.dodzi@invocom.me",
+  "creation": "2026-10-18 18:13:08.622779",
+  "modified": "2026-10-18 18:13:08.622779",
+  "modified_by": "richard.dodzi@invocom.me",
+  "docstatus": 0,
+  "idx": 0,
+  "comment_type": "Comment",
+  "comment_email": "richard.dodzi@invocom.me",
+  "subject": null,
+  "comment_by": null,
+  "published": 0,
+  "seen": 0,
+  "reference_doctype": "Material Cutting Plan",
+  "reference_name": "26MCP1000138",
+  "reference_owner": null,
+  "content": "<p><strong>REC-MCP-20261018-1511 — SOLDE LIVRÉ / SUBSTITUTION EXPRESSÉMENT AUTORISÉE</strong></p><p>Autorisation explicite utilisateur reçue : utiliser les quatre séries de recette affectées à A2 (SAL-ORD-2026-00029), article DVC10MMC, dimensions 1200 × 900 × 10 mm, pour le solde de SAL-ORD-2026-00024. Livraison du solde validée : MAT-DN-2026-00012 (10 ouvrages). Les six commandes sont livrées à 100 %, soit 74 ouvrages au total. Aucune nouvelle fabrication n’a été réalisée pour ce remplacement.</p><p>Séries de remplacement :<br>WC-5a994bd1cd7c559789cff5049448<br>WC-c93ab3b33b6d32c4d5d92ea21c51<br>WC-d43914cb1982bcc52bff9a31b918<br>WC-e7c947a9789477e781370a4185f2</p><p>L’anomalie d’affectation constatée sur les assemblages MAT-STE-2026-00071 et MAT-STE-2026-00076 reste non corrigée ; les substitutions permettent de solder la recette et ne constituent pas une correction du défaut. Stock final relevé : 169 plaques et 1 chute, surface totale de la famille VC10MMC 1324,9556 m².</p>",
+  "ip_address": null,
+  "doctype": "Comment"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "1k28nd72hn",
+  "owner": "richard.dodzi@invocom.me",
+  "creation": "2026-10-18 15:11:28.834979",
+  "modified": "2026-10-18 15:11:28.834979",
+  "modified_by": "richard.dodzi@invocom.me",
+  "docstatus": 0,
+  "idx": 0,
+  "chantier": "26CHANT1000012",
+  "section_name": "Zone 2 — intérieurs",
+  "parent_chantier_section": null,
+  "is_group": 0,
+  "lft": 17,
+  "rgt": 18,
+  "old_parent": "",
+  "doctype": "Chantier Section"
+}

@@ -1,0 +1,216 @@
+{
+  "roots": [],
+  "errors": [],
+  "as_of": "2026-10-18 15:20:14.461734",
+  "dimension_fields": [],
+  "primary_items": [
+    {
+      "name": "VC6MMC",
+      "item_name": "VITRE CLAIRE 6 MM"
+    },
+    {
+      "name": "MC6MME",
+      "item_name": "MIROIR CLAIR 6MM"
+    },
+    {
+      "name": "PV5MM",
+      "item_name": "PARSOL VERT 5 MM"
+    },
+    {
+      "name": "PV6MM",
+      "item_name": "PARSOL VERT 6MM"
+    },
+    {
+      "name": "PV10MM",
+      "item_name": "PARSOL VERT 10 MM"
+    },
+    {
+      "name": "RB8MM",
+      "item_name": "REFLEX BRONZE 8MM"
+    },
+    {
+      "name": "RB5MM",
+      "item_name": "REFLEXBRONZE 5MM"
+    },
+    {
+      "name": "VG8MM",
+      "item_name": "VITRE GRIS 8 MM"
+    },
+    {
+      "name": "MC5MM",
+      "item_name": "MIROIR CLAIR 5 MM"
+    },
+    {
+      "name": "MC4MM",
+      "item_name": "MIROIR CLAIR 4 MM"
+    },
+    {
+      "name": "RB6MM",
+      "item_name": "REFLEX BRONZE 6MM"
+    },
+    {
+      "name": "VB8MM",
+      "item_name": "VITRE BRONZE 8MM"
+    },
+    {
+      "name": "VC4MMC",
+      "item_name": "VITRE CLAIR 4 MM"
+    },
+    {
+      "name": "VC5MM",
+      "item_name": "VITRE CLAIRE 5MM"
+    },
+    {
+      "name": "VG5MM",
+      "item_name": "V ITRE GRIS 5 MM"
+    },
+    {
+      "name": "TC6MM",
+      "item_name": "TRIPLEX CLAIR 6 MM"
+    },
+    {
+      "name": "MB5MM",
+      "item_name": "DECOUPE MIROIR BRONZE 5 MM"
+    },
+    {
+      "name": "MG5MM",
+      "item_name": "MIROIR GRIS 5 MM"
+    },
+    {
+      "name": "VC3MMC",
+      "item_name": "VITRE CLAIRE 3MM"
+    },
+    {
+      "name": "PV8MM",
+      "item_name": "PARSOL VERT 8 MM"
+    },
+    {
+      "name": "VC15MMC",
+      "item_name": "VITRE CLAIRE 15 MM"
+    },
+    {
+      "name": "VG10MM",
+      "item_name": "VITRE GRIS 10 MM"
+    },
+    {
+      "name": "VC8MMC",
+      "item_name": "VITRE CLAIRE 8 MM"
+    },
+    {
+      "name": "VC12MMC",
+      "item_name": "VITRE CLAIRE 12 MM"
+    },
+    {
+      "name": "VC10MMC",
+      "item_name": "VITRE CLAIRE 10 MM"
+    }
+  ],
+  "companies": [
+    "Univers Glass"
+  ],
+  "chantiers": [
+    {
+      "name": "26CHANT1000012",
+      "designation": "REC-MCP-20261018-1511 — PETIT CHANTIER B 6 ouvrages"
+    },
+    {
+      "name": "26CHANT1000011",
+      "designation": "REC-MCP-20261018-1511 — PETIT CHANTIER A 8 ouvrages"
+    },
+    {
+      "name": "26CHANT1000010",
+      "designation": "REC-MCP-20261018-1511 — GRAND CHANTIER 60 ouvrages"
+    },
+    {
+      "name": "26CHANT1000009",
+      "designation": "CHANTIER 4"
+    },
+    {
+      "name": "26CHANT1000008",
+      "designation": "test"
+    },
+    {
+      "name": "26CHANT1000007",
+      "designation": "COMMANDE TEST 2"
+    },
+    {
+      "name": "26CHANT1000006",
+      "designation": "TEST1"
+    },
+    {
+      "name": "26CHANT1000005",
+      "designation": "DOUBLE VITRAGE [100,80] 10MM"
+    },
+    {
+      "name": "26CHANT1000004",
+      "designation": "ASSEM "
+    },
+    {
+      "name": "26CHANT1000001",
+      "designation": "VITRE CLAIRE SARALU"
+    },
+    {
+      "name": "26CHANT1000003",
+      "designation": "VITRE SARALU"
+    },
+    {
+      "name": "26CHANT1000002",
+      "designation": "VITRE SARALU"
+    }
+  ],
+  "sections": [
+    {
+      "name": "1k28nd72hn",
+      "section_name": "Zone 2 — intérieurs",
+      "chantier": "26CHANT1000012"
+    },
+    {
+      "name": "6k1spns35q",
+      "section_name": "Zone 1 — façades",
+      "chantier": "26CHANT1000012"
+    },
+    {
+      "name": "7jvk1te883",
+      "section_name": "Zone 2 — intérieurs",
+      "chantier": "26CHANT1000011"
+    },
+    {
+      "name": "fjvatuchtp",
+      "section_name": "Zone 1 — façades",
+      "chantier": "26CHANT1000011"
+    },
+    {
+      "name": "1jt26erfq6",
+      "section_name": "Zone 2 — intérieurs",
+      "chantier": "26CHANT1000010"
+    },
+    {
+      "name": "djsoq0a5ts",
+      "section_name": "Zone 1 — façades",
+      "chantier": "26CHANT1000010"
+    },
+    {
+      "name": "0h2vc83m4p",
+      "section_name": "Piece 2",
+      "chantier": "26CHANT1000009"
+    },
+    {
+      "name": "ah0b8aerf6",
+      "section_name": "Piece 1",
+      "chantier": "26CHANT1000009"
+    },
+    {
+      "name": "egqoln3nul",
+      "section_name": "Rez de chaussee",
+      "chantier": "26CHANT1000009"
+    }
+  ],
+  "counters": {
+    "orders": 0,
+    "works": 0,
+    "remaining": 0,
+    "fabricable": 0,
+    "missing_cuts": 0,
+    "blocked": 0
+  }
+}

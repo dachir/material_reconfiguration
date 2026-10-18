@@ -151,14 +151,17 @@ doc_events = {
             for event in ("on_submit", "on_cancel")}
        for dt in ("Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
     "Sales Order": {
+        "after_insert": "mat_reco.material_reconfiguration.services.task_notifications.order_created",
         "on_update": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
         "after_mapping": "mat_reco.material_reconfiguration.services.chantier_service.map_chantier",
         "validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
         "before_update_after_submit": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
         "before_cancel": "mat_reco.material_reconfiguration.services.chantier_service.protect_produced_order",
-        "on_submit": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
-        "on_cancel": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+        "on_submit": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.task_notifications.order_created"],
+        "on_cancel": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.task_notifications.order_cancelled"],
     },
+    "Chantier": {"on_submit": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished"},
+    "Chantier Technical Study": {"on_submit": "mat_reco.material_reconfiguration.services.task_notifications.study_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.study_finished"},
     "Quotation": {"validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial"},
     "Stock Entry": {
         "before_validate": "mat_reco.stock_hooks.stock_entry_before_validate",
@@ -298,3 +301,5 @@ after_migrate = [
 jinja = {"methods": ["mat_reco.printing.render_mat_reco_a4"]}
 after_migrate.append("mat_reco.printing.install_print_formats")
 after_install = "mat_reco.printing.install_print_formats"
+
+after_migrate.append("mat_reco.material_reconfiguration.services.task_notifications.install_task_notifications")

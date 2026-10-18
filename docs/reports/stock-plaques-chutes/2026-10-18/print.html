@@ -1,0 +1,27 @@
+<style>
+@page {size:A4 landscape;margin:12mm;}
+.ug-stock-print {font:10px Arial,sans-serif;color:#111;}
+.ug-stock-print h2 {font-size:20px;margin:0 0 8px;}
+.ug-stock-print .context {margin-bottom:12px;font-size:10px;}
+.ug-stock-print table {width:100%;table-layout:fixed;border-collapse:collapse;}
+.ug-stock-print th,.ug-stock-print td {border:0.6pt solid #777;padding:5px;vertical-align:top;overflow-wrap:anywhere;font-size:10px;}
+.ug-stock-print th {background:#eee;}
+.ug-stock-print .number {text-align:right;white-space:nowrap;}
+.ug-stock-print .total {font-weight:bold;background:#eee;}
+.ug-stock-print small {font-size:9px;color:#555;}
+.ug-stock-print thead {display:table-header-group;}
+.ug-stock-print tr {page-break-inside:avoid;}
+</style>
+<div class="ug-stock-print">
+<h2>Stock de Vitres — {{ frappe.utils.escape_html(filters.stock_type || 'Les deux') }}</h2>
+<div class="context">Édité le {{ frappe.datetime.str_to_user(frappe.datetime.now_datetime()) }}<br>
+Présentation : {{ frappe.utils.escape_html(filters.detail || 'Synthèse') }} · Société : {{ frappe.utils.escape_html(filters.company || 'Toutes') }} · Dépôt : {{ frappe.utils.escape_html(filters.warehouse || 'Tous') }} · Article primaire : {{ frappe.utils.escape_html(filters.primary_item || 'Tous') }}<br>
+Stock physique actuel ; réservations non déduites. Surface nette après retrait de l’évidement des chutes en L. Les surfaces inconnues sont exclues du total de surface.</div>
+<table><colgroup><col style="width:26%"><col style="width:7%"><col style="width:15%"><col style="width:5%"><col style="width:9%"><col style="width:16%">{% if filters.detail === 'Détail par série' %}<col style="width:13%">{% endif %}<col></colgroup>
+<thead><tr><th>Article / désignation</th><th>Type</th><th>Dimensions (mm)<br>L × H × Ép.</th><th>Qté</th><th>Surface m²</th><th>Dépôt</th>{% if filters.detail === 'Détail par série' %}<th>N° série</th>{% endif %}<th>Observation</th></tr></thead>
+<tbody>{% for (var i=0;i<original_data.length;i++) { var row=original_data[i]; var total=row.item_name === 'TOTAL'; %}
+<tr class="{{ total ? 'total' : '' }}"><td>{{ frappe.utils.escape_html(row.item_name || '') }}{% if !total %}<br><small>{{ frappe.utils.escape_html(row.primary_item || '') }}{% if row.item_code !== row.primary_item %} · {{ frappe.utils.escape_html(row.item_code || '') }}{% endif %}</small>{% endif %}</td>
+<td>{{ frappe.utils.escape_html(row.stock_type || '') }}</td><td>{% if !total %}{{ format_number(row.length_mm, null, 0) }} × {{ format_number(row.width_mm, null, 0) }} × {{ format_number(row.thickness_mm, null, 2) }}{% if row.removed_length_mm %}<br><small>Retrait : {{ format_number(row.removed_length_mm, null, 0) }} × {{ format_number(row.removed_width_mm, null, 0) }}</small>{% endif %}{% endif %}</td>
+<td class="number">{{ format_number(row.qty, null, 0) }}</td><td class="number">{{ row.area_m2 == null ? '—' : format_number(row.area_m2, null, 4) }}</td><td>{{ frappe.utils.escape_html(row.warehouse || '') }}</td>{% if filters.detail === 'Détail par série' %}<td>{{ frappe.utils.escape_html(row.serial_no || '') }}</td>{% endif %}<td>{{ frappe.utils.escape_html(row.note || '') }}</td></tr>
+{% } %}</tbody></table>
+</div>

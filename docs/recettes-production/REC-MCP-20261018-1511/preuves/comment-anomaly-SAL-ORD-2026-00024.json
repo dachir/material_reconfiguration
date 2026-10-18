@@ -1,0 +1,21 @@
+{
+  "name": "3tnufek0sr",
+  "owner": "richard.dodzi@invocom.me",
+  "creation": "2026-10-18 15:27:59.829274",
+  "modified": "2026-10-18 15:27:59.829274",
+  "modified_by": "richard.dodzi@invocom.me",
+  "docstatus": 0,
+  "idx": 0,
+  "comment_type": "Comment",
+  "comment_email": "richard.dodzi@invocom.me",
+  "subject": null,
+  "comment_by": null,
+  "published": 0,
+  "seen": 0,
+  "reference_doctype": "Sales Order",
+  "reference_name": "SAL-ORD-2026-00024",
+  "reference_owner": null,
+  "content": "<p><strong>REC-MCP-20261018-1511 — RECETTE PRODUCTION / ANOMALIE D’AFFECTATION</strong></p><p>3 chantiers, 6 devis, 6 commandes, 103 verres et 2 MCP exécutés. Les assemblages MAT-STE-2026-00071 et MAT-STE-2026-00076 ont consommé 6 séries initialement affectées à d’autres lignes de commande du même test. Le solde de SAL-ORD-2026-00024 requiert désormais 4 séries de substitution identiques (1200 × 900 × 10 mm). 64 / 74 ouvrages livrés à ce stade ; aucune substitution exécutée. Accord complémentaire demandé à l’utilisateur. Défaut non corrigé pendant la recette. Le rapport détaillé sera joint au MCP 26MCP1000137.</p>",
+  "ip_address": null,
+  "doctype": "Comment"
+}

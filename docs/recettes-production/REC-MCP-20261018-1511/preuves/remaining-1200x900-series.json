@@ -1,0 +1,34 @@
+[
+  {
+    "name": "WC-5a994bd1cd7c559789cff5049448",
+    "item_code": "DVC10MMC",
+    "warehouse": "Stores - UG",
+    "custom_dimension_length_mm": 1200.0,
+    "custom_dimension_width_mm": 900.0,
+    "custom_dimension_thickness_mm": 10.0
+  },
+  {
+    "name": "WC-c93ab3b33b6d32c4d5d92ea21c51",
+    "item_code": "DVC10MMC",
+    "warehouse": "Stores - UG",
+    "custom_dimension_length_mm": 1200.0,
+    "custom_dimension_width_mm": 900.0,
+    "custom_dimension_thickness_mm": 10.0
+  },
+  {
+    "name": "WC-d43914cb1982bcc52bff9a31b918",
+    "item_code": "DVC10MMC",
+    "warehouse": "Stores - UG",
+    "custom_dimension_length_mm": 1200.0,
+    "custom_dimension_width_mm": 900.0,
+    "custom_dimension_thickness_mm": 10.0
+  },
+  {
+    "name": "WC-e7c947a9789477e781370a4185f2",
+    "item_code": "DVC10MMC",
+    "warehouse": "Stores - UG",
+    "custom_dimension_length_mm": 1200.0,
+    "custom_dimension_width_mm": 900.0,
+    "custom_dimension_thickness_mm": 10.0
+  }
+]

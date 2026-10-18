@@ -6,3 +6,5 @@
 .ug-glass .glass-toggle:disabled{opacity:1;cursor:default}
 
 .glass-serial{display:flex;align-items:center;gap:9px}.glass-serial>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.glass-offcut-icon{width:24px;height:24px;flex:0 0 24px;color:#a8dce8}
+
+.glass-stock-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.glass-print{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:48px;border:1px solid var(--line);border-radius:7px;background:#1b2832;color:#e5edf4;cursor:pointer}.glass-print:hover{background:#263a47}

@@ -75,6 +75,32 @@
    "label": "Instructions pour les sections",
    "fieldtype": "Long Text",
    "default": "Proposer uniquement une arborescence de sections et sous-sections de chantier. Conserver les noms et l’ordre présents dans le descriptif ou les plans. Ne pas créer d’ouvrages. Signaler les ambiguïtés et les libellés illisibles sans inventer de pièces. La proposition doit être validée par l’utilisateur avant création."
+  },
+  {
+   "fieldname": "task_notification_section",
+   "fieldtype": "Section Break",
+   "label": "Notifications et tâches Univers Glass"
+  },
+  {
+   "fieldname": "technical_notification_role",
+   "fieldtype": "Link",
+   "options": "Role",
+   "label": "Rôle responsable des fiches techniques",
+   "description": "Tous les utilisateurs actifs de ce rôle ayant accès à la fiche reçoivent une notification et une tâche."
+  },
+  {
+   "fieldname": "workshop_notification_role",
+   "fieldtype": "Link",
+   "options": "Role",
+   "label": "Rôle responsable du cockpit atelier",
+   "description": "Notifié dès la création des commandes contenant des articles vitrés."
+  },
+  {
+   "fieldname": "chantier_notification_role",
+   "fieldtype": "Link",
+   "options": "Role",
+   "label": "Rôle de validation des chantiers",
+   "description": "Les utilisateurs actifs de ce rôle disposant déjà du droit de valider le chantier sont notifiés après validation de sa fiche technique."
   }
  ],
  "field_order": [
@@ -88,7 +114,11 @@
   "timeout_seconds",
   "max_output_tokens",
   "temperature",
-  "section_instructions"
+  "section_instructions",
+  "task_notification_section",
+  "chantier_notification_role",
+  "technical_notification_role",
+  "workshop_notification_role"
  ],
  "permissions": [
   {

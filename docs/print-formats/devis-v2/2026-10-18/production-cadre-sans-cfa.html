@@ -1,0 +1,805 @@
+<html><head><meta charset="utf-8"><style>@media screen {
+	.print-format-gutter {
+		background-color: #d1d8dd;
+		padding: 30px 0px;
+	}
+	.print-format {
+		background-color: white;
+		border-radius: 8px;
+		max-width: 8.3in;
+		min-height: 11.69in;
+		padding: 0.75in;
+		margin: auto;
+		color: var(--gray-900);
+	}
+
+	.print-format.landscape {
+		max-width: 11.69in;
+		padding: 0.2in;
+	}
+
+	.page-break {
+		/* padding: 15px 0px; */
+		border-bottom: 1px dashed #888;
+	}
+
+	/* .page-break:first-child {
+		padding-top: 0px;
+	} */
+
+	.page-break:last-child {
+		border-bottom: 0px;
+	}
+
+	/* mozilla hack for images in table */
+	body:last-child .print-format td img {
+		width: 100% !important;
+	}
+
+	@media(max-width: 767px) {
+		.print-format {
+			padding: 0.2in;
+		}
+	}
+}
+
+@media print {
+	.print-format p {
+		margin-left: 1px;
+		margin-right: 1px;
+	}
+}
+
+.disabled-check {
+	color: #eee;
+}
+
+.data-field {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.data-field .value {
+	word-wrap: break-word;
+}
+
+.important .value {
+	font-size: 120%;
+	font-weight: bold;
+}
+
+.important label {
+	line-height: 1.8;
+	margin: 0px;
+}
+
+.table {
+	font-size: inherit;
+	margin: 20px 0px;
+}
+
+.checkbox-options {
+	columns: var(--checkbox-options-columns);
+}
+
+.square-image {
+	width: 100%;
+	height: 0;
+	padding: 50% 0;
+	background-size: contain;
+	/*background-size: cover;*/
+	background-repeat: no-repeat !important;
+	background-position: center center;
+	border-radius: 4px;
+}
+
+.print-item-image {
+	object-fit: contain;
+}
+
+.pdf-variables,
+.pdf-variable,
+.visible-pdf {
+	display: none !important;
+}
+
+.print-format {
+	font-size: 9pt;
+	font-family: Inter, "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
+	-webkit-print-color-adjust:exact;
+}
+
+.page-break {
+	page-break-after: always;
+}
+
+.print-heading {
+	border-bottom: 1px solid #aaa;
+	margin-bottom: 10px;
+}
+
+.print-heading h2 {
+	margin: 0px;
+}
+.print-heading h4 {
+	margin-top: 5px;
+}
+
+table.no-border, table.no-border td {
+	border: 0px;
+}
+
+.print-format label {
+	/* wkhtmltopdf breaks label into multiple lines when it is inline-block */
+	display: block;
+	font-weight: 700;
+}
+
+.print-format img {
+	max-width: 100%;
+}
+
+.print-format table td > .primary:first-child {
+	font-weight: bold;
+}
+
+.print-format td, .print-format th {
+	vertical-align: top !important;
+	padding: 6px !important;
+}
+
+.print-format p {
+	margin: 3px 0px 3px;
+}
+
+.print-format table td pre {
+	white-space: normal;
+	word-break: normal;
+}
+
+table td div {
+	
+	/* needed to avoid partial cutting of text between page break in wkhtmltopdf */
+	page-break-inside: avoid !important;
+	
+}
+
+/* hack for webkit specific browser */
+@media (-webkit-min-device-pixel-ratio:0) {
+	thead, tfoot {
+		display: table-header-group;
+	}
+}
+
+[document-status] {
+	margin-bottom: 5mm;
+}
+
+.signature-img {
+	background: #fff;
+	border-radius: 3px;
+	margin-top: 5px;
+	max-height: 150px;
+}
+
+.print-format-preview [data-fieldtype="Table"] {
+	overflow: auto;
+}
+.print-format {
+    font-size: 13px;
+    background: white;
+}
+
+.print-heading {
+    border-bottom: 1px solid #f4f5f6;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.print-heading h2 {
+    font-size: 24px;
+}
+
+.print-heading h2 div {
+    font-weight: 600;
+}
+
+.print-heading small {
+    font-size: 13px !important;
+    font-weight: normal;
+    line-height: 2.5;
+    color: #4c5a67;
+}
+
+.print-format .letter-head {
+    margin-bottom: 30px;
+}
+
+.print-format label {
+    font-weight: normal;
+    font-size: 13px;
+    color: #4C5A67;
+    margin-bottom: 0;
+}
+
+.print-format .data-field {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.print-format .value {
+    color: #192734;
+    line-height: 1.8;
+}
+
+.print-format .section-break:not(:last-child) {
+    margin-bottom: 0;
+}
+
+.print-format .row:not(.section-break) {
+    line-height: 1.6;
+    margin-top: 15px !important;
+}
+
+.print-format .important .value {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.print-format th {
+    color: #74808b;
+    font-weight: normal;
+    border-bottom-width: 1px !important;
+}
+
+.print-format .table-bordered td, .print-format .table-bordered th {
+    border: 1px solid #f4f5f6;
+}
+
+.print-format .table-bordered {
+    border: 1px solid #f4f5f6;
+}
+
+.print-format td, .print-format th {
+    padding: 10px !important;
+}
+
+.print-format .primary.compact-item {
+    font-weight: normal;
+}
+
+.print-format table td .value {
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+
+.print-format {
+    padding: 15px !important;
+}
+
+body {
+    color: #000;
+    margin: 0;
+}
+
+body * {
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 10px;
+    line-height: 1.5em;
+    box-sizing: border-box;
+}
+
+.logo-wrap {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.logo {
+    max-width: 90px;
+    max-height: 60px;
+}
+
+.doc-title {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 8px 0 10px 6px;
+}
+
+table.outer {
+    width: 100%;
+    border: none;
+    margin-bottom: 18px;
+}
+
+table.outer td {
+    vertical-align: top;
+    padding: 4px 8px;
+}
+
+.no-border,
+.no-border td,
+.no-border th {
+    border: none !important;
+}
+
+.left-info,
+.right-info {
+    width: 50%;
+}
+
+.left-info div,
+.right-info div {
+    margin-bottom: 3px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.data-table th,
+.data-table td {
+    border: 0.4pt solid #dedede;
+    padding: 6px !important;
+    text-align: center;
+}
+
+.data-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.items-table {
+    margin-top: 8px;
+}
+
+.totals-row td {
+    height: 28px;
+}
+
+.label-cell {
+    font-weight: bold;
+}
+
+.summary-table {
+    margin-top: 40px;
+}
+
+.terms {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 28px;
+    padding-top: 10px;
+    line-height: 1.8;
+}
+
+.footer {
+    border-top: 0.4pt solid #dedede;
+    font-size: 10px;
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 8px;
+    line-height: 1.6;
+}
+/* One commercial line and its related services/accessories form one group. */
+.items-table tbody.item-group { page-break-inside: avoid; break-inside: avoid; }
+.items-table tbody.item-group > tr > td { border-top: none !important; border-bottom: none !important; }
+.items-table tbody.item-group > tr:first-child > td { border-top: 0.4pt solid #dedede !important; }
+.items-table .related-row td { padding-top: 3px !important; padding-bottom: 3px !important; }
+.items-table .related-row td.text-left { padding-left: 14px !important; color: #555; }
+.items-table .items-totals td { border-top: 0.4pt solid #dedede !important; }
+.summary-table { margin-top: 22px; }
+.summary-table th, .summary-table td { padding: 5px !important; }
+.net-payable { font-weight: bold; }
+
+/* Keep currency amounts together on one line. */
+.items-table td:nth-last-child(-n+3), .summary-table td { white-space: nowrap; }
+
+/* Strong frame and column borders; subtle horizontal article-group boundaries. */
+.data-table { border: 0.75pt solid #777 !important; }
+.data-table th, .data-table td { border-left: 0.75pt solid #777 !important; border-right: 0.75pt solid #777 !important; }
+.data-table thead th { border-top: 0.75pt solid #777 !important; border-bottom: 0.75pt solid #777 !important; }
+.items-table tbody.item-group > tr > td { border-top: none !important; border-bottom: none !important; }
+.items-table tbody.item-group > tr:first-child > td { border-top: 0.4pt solid #dedede !important; }
+.items-table .items-totals td { border-top: 0.75pt solid #777 !important; }
+.summary-table td { border-top: 0.75pt solid #777 !important; border-bottom: 0.75pt solid #777 !important; }
+</style></head><body>
+<div class="print-format">
+
+    <div class="logo-wrap">
+        <img src="/files/DAL ALU Logo.jpg" class="logo">
+    </div>
+
+    <div class="doc-title">DEVIS</div>
+
+    <table class="outer no-border info-table">
+        <tr>
+            <td class="left-info">
+                <div><b>N° Proforma :</b> SAL-QTN-2026-00029</div>
+                <div><b>Référence :</b> </div>
+                <div><b>Date :</b> 18-10-2026</div>
+            </td>
+            <td class="right-info">
+                <div><b>Client :</b> COTE D'IVOIRE AGENCEMENT</div>
+                <div><b>Téléphone :</b> </div>
+                <div><b>Adresse :</b> ZONE 4<br>
+ZONE 4<br>
+Ivory Coast<br>
+<br>
+</div>
+                <div><b>N° CC :</b> </div>
+            </td>
+        </tr>
+    </table>
+
+    
+    
+    
+    <table class="data-table items-table">
+        <thead><tr><th>Référence</th><th>Désignation</th><th>Qté</th><th>L</th><th>H</th><th>M²</th><th>M.L.</th><th>P.U.</th><th>Rem.</th><th>Montant HT</th></tr></thead>
+        
+        <tbody class="item-group">
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="parent-row" data-row-name="9lnjcii7ek" data-parent-row="">
+            <td>DPV10MM</td>
+            <td class="text-left">DECOUPE PARSOL VERT 10 MM</td>
+            <td>1</td>
+            <td>1 000</td>
+            <td>800</td>
+            <td>0.8000</td>
+            <td>3.60</td>
+            <td>80,000</td>
+            <td>0</td>
+            <td>80,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnjjbdjcq" data-parent-row="9lnjcii7ek">
+            <td>SC0001</td>
+            <td class="text-left">RABOTAGE</td>
+            <td>3.6</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>5,000</td>
+            <td>0</td>
+            <td>18,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnjnd9f2r" data-parent-row="9lnjcii7ek">
+            <td>SC0004</td>
+            <td class="text-left">TROUS</td>
+            <td>1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>500</td>
+            <td>0</td>
+            <td>500</td>
+        </tr>
+    
+            
+        </tbody>
+        
+        <tbody class="item-group">
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="parent-row" data-row-name="9lnj8m7oom" data-parent-row="">
+            <td>DPV10MM</td>
+            <td class="text-left">DECOUPE PARSOL VERT 10 MM</td>
+            <td>1</td>
+            <td>500</td>
+            <td>600</td>
+            <td>0.3000</td>
+            <td>2.20</td>
+            <td>50,000</td>
+            <td>0</td>
+            <td>50,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnjp4n9qc" data-parent-row="9lnj8m7oom">
+            <td>SC0001</td>
+            <td class="text-left">RABOTAGE</td>
+            <td>2.2</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>5,000</td>
+            <td>0</td>
+            <td>11,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnj359n1d" data-parent-row="9lnj8m7oom">
+            <td>SC0004</td>
+            <td class="text-left">TROUS</td>
+            <td>1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>500</td>
+            <td>0</td>
+            <td>500</td>
+        </tr>
+    
+            
+        </tbody>
+        
+        <tbody class="item-group">
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="parent-row" data-row-name="9lnj1uqrbf" data-parent-row="">
+            <td>DPV10MM</td>
+            <td class="text-left">DECOUPE PARSOL VERT 10 MM</td>
+            <td>1</td>
+            <td>1 200</td>
+            <td>1 000</td>
+            <td>1.2000</td>
+            <td>4.40</td>
+            <td>100,000</td>
+            <td>0</td>
+            <td>100,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnje2kt0b" data-parent-row="9lnj1uqrbf">
+            <td>SC0001</td>
+            <td class="text-left">RABOTAGE</td>
+            <td>4.4</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>5,000</td>
+            <td>0</td>
+            <td>22,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnjnlf4m4" data-parent-row="9lnj1uqrbf">
+            <td>SC0004</td>
+            <td class="text-left">TROUS</td>
+            <td>1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>500</td>
+            <td>0</td>
+            <td>500</td>
+        </tr>
+    
+            
+        </tbody>
+        
+        <tbody class="item-group">
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="parent-row" data-row-name="9lnj0i6e66" data-parent-row="">
+            <td>DPV10MM</td>
+            <td class="text-left">DECOUPE PARSOL VERT 10 MM</td>
+            <td>2</td>
+            <td>600</td>
+            <td>600</td>
+            <td>0.3600</td>
+            <td>2.40</td>
+            <td>80,000</td>
+            <td>0</td>
+            <td>160,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnjv5636l" data-parent-row="9lnj0i6e66">
+            <td>SC0001</td>
+            <td class="text-left">RABOTAGE</td>
+            <td>4.8</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>5,000</td>
+            <td>0</td>
+            <td>24,000</td>
+        </tr>
+    
+            
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <tr class="related-row" data-row-name="9lnj015m6t" data-parent-row="9lnj0i6e66">
+            <td>SC0004</td>
+            <td class="text-left">TROUS</td>
+            <td>1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>500</td>
+            <td>0</td>
+            <td>500</td>
+        </tr>
+    
+            
+        </tbody>
+        
+        <tbody class="items-totals"><tr class="totals-row">
+            <td colspan="5" class="label-cell text-left">TOTAL</td>
+            <td>3.0200</td>
+            <td>15.00</td>
+            <td></td>
+            <td>0</td>
+            <td>467,000</td>
+        </tr></tbody>
+    </table>
+
+    
+    <table class="data-table summary-table">
+        <thead><tr>
+            <th>TOTAL HT</th><th>REMISE COMPL.</th><th>TOTAL HT NET</th>
+            
+            <th>TOTAL TTC</th>
+            
+            <th>NET À PAYER</th>
+        </tr></thead>
+        <tbody><tr>
+            <td>467,000</td>
+            <td>0</td>
+            <td>467,000</td>
+            
+            <td>467,000</td>
+            
+            <td class="net-payable">467,000</td>
+        </tr></tbody>
+    </table>
+
+    <div class="terms">
+        <div>Les articles vendus ne sont ni repris ni échangés.</div>
+        <div>
+            Arrêté le présent devis à la somme de :
+            XOF Four Hundred And Sixty Seven Thousand only.
+        </div>
+    </div>
+
+    <div class="footer">
+        DAL-ALU KINSHASA SARL<br>
+        N° Impôt A2409344Y - ID Nat 05-H5300-N43768E - RCCM CD/KIN/RCCM/24-B-06887<br>
+        20, Avenue Colonel Mondjiba, Kinshasa Ngaliema - RDC<br>
+        Téléphone : 0999781511 / 0813334291<br>
+        Email : dalalurdc@gmail.com
+    </div>
+
+</div></body></html>

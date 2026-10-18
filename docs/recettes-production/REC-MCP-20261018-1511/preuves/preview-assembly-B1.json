@@ -1,0 +1,59 @@
+{
+  "sales_order": "SAL-ORD-2026-00027",
+  "node_id": "SAL-ORD-2026-00027",
+  "qty": 2,
+  "action": "repack",
+  "movements": [
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-eb59c2f7a5c7cc3623ff741e1390",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-b270f3010c9988c6ba1fefdd39d0",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-040a15cbe760933dc4238bf0bb91",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-13cebb3eb44e1fb68ee848469005",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "qty": 2,
+      "warehouse": "Stores - UG",
+      "serial_no": "Créé par l’assemblage précédent",
+      "direction": "Consommation"
+    }
+  ],
+  "shortages": [],
+  "tasks": [
+    {
+      "node_id": "9l2v8ov3rr:root",
+      "qty": 2,
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+      "warehouse": "Stores - UG"
+    }
+  ],
+  "message": "Assemblages des sous-ouvrages vers le parent.",
+  "version": "852bd24de476f1900d8762aef4c7911761e219642e9121259d88b95faeeada79"
+}

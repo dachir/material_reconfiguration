@@ -1,0 +1,136 @@
+{% macro amount_display(value, currency, precision=2) -%}
+{{ frappe.utils.fmt_money(value, precision=precision, currency=currency, format='#,###') if currency not in ('XOF','XAF') else frappe.utils.fmt_money(value, precision=0, format='#,###') }}
+{%- endmacro %}
+<div class="devis-v2-content">
+
+    <div class="logo-wrap">
+        <img src="/files/DAL ALU Logo.jpg" class="logo">
+    </div>
+
+    <div class="doc-title">DEVIS</div>
+
+    <table class="outer no-border info-table">
+        <tr>
+            <td class="left-info">
+                <div><b>N° Proforma :</b> {{ doc.name or "" }}</div>
+                <div><b>Référence :</b> {{ doc.get("custom_reference") or "" }}</div>
+                <div><b>Date :</b> {{ frappe.utils.formatdate(doc.get("transaction_date")) if doc.get("transaction_date") else "" }}</div>
+            </td>
+            <td class="right-info">
+                <div><b>Client :</b> {{ doc.get("customer_name") or doc.get("party_name") or doc.get("customer") or "" }}</div>
+                <div><b>Téléphone :</b> {{ doc.get("custom_phone_number") or "" }}</div>
+                <div><b>Adresse :</b> {{ doc.get("address_display") or "" }}</div>
+                <div><b>N° CC :</b> {{ doc.get("custom_n_cc") or "" }}</div>
+            </td>
+        </tr>
+    </table>
+
+    {% set ns = namespace(total_surface=0, total_ml=0, total_discount=0, airsi=0) %}
+    {% set item_names = doc.items | map(attribute='name') | list %}
+    {% macro item_row(item, related=false) %}
+        {% set extra = related or item.get('custom_is_service_row') or item.get('custom_is_accessory_row') %}
+        {% set l = 0 if extra else (item.get('custom_client_length_mm') or 0) | float %}
+        {% set h = 0 if extra else (item.get('custom_client_width_mm') or 0) | float %}
+        {% set qty = (item.get('qty') or 0) | float %}
+        {% set m2 = l * h / 1000000 %}
+        {% set ml = 2 * (l + h) / 1000 %}
+        {% set rem = (item.get('discount_amount') or 0) | float %}
+        {% set ns.total_surface = ns.total_surface + m2 * qty %}
+        {% set ns.total_ml = ns.total_ml + ml * qty %}
+        {% set ns.total_discount = ns.total_discount + rem * qty %}
+        <tr class="{{ 'related-row' if related else 'parent-row' }}" data-row-name="{{ item.name }}" data-parent-row="{{ item.get('custom_parent_row') or '' }}">
+            <td>{{ item.get('item_code') or '' }}</td>
+            <td class="text-left">{{ item.get('description') or item.get('item_name') or '' }}</td>
+            <td>{{ '{:g}'.format(qty) }}</td>
+            <td>{{ '{:,.0f}'.format(l).replace(',', ' ') if l else '' }}</td>
+            <td>{{ '{:,.0f}'.format(h).replace(',', ' ') if h else '' }}</td>
+            <td>{{ '{:,.4f}'.format(m2).replace(',', ' ') if l and h else '' }}</td>
+            <td>{{ '{:,.2f}'.format(ml).replace(',', ' ') if l and h else '' }}</td>
+            <td>{{ amount_display(item.get('rate') or 0, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            <td>{{ amount_display(rem, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            <td>{{ amount_display(item.get('amount') or 0, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+        </tr>
+    {% endmacro %}
+    <table class="data-table items-table">
+        <thead><tr><th>Référence</th><th>Désignation</th><th>Qté</th><th>L</th><th>H</th><th>M²</th><th>M.L.</th><th>P.U.</th><th>Rem.</th><th>Montant HT</th></tr></thead>
+        {% for parent in doc.items if not parent.get('custom_parent_row') or parent.get('custom_parent_row') not in item_names %}
+        <tbody class="item-group">
+            {{ item_row(parent) }}
+            {% for extra in doc.items if extra.get('custom_parent_row') == parent.name %}
+                {{ item_row(extra, true) }}
+            {% endfor %}
+        </tbody>
+        {% endfor %}
+        <tbody class="items-totals"><tr class="totals-row">
+            <td colspan="5" class="label-cell text-left">TOTAL</td>
+            <td>{{ '{:,.4f}'.format(ns.total_surface).replace(',', ' ') }}</td>
+            <td>{{ '{:,.2f}'.format(ns.total_ml).replace(',', ' ') }}</td>
+            <td></td>
+            <td>{{ amount_display(ns.total_discount, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            <td>{{ amount_display(doc.get('total') or 0, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+        </tr></tbody>
+    </table>
+
+    {% for tax in doc.get('taxes', []) %}
+        {% set identity = ((tax.get('description') or '') ~ ' ' ~ (tax.get('account_head') or '')) | upper %}
+        {% if 'AIRSI' in identity %}
+            {% set value = tax.get('tax_amount_after_discount_amount') if tax.get('tax_amount_after_discount_amount') is not none else (tax.get('tax_amount') or 0) %}
+            {% set ns.airsi = ns.airsi + value %}
+        {% endif %}
+    {% endfor %}
+    <table class="data-table summary-table">
+        <thead><tr>
+            <th>TOTAL HT</th><th>REMISE COMPL.</th><th>TOTAL HT NET</th>
+            {% for tax in doc.get('taxes', []) %}
+                {% set identity = ((tax.get('description') or '') ~ ' ' ~ (tax.get('account_head') or '')) | upper %}
+                {% if 'AIRSI' not in identity %}
+                    <th>{% if 'TVA' in identity or 'VAT' in identity or ((tax.get('description') or '') | trim | upper in ['METRIC', 'METRIC @ 18.0'] and 'VAT' in (doc.get('taxes_and_charges') or '') | upper) %}TVA{% else %}{{ tax.get('description') or tax.get('account_head') or 'Taxe' }}{% endif %}{% if tax.get('charge_type') != 'Actual' %} {{ '{:g}'.format(tax.get('rate') or 0) }} %{% endif %}</th>
+                {% endif %}
+            {% endfor %}
+            <th>TOTAL TTC</th>
+            {% for tax in doc.get('taxes', []) %}
+                {% set identity = ((tax.get('description') or '') ~ ' ' ~ (tax.get('account_head') or '')) | upper %}
+                {% if 'AIRSI' in identity %}<th>AIRSI{% if tax.get('charge_type') != 'Actual' %} {{ '{:g}'.format(tax.get('rate') or 0) }} %{% endif %}</th>{% endif %}
+            {% endfor %}
+            <th>NET À PAYER</th>
+        </tr></thead>
+        <tbody><tr>
+            <td>{{ amount_display(doc.get('total') or 0, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            <td>{{ amount_display(doc.get('discount_amount') or 0, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            <td>{{ amount_display(doc.get('net_total') or 0, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            {% for tax in doc.get('taxes', []) %}
+                {% set identity = ((tax.get('description') or '') ~ ' ' ~ (tax.get('account_head') or '')) | upper %}
+                {% if 'AIRSI' not in identity %}
+                    {% set value = tax.get('tax_amount_after_discount_amount') if tax.get('tax_amount_after_discount_amount') is not none else (tax.get('tax_amount') or 0) %}
+                    <td>{{ amount_display(value, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+                {% endif %}
+            {% endfor %}
+            <td>{{ amount_display((doc.get('grand_total') or 0) - ns.airsi, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+            {% for tax in doc.get('taxes', []) %}
+                {% set identity = ((tax.get('description') or '') ~ ' ' ~ (tax.get('account_head') or '')) | upper %}
+                {% if 'AIRSI' in identity %}
+                    {% set value = tax.get('tax_amount_after_discount_amount') if tax.get('tax_amount_after_discount_amount') is not none else (tax.get('tax_amount') or 0) %}
+                    <td>{{ amount_display(value, currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+                {% endif %}
+            {% endfor %}
+            <td class="net-payable">{{ amount_display(doc.get('rounded_total') if not doc.get('disable_rounded_total') and doc.get('rounded_total') else (doc.get('grand_total') or 0), currency=doc.currency, precision=0 if doc.currency in ('XOF', 'XAF') else 2) }}</td>
+        </tr></tbody>
+    </table>
+
+    <div class="terms">
+        <div>Les articles vendus ne sont ni repris ni échangés.</div>
+        <div>
+            Arrêté le présent devis à la somme de :
+            {{ doc.get("in_words") or "" }}
+        </div>
+    </div>
+
+    <div class="footer">
+        DAL-ALU KINSHASA SARL<br>
+        N° Impôt A2409344Y - ID Nat 05-H5300-N43768E - RCCM CD/KIN/RCCM/24-B-06887<br>
+        20, Avenue Colonel Mondjiba, Kinshasa Ngaliema - RDC<br>
+        Téléphone : 0999781511 / 0813334291<br>
+        Email : dalalurdc@gmail.com
+    </div>
+
+</div>

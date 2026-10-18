@@ -77,6 +77,12 @@
    "options": "Price List"
   },
   {
+   "fieldname": "taxes_and_charges",
+   "label": "Modèle de taxes",
+   "fieldtype": "Link",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
    "fieldname": "lines",
    "label": "Ouvrages proposés",
    "fieldtype": "Table",
@@ -129,6 +135,7 @@
   "description",
   "currency",
   "selling_price_list",
+  "taxes_and_charges",
   "lines",
   "technical_study",
   "commercial_hash",

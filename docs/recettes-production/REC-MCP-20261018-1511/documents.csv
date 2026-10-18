@@ -1,0 +1,40 @@
+﻿doctype;reference;etape;url
+Customer;CUST-2026-00014;client-test;https://fimaci.f.frappe.cloud/app/customer/CUST-2026-00014
+Chantier;26CHANT1000010;chantier-G;https://fimaci.f.frappe.cloud/app/chantier/26CHANT1000010
+Chantier Technical Study;6jtg124b2a;fiche-G;https://fimaci.f.frappe.cloud/app/chantier-technical-study/6jtg124b2a
+Chantier;26CHANT1000011;chantier-A;https://fimaci.f.frappe.cloud/app/chantier/26CHANT1000011
+Chantier Technical Study;6k00l0s860;fiche-A;https://fimaci.f.frappe.cloud/app/chantier-technical-study/6k00l0s860
+Chantier;26CHANT1000012;chantier-B;https://fimaci.f.frappe.cloud/app/chantier/26CHANT1000012
+Chantier Technical Study;4k2j2gtamo;fiche-B;https://fimaci.f.frappe.cloud/app/chantier-technical-study/4k2j2gtamo
+Quotation;SAL-QTN-2026-00030;devis-G1;https://fimaci.f.frappe.cloud/app/quotation/SAL-QTN-2026-00030
+Sales Order;SAL-ORD-2026-00024;commande-G1;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00024
+Quotation;SAL-QTN-2026-00031;devis-G2;https://fimaci.f.frappe.cloud/app/quotation/SAL-QTN-2026-00031
+Sales Order;SAL-ORD-2026-00025;commande-G2;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00025
+Quotation;SAL-QTN-2026-00032;devis-A1;https://fimaci.f.frappe.cloud/app/quotation/SAL-QTN-2026-00032
+Sales Order;SAL-ORD-2026-00026;commande-A1;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00026
+Quotation;SAL-QTN-2026-00033;devis-B1;https://fimaci.f.frappe.cloud/app/quotation/SAL-QTN-2026-00033
+Sales Order;SAL-ORD-2026-00027;commande-B1;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00027
+Material Cutting Plan;26MCP1000137;mcp-simulation-1;https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000137
+Stock Entry;MAT-STE-2026-00066;repack-mcp-1;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00066
+Stock Entry;MAT-STE-2026-00067;assemblage-G1;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00067
+Stock Entry;MAT-STE-2026-00068;assemblage-G1;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00068
+Stock Entry;MAT-STE-2026-00069;assemblage-G2;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00069
+Stock Entry;MAT-STE-2026-00070;assemblage-G2;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00070
+Stock Entry;MAT-STE-2026-00071;assemblage-A1;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00071
+Stock Entry;MAT-STE-2026-00072;assemblage-B1;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00072
+Delivery Note;MAT-DN-2026-00006;livraison-brouillon-G1-partielle;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00006
+Quotation;SAL-QTN-2026-00034;devis-G3;https://fimaci.f.frappe.cloud/app/quotation/SAL-QTN-2026-00034
+Sales Order;SAL-ORD-2026-00028;commande-G3;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00028
+Quotation;SAL-QTN-2026-00035;devis-A2;https://fimaci.f.frappe.cloud/app/quotation/SAL-QTN-2026-00035
+Sales Order;SAL-ORD-2026-00029;commande-A2;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00029
+Delivery Note;MAT-DN-2026-00007;livraison-brouillon-G2-totale;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00007
+Delivery Note;MAT-DN-2026-00008;livraison-brouillon-A1-totale;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00008
+Delivery Note;MAT-DN-2026-00009;livraison-brouillon-B1-totale;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00009
+Material Cutting Plan;26MCP1000138;mcp-simulation-2;https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000138
+Stock Entry;MAT-STE-2026-00073;repack-mcp-2;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00073
+Stock Entry;MAT-STE-2026-00074;assemblage-G3;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00074
+Stock Entry;MAT-STE-2026-00075;assemblage-G3;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00075
+Stock Entry;MAT-STE-2026-00076;assemblage-A2;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00076
+Delivery Note;MAT-DN-2026-00010;livraison-brouillon-G3-totale;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00010
+Delivery Note;MAT-DN-2026-00011;livraison-brouillon-A2-totale;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00011
+Delivery Note;MAT-DN-2026-00012;livraison-brouillon-G1-solde;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00012

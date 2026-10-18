@@ -1,0 +1,169 @@
+{
+  "sales_order": "SAL-ORD-2026-00024",
+  "node_id": "SAL-ORD-2026-00024",
+  "qty": 8,
+  "action": "repack",
+  "movements": [
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-1e9c7327925933159a4a736b18c8",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-af4ab5181e7cabc12094e6f4928d",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-b551a9825c3b90496cc8c4267965",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-2fd3c03f08ccf5da0ed0364e3d5e",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-88dba823f8120e0ac38ddfed5b1e",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-3c050d65de1bb641ef010744c31a",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-289bb0113c78d1240ef87bd8ba1d",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-e6cf4ae4a78e0e6e1d087b266031",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-89c5a06df02cd919f0138527c13a",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-e60e9c78f74a1dcd99c7a28b33ed",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-4aa6bb0a310afee4999f6e26fa7a",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-a239d012e7a37c9168c7d01d8fe9",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "qty": 6,
+      "warehouse": "Stores - UG",
+      "serial_no": "Créé par l’assemblage précédent",
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-bdf8f15a986c2fd1177f48aa1b85",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-f3da7393828e53e6f9f4b2c631b5",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-d765b40506e79797132a2bb327a0",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "DVC10MMC",
+      "qty": 1.0,
+      "warehouse": "Stores - UG",
+      "serial_no": "WC-c65cc11de71c3b014988e14ee232",
+      "batch_no": null,
+      "direction": "Consommation"
+    },
+    {
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "qty": 2,
+      "warehouse": "Stores - UG",
+      "serial_no": "Créé par l’assemblage précédent",
+      "direction": "Consommation"
+    }
+  ],
+  "shortages": [],
+  "tasks": [
+    {
+      "node_id": "5kpkbesf95:root",
+      "qty": 6,
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+      "warehouse": "Stores - UG"
+    },
+    {
+      "node_id": "5kpkefc7qj:root",
+      "qty": 2,
+      "item_code": "REC-MCP-20261018-1511-DV32",
+      "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+      "warehouse": "Stores - UG"
+    }
+  ],
+  "message": "Assemblages des sous-ouvrages vers le parent.",
+  "version": "06d6e8fd5951272e24143156279c255d22313e987fdf043187c2982a2b7fc062"
+}

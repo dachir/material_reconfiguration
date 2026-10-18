@@ -1,0 +1,35 @@
+[
+  {
+    "label": "Dépassement de devis chantier G",
+    "ok": true,
+    "error": "417 frappe.exceptions.ValidationError: Tous les ouvrages de ce chantier sont déjà au devis.",
+    "count_before": 3,
+    "count_after": 3
+  },
+  {
+    "label": "Dépassement de devis chantier A",
+    "ok": true,
+    "error": "417 frappe.exceptions.ValidationError: Tous les ouvrages de ce chantier sont déjà au devis.",
+    "count_before": 2,
+    "count_after": 2
+  },
+  {
+    "label": "Dépassement de devis chantier B",
+    "ok": true,
+    "error": "417 frappe.exceptions.ValidationError: Tous les ouvrages de ce chantier sont déjà au devis.",
+    "count_before": 1,
+    "count_after": 1
+  },
+  {
+    "label": "Sélecteur MCP propose uniquement les deux commandes tardives",
+    "ok": true,
+    "actual": [
+      "SAL-ORD-2026-00028",
+      "SAL-ORD-2026-00029"
+    ],
+    "expected": [
+      "SAL-ORD-2026-00028",
+      "SAL-ORD-2026-00029"
+    ]
+  }
+]

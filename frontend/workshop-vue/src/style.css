@@ -193,7 +193,8 @@
 	margin-top: 4px;
 	height: 33px;
 }
-.ug-filters > button {
+.ug-filters > button,
+.ug-filter-actions > button {
 	height: 35px;
 }
 .ug-switch {
@@ -936,3 +937,6 @@
  outline-offset: 3px;
 }
 .ug-chantiers input[type="checkbox"]:disabled { opacity: .55; cursor: default; }
+
+.ug-filter-actions {display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.ug-filter-actions .ug-print-stock {width:35px;padding:0;display:inline-flex;align-items:center;justify-content:center;}

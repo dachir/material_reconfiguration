@@ -1,0 +1,17 @@
+{
+  "name": "djsoq0a5ts",
+  "owner": "richard.dodzi@invocom.me",
+  "creation": "2026-10-18 15:11:11.258659",
+  "modified": "2026-10-18 15:11:11.258659",
+  "modified_by": "richard.dodzi@invocom.me",
+  "docstatus": 0,
+  "idx": 0,
+  "chantier": "26CHANT1000010",
+  "section_name": "Zone 1 — façades",
+  "parent_chantier_section": null,
+  "is_group": 0,
+  "lft": 7,
+  "rgt": 8,
+  "old_parent": "",
+  "doctype": "Chantier Section"
+}

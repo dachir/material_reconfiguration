@@ -1,0 +1,33 @@
+{
+  "id": "ANOMALIE-01",
+  "title": "Consommation de deux séries réservées à une autre commande de recette",
+  "mcp": "26MCP1000137",
+  "mcp_repack": "MAT-STE-2026-00066",
+  "assembly": "MAT-STE-2026-00071",
+  "affected_order": "SAL-ORD-2026-00024",
+  "assembly_order": "SAL-ORD-2026-00026",
+  "inputs": [
+    {
+      "serial_no": "WC-82504f54b463639c236b40889661",
+      "mcp_assignment": {
+        "sales_order_item": "5kpk9vst89",
+        "item_code": "DVC10MMC"
+      },
+      "consumed_in": "MAT-STE-2026-00071",
+      "assembly_sales_order": "SAL-ORD-2026-00026",
+      "row_sales_order_item": "3l0prhcder"
+    },
+    {
+      "serial_no": "WC-5eb1bc802dabcb815f3049007727",
+      "mcp_assignment": {
+        "sales_order_item": "5kpk9vst89",
+        "item_code": "DVC10MMC"
+      },
+      "consumed_in": "MAT-STE-2026-00071",
+      "assembly_sales_order": "SAL-ORD-2026-00026",
+      "row_sales_order_item": "3l0prhcder"
+    }
+  ],
+  "impact": "Le solde de G01 de SAL-ORD-2026-00024 requiert 4 pièces ; seules 2 de ses séries affectées restent en stock. Deux séries du test affectées à A1 et de mêmes dimensions restent disponibles. Substitution non exécutée, accord demandé.",
+  "hypothesis": "Dans _fresh_request, ownership est recalculé à partir des seules commandes présentes dans roots, qui exclut les commandes entièrement produites. Les séries de G1 deviennent alors non affectées pour les actions suivantes. À confirmer dans le code effectivement déployé."
+}

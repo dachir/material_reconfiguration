@@ -1,0 +1,2315 @@
+{
+  "run": "REC-MCP-20261018-1511",
+  "site": "https://fimaci.f.frappe.cloud",
+  "created": [
+    {
+      "doctype": "Customer",
+      "name": "CUST-2026-00014",
+      "stage": "client-test"
+    },
+    {
+      "doctype": "Chantier",
+      "name": "26CHANT1000010",
+      "stage": "chantier-G"
+    },
+    {
+      "doctype": "Chantier Section",
+      "name": "djsoq0a5ts",
+      "stage": "section-G"
+    },
+    {
+      "doctype": "Chantier Section",
+      "name": "1jt26erfq6",
+      "stage": "section-G"
+    },
+    {
+      "doctype": "Chantier Technical Study",
+      "name": "6jtg124b2a",
+      "stage": "fiche-G"
+    },
+    {
+      "doctype": "Chantier",
+      "name": "26CHANT1000011",
+      "stage": "chantier-A"
+    },
+    {
+      "doctype": "Chantier Section",
+      "name": "fjvatuchtp",
+      "stage": "section-A"
+    },
+    {
+      "doctype": "Chantier Section",
+      "name": "7jvk1te883",
+      "stage": "section-A"
+    },
+    {
+      "doctype": "Chantier Technical Study",
+      "name": "6k00l0s860",
+      "stage": "fiche-A"
+    },
+    {
+      "doctype": "Chantier",
+      "name": "26CHANT1000012",
+      "stage": "chantier-B"
+    },
+    {
+      "doctype": "Chantier Section",
+      "name": "6k1spns35q",
+      "stage": "section-B"
+    },
+    {
+      "doctype": "Chantier Section",
+      "name": "1k28nd72hn",
+      "stage": "section-B"
+    },
+    {
+      "doctype": "Chantier Technical Study",
+      "name": "4k2j2gtamo",
+      "stage": "fiche-B"
+    },
+    {
+      "doctype": "Quotation",
+      "name": "SAL-QTN-2026-00030",
+      "stage": "devis-G1"
+    },
+    {
+      "doctype": "Sales Order",
+      "name": "SAL-ORD-2026-00024",
+      "stage": "commande-G1"
+    },
+    {
+      "doctype": "Quotation",
+      "name": "SAL-QTN-2026-00031",
+      "stage": "devis-G2"
+    },
+    {
+      "doctype": "Sales Order",
+      "name": "SAL-ORD-2026-00025",
+      "stage": "commande-G2"
+    },
+    {
+      "doctype": "Quotation",
+      "name": "SAL-QTN-2026-00032",
+      "stage": "devis-A1"
+    },
+    {
+      "doctype": "Sales Order",
+      "name": "SAL-ORD-2026-00026",
+      "stage": "commande-A1"
+    },
+    {
+      "doctype": "Quotation",
+      "name": "SAL-QTN-2026-00033",
+      "stage": "devis-B1"
+    },
+    {
+      "doctype": "Sales Order",
+      "name": "SAL-ORD-2026-00027",
+      "stage": "commande-B1"
+    },
+    {
+      "doctype": "Material Cutting Plan",
+      "name": "26MCP1000137",
+      "stage": "mcp-simulation-1"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00066",
+      "stage": "repack-mcp-1"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00067",
+      "stage": "assemblage-G1"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00068",
+      "stage": "assemblage-G1"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00069",
+      "stage": "assemblage-G2"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00070",
+      "stage": "assemblage-G2"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00071",
+      "stage": "assemblage-A1"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00072",
+      "stage": "assemblage-B1"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00006",
+      "stage": "livraison-brouillon-G1-partielle"
+    },
+    {
+      "doctype": "Quotation",
+      "name": "SAL-QTN-2026-00034",
+      "stage": "devis-G3"
+    },
+    {
+      "doctype": "Sales Order",
+      "name": "SAL-ORD-2026-00028",
+      "stage": "commande-G3"
+    },
+    {
+      "doctype": "Quotation",
+      "name": "SAL-QTN-2026-00035",
+      "stage": "devis-A2"
+    },
+    {
+      "doctype": "Sales Order",
+      "name": "SAL-ORD-2026-00029",
+      "stage": "commande-A2"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00007",
+      "stage": "livraison-brouillon-G2-totale"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00008",
+      "stage": "livraison-brouillon-A1-totale"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00009",
+      "stage": "livraison-brouillon-B1-totale"
+    },
+    {
+      "doctype": "Material Cutting Plan",
+      "name": "26MCP1000138",
+      "stage": "mcp-simulation-2"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00073",
+      "stage": "repack-mcp-2"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00074",
+      "stage": "assemblage-G3"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00075",
+      "stage": "assemblage-G3"
+    },
+    {
+      "doctype": "Stock Entry",
+      "name": "MAT-STE-2026-00076",
+      "stage": "assemblage-A2"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00010",
+      "stage": "livraison-brouillon-G3-totale"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00011",
+      "stage": "livraison-brouillon-A2-totale"
+    },
+    {
+      "doctype": "Delivery Note",
+      "name": "MAT-DN-2026-00012",
+      "stage": "livraison-brouillon-G1-solde"
+    }
+  ],
+  "checks": [
+    {
+      "label": "Chantier G et fiche technique validés",
+      "ok": true,
+      "detail": {
+        "chantier": "26CHANT1000010",
+        "study": "6jtg124b2a"
+      }
+    },
+    {
+      "label": "Chantier A et fiche technique validés",
+      "ok": true,
+      "detail": {
+        "chantier": "26CHANT1000011",
+        "study": "6k00l0s860"
+      }
+    },
+    {
+      "label": "Chantier B et fiche technique validés",
+      "ok": true,
+      "detail": {
+        "chantier": "26CHANT1000012",
+        "study": "4k2j2gtamo"
+      }
+    },
+    {
+      "label": "Devis G1 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00030"
+    },
+    {
+      "label": "Idempotence du devis G1",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00030"
+    },
+    {
+      "label": "Devis G1 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00030"
+    },
+    {
+      "label": "Idempotence du devis G1",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00030"
+    },
+    {
+      "label": "Commande G1 approuvée via workflow",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00024"
+    },
+    {
+      "label": "Sections présentes sur devis G1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Sections absentes sur commande G1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Origine chantier et devis conservée G1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Devis G2 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00031"
+    },
+    {
+      "label": "Idempotence du devis G2",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00031"
+    },
+    {
+      "label": "Commande G2 approuvée via workflow",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00025"
+    },
+    {
+      "label": "Sections présentes sur devis G2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Sections absentes sur commande G2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Origine chantier et devis conservée G2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Devis A1 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00032"
+    },
+    {
+      "label": "Idempotence du devis A1",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00032"
+    },
+    {
+      "label": "Commande A1 approuvée via workflow",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00026"
+    },
+    {
+      "label": "Sections présentes sur devis A1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Sections absentes sur commande A1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Origine chantier et devis conservée A1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Devis B1 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00033"
+    },
+    {
+      "label": "Idempotence du devis B1",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00033"
+    },
+    {
+      "label": "Commande B1 approuvée via workflow",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00027"
+    },
+    {
+      "label": "Sections présentes sur devis B1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Sections absentes sur commande B1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Origine chantier et devis conservée B1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande disponible pour MCP 1",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00024"
+    },
+    {
+      "label": "Prévisualisation propose MCP 1",
+      "ok": true,
+      "detail": "mcp"
+    },
+    {
+      "label": "Un seul MCP pour la vitre commune 1",
+      "ok": true,
+      "detail": {
+        "action": "mcp",
+        "mcps": [
+          "26MCP1000137"
+        ],
+        "outputs": [],
+        "message": "Simulation MCP préparée. Poursuivez dans son interface habituelle.",
+        "operation": "1livh71vg2"
+      }
+    },
+    {
+      "label": "Idempotence création MCP 1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Aucune commande externe dans MCP 1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Nombre de pièces planifiées MCP 1",
+      "ok": true,
+      "detail": {
+        "requested": 69,
+        "planned": 69,
+        "missing": 0
+      }
+    },
+    {
+      "label": "MCP 1 exécuté et repack automatique validé",
+      "ok": true,
+      "detail": {
+        "mcp": "26MCP1000137",
+        "status": "Executed",
+        "entries": [
+          {
+            "name": "MAT-STE-2026-00066",
+            "docstatus": 1
+          }
+        ]
+      }
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — apres-mcp-1",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Assemblage sans nouvelle découpe G1",
+      "ok": true,
+      "detail": {
+        "action": "repack",
+        "shortages": []
+      }
+    },
+    {
+      "label": "Idempotence assemblage G1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande G1 entièrement produite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Assemblage sans nouvelle découpe G2",
+      "ok": true,
+      "detail": {
+        "action": "repack",
+        "shortages": []
+      }
+    },
+    {
+      "label": "Idempotence assemblage G2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande G2 entièrement produite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Assemblage sans nouvelle découpe A1",
+      "ok": true,
+      "detail": {
+        "action": "repack",
+        "shortages": []
+      }
+    },
+    {
+      "label": "Idempotence assemblage A1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande A1 entièrement produite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Assemblage sans nouvelle découpe B1",
+      "ok": true,
+      "detail": {
+        "action": "repack",
+        "shortages": []
+      }
+    },
+    {
+      "label": "Idempotence assemblage B1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande B1 entièrement produite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — 01-apres-assemblages",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Quantité à livrer positive G1-partielle",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G1-partielle",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpk9vst89",
+        "needed": 4,
+        "available": 6
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-partielle",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G1-partielle",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 3
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G1-partielle",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpkbesf95",
+        "needed": 3,
+        "available": 6
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-partielle",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G1-partielle",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G1-partielle",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpk8c6rks",
+        "needed": 2,
+        "available": 4
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-partielle",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G1-partielle",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 1
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G1-partielle",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpkefc7qj",
+        "needed": 1,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-partielle",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison G1-partielle validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00006",
+        "qty": 10.0
+      }
+    },
+    {
+      "label": "Livraison partielle G1 à 50 %",
+      "ok": true,
+      "detail": 50.0
+    },
+    {
+      "label": "Quantité à livrer positive G1-solde",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G1-solde",
+      "ok": false,
+      "detail": {
+        "so_detail": "5kpk9vst89",
+        "needed": 4,
+        "available": 2
+      }
+    },
+    {
+      "label": "Devis G3 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00034"
+    },
+    {
+      "label": "Idempotence du devis G3",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00034"
+    },
+    {
+      "label": "Commande G3 approuvée via workflow",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00028"
+    },
+    {
+      "label": "Sections présentes sur devis G3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Sections absentes sur commande G3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Origine chantier et devis conservée G3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Devis A2 approuvé via workflow",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00035"
+    },
+    {
+      "label": "Idempotence du devis A2",
+      "ok": true,
+      "detail": "SAL-QTN-2026-00035"
+    },
+    {
+      "label": "Commande A2 approuvée via workflow",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00029"
+    },
+    {
+      "label": "Sections présentes sur devis A2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Sections absentes sur commande A2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Origine chantier et devis conservée A2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G2-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 8
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G2-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "9ktecc1iek",
+        "needed": 8,
+        "available": 8
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G2-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G2-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 6
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G2-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "9kteu5ku7u",
+        "needed": 6,
+        "available": 6
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G2-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G2-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G2-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "9ktea9escr",
+        "needed": 4,
+        "available": 4
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G2-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G2-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G2-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "9ktet6knc5",
+        "needed": 2,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G2-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison G2-totale validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00007",
+        "qty": 20.0
+      }
+    },
+    {
+      "label": "Commande G2 livrée à 100 %",
+      "ok": true,
+      "detail": {
+        "order": "SAL-ORD-2026-00025",
+        "per_delivered": 100.0,
+        "status": "To Bill"
+      }
+    },
+    {
+      "label": "Quantité à livrer positive A1-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 3
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande A1-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "3l0pldconh",
+        "needed": 3,
+        "available": 3
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées A1-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive A1-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 1
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande A1-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "3l0prhcder",
+        "needed": 1,
+        "available": 1
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées A1-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison A1-totale validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00008",
+        "qty": 4.0
+      }
+    },
+    {
+      "label": "Commande A1 livrée à 100 %",
+      "ok": true,
+      "detail": {
+        "order": "SAL-ORD-2026-00026",
+        "per_delivered": 100.0,
+        "status": "To Bill"
+      }
+    },
+    {
+      "label": "Quantité à livrer positive B1-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande B1-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "9l2vhaiaab",
+        "needed": 4,
+        "available": 4
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées B1-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive B1-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande B1-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "9l2v8ov3rr",
+        "needed": 2,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées B1-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison B1-totale validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00009",
+        "qty": 6.0
+      }
+    },
+    {
+      "label": "Commande B1 livrée à 100 %",
+      "ok": true,
+      "detail": {
+        "order": "SAL-ORD-2026-00027",
+        "per_delivered": 100.0,
+        "status": "To Bill"
+      }
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — apres-livraisons-1",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Commande disponible pour MCP 2",
+      "ok": true,
+      "detail": "SAL-ORD-2026-00028"
+    },
+    {
+      "label": "Prévisualisation propose MCP 2",
+      "ok": true,
+      "detail": "mcp"
+    },
+    {
+      "label": "Un seul MCP pour la vitre commune 2",
+      "ok": true,
+      "detail": {
+        "action": "mcp",
+        "mcps": [
+          "26MCP1000138"
+        ],
+        "outputs": [],
+        "message": "Simulation MCP préparée. Poursuivez dans son interface habituelle.",
+        "operation": "0oj3uu40ht"
+      }
+    },
+    {
+      "label": "Idempotence création MCP 2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Aucune commande externe dans MCP 2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Nombre de pièces planifiées MCP 2",
+      "ok": true,
+      "detail": {
+        "requested": 34,
+        "planned": 34,
+        "missing": 0
+      }
+    },
+    {
+      "label": "MCP 2 exécuté et repack automatique validé",
+      "ok": true,
+      "detail": {
+        "mcp": "26MCP1000138",
+        "status": "Executed",
+        "entries": [
+          {
+            "name": "MAT-STE-2026-00073",
+            "docstatus": 1
+          }
+        ]
+      }
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — apres-mcp-2",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Assemblage sans nouvelle découpe G3",
+      "ok": true,
+      "detail": {
+        "action": "repack",
+        "shortages": []
+      }
+    },
+    {
+      "label": "Idempotence assemblage G3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande G3 entièrement produite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Assemblage sans nouvelle découpe A2",
+      "ok": true,
+      "detail": {
+        "action": "repack",
+        "shortages": []
+      }
+    },
+    {
+      "label": "Idempotence assemblage A2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Commande A2 entièrement produite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — 02-apres-assemblages",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Quantité à livrer positive G3-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 8
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G3-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "6nt85tt34m",
+        "needed": 8,
+        "available": 8
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G3-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G3-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 6
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G3-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "6nt87d6naj",
+        "needed": 6,
+        "available": 6
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G3-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G3-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G3-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "6nt805cs1l",
+        "needed": 4,
+        "available": 4
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G3-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G3-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande G3-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "6nt806o57m",
+        "needed": 2,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G3-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison G3-totale validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00010",
+        "qty": 20.0
+      }
+    },
+    {
+      "label": "Commande G3 livrée à 100 %",
+      "ok": true,
+      "detail": {
+        "order": "SAL-ORD-2026-00028",
+        "per_delivered": 100.0,
+        "status": "To Bill"
+      }
+    },
+    {
+      "label": "Quantité à livrer positive A2-totale",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande A2-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "bnvrm1ah08",
+        "needed": 2,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées A2-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive A2-totale",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries produites affectées à la bonne commande A2-totale",
+      "ok": true,
+      "detail": {
+        "so_detail": "bnvrsb8s9e",
+        "needed": 2,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées A2-totale",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison A2-totale validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00011",
+        "qty": 4.0
+      }
+    },
+    {
+      "label": "Commande A2 livrée à 100 %",
+      "ok": true,
+      "detail": {
+        "order": "SAL-ORD-2026-00029",
+        "per_delivered": 100.0,
+        "status": "To Bill"
+      }
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — apres-livraisons-2",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Quantité à livrer positive G1-solde",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Substitution limitée aux deux séries autorisées",
+      "ok": false,
+      "detail": {
+        "needed": 4,
+        "available": 0
+      }
+    },
+    {
+      "label": "Bilan matière MCP 26MCP1000137",
+      "ok": true,
+      "detail": 2.6645352591003757e-15
+    },
+    {
+      "label": "Bilan matière MCP 26MCP1000138",
+      "ok": true,
+      "detail": 8.881784197001252e-16
+    },
+    {
+      "label": "103 identifiants de pièces uniques sur les deux MCP",
+      "ok": true,
+      "detail": 103
+    },
+    {
+      "label": "Aucune consommation croisée de séries affectées entre commandes",
+      "ok": false,
+      "detail": [
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "assembly_order": "SAL-ORD-2026-00026",
+          "serial_no": "WC-82504f54b463639c236b40889661",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "3l0prhcder",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "assembly_order": "SAL-ORD-2026-00026",
+          "serial_no": "WC-5eb1bc802dabcb815f3049007727",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "3l0prhcder",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-f78562c6af85b4a1e2a4b5d4d2b1",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-ad346fe37409317b18ac4d0f51c9",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-5d4fbeabc893fcd2a2bf9cbeed9c",
+          "original_sales_order_item": "3l0prhcder",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-0fbb9345c158ef8f254b34b1c97e",
+          "original_sales_order_item": "3l0prhcder",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        }
+      ]
+    },
+    {
+      "label": "Aucune série livrée deux fois",
+      "ok": true,
+      "detail": 64
+    },
+    {
+      "label": "Journal de stock sans solde négatif pour les mouvements test",
+      "ok": true,
+      "detail": {
+        "entries": 51
+      }
+    },
+    {
+      "label": "Bilan matière MCP 26MCP1000137",
+      "ok": true,
+      "detail": 2.6645352591003757e-15
+    },
+    {
+      "label": "Bilan matière MCP 26MCP1000138",
+      "ok": true,
+      "detail": 8.881784197001252e-16
+    },
+    {
+      "label": "103 identifiants de pièces uniques sur les deux MCP",
+      "ok": true,
+      "detail": 103
+    },
+    {
+      "label": "Aucune consommation croisée de séries affectées entre commandes",
+      "ok": false,
+      "detail": [
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "assembly_order": "SAL-ORD-2026-00026",
+          "serial_no": "WC-82504f54b463639c236b40889661",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "3l0prhcder",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "assembly_order": "SAL-ORD-2026-00026",
+          "serial_no": "WC-5eb1bc802dabcb815f3049007727",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "3l0prhcder",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-f78562c6af85b4a1e2a4b5d4d2b1",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-ad346fe37409317b18ac4d0f51c9",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-5d4fbeabc893fcd2a2bf9cbeed9c",
+          "original_sales_order_item": "3l0prhcder",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-0fbb9345c158ef8f254b34b1c97e",
+          "original_sales_order_item": "3l0prhcder",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        }
+      ]
+    },
+    {
+      "label": "Aucune série livrée deux fois",
+      "ok": true,
+      "detail": 64
+    },
+    {
+      "label": "Journal de stock sans solde négatif pour les mouvements test",
+      "ok": true,
+      "detail": {
+        "entries": 51
+      }
+    },
+    {
+      "label": "Absence de GL constatée — stock à coût nul, équilibre non applicable",
+      "ok": true,
+      "detail": {
+        "gl_entries": 0,
+        "note": "Les deux repacks MCP ont des valeurs entrantes et sortantes nulles."
+      }
+    },
+    {
+      "label": "Quantité à livrer positive G1-solde",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 4
+      }
+    },
+    {
+      "label": "Substitution limitée aux quatre séries A2 autorisées",
+      "ok": true,
+      "detail": {
+        "needed": 4,
+        "available": 4
+      }
+    },
+    {
+      "label": "Séries test disponibles pour livraison G1-solde",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpk9vst89",
+        "needed": 4,
+        "available": 4
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-solde",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G1-solde",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 3
+      }
+    },
+    {
+      "label": "Séries test disponibles pour livraison G1-solde",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpkbesf95",
+        "needed": 3,
+        "available": 3
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-solde",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G1-solde",
+      "ok": true,
+      "detail": {
+        "item": "DVC10MMC",
+        "qty": 2
+      }
+    },
+    {
+      "label": "Séries test disponibles pour livraison G1-solde",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpk8c6rks",
+        "needed": 2,
+        "available": 2
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-solde",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quantité à livrer positive G1-solde",
+      "ok": true,
+      "detail": {
+        "item": "REC-MCP-20261018-1511-DV32",
+        "qty": 1
+      }
+    },
+    {
+      "label": "Séries test disponibles pour livraison G1-solde",
+      "ok": true,
+      "detail": {
+        "so_detail": "5kpkefc7qj",
+        "needed": 1,
+        "available": 1
+      }
+    },
+    {
+      "label": "Dimensions des séries livrées G1-solde",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Livraison G1-solde validée",
+      "ok": true,
+      "detail": {
+        "name": "MAT-DN-2026-00012",
+        "qty": 10.0
+      }
+    },
+    {
+      "label": "Commande G1 livrée à 100 %",
+      "ok": true,
+      "detail": {
+        "order": "SAL-ORD-2026-00024",
+        "per_delivered": 100.0,
+        "status": "To Bill"
+      }
+    },
+    {
+      "label": "Cockpit sans erreur pour les commandes test — apres-livraisons-3",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "label": "Bilan matière MCP 26MCP1000137",
+      "ok": true,
+      "detail": 2.6645352591003757e-15
+    },
+    {
+      "label": "Bilan matière MCP 26MCP1000138",
+      "ok": true,
+      "detail": 8.881784197001252e-16
+    },
+    {
+      "label": "103 identifiants de pièces uniques sur les deux MCP",
+      "ok": true,
+      "detail": 103
+    },
+    {
+      "label": "Aucune consommation croisée de séries affectées entre commandes",
+      "ok": false,
+      "detail": [
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "assembly_order": "SAL-ORD-2026-00026",
+          "serial_no": "WC-82504f54b463639c236b40889661",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "3l0prhcder",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "assembly_order": "SAL-ORD-2026-00026",
+          "serial_no": "WC-5eb1bc802dabcb815f3049007727",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "3l0prhcder",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-f78562c6af85b4a1e2a4b5d4d2b1",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-ad346fe37409317b18ac4d0f51c9",
+          "original_sales_order_item": "5kpk9vst89",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-5d4fbeabc893fcd2a2bf9cbeed9c",
+          "original_sales_order_item": "3l0prhcder",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "assembly_order": "SAL-ORD-2026-00029",
+          "serial_no": "WC-0fbb9345c158ef8f254b34b1c97e",
+          "original_sales_order_item": "3l0prhcder",
+          "consuming_sales_order_item": "bnvrsb8s9e",
+          "length_mm": 1200.0,
+          "width_mm": 900.0
+        }
+      ]
+    },
+    {
+      "label": "Aucune série livrée deux fois",
+      "ok": true,
+      "detail": 74
+    },
+    {
+      "label": "Journal de stock sans solde négatif pour les mouvements test",
+      "ok": true,
+      "detail": {
+        "entries": 55
+      }
+    },
+    {
+      "label": "Absence de GL constatée — stock à coût nul, équilibre non applicable",
+      "ok": true,
+      "detail": {
+        "gl_entries": 0,
+        "note": "Les deux repacks MCP ont des valeurs entrantes et sortantes nulles."
+      }
+    },
+    {
+      "label": "Bilan matière global après toutes les livraisons",
+      "ok": true,
+      "detail": {
+        "initial_m2": 1425.496800000001,
+        "final_m2": 1324.955600000001,
+        "delivered_glass_m2": 89.80000000000001,
+        "waste_m2": 10.7412
+      }
+    },
+    {
+      "label": "Toutes les commandes livrées à 100 %",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "label": "Quatre substitutions A2 autorisées et enregistrées",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "chantiers": {
+    "G": {
+      "name": "26CHANT1000010",
+      "sections_done": true,
+      "study": "6jtg124b2a",
+      "lines": {
+        "G01": "8265f36af9e14fffaf3e58eae75be237",
+        "G02": "603e01ab4a184486bda5e8f5caa017b8",
+        "G03": "38d23400827a45949caf1aefd2670553",
+        "G04": "acab3980ebbb4dfa9987b04ca62a8392"
+      }
+    },
+    "A": {
+      "name": "26CHANT1000011",
+      "sections_done": true,
+      "study": "6k00l0s860",
+      "lines": {
+        "A01": "7c22bd3ec60d4253b35b6060d8d24ad2",
+        "A02": "e96216613bb74384b4aea416681facbd"
+      }
+    },
+    "B": {
+      "name": "26CHANT1000012",
+      "sections_done": true,
+      "study": "4k2j2gtamo",
+      "lines": {
+        "B01": "08746e9f1c3a444a8ea98aeb48c7930d",
+        "B02": "566041bbfb9c4ceb8b582b5e4641c438"
+      }
+    }
+  },
+  "quotes": {
+    "G1": "SAL-QTN-2026-00030",
+    "G2": "SAL-QTN-2026-00031",
+    "A1": "SAL-QTN-2026-00032",
+    "B1": "SAL-QTN-2026-00033",
+    "G3": "SAL-QTN-2026-00034",
+    "A2": "SAL-QTN-2026-00035"
+  },
+  "orders": {
+    "G1": "SAL-ORD-2026-00024",
+    "G2": "SAL-ORD-2026-00025",
+    "A1": "SAL-ORD-2026-00026",
+    "B1": "SAL-ORD-2026-00027",
+    "G3": "SAL-ORD-2026-00028",
+    "A2": "SAL-ORD-2026-00029"
+  },
+  "mcps": [
+    "26MCP1000137",
+    "26MCP1000138"
+  ],
+  "deliveries": [
+    "MAT-DN-2026-00006",
+    "MAT-DN-2026-00007",
+    "MAT-DN-2026-00008",
+    "MAT-DN-2026-00009",
+    "MAT-DN-2026-00010",
+    "MAT-DN-2026-00011",
+    "MAT-DN-2026-00012"
+  ],
+  "snapshots": [
+    {
+      "stage": "00-avant-test",
+      "at": "2026-10-18T15:11:07.564546+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 182,
+        "chutes": 0,
+        "total": 182,
+        "surface_m2": 1425.496800000001,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 182.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "01-avant-validation-mcp",
+      "at": "2026-10-18T15:14:15.343942+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 182,
+        "chutes": 0,
+        "total": 182,
+        "surface_m2": 1425.496800000001,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 31.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 19.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 182.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "01-apres-validation-mcp",
+      "at": "2026-10-18T15:14:24.748331+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 173,
+        "chutes": 70,
+        "total": 243,
+        "surface_m2": 1418.935599999998,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 69.0,
+          "reserved_qty": 31.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 19.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 174.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "01-apres-assemblages",
+      "at": "2026-10-18T15:15:31.462145+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 173,
+        "chutes": 32,
+        "total": 205,
+        "surface_m2": 1391.5756000000001,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 31.0,
+          "reserved_qty": 31.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 19.0,
+          "reserved_qty": 19.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 174.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "01-apres-livraison-partielle-G1",
+      "at": "2026-10-18T15:16:00.993691+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 173,
+        "chutes": 26,
+        "total": 199,
+        "surface_m2": 1384.2556000000004,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 25.0,
+          "reserved_qty": 25.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 15.0,
+          "reserved_qty": 15.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 174.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "01-apres-livraisons",
+      "at": "2026-10-18T15:18:59.121504+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 173,
+        "chutes": 7,
+        "total": 180,
+        "surface_m2": 1367.3756000000008,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 6.0,
+          "reserved_qty": 20.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 4.0,
+          "reserved_qty": 14.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 174.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "02-avant-validation-mcp",
+      "at": "2026-10-18T15:19:21.257203+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 173,
+        "chutes": 7,
+        "total": 180,
+        "surface_m2": 1367.3756000000008,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 6.0,
+          "reserved_qty": 20.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 4.0,
+          "reserved_qty": 14.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 174.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "02-apres-validation-mcp",
+      "at": "2026-10-18T15:19:29.707976+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 169,
+        "chutes": 41,
+        "total": 210,
+        "surface_m2": 1363.1955999999989,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 40.0,
+          "reserved_qty": 20.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 4.0,
+          "reserved_qty": 14.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 170.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "02-apres-assemblages",
+      "at": "2026-10-18T15:20:13.793661+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 169,
+        "chutes": 21,
+        "total": 190,
+        "surface_m2": 1347.8756,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 20.0,
+          "reserved_qty": 20.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 14.0,
+          "reserved_qty": 14.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 170.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "02-apres-livraisons",
+      "at": "2026-10-18T15:22:15.143839+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 169,
+        "chutes": 7,
+        "total": 176,
+        "surface_m2": 1332.2756000000006,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 6.0,
+          "reserved_qty": 6.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 4.0,
+          "reserved_qty": 4.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 170.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "03-apres-livraisons",
+      "at": "2026-10-18T18:12:40.028958+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 169,
+        "chutes": 1,
+        "total": 170,
+        "surface_m2": 1324.955600000001,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 170.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    },
+    {
+      "stage": "99-final",
+      "at": "2026-10-18T18:13:02.340364+00:00",
+      "family": {
+        "item_code": "VC10MMC",
+        "item_name": "VITRE CLAIRE 10 MM",
+        "volumes": 169,
+        "chutes": 1,
+        "total": 170,
+        "surface_m2": 1324.955600000001,
+        "warehouse": "Stores - UG"
+      },
+      "bins": [
+        {
+          "item_code": "DVC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "warehouse": "Stores - UG",
+          "actual_qty": 0.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        },
+        {
+          "item_code": "VC10MMC",
+          "warehouse": "Stores - UG",
+          "actual_qty": 170.0,
+          "reserved_qty": 0.0,
+          "valuation_rate": 0.0,
+          "stock_value": 0.0
+        }
+      ]
+    }
+  ],
+  "customer": "CUST-2026-00014",
+  "composite_code": "REC-MCP-20261018-1511-DV32",
+  "mcp-wave-1": "26MCP1000137",
+  "assemblies": {
+    "G1": {
+      "action": "repack",
+      "stock_entries": [
+        "MAT-STE-2026-00067",
+        "MAT-STE-2026-00068"
+      ],
+      "outputs": [
+        {
+          "stock_entry": "MAT-STE-2026-00067",
+          "node_id": "5kpkbesf95:root",
+          "qty": 6,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00068",
+          "node_id": "5kpkefc7qj:root",
+          "qty": 2,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        }
+      ],
+      "message": "Assemblages validés.",
+      "operation": "fm7btkth7a"
+    },
+    "G2": {
+      "action": "repack",
+      "stock_entries": [
+        "MAT-STE-2026-00069",
+        "MAT-STE-2026-00070"
+      ],
+      "outputs": [
+        {
+          "stock_entry": "MAT-STE-2026-00069",
+          "node_id": "9kteu5ku7u:root",
+          "qty": 6,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00070",
+          "node_id": "9ktet6knc5:root",
+          "qty": 2,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        }
+      ],
+      "message": "Assemblages validés.",
+      "operation": "fm97gigm02"
+    },
+    "A1": {
+      "action": "repack",
+      "stock_entries": [
+        "MAT-STE-2026-00071"
+      ],
+      "outputs": [
+        {
+          "stock_entry": "MAT-STE-2026-00071",
+          "node_id": "3l0prhcder:root",
+          "qty": 1,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        }
+      ],
+      "message": "Assemblages validés.",
+      "operation": "bmb2lv3ifb"
+    },
+    "B1": {
+      "action": "repack",
+      "stock_entries": [
+        "MAT-STE-2026-00072"
+      ],
+      "outputs": [
+        {
+          "stock_entry": "MAT-STE-2026-00072",
+          "node_id": "9l2v8ov3rr:root",
+          "qty": 2,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        }
+      ],
+      "message": "Assemblages validés.",
+      "operation": "8mcl7cr2b9"
+    },
+    "G3": {
+      "action": "repack",
+      "stock_entries": [
+        "MAT-STE-2026-00074",
+        "MAT-STE-2026-00075"
+      ],
+      "outputs": [
+        {
+          "stock_entry": "MAT-STE-2026-00074",
+          "node_id": "6nt87d6naj:root",
+          "qty": 6,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        },
+        {
+          "stock_entry": "MAT-STE-2026-00075",
+          "node_id": "6nt806o57m:root",
+          "qty": 2,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        }
+      ],
+      "message": "Assemblages validés.",
+      "operation": "4p17unp9ea"
+    },
+    "A2": {
+      "action": "repack",
+      "stock_entries": [
+        "MAT-STE-2026-00076"
+      ],
+      "outputs": [
+        {
+          "stock_entry": "MAT-STE-2026-00076",
+          "node_id": "bnvrsb8s9e:root",
+          "qty": 2,
+          "item_code": "REC-MCP-20261018-1511-DV32"
+        }
+      ],
+      "message": "Assemblages validés.",
+      "operation": "3p4pr1vdol"
+    }
+  },
+  "delivery_by_label": {
+    "G1-partielle": "MAT-DN-2026-00006",
+    "G2-totale": "MAT-DN-2026-00007",
+    "A1-totale": "MAT-DN-2026-00008",
+    "B1-totale": "MAT-DN-2026-00009",
+    "G3-totale": "MAT-DN-2026-00010",
+    "A2-totale": "MAT-DN-2026-00011",
+    "G1-solde": "MAT-DN-2026-00012"
+  },
+  "mcp-wave-2": "26MCP1000138",
+  "serial_substitutions": [
+    {
+      "serial_no": "WC-5a994bd1cd7c559789cff5049448",
+      "original_owner": "bnvrsb8s9e",
+      "delivery_owner": "5kpk9vst89",
+      "authorized_by_user": true,
+      "reason": "Accord explicite utilisateur dans la conversation : substitution des quatre verres de recette 1200 × 900 × 10 mm affectés à A2 (SAL-ORD-2026-00029), autorisée explicitement par l’utilisateur."
+    },
+    {
+      "serial_no": "WC-c93ab3b33b6d32c4d5d92ea21c51",
+      "original_owner": "bnvrsb8s9e",
+      "delivery_owner": "5kpk9vst89",
+      "authorized_by_user": true,
+      "reason": "Accord explicite utilisateur dans la conversation : substitution des quatre verres de recette 1200 × 900 × 10 mm affectés à A2 (SAL-ORD-2026-00029), autorisée explicitement par l’utilisateur."
+    },
+    {
+      "serial_no": "WC-d43914cb1982bcc52bff9a31b918",
+      "original_owner": "bnvrsb8s9e",
+      "delivery_owner": "5kpk9vst89",
+      "authorized_by_user": true,
+      "reason": "Accord explicite utilisateur dans la conversation : substitution des quatre verres de recette 1200 × 900 × 10 mm affectés à A2 (SAL-ORD-2026-00029), autorisée explicitement par l’utilisateur."
+    },
+    {
+      "serial_no": "WC-e7c947a9789477e781370a4185f2",
+      "original_owner": "bnvrsb8s9e",
+      "delivery_owner": "5kpk9vst89",
+      "authorized_by_user": true,
+      "reason": "Accord explicite utilisateur dans la conversation : substitution des quatre verres de recette 1200 × 900 × 10 mm affectés à A2 (SAL-ORD-2026-00029), autorisée explicitement par l’utilisateur."
+    }
+  ]
+}

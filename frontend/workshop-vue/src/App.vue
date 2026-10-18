@@ -80,6 +80,9 @@ async function call(method, args = {}) {
 	});
 	return response.message;
 }
+function openStockReport() {
+	frappe.set_route('query-report', 'UG - Stock de Vitres');
+}
 function message(e) {
 	return (
 		e?.message ||
@@ -328,9 +331,20 @@ function wheel(e) {
 				>
 				<label>Du<input v-model="filters.from_date" type="date" @change="refresh" /></label
 				><label>Au<input v-model="filters.to_date" type="date" @change="refresh" /></label>
-				<button :disabled="busy || acting" @click="refresh">
-					↻ {{ busy ? "Actualisation…" : "Actualiser" }}
-				</button>
+				<div class="ug-filter-actions">
+					<button :disabled="busy || acting" @click="refresh">
+						↻ {{ busy ? "Actualisation…" : "Actualiser" }}
+					</button>
+					<button class="ug-print-stock" type="button"
+						title="Imprimer le stock de plaques et chutes"
+						aria-label="Imprimer le stock de plaques et chutes"
+						@click="openStockReport">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+							<path d="M6 14h12v8H6zM18 12h.01" />
+						</svg>
+					</button>
+				</div>
 				<div class="ug-switch">
 					<button :class="{ primary: mode === 'tree' }" @click="setMode('tree')">
 						♧ Vue arbre</button

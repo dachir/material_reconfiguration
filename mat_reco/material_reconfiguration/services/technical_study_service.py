@@ -26,6 +26,7 @@ def commercial_hash(chantier, study, legacy=None):
     values=dict(source=source_hash(chantier),study=study.technical_hash,customer=chantier.customer,
         currency=chantier.currency,price_list=chantier.selling_price_list,terms=chantier.terms,
         prices=[dict(id=r.line_id,rate=flt(r.rate),confirmed=cint(r.rate_set)) for r in chantier.lines])
+    if chantier.get('taxes_and_charges'):values['taxes_and_charges']=chantier.taxes_and_charges
     if chantier.get('commercial_extras'):values['extras']=chantier_extras.signature(chantier,legacy=legacy)
     return fingerprint(values)
 
@@ -55,6 +56,11 @@ def validate_macro(chantier):
     seen, ids = set(), set()
     if not chantier.currency:
         chantier.currency = frappe.get_cached_value('Company',chantier.company,'default_currency')
+    if chantier.get('taxes_and_charges'):
+        template=frappe.get_doc('Sales Taxes and Charges Template',chantier.taxes_and_charges)
+        template.check_permission('read')
+        if template.disabled or template.company!=chantier.company:
+            frappe.throw('Choisir un modèle de taxes actif de la société du chantier.')
     for row in chantier.get('lines',[]):
         if not row.line_id:
             row.line_id = uuid.uuid4().hex
@@ -395,6 +401,8 @@ def validate_quote(doc, chantier):
     if chantier.technical_study!=study.name or not commercial_hash_matches(chantier,study):
         frappe.throw('Les validations technique et commerciale ne correspondent plus.')
     if doc.currency!=chantier.currency:frappe.throw('La devise doit correspondre au chantier approuvé.')
+    if chantier.get('taxes_and_charges') and doc.taxes_and_charges!=chantier.taxes_and_charges:
+        frappe.throw('Le modèle de taxes doit correspondre au chantier approuvé.')
     definitions=quotation_rows(chantier,study)
     by_repere={r.repere:r.line_id for r in chantier.lines}
     doc.custom_technical_study=study.name
@@ -453,7 +461,13 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
             custom_repere=macro.repere,custom_chantier_section=macro.section,custom_chantier_line=macro.line_id,
             custom_client_length_mm=tech.length_mm,custom_client_width_mm=tech.width_mm,custom_client_thickness_mm=tech.thickness_mm))
     chantier_extras.add_quote_rows(quote,dossier)
+    if dossier.get('taxes_and_charges'):
+        quote.taxes_and_charges=dossier.taxes_and_charges
     quote.run_method('set_missing_values')
+    if dossier.get('taxes_and_charges'):
+        from erpnext.controllers.accounts_controller import get_taxes_and_charges
+        quote.taxes_and_charges=dossier.taxes_and_charges
+        quote.set('taxes',get_taxes_and_charges('Sales Taxes and Charges Template',dossier.taxes_and_charges))
     prices={r.line_id:r for r in list(dossier.lines)+list(dossier.get('commercial_extras', []))}
     # Preserve the manager-approved price, including an explicitly free line.
     for row in quote.items:
@@ -466,7 +480,7 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
 
 
 @frappe.whitelist(methods=['POST'])
-def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None, header=None):
+def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None, header=None, taxes_and_charges=None):
     doc=frappe.get_doc('Chantier',chantier,for_update=True);doc.check_permission('write')
     if doc.docstatus!=0 or str(doc.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant de l’enregistrer.')
     incoming=frappe.parse_json(lines)
@@ -484,6 +498,7 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
         for field in ('customer', 'designation', 'responsible', 'expected_start_date', 'expected_end_date'):
             if field in values:
                 doc.set(field, values[field])
+    if taxes_and_charges is not None:doc.taxes_and_charges=taxes_and_charges
     doc.currency=currency;doc.selling_price_list=selling_price_list;doc.terms=terms;doc.save();return doc.as_dict()
 
 

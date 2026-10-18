@@ -1,0 +1,31 @@
+.print-format {padding:15px!important;}
+.production-sheet {font-family:Arial,sans-serif;color:#111;font-size:12px;line-height:1.45;}
+.production-sheet * {box-sizing:border-box;}
+.production-sheet h1 {font-size:22px;font-weight:bold;margin:8px 0 20px;}
+.production-sheet .outer {width:100%;border:0;margin-bottom:16px;}
+.production-sheet .outer td {border:0;padding:4px 8px;vertical-align:top;width:50%;}
+.production-sheet .logo td {text-align:center;width:100%;}
+.production-sheet .logo img {max-height:100px;max-width:150px;}
+.production-sheet .description {margin:8px 0;}
+.production-sheet .data-table {width:100%;table-layout:fixed;border-collapse:collapse;margin-top:16px;}
+.production-sheet .data-table th,.production-sheet .data-table td {border:1px solid #555;padding:6px 3px;text-align:center;vertical-align:top;font-size:10px;line-height:1.4;}
+.production-sheet .data-table th {background:#f3f3f3;font-weight:bold;font-size:9px;vertical-align:middle;}
+.production-sheet .data-table th small {font-size:9px;font-weight:normal;}
+.production-sheet .data-table .designation {text-align:left;padding:7px 6px;overflow-wrap:anywhere;}
+.production-sheet .designation strong {font-size:10.5px;}
+.production-sheet .detail {color:#555;font-size:9px;margin-top:3px;}
+.production-sheet .associated {font-size:9px;margin-top:4px;}
+.production-sheet .numeric,.production-sheet .operation-value {white-space:nowrap;}
+.production-sheet .operation-value + .operation-value {margin-top:3px;}
+.production-sheet .absent {color:#777;}
+.production-sheet tfoot td {font-weight:bold;background:#f6f6f6;}
+.production-sheet .data-table .total-unit {text-align:left;}
+.production-sheet thead {display:table-header-group;}
+.production-sheet tfoot {display:table-row-group;}
+.production-sheet tr {page-break-inside:avoid;}
+.production-sheet .legend {font-size:9px;margin-top:8px;color:#555;}
+.production-sheet .terms {font-size:11px;text-align:center;margin-top:28px;}
+.production-sheet .footer {border-top:1px solid #555;font-size:9px;text-align:center;margin-top:32px;padding-top:8px;}
+
+.print-format .production-sheet .data-table th {font-size:9px!important;padding:6px 2px!important;white-space:normal;overflow-wrap:anywhere;}
+.print-format .production-sheet .data-table td {font-size:10px!important;padding:6px 3px!important;}

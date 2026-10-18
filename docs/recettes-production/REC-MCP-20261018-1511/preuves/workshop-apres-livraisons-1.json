@@ -1,0 +1,747 @@
+{
+  "roots": [
+    {
+      "id": "SAL-ORD-2026-00028",
+      "label": "SAL-ORD-2026-00028",
+      "item_type": "ORDER",
+      "sales_order": "SAL-ORD-2026-00028",
+      "company": "Univers Glass",
+      "customer": "CUST-2026-00014",
+      "status": "To Deliver and Bill",
+      "chantier": "26CHANT1000010",
+      "delivery_date": "2026-11-01",
+      "transaction_date": "2026-10-18",
+      "children": [
+        {
+          "id": "6nt85tt34m:root",
+          "sales_order": "SAL-ORD-2026-00028",
+          "sales_order_item": "6nt85tt34m",
+          "item_code": "DVC10MMC",
+          "label": "DECOUPE VITRE CLAIRE 10 MM",
+          "item_type": "DECOUPE",
+          "ratio": 1,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 10.0,
+          "children": [
+            {
+              "id": "6nt85tt34m:root:stock",
+              "label": "Stock compatible",
+              "item_code": "DVC10MMC",
+              "item_type": "STOCK",
+              "sales_order": "SAL-ORD-2026-00028",
+              "sales_order_item": "6nt85tt34m",
+              "required_qty": 8,
+              "remaining_qty": 8,
+              "produced_qty": 0,
+              "physical_qty": 4,
+              "allocatable_qty": 0,
+              "fabricable_qty": 0,
+              "state": "blocked",
+              "state_label": "0 allouables / 4 physiques",
+              "children": [],
+              "stock_note": "",
+              "length_mm": 1200.0,
+              "width_mm": 900.0,
+              "thickness_mm": 10.0
+            }
+          ],
+          "is_final": true,
+          "warehouse": "Stores - UG",
+          "has_serial_no": true,
+          "has_batch_no": false,
+          "stock_uom": "PC",
+          "primary_item": "VC10MMC",
+          "section": null,
+          "repere": "G01",
+          "chantier": "26CHANT1000010",
+          "air_layers": [],
+          "air_gap_mm": 0,
+          "company": "Univers Glass",
+          "required_qty": 8,
+          "produced_qty": 0.0,
+          "remaining_qty": 8,
+          "pending_quality_qty": 0.0,
+          "manufacture_qty": 8,
+          "stock_note": "",
+          "physical_qty": 4,
+          "allocatable_qty": 0,
+          "fabricable_qty": 0,
+          "missing_qty": 8,
+          "requires_mcp": true,
+          "state": "blocked",
+          "state_label": "Découpe nécessaire"
+        },
+        {
+          "id": "6nt87d6naj:root",
+          "sales_order": "SAL-ORD-2026-00028",
+          "sales_order_item": "6nt87d6naj",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+          "item_type": "OUVRAGE",
+          "ratio": 1,
+          "length_mm": 1000.0,
+          "width_mm": 800.0,
+          "thickness_mm": 32.0,
+          "children": [
+            {
+              "id": "6nt87d6naj:0",
+              "sales_order": "SAL-ORD-2026-00028",
+              "sales_order_item": "6nt87d6naj",
+              "item_code": "DVC10MMC",
+              "label": "DECOUPE VITRE CLAIRE 10 MM",
+              "item_type": "DECOUPE",
+              "ratio": 2,
+              "length_mm": 1000.0,
+              "width_mm": 800.0,
+              "thickness_mm": 10.0,
+              "children": [
+                {
+                  "id": "6nt87d6naj:0:stock",
+                  "label": "Stock compatible",
+                  "item_code": "DVC10MMC",
+                  "item_type": "STOCK",
+                  "sales_order": "SAL-ORD-2026-00028",
+                  "sales_order_item": "6nt87d6naj",
+                  "required_qty": 12,
+                  "remaining_qty": 12,
+                  "produced_qty": 0,
+                  "physical_qty": 0,
+                  "allocatable_qty": 0,
+                  "fabricable_qty": 0,
+                  "state": "blocked",
+                  "state_label": "0 allouables / 0 physiques",
+                  "children": [],
+                  "stock_note": "",
+                  "length_mm": 1000.0,
+                  "width_mm": 800.0,
+                  "thickness_mm": 10.0
+                }
+              ],
+              "is_final": false,
+              "warehouse": "Stores - UG",
+              "has_serial_no": true,
+              "has_batch_no": false,
+              "stock_uom": "PC",
+              "primary_item": "VC10MMC",
+              "section": null,
+              "repere": "G02",
+              "chantier": "26CHANT1000010",
+              "company": "Univers Glass",
+              "produced_qty": 0.0,
+              "stock_note": "",
+              "physical_qty": 0,
+              "remaining_qty": 12,
+              "allocatable_qty": 0,
+              "fabricable_qty": 0,
+              "missing_qty": 12,
+              "requires_mcp": true,
+              "state": "blocked",
+              "state_label": "Découpe nécessaire"
+            }
+          ],
+          "is_final": true,
+          "warehouse": "Stores - UG",
+          "has_serial_no": true,
+          "has_batch_no": false,
+          "stock_uom": "PC",
+          "primary_item": null,
+          "section": null,
+          "repere": "G02",
+          "chantier": "26CHANT1000010",
+          "air_layers": [
+            {
+              "path": [
+                1
+              ],
+              "thickness_mm": 12.0,
+              "qty": 1.0
+            }
+          ],
+          "air_gap_mm": 12.0,
+          "company": "Univers Glass",
+          "required_qty": 6,
+          "produced_qty": 0.0,
+          "remaining_qty": 6,
+          "pending_quality_qty": 0.0,
+          "manufacture_qty": 6,
+          "stock_note": "",
+          "physical_qty": 3,
+          "allocatable_qty": 0,
+          "fabricable_qty": 0,
+          "missing_qty": 12,
+          "requires_mcp": true,
+          "state": "blocked",
+          "state_label": "Découpe nécessaire"
+        },
+        {
+          "id": "6nt805cs1l:root",
+          "sales_order": "SAL-ORD-2026-00028",
+          "sales_order_item": "6nt805cs1l",
+          "item_code": "DVC10MMC",
+          "label": "DECOUPE VITRE CLAIRE 10 MM",
+          "item_type": "DECOUPE",
+          "ratio": 1,
+          "length_mm": 1500.0,
+          "width_mm": 1000.0,
+          "thickness_mm": 10.0,
+          "children": [
+            {
+              "id": "6nt805cs1l:root:stock",
+              "label": "Stock compatible",
+              "item_code": "DVC10MMC",
+              "item_type": "STOCK",
+              "sales_order": "SAL-ORD-2026-00028",
+              "sales_order_item": "6nt805cs1l",
+              "required_qty": 4,
+              "remaining_qty": 4,
+              "produced_qty": 0,
+              "physical_qty": 2,
+              "allocatable_qty": 0,
+              "fabricable_qty": 0,
+              "state": "blocked",
+              "state_label": "0 allouables / 2 physiques",
+              "children": [],
+              "stock_note": "",
+              "length_mm": 1500.0,
+              "width_mm": 1000.0,
+              "thickness_mm": 10.0
+            }
+          ],
+          "is_final": true,
+          "warehouse": "Stores - UG",
+          "has_serial_no": true,
+          "has_batch_no": false,
+          "stock_uom": "PC",
+          "primary_item": "VC10MMC",
+          "section": null,
+          "repere": "G03",
+          "chantier": "26CHANT1000010",
+          "air_layers": [],
+          "air_gap_mm": 0,
+          "company": "Univers Glass",
+          "required_qty": 4,
+          "produced_qty": 0.0,
+          "remaining_qty": 4,
+          "pending_quality_qty": 0.0,
+          "manufacture_qty": 4,
+          "stock_note": "",
+          "physical_qty": 2,
+          "allocatable_qty": 0,
+          "fabricable_qty": 0,
+          "missing_qty": 4,
+          "requires_mcp": true,
+          "state": "blocked",
+          "state_label": "Découpe nécessaire"
+        },
+        {
+          "id": "6nt806o57m:root",
+          "sales_order": "SAL-ORD-2026-00028",
+          "sales_order_item": "6nt806o57m",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+          "item_type": "OUVRAGE",
+          "ratio": 1,
+          "length_mm": 700.0,
+          "width_mm": 500.0,
+          "thickness_mm": 32.0,
+          "children": [
+            {
+              "id": "6nt806o57m:0",
+              "sales_order": "SAL-ORD-2026-00028",
+              "sales_order_item": "6nt806o57m",
+              "item_code": "DVC10MMC",
+              "label": "DECOUPE VITRE CLAIRE 10 MM",
+              "item_type": "DECOUPE",
+              "ratio": 2,
+              "length_mm": 700.0,
+              "width_mm": 500.0,
+              "thickness_mm": 10.0,
+              "children": [
+                {
+                  "id": "6nt806o57m:0:stock",
+                  "label": "Stock compatible",
+                  "item_code": "DVC10MMC",
+                  "item_type": "STOCK",
+                  "sales_order": "SAL-ORD-2026-00028",
+                  "sales_order_item": "6nt806o57m",
+                  "required_qty": 4,
+                  "remaining_qty": 4,
+                  "produced_qty": 0,
+                  "physical_qty": 0,
+                  "allocatable_qty": 0,
+                  "fabricable_qty": 0,
+                  "state": "blocked",
+                  "state_label": "0 allouables / 0 physiques",
+                  "children": [],
+                  "stock_note": "",
+                  "length_mm": 700.0,
+                  "width_mm": 500.0,
+                  "thickness_mm": 10.0
+                }
+              ],
+              "is_final": false,
+              "warehouse": "Stores - UG",
+              "has_serial_no": true,
+              "has_batch_no": false,
+              "stock_uom": "PC",
+              "primary_item": "VC10MMC",
+              "section": null,
+              "repere": "G04",
+              "chantier": "26CHANT1000010",
+              "company": "Univers Glass",
+              "produced_qty": 0.0,
+              "stock_note": "",
+              "physical_qty": 0,
+              "remaining_qty": 4,
+              "allocatable_qty": 0,
+              "fabricable_qty": 0,
+              "missing_qty": 4,
+              "requires_mcp": true,
+              "state": "blocked",
+              "state_label": "Découpe nécessaire"
+            }
+          ],
+          "is_final": true,
+          "warehouse": "Stores - UG",
+          "has_serial_no": true,
+          "has_batch_no": false,
+          "stock_uom": "PC",
+          "primary_item": null,
+          "section": null,
+          "repere": "G04",
+          "chantier": "26CHANT1000010",
+          "air_layers": [
+            {
+              "path": [
+                1
+              ],
+              "thickness_mm": 12.0,
+              "qty": 1.0
+            }
+          ],
+          "air_gap_mm": 12.0,
+          "company": "Univers Glass",
+          "required_qty": 2,
+          "produced_qty": 0.0,
+          "remaining_qty": 2,
+          "pending_quality_qty": 0.0,
+          "manufacture_qty": 2,
+          "stock_note": "",
+          "physical_qty": 1,
+          "allocatable_qty": 0,
+          "fabricable_qty": 0,
+          "missing_qty": 4,
+          "requires_mcp": true,
+          "state": "blocked",
+          "state_label": "Découpe nécessaire"
+        }
+      ],
+      "required_qty": 20.0,
+      "produced_qty": 0.0,
+      "remaining_qty": 20.0,
+      "manufacture_qty": 20,
+      "fabricable_qty": 0,
+      "requires_mcp": true,
+      "state": "blocked",
+      "state_label": "Besoin restant"
+    },
+    {
+      "id": "SAL-ORD-2026-00029",
+      "label": "SAL-ORD-2026-00029",
+      "item_type": "ORDER",
+      "sales_order": "SAL-ORD-2026-00029",
+      "company": "Univers Glass",
+      "customer": "CUST-2026-00014",
+      "status": "To Deliver and Bill",
+      "chantier": "26CHANT1000011",
+      "delivery_date": "2026-11-01",
+      "transaction_date": "2026-10-18",
+      "children": [
+        {
+          "id": "bnvrm1ah08:root",
+          "sales_order": "SAL-ORD-2026-00029",
+          "sales_order_item": "bnvrm1ah08",
+          "item_code": "DVC10MMC",
+          "label": "DECOUPE VITRE CLAIRE 10 MM",
+          "item_type": "DECOUPE",
+          "ratio": 1,
+          "length_mm": 800.0,
+          "width_mm": 600.0,
+          "thickness_mm": 10.0,
+          "children": [
+            {
+              "id": "bnvrm1ah08:root:stock",
+              "label": "Stock compatible",
+              "item_code": "DVC10MMC",
+              "item_type": "STOCK",
+              "sales_order": "SAL-ORD-2026-00029",
+              "sales_order_item": "bnvrm1ah08",
+              "required_qty": 2,
+              "remaining_qty": 2,
+              "produced_qty": 0,
+              "physical_qty": 0,
+              "allocatable_qty": 0,
+              "fabricable_qty": 0,
+              "state": "blocked",
+              "state_label": "0 allouables / 0 physiques",
+              "children": [],
+              "stock_note": "",
+              "length_mm": 800.0,
+              "width_mm": 600.0,
+              "thickness_mm": 10.0
+            }
+          ],
+          "is_final": true,
+          "warehouse": "Stores - UG",
+          "has_serial_no": true,
+          "has_batch_no": false,
+          "stock_uom": "PC",
+          "primary_item": "VC10MMC",
+          "section": null,
+          "repere": "A01",
+          "chantier": "26CHANT1000011",
+          "air_layers": [],
+          "air_gap_mm": 0,
+          "company": "Univers Glass",
+          "required_qty": 2,
+          "produced_qty": 0.0,
+          "remaining_qty": 2,
+          "pending_quality_qty": 0.0,
+          "manufacture_qty": 2,
+          "stock_note": "",
+          "physical_qty": 0,
+          "allocatable_qty": 0,
+          "fabricable_qty": 0,
+          "missing_qty": 2,
+          "requires_mcp": true,
+          "state": "blocked",
+          "state_label": "Découpe nécessaire"
+        },
+        {
+          "id": "bnvrsb8s9e:root",
+          "sales_order": "SAL-ORD-2026-00029",
+          "sales_order_item": "bnvrsb8s9e",
+          "item_code": "REC-MCP-20261018-1511-DV32",
+          "label": "REC-MCP-20261018-1511 Double vitrage 10/12/10 — RECETTE",
+          "item_type": "OUVRAGE",
+          "ratio": 1,
+          "length_mm": 1200.0,
+          "width_mm": 900.0,
+          "thickness_mm": 32.0,
+          "children": [
+            {
+              "id": "bnvrsb8s9e:0",
+              "sales_order": "SAL-ORD-2026-00029",
+              "sales_order_item": "bnvrsb8s9e",
+              "item_code": "DVC10MMC",
+              "label": "DECOUPE VITRE CLAIRE 10 MM",
+              "item_type": "DECOUPE",
+              "ratio": 2,
+              "length_mm": 1200.0,
+              "width_mm": 900.0,
+              "thickness_mm": 10.0,
+              "children": [
+                {
+                  "id": "bnvrsb8s9e:0:stock",
+                  "label": "Stock compatible",
+                  "item_code": "DVC10MMC",
+                  "item_type": "STOCK",
+                  "sales_order": "SAL-ORD-2026-00029",
+                  "sales_order_item": "bnvrsb8s9e",
+                  "required_qty": 4,
+                  "remaining_qty": 4,
+                  "produced_qty": 0,
+                  "physical_qty": 4,
+                  "allocatable_qty": 0,
+                  "fabricable_qty": 0,
+                  "state": "blocked",
+                  "state_label": "0 allouables / 4 physiques",
+                  "children": [],
+                  "stock_note": "",
+                  "length_mm": 1200.0,
+                  "width_mm": 900.0,
+                  "thickness_mm": 10.0
+                }
+              ],
+              "is_final": false,
+              "warehouse": "Stores - UG",
+              "has_serial_no": true,
+              "has_batch_no": false,
+              "stock_uom": "PC",
+              "primary_item": "VC10MMC",
+              "section": null,
+              "repere": "A02",
+              "chantier": "26CHANT1000011",
+              "company": "Univers Glass",
+              "produced_qty": 0.0,
+              "stock_note": "",
+              "physical_qty": 4,
+              "remaining_qty": 4,
+              "allocatable_qty": 0,
+              "fabricable_qty": 0,
+              "missing_qty": 4,
+              "requires_mcp": true,
+              "state": "blocked",
+              "state_label": "Découpe nécessaire"
+            }
+          ],
+          "is_final": true,
+          "warehouse": "Stores - UG",
+          "has_serial_no": true,
+          "has_batch_no": false,
+          "stock_uom": "PC",
+          "primary_item": null,
+          "section": null,
+          "repere": "A02",
+          "chantier": "26CHANT1000011",
+          "air_layers": [
+            {
+              "path": [
+                1
+              ],
+              "thickness_mm": 12.0,
+              "qty": 1.0
+            }
+          ],
+          "air_gap_mm": 12.0,
+          "company": "Univers Glass",
+          "required_qty": 2,
+          "produced_qty": 0.0,
+          "remaining_qty": 2,
+          "pending_quality_qty": 0.0,
+          "manufacture_qty": 2,
+          "stock_note": "",
+          "physical_qty": 0,
+          "allocatable_qty": 0,
+          "fabricable_qty": 0,
+          "missing_qty": 4,
+          "requires_mcp": true,
+          "state": "blocked",
+          "state_label": "Découpe nécessaire"
+        }
+      ],
+      "required_qty": 4.0,
+      "produced_qty": 0.0,
+      "remaining_qty": 4.0,
+      "manufacture_qty": 4,
+      "fabricable_qty": 0,
+      "requires_mcp": true,
+      "state": "blocked",
+      "state_label": "Besoin restant"
+    }
+  ],
+  "errors": [],
+  "as_of": "2026-10-18 15:18:59.716612",
+  "dimension_fields": [],
+  "primary_items": [
+    {
+      "name": "VC6MMC",
+      "item_name": "VITRE CLAIRE 6 MM"
+    },
+    {
+      "name": "MC6MME",
+      "item_name": "MIROIR CLAIR 6MM"
+    },
+    {
+      "name": "PV5MM",
+      "item_name": "PARSOL VERT 5 MM"
+    },
+    {
+      "name": "PV6MM",
+      "item_name": "PARSOL VERT 6MM"
+    },
+    {
+      "name": "PV10MM",
+      "item_name": "PARSOL VERT 10 MM"
+    },
+    {
+      "name": "RB8MM",
+      "item_name": "REFLEX BRONZE 8MM"
+    },
+    {
+      "name": "RB5MM",
+      "item_name": "REFLEXBRONZE 5MM"
+    },
+    {
+      "name": "VG8MM",
+      "item_name": "VITRE GRIS 8 MM"
+    },
+    {
+      "name": "MC5MM",
+      "item_name": "MIROIR CLAIR 5 MM"
+    },
+    {
+      "name": "MC4MM",
+      "item_name": "MIROIR CLAIR 4 MM"
+    },
+    {
+      "name": "RB6MM",
+      "item_name": "REFLEX BRONZE 6MM"
+    },
+    {
+      "name": "VB8MM",
+      "item_name": "VITRE BRONZE 8MM"
+    },
+    {
+      "name": "VC4MMC",
+      "item_name": "VITRE CLAIR 4 MM"
+    },
+    {
+      "name": "VC5MM",
+      "item_name": "VITRE CLAIRE 5MM"
+    },
+    {
+      "name": "VG5MM",
+      "item_name": "V ITRE GRIS 5 MM"
+    },
+    {
+      "name": "TC6MM",
+      "item_name": "TRIPLEX CLAIR 6 MM"
+    },
+    {
+      "name": "MB5MM",
+      "item_name": "DECOUPE MIROIR BRONZE 5 MM"
+    },
+    {
+      "name": "MG5MM",
+      "item_name": "MIROIR GRIS 5 MM"
+    },
+    {
+      "name": "VC3MMC",
+      "item_name": "VITRE CLAIRE 3MM"
+    },
+    {
+      "name": "PV8MM",
+      "item_name": "PARSOL VERT 8 MM"
+    },
+    {
+      "name": "VC15MMC",
+      "item_name": "VITRE CLAIRE 15 MM"
+    },
+    {
+      "name": "VG10MM",
+      "item_name": "VITRE GRIS 10 MM"
+    },
+    {
+      "name": "VC8MMC",
+      "item_name": "VITRE CLAIRE 8 MM"
+    },
+    {
+      "name": "VC12MMC",
+      "item_name": "VITRE CLAIRE 12 MM"
+    },
+    {
+      "name": "VC10MMC",
+      "item_name": "VITRE CLAIRE 10 MM"
+    }
+  ],
+  "companies": [
+    "Univers Glass"
+  ],
+  "chantiers": [
+    {
+      "name": "26CHANT1000012",
+      "designation": "REC-MCP-20261018-1511 — PETIT CHANTIER B 6 ouvrages"
+    },
+    {
+      "name": "26CHANT1000011",
+      "designation": "REC-MCP-20261018-1511 — PETIT CHANTIER A 8 ouvrages"
+    },
+    {
+      "name": "26CHANT1000010",
+      "designation": "REC-MCP-20261018-1511 — GRAND CHANTIER 60 ouvrages"
+    },
+    {
+      "name": "26CHANT1000009",
+      "designation": "CHANTIER 4"
+    },
+    {
+      "name": "26CHANT1000008",
+      "designation": "test"
+    },
+    {
+      "name": "26CHANT1000007",
+      "designation": "COMMANDE TEST 2"
+    },
+    {
+      "name": "26CHANT1000006",
+      "designation": "TEST1"
+    },
+    {
+      "name": "26CHANT1000005",
+      "designation": "DOUBLE VITRAGE [100,80] 10MM"
+    },
+    {
+      "name": "26CHANT1000004",
+      "designation": "ASSEM "
+    },
+    {
+      "name": "26CHANT1000001",
+      "designation": "VITRE CLAIRE SARALU"
+    },
+    {
+      "name": "26CHANT1000003",
+      "designation": "VITRE SARALU"
+    },
+    {
+      "name": "26CHANT1000002",
+      "designation": "VITRE SARALU"
+    }
+  ],
+  "sections": [
+    {
+      "name": "1k28nd72hn",
+      "section_name": "Zone 2 — intérieurs",
+      "chantier": "26CHANT1000012"
+    },
+    {
+      "name": "6k1spns35q",
+      "section_name": "Zone 1 — façades",
+      "chantier": "26CHANT1000012"
+    },
+    {
+      "name": "7jvk1te883",
+      "section_name": "Zone 2 — intérieurs",
+      "chantier": "26CHANT1000011"
+    },
+    {
+      "name": "fjvatuchtp",
+      "section_name": "Zone 1 — façades",
+      "chantier": "26CHANT1000011"
+    },
+    {
+      "name": "1jt26erfq6",
+      "section_name": "Zone 2 — intérieurs",
+      "chantier": "26CHANT1000010"
+    },
+    {
+      "name": "djsoq0a5ts",
+      "section_name": "Zone 1 — façades",
+      "chantier": "26CHANT1000010"
+    },
+    {
+      "name": "0h2vc83m4p",
+      "section_name": "Piece 2",
+      "chantier": "26CHANT1000009"
+    },
+    {
+      "name": "ah0b8aerf6",
+      "section_name": "Piece 1",
+      "chantier": "26CHANT1000009"
+    },
+    {
+      "name": "egqoln3nul",
+      "section_name": "Rez de chaussee",
+      "chantier": "26CHANT1000009"
+    }
+  ],
+  "counters": {
+    "orders": 2,
+    "works": 6,
+    "remaining": 24.0,
+    "fabricable": 0,
+    "missing_cuts": 34,
+    "blocked": 2
+  }
+}

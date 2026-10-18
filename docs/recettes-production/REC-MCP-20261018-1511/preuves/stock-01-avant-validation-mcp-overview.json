@@ -1,0 +1,220 @@
+{
+  "groups": [
+    {
+      "item_code": "MB5MM",
+      "item_name": "DECOUPE MIROIR BRONZE 5 MM",
+      "volumes": 52,
+      "chutes": 0,
+      "total": 52,
+      "surface_m2": 375.57000000000033,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "MC4MM",
+      "item_name": "MIROIR CLAIR 4 MM",
+      "volumes": 66,
+      "chutes": 0,
+      "total": 66,
+      "surface_m2": 476.6850000000007,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "MC5MM",
+      "item_name": "MIROIR CLAIR 5 MM",
+      "volumes": 102,
+      "chutes": 3,
+      "total": 105,
+      "surface_m2": 741.8054999999998,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "MC6MME",
+      "item_name": "MIROIR CLAIR 6MM",
+      "volumes": 85,
+      "chutes": 1,
+      "total": 86,
+      "surface_m2": 617.7875000000004,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "MG5MM",
+      "item_name": "MIROIR GRIS 5 MM",
+      "volumes": 52,
+      "chutes": 0,
+      "total": 52,
+      "surface_m2": 375.57000000000033,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "PV10MM",
+      "item_name": "PARSOL VERT 10 MM",
+      "volumes": 12,
+      "chutes": 6,
+      "total": 18,
+      "surface_m2": 101.41720000000002,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "PV5MM",
+      "item_name": "PARSOL VERT 5 MM",
+      "volumes": 60,
+      "chutes": 0,
+      "total": 60,
+      "surface_m2": 423.7200000000004,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "PV6MM",
+      "item_name": "PARSOL VERT 6MM",
+      "volumes": 66,
+      "chutes": 4,
+      "total": 70,
+      "surface_m2": 524.0308000000003,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "PV8MM",
+      "item_name": "PARSOL VERT 8 MM",
+      "volumes": 85,
+      "chutes": 0,
+      "total": 85,
+      "surface_m2": 665.7540000000005,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "RB5MM",
+      "item_name": "REFLEXBRONZE 5MM",
+      "volumes": 27,
+      "chutes": 0,
+      "total": 27,
+      "surface_m2": 211.47480000000013,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "RB6MM",
+      "item_name": "REFLEX BRONZE 6MM",
+      "volumes": 125,
+      "chutes": 0,
+      "total": 125,
+      "surface_m2": 882.7500000000011,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "RB8MM",
+      "item_name": "REFLEX BRONZE 8MM",
+      "volumes": 17,
+      "chutes": 0,
+      "total": 17,
+      "surface_m2": 133.15080000000006,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VB8MM",
+      "item_name": "VITRE BRONZE 8MM",
+      "volumes": 17,
+      "chutes": 0,
+      "total": 17,
+      "surface_m2": 133.15080000000006,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC10MMC",
+      "item_name": "VITRE CLAIRE 10 MM",
+      "volumes": 182,
+      "chutes": 0,
+      "total": 182,
+      "surface_m2": 1425.496800000001,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC12MMC",
+      "item_name": "VITRE CLAIRE 12 MM",
+      "volumes": 264,
+      "chutes": 0,
+      "total": 264,
+      "surface_m2": 2067.753600000001,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC15MMC",
+      "item_name": "VITRE CLAIRE 15 MM",
+      "volumes": 36,
+      "chutes": 0,
+      "total": 36,
+      "surface_m2": 281.9664000000002,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC4MMC",
+      "item_name": "VITRE CLAIR 4 MM",
+      "volumes": 210,
+      "chutes": 0,
+      "total": 210,
+      "surface_m2": 1644.8040000000012,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC5MM",
+      "item_name": "VITRE CLAIRE 5MM",
+      "volumes": 162,
+      "chutes": 0,
+      "total": 162,
+      "surface_m2": 1144.0439999999996,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC6MMC",
+      "item_name": "VITRE CLAIRE 6 MM",
+      "volumes": 769,
+      "chutes": 0,
+      "total": 769,
+      "surface_m2": 6023.115600000002,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VC8MMC",
+      "item_name": "VITRE CLAIRE 8 MM",
+      "volumes": 544,
+      "chutes": 0,
+      "total": 544,
+      "surface_m2": 4260.825599999949,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VG10MM",
+      "item_name": "VITRE GRIS 10 MM",
+      "volumes": 28,
+      "chutes": 0,
+      "total": 28,
+      "surface_m2": 219.30720000000014,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VG5MM",
+      "item_name": "V ITRE GRIS 5 MM",
+      "volumes": 122,
+      "chutes": 0,
+      "total": 122,
+      "surface_m2": 861.5640000000011,
+      "warehouse": "Stores - UG"
+    },
+    {
+      "item_code": "VG8MM",
+      "item_name": "VITRE GRIS 8 MM",
+      "volumes": 17,
+      "chutes": 0,
+      "total": 17,
+      "surface_m2": 133.15080000000006,
+      "warehouse": "Stores - UG"
+    }
+  ],
+  "volumes": 3100,
+  "chutes": 14,
+  "total": 3114,
+  "surface_m2": 23724.89439999996,
+  "diagnostics": {},
+  "as_of": "2026-10-18 15:14:13.953007",
+  "surface_basis": "physical",
+  "reserved_m2": null,
+  "available_m2": null
+}

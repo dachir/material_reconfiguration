@@ -1,0 +1,16 @@
+{
+  "action": "repack",
+  "stock_entries": [
+    "MAT-STE-2026-00072"
+  ],
+  "outputs": [
+    {
+      "stock_entry": "MAT-STE-2026-00072",
+      "node_id": "9l2v8ov3rr:root",
+      "qty": 2,
+      "item_code": "REC-MCP-20261018-1511-DV32"
+    }
+  ],
+  "message": "Assemblages validés.",
+  "operation": "8mcl7cr2b9"
+}

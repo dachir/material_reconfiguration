@@ -1,0 +1,23 @@
+{
+  "action": "repack",
+  "stock_entries": [
+    "MAT-STE-2026-00069",
+    "MAT-STE-2026-00070"
+  ],
+  "outputs": [
+    {
+      "stock_entry": "MAT-STE-2026-00069",
+      "node_id": "9kteu5ku7u:root",
+      "qty": 6,
+      "item_code": "REC-MCP-20261018-1511-DV32"
+    },
+    {
+      "stock_entry": "MAT-STE-2026-00070",
+      "node_id": "9ktet6knc5:root",
+      "qty": 2,
+      "item_code": "REC-MCP-20261018-1511-DV32"
+    }
+  ],
+  "message": "Assemblages validés.",
+  "operation": "fm97gigm02"
+}
