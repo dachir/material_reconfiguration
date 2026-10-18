@@ -84,7 +84,7 @@
   },
   {
    "fieldname": "technical_study",
-   "label": "Étude technique validée",
+   "label": "Fiche technique validée",
    "fieldtype": "Link",
    "options": "Chantier Technical Study",
    "read_only": 1,

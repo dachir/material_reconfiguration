@@ -5,11 +5,6 @@ frappe.pages["workshop-cockpit"].on_page_load = function (wrapper) {
 		single_column: true,
 	});
 	wrapper.workshopPage = page;
-	frappe.router.on("change", () => {
-		const active = frappe.get_route()[0] === "workshop-cockpit";
-		document.body.classList.toggle("ug-workshop-active", active);
-		if (!active) wrapper.workshop?.hide();
-	});
 	page.main.addClass("univers-workshop-host");
 	frappe.require(
 		[
@@ -23,7 +18,7 @@ frappe.pages["workshop-cockpit"].on_page_load = function (wrapper) {
 	);
 };
 frappe.pages["workshop-cockpit"].on_page_show = function (wrapper) {
-	document.body.classList.add("ug-workshop-active");
+	document.body.classList.remove("ug-workshop-active");
 	wrapper.workshop?.show();
 };
 frappe.pages["workshop-cockpit"].on_page_hide = function (wrapper) {

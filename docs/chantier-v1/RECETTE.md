@@ -106,3 +106,33 @@ Validation : build réussi, 20 tests frontend réussis et 40 tests serveur de te
 Commande navigateur : `WORKSHOP_PLAYWRIGHT_MODULE=/home/marsavco/frappe-bench/apps/crm/node_modules/playwright node apps/mat_reco/frontend/workshop-vue/tests/technical-batch-browser.cjs`. Les données de capture sont des fixtures navigateur sans écriture métier. Capture : `technical-batch.png`.
 
 Fichiers de cette évolution : `frontend/workshop-vue/src/TechnicalStudy.vue`, `frontend/workshop-vue/src/technical-batch.js`, `frontend/workshop-vue/tests/technical-batch.test.mjs`, `frontend/workshop-vue/tests/technical-batch-browser.cjs`, `mat_reco/material_reconfiguration/tests/test_technical_study_service.py`, assets `workshop.js` et `workshop.css`, ce compte rendu et la capture. Aucune API métier ni règle de validation n’a été changée.
+
+## Étude technique — présentation compacte
+
+Suppression des paragraphes pédagogiques génériques (exemple double vitrage, explication du bouton +, article existant et création des Items), du bandeau de rappel, du pied explicatif et de la décoration de verre. Les erreurs métier et le contrôle d’épaisseur restent visibles. Le rappel d’application groupée est ramené à la source et aux champs copiés. Les notes techniques restent éditables.
+
+Les espacements des champs, panneaux, cartes d’ouvrages et composants ont été réduits. La marge héritée de 48 px et le padding vertical hérité de 12 px des cartes sont explicitement neutralisés. Hauteur mesurée dans le navigateur : environ 41 px par carte de composant, contre 65 px avant neutralisation, avec une indentation d’arbre conservée. Build et recette navigateur d’affectation groupée/sauvegarde réussis. Capture `technical-batch.png` actualisée. Aucune modification de règles métier.
+
+## Chantier réintégré à la page ERPNext standard
+
+À la demande de l’utilisateur, suppression des règles globales de plein écran qui cachaient la navbar et le titre ERPNext, forçaient la pleine largeur et remplaçaient le fond de page. Chantier reste monté dans le `page.main` standard existant. Le composant conserve son thème interne et ses fonctionnalités. Le volet Services / Accessoires se limite à la hauteur disponible sous les barres ERPNext.
+
+Build et recette navigateur réussis : navbar et titre de page visibles, composant encastré dans le conteneur ERPNext, volet fonctionnel et contrôles d’affectation conservés. Captures actualisées.
+
+## Fiche technique dans le cadre ERPNext
+
+L’écran technique est réintégré au conteneur ERPNext standard : les règles globales de plein écran sont supprimées et la page ne masque plus la navbar ni le titre ERPNext. La présentation compacte et la copie groupée restent actives. Le titre visible devient « Fiche technique », avec les actions et confirmations correspondantes, le raccourci Univers Glass, les liens depuis Chantier, les champs liés des devis/commandes et le titre du rapport A4. Les noms internes `Chantier Technical Study` et `technical-study` sont conservés.
+
+Les libellés ERPNext ont été actualisés de façon ciblée : Page, libellé du champ de Chantier, Custom Fields de devis/commande et raccourci du Workspace. Les autres paramètres du Workspace et les données commerciales ont été conservés. Cache actualisé et workers web rechargés pour le titre d’impression.
+
+Validation : build réussi, recette navigateur de sélection/copie/sauvegarde réussie avec vérification de la navbar, du titre Fiche technique et du conteneur standard, quatre tests d’impression A4 réussis. Capture `technical-batch.png` actualisée.
+
+## En-tête épuré et statut dans ERPNext
+
+Suppression des textes barrés dans le panneau sombre : marque/préparation technique, titre Fiche technique répété, nom/référence de chantier et libellé visible du sélecteur. Le sélecteur conserve son nom accessible. Les actions restent disponibles. Le statut est remonté au titre de page ERPNext dans la partie blanche via `page.set_indicator` ; il suit le chargement, la sauvegarde et les changements de docstatus de la fiche.
+
+Build et recette navigateur réussis, avec vérification des indicateurs Brouillon et Validée dans le titre ERPNext, de l’absence de titre répété et des fonctionnalités d’affectation groupée/sauvegarde. Capture complémentaire : `fiche-technique-status.png`. Le navigateur de recette a utilisé `TMPDIR=/dev/shm` après un manque d’espace temporaire sur le disque système ; aucune donnée existante n’a été supprimée.
+
+## Alignement de la barre de commandes
+
+Sélecteur de fiche et bouton Document ERPNext déplacés à gauche de la même rangée que les actions de droite. L’alignement vertical est vérifié dans le navigateur (centres identiques), avec retour à la ligne sur les petits écrans. Build et recette d’interaction réussis. Captures actualisées.

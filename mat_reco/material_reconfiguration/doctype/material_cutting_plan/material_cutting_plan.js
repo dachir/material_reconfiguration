@@ -219,7 +219,12 @@ frappe.ui.form.on('Material Cutting Plan', {
             }, __('Outils'));
         }
 
-        frm.add_custom_button(__('Create Draft Repack'), async function() {
+        if (frm.doc.docstatus === 1) {
+            frm.add_custom_button(__('Repack lié'), () => {
+                frappe.set_route('List', 'Stock Entry', {custom_material_cutting_plan: frm.doc.name});
+            });
+        }
+        if (frm.doc.docstatus === 0) frm.add_custom_button(__('Create Draft Repack'), async function() {
             if (!frm.doc.name) {
                 frappe.msgprint(__('Please save the Material Cutting Plan first.'));
                 return;

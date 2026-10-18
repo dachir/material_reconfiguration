@@ -10,7 +10,7 @@ TITLES = {
     'Chantier': 'Dossier chantier',
     'Chantier Section': 'Section de chantier',
     'Chantier Section Template': 'Modèle de sections',
-    'Chantier Technical Study': 'Étude technique',
+    'Chantier Technical Study': 'Fiche technique',
     'Material Cutting Plan': 'Plan de découpe',
     'Material Production Plan': 'Plan de production',
     'Material Receipt Plan': 'Bon de réception matière',

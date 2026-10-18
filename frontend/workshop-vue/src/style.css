@@ -900,100 +900,12 @@
 	}
 }
 
-/* Scoped full-width Desk shell; removed as soon as the operator leaves this page. */
-body.ug-workshop-active {
-	background: #03131e;
-	padding-top: 0 !important;
-}
-.ug-workshop-active > .navbar,
-.ug-workshop-active header.navbar,
-.ug-workshop-active .page-head {
-	display: none !important;
-}
-.ug-workshop-active .page-container > .container,
-.ug-workshop-active .page-body,
-.ug-workshop-active .main-section {
-	max-width: none !important;
-	width: 100% !important;
-}
-.ug-workshop-active .page-body {
-	padding: 0 !important;
-}
-.ug-workshop-active .layout-main-section-wrapper {
-	margin: 0 !important;
-}
-.ug-workshop-active .layout-main-section {
-	border: 0 !important;
-}
-.ug-workshop-active .ug-workshop {
-	min-height: 100vh !important;
-	border-radius: 0 !important;
-}
-.ug-workshop-active .ug-viewport {
-	height: calc(100vh - 310px);
-	max-height: none;
-	min-height: 420px;
-}
-
 .ug-workshop .ug-filters label {
 	min-width: 130px;
 }
 .ug-workshop .ug-filters label:has(input[type="date"]) {
 	flex: 0.75;
 }
-
-/* The graph owns the remaining desktop height; branches scroll inside it. */
-@media (min-width: 801px) {
-	.ug-workshop-active .ug-main {
-		display: flex;
-		flex-direction: column;
-		height: 100vh;
-		overflow: hidden;
-	}
-	.ug-workshop-active .ug-topbar,
-	.ug-workshop-active .ug-header,
-	.ug-workshop-active .ug-filters,
-	.ug-workshop-active .ug-alert,
-	.ug-workshop-active .ug-cards,
-	.ug-workshop-active .ug-legend {
-		flex-shrink: 0;
-	}
-	.ug-workshop-active .ug-content {
-		flex: 1;
-		min-height: 0;
-	}
-	.ug-workshop-active .ug-graph-panel {
-		display: flex;
-		flex-direction: column;
-		min-height: 0;
-	}
-	.ug-workshop-active .ug-viewport {
-		flex: 1;
-		height: auto !important;
-		min-height: 180px !important;
-	}
-	.ug-workshop-active .ug-details {
-		overflow: auto;
-	}
-	.ug-workshop-active .ug-panel-heading,
-	.ug-workshop-active .ug-graph-footer {
-		flex-shrink: 0;
-	}
-	.ug-workshop-active .ug-list-wrap {
-		overflow: auto;
-		min-height: 0;
-		flex: 1;
-	}
-}
-
-/* The technical editor uses the same full-width dark shell as the workshop. */
-body.ug-technical-active{background:#03131e;padding-top:0!important}
-.ug-technical-active>.navbar,.ug-technical-active header.navbar,.ug-technical-active .page-head{display:none!important}
-.ug-technical-active .page-container>.container,.ug-technical-active .page-body,.ug-technical-active .main-section{max-width:none!important;width:100%!important}
-.ug-technical-active .page-body{padding:0!important}
-.ug-technical-active .layout-main-section-wrapper{margin:0!important}
-.ug-technical-active .layout-main-section{border:0!important}
-.ug-technical-active .ug-tech{min-height:100vh;border-radius:0}
 
 /* Explicit checkmarks: Desk resets native checkbox appearance. */
 .ug-chantiers input[type="checkbox"] {

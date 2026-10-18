@@ -191,6 +191,10 @@ class MaterialCuttingPlan(Document):
         from mat_reco.material_reconfiguration.services.mcp_compensation_service import validate_compensation_coverage
         validate_compensation_coverage(self)
 
+    def on_submit(self):
+        from mat_reco.material_reconfiguration.services.mcp_repack import execute_on_submit
+        execute_on_submit(self)
+
     def _materialize_effective_plan(self, source_json_field="result_json"):
         raw_tree = self._safe_json_load(self.get(source_json_field))
         if not raw_tree:

@@ -5,5 +5,5 @@ frappe.pages['glass-stock'].on_page_load = function(wrapper) {
   if(frappe.get_route()[0]==='glass-stock')wrapper.glassStock.show();
  });
 };
-frappe.pages['glass-stock'].on_page_show=function(wrapper){document.body.classList.add('ug-glass-active');wrapper.glassStock?.show();};
+frappe.pages['glass-stock'].on_page_show=function(wrapper){document.body.classList.remove('ug-glass-active');wrapper.glassStock?.show();};
 frappe.pages['glass-stock'].on_page_hide=function(wrapper){document.body.classList.remove('ug-glass-active');wrapper.glassStock?.hide();};

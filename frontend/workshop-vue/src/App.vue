@@ -27,7 +27,7 @@ const filters = reactive({
 	to_date: "",
 });
 const mode = ref("tree"),
-	zoom = ref(0.85),
+	zoom = ref(0.65),
 	quantity = ref(1),
 	preview = ref(null),
 	result = ref(null),

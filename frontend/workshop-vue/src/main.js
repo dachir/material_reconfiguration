@@ -20,4 +20,4 @@ export function mountChantiers(element) {
 }
 
 import TechnicalStudy from "./TechnicalStudy.vue";
-export function mountTechnicalStudy(element){const app=createApp(TechnicalStudy);const component=app.mount(element);return {show:()=>component.show(),hide:()=>component.hide(),unmount:()=>app.unmount()};}
+export function mountTechnicalStudy(element,onStatusChange){const app=createApp(TechnicalStudy,{onStatusChange});const component=app.mount(element);return {show:()=>component.show(),hide:()=>component.hide(),unmount:()=>app.unmount()};}
