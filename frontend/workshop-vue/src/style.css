@@ -940,3 +940,7 @@
 
 .ug-filter-actions {display:flex;gap:8px;align-items:center;flex-shrink:0;}
 .ug-filter-actions .ug-print-stock {width:35px;padding:0;display:inline-flex;align-items:center;justify-content:center;}
+
+.ug-workshop .ug-mcp-node{display:flex;align-items:center;gap:8px;padding:10px;text-align:left;border-color:#b28adf;background:#241d39;color:var(--text);cursor:pointer;min-height:70px;}
+.ug-links .ug-mcp-link path{stroke:#b28adf;stroke-width:2;}
+.ug-links .ug-mcp-link circle{fill:#b28adf;}

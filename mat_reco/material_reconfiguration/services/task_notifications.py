@@ -115,6 +115,56 @@ def order_cancelled(doc, method=None):
     close_tasks(doc, 'workshop')
 
 
+
+def lock_workshop_validation(doc, method=None):
+    # Same lock as cockpit planning: the last concurrent validation must see
+    # the preceding plan and its submitted manufacturing receipts.
+    frappe.db.sql('SELECT name FROM `tabCompany` WHERE name=%s FOR UPDATE', doc.company)
+
+
+def mcp_submitted(doc, method=None):
+    """Close atelier handoffs only after every linked plan has executed."""
+    if doc.docstatus != 1 or doc.get('status') != 'Executed':
+        return
+    orders = sorted({row.sales_order for row in doc.get('selected_sales_orders', []) if row.sales_order})
+    if not orders:
+        return
+    tasks = frappe.get_all('ToDo', filters={
+        'reference_type': 'Sales Order', 'reference_name': ['in', orders],
+        'status': 'Open', 'description': ['like', '[Univers Glass — Atelier]%'],
+    }, pluck='reference_name')
+    candidates = set(tasks)
+    if not candidates:
+        return
+    # A submitted plan without its successfully executed Repack is not launched.
+    plans = frappe.db.sql('''SELECT DISTINCT link.sales_order, plan.docstatus, plan.status
+        FROM `tabMCP Sales Order` link
+        JOIN `tabMaterial Cutting Plan` plan ON plan.name=link.parent
+        WHERE link.parenttype='Material Cutting Plan'
+        AND link.parentfield='selected_sales_orders'
+        AND link.sales_order IN %(orders)s AND plan.docstatus < 2''',
+        {'orders': tuple(sorted(candidates))}, as_dict=True)
+    candidates -= {row.sales_order for row in plans if row.docstatus != 1 or row.status != 'Executed'}
+    if not candidates:
+        return
+    from .workshop_service import _load
+    roots, errors, _ = _load(doc.company)
+    by_order = {root['id']: root for root in roots}
+    invalid = {row['sales_order'] for row in errors}
+    for name in sorted(candidates - invalid):
+        order = frappe.get_doc('Sales Order', name)
+        order.check_permission('read')
+        if order.docstatus != 1 or order.company != doc.company:
+            continue
+        root = by_order.get(name)
+        # Physical receipts cover executed cuts. A partially planned order must
+        # keep its task even when every plan created so far is submitted.
+        if root and (root.get('requires_mcp') or any(
+                branch.get('invalid_message') for branch in root.get('children', []))):
+            continue
+        close_tasks(order, 'workshop')
+
+
 def install_workspace_tasks():
     if not frappe.db.exists('Workspace', 'Univers Glass'):
         return

@@ -8,7 +8,7 @@ export function flatten(roots) {
 	roots.forEach(visit);
 	return result;
 }
-export function layout(roots, expanded, compact = false) {
+export function layout(roots, expanded, compact = false, plans = []) {
 	const nodes = [],
 		edges = [];
 	let nextRow = 0;
@@ -43,11 +43,44 @@ export function layout(roots, expanded, compact = false) {
 		visit(root, 0);
 		nextRow += compact ? 0 : 0.35;
 	});
+	const visible = new Map(nodes.map(n => [n.id, n]));
+	const paths = new Map();
+	function rememberPath(node, ancestors) {
+		const path = [...ancestors, node.id];
+		paths.set(node.id, path);
+		(node.children || []).forEach(child => rememberPath(child, path));
+	}
+	roots.forEach(root => rememberPath(root, []));
+	// Reserve the far-right column independently of branch expansion depth.
+	let maxDepth = 0;
+	function measure(node, depth) {
+		maxDepth = Math.max(maxDepth, depth);
+		(node.children || []).forEach(child => measure(child, depth + 1));
+	}
+	roots.forEach(root => measure(root, 0));
+	const planX = (maxDepth + 1) * 285 + 20;
+	const mcps = [...plans].sort((a,b) => a.creation.localeCompare(b.creation) || a.name.localeCompare(b.name))
+		.map((plan, index) => ({...plan, x:planX, y:index * 100 + 35}));
+	for (const plan of mcps) {
+		const sources = new Set();
+		for (const id of new Set(plan.stock_ids)) {
+			const path = plan.stock_paths?.[id] || paths.get(id) || [id];
+			const sourceId = [...path].reverse().find(key => visible.has(key));
+			const source = visible.get(sourceId);
+			// Hidden stocks share a single connection from their visible ancestor.
+			if (source && !sources.has(sourceId)) {
+				sources.add(sourceId);
+				edges.push({id:`${sourceId}/${plan.id}`, from:source, to:plan, mcp:true,
+					ready:plan.docstatus === 1, label:''});
+			}
+		}
+	}
 	return {
 		nodes,
+		mcps,
 		edges,
-		width: Math.max(700, ...nodes.map((n) => n.x + 245)),
-		height: Math.max(450, nextRow * 100 + 40),
+		width: Math.max(700, ...[...nodes, ...mcps].map((n) => n.x + 245)),
+		height: Math.max(450, nextRow * 100 + 40, mcps.length * 100 + 70),
 	};
 }
 export function routeFor(result) {

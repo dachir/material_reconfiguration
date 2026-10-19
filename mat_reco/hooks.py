@@ -144,6 +144,15 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
+    "Material Cutting Plan": {
+        "on_update": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+        "on_cancel": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+        "before_submit": "mat_reco.material_reconfiguration.services.task_notifications.lock_workshop_validation",
+        "on_submit": [
+            "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+            "mat_reco.material_reconfiguration.services.task_notifications.mcp_submitted",
+        ],
+    },
     "Stock Ledger Entry": {
         "after_insert": "mat_reco.material_reconfiguration.services.glass_stock.notify_stock_change",
     },

@@ -488,13 +488,15 @@ def get_dashboard(filters=None,expanded_orders=None):
                 state='ok' if n['allocatable_qty']>=n['remaining_qty'] else 'blocked',
                 state_label=f"{n['allocatable_qty']} allouables / {n['physical_qty']} physiques",children=[],
                 stock_note=n.get('stock_note',''),length_mm=n['length_mm'],width_mm=n['width_mm'],thickness_mm=n['thickness_mm'])]
+    from .workshop_graph import get_workshop_mcps
+    mcps = get_workshop_mcps(roots)
     if expanded_orders is not None:
         expanded=set(_json(expanded_orders,[]))
         for root in roots:
             root['has_children']=bool(root['children'])
             if root['id'] not in expanded:
                 root['children']=[]
-    return dict(roots=roots,errors=errors,as_of=str(now_datetime()),dimension_fields=_dimension_choices(filters.get('company')),
+    return dict(roots=roots,mcps=mcps,errors=errors,as_of=str(now_datetime()),dimension_fields=_dimension_choices(filters.get('company')),
         primary_items=frappe.get_list('Item',filters={'custom_item_types':'PRIMAIRE','disabled':0},fields=['name','item_name'],limit_page_length=0),
         companies=frappe.get_list('Company',pluck='name',limit_page_length=0),
         chantiers=frappe.get_list('Chantier',fields=['name','designation'],limit_page_length=0) if frappe.has_permission('Chantier','read') else [],

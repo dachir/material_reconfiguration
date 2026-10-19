@@ -4,6 +4,7 @@ import { ref, reactive, computed, onBeforeUnmount } from "vue";
 import { flatten, layout, routeFor } from "./layout.js";
 import { defaultQuantity } from "./quantity.js";
 const api = "mat_reco.material_reconfiguration.services.workshop_service.";
+const mcps = ref([]);
 const roots = ref([]),
 	errors = ref([]),
 	counters = ref({}),
@@ -44,7 +45,7 @@ let timer = null,
 const loadedOrders = new Set();
 const index = computed(() => flatten(roots.value));
 const selected = computed(() => index.value.get(selectedId.value));
-const scene = computed(() => layout(roots.value, expanded.value));
+const scene = computed(() => layout(roots.value, expanded.value, false, mcps.value));
 const actionLabel = computed(() => {
 	const node = selected.value;
 	if (!node) return "Fabriquer";
@@ -104,6 +105,7 @@ async function refresh() {
 		});
 		if (current !== requestId) return;
 		roots.value = data.roots;
+		mcps.value = data.mcps || [];
 		errors.value = data.errors;
 		counters.value = data.counters;
 		primaryItems.value = data.primary_items;
@@ -154,6 +156,8 @@ async function setMode(value) {
 		await refresh();
 	}
 }
+function openMcp(name) { frappe.set_route('Form', 'Material Cutting Plan', name); }
+function mcpStatus(plan) { return ({Draft:'Brouillon',Simulated:'Simulé',Approved:'Approuvé',Executed:'Exécuté',Cancelled:'Annulé'})[plan.status] || plan.status; }
 function progress(n) {
 	return Math.min(100, (100 * (n.produced_qty || 0)) / (n.required_qty || n.remaining_qty || 1));
 }
@@ -432,7 +436,7 @@ function wheel(e) {
 									<g
 										v-for="edge in scene.edges"
 										:key="edge.id"
-										:class="{ satisfied: edge.ready }"
+										:class="{ satisfied: edge.ready, 'ug-mcp-link': edge.mcp }"
 									>
 										<path
 											:d="`M ${edge.from.x + 218} ${edge.from.y + 35} H ${
@@ -518,6 +522,15 @@ function wheel(e) {
 										></span>
 									</button>
 								</div>
+                                <button v-for="plan in scene.mcps" :key="plan.id" class="ug-node ug-mcp-node"
+                                    :style="{left:plan.x+'px',top:plan.y+'px'}" :title="'Ouvrir '+plan.name"
+                                    @click="openMcp(plan.name)">
+                                    <span class="ug-node-icon" aria-hidden="true">▧</span>
+                                    <span class="ug-node-text"><strong>{{plan.name}}</strong>
+                                    <small>{{mcpStatus(plan)}}</small>
+                                    <small>{{plan.creation.slice(0,16).replace('T',' ')}}</small>
+                                    </span>
+                                </button>
 							</div>
 						</div>
 					</div>
