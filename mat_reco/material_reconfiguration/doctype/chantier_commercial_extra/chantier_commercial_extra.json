@@ -84,6 +84,31 @@
    "fieldname": "price_source",
    "label": "Origine du prix",
    "fieldtype": "Data"
+  },
+  {
+   "fieldname": "inherited_from",
+   "label": "Hérité du type",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inherited_key",
+   "label": "Clé complément du type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "inherited_qty_override",
+   "label": "Quantité ajustée pour cet ouvrage",
+   "fieldtype": "Check",
+   "hidden": 1
+  },
+  {
+   "fieldname": "inherited_rate_override",
+   "label": "Prix ajusté pour cet ouvrage",
+   "fieldtype": "Check",
+   "hidden": 1
   }
  ],
  "permissions": []

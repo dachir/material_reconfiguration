@@ -15,6 +15,8 @@ class Chantier(Document):
     def validate(self):
         validate_chantier(self)
         validate_macro(self)
+        from mat_reco.material_reconfiguration.services.ft_activation import validate_activation
+        validate_activation(self)
 
     def before_submit(self):
         submit_chantier(self)

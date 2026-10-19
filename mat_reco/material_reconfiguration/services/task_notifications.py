@@ -29,6 +29,7 @@ def send_tasks(doc, stage, event_key):
     # Serialize task creation per source document, including concurrent requests.
     frappe.db.get_value(doc.doctype, doc.name, 'name', for_update=True)
     label, route = STAGES[stage][1:]
+    if stage == 'technical' and doc.doctype == 'Chantier':route = 'chantiers'
     link = '/app/' + route + ('/' + doc.name if stage in ('technical', 'chantier', 'workshop') else '')
     prefix = f'[Univers Glass — {label}]'
     description = f'{prefix} {escape_html(doc.name)} — <a href="{escape_html(link)}">Ouvrir {label.lower()}</a>'
@@ -77,10 +78,6 @@ def handoff_study(chantier, request_key, study=None):
     doc.check_permission('read')
     if doc.chantier != chantier:
         frappe.throw('La fiche technique appartient à un autre chantier.')
-    if doc.docstatus == 0:
-        users = send_tasks(doc, 'technical', request_key)
-        if not users:
-            frappe.msgprint('Aucun destinataire actif autorisé : vérifier le rôle des fiches techniques dans Mat Reco Settings.', alert=True)
     return doc.name
 
 
@@ -101,6 +98,10 @@ def close_tasks(doc, stage):
 def study_finished(doc, method=None):
     close_tasks(doc, 'technical')
     dossier = frappe.get_doc('Chantier', doc.chantier)
+    from .chantier_work_types import is_v2
+    if is_v2(dossier):
+        frappe.publish_realtime('workshop_updated',{'doctype':doc.doctype,'name':doc.name,'chantier':doc.chantier},after_commit=True)
+        return
     if doc.docstatus == 1 and dossier.docstatus == 0 and dossier.status not in ('Cancelled', 'On Hold'):
         send_tasks(dossier, 'chantier', 'study-validated:' + doc.name)
     elif doc.docstatus == 2:

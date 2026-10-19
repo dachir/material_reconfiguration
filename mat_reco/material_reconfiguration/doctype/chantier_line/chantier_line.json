@@ -86,11 +86,25 @@
    "fieldtype": "Select",
    "options": "Manual\nPrice List",
    "read_only": 1
+  },
+  {
+   "fieldname": "work_type",
+   "label": "Type d’ouvrage",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "excluded_type_extras",
+   "label": "Compléments communs retirés",
+   "fieldtype": "Long Text",
+   "hidden": 1
   }
  ],
  "field_order": [
   "line_id",
   "repere",
+  "work_type",
+  "excluded_type_extras",
   "designation",
   "section",
   "proposed_item",

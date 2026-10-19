@@ -341,6 +341,7 @@ def _inventory(nodes, company, ownership, *, lock=False):
 
 
 def _load(company=None, *, lock=False):
+    from .chantier_work_types import logical_section
     _permission('Sales Order')
     _permission('Stock Entry')
     orders = [frappe.get_doc('Sales Order', r.name, for_update=lock) for r in frappe.get_list('Sales Order',
@@ -387,6 +388,7 @@ def _load(company=None, *, lock=False):
                     item_code=row.item_code,item_type=frappe.get_cached_value('Item',row.item_code,'custom_item_types'),
                     sales_order=order.name,sales_order_item=row.name,company=order.company,children=[],is_final=True,
                     required_qty=total,produced_qty=accepted[row.name],remaining_qty=remaining,manufacture_qty=remaining,
+                    section=logical_section(order,row),
                     pending_quality_qty=pending[row.name],fabricable_qty=0,physical_qty=0,allocatable_qty=0,
                     missing_qty=0,requires_mcp=False,state='blocked',state_label='Données à corriger',
                     invalid_message=str(exc),stock_note=str(exc),primary_items=list({n['primary_item'] for n in _walk(node) if n.get('primary_item')}) if node else [],length_mm=flt(row.get('custom_client_length_mm')),
@@ -928,7 +930,20 @@ def workshop_cutting_demands(doc):
         so=frappe.get_doc('Sales Order',name);so.check_permission('read')
         if so.company!=doc.company or so.docstatus!=1:
             frappe.throw('Les commandes du MCP doivent être validées et de la même société.')
-        trees=[_tree(so,r,allow_invalid=True) for r in so.items if frappe.get_cached_value('Item',r.item_code,'custom_item_types') in ('OUVRAGE','DECOUPE')]
+        trees=[]
+        from .chantier_work_types import is_v2, freeze_order
+        loose=is_v2(frappe.get_doc('Chantier',so.custom_chantier)) if so.get('custom_chantier') else False
+        for row in so.items:
+            if frappe.get_cached_value('Item',row.item_code,'custom_item_types') not in ('OUVRAGE','DECOUPE'):continue
+            try:
+                tree=_tree(so,row,allow_invalid=True)
+            except frappe.ValidationError:
+                frappe.clear_messages();continue
+            if loose and any(n.get('primary_item')==doc.source_item for n in _walk(tree)) and any(
+                    need.get('sales_order',spec['sales_order'])==name and flt(need.get('qty'))>0
+                    and need['node_id'].startswith(row.name+':') for need in spec['needs']):
+                freeze_order(so,node_id=row.name+':root')
+            trees.append(tree)
         contexts[name]=(so,trees,{n['id']:n for branch in trees for n in _walk(branch)})
     demands=[]
     for need in spec['needs']:
@@ -977,6 +992,9 @@ def execute_action(sales_order,node_id,qty,request_key,version,dimensions=None):
         if (existing.sales_order,existing.node_id,existing.requested_qty)!=(sales_order,node_id,_qty(qty)):
             frappe.throw('Cette clé a déjà servi pour une autre opération.')
         return _json(existing.result_json)
+    if so.get('custom_chantier'):
+        from .chantier_work_types import freeze_order
+        freeze_order(so,node_id=node_id)
     root,node,request=_fresh_request(sales_order,node_id,qty,lock=True,dimensions=dimensions)
     import hmac
     if not hmac.compare_digest(version,_version(root,node,request)):

@@ -46,6 +46,14 @@
    "options": "Chantier Technical Study",
    "read_only": 1,
    "no_copy": 1
+  },
+  {
+   "fieldname": "loose_link",
+   "label": "Parcours indépendant",
+   "fieldtype": "Check",
+   "default": "0",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
  "field_order": [
@@ -54,7 +62,8 @@
   "technical_hash",
   "lines",
   "notes",
-  "amended_from"
+  "amended_from",
+  "loose_link"
  ],
  "track_changes": 1,
  "permissions": [

@@ -2,6 +2,7 @@
 import copy
 import json
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import nowdate, add_days
@@ -10,6 +11,15 @@ from mat_reco.material_reconfiguration.services import technical_study_service a
 
 class TechnicalStudyTests(unittest.TestCase):
     def setUp(self):
+        # Reproduce historical projects created before the type-based workflow.
+        from mat_reco.material_reconfiguration.doctype.chantier.chantier import Chantier
+        original_before_insert = Chantier.before_insert
+        def historical_before_insert(doc):
+            original_before_insert(doc)
+            doc.workflow_version = 0
+        legacy = patch.object(Chantier, 'before_insert', historical_before_insert)
+        legacy.start()
+        self.addCleanup(legacy.stop)
         frappe.db.savepoint('qa_technical')
         self.user=frappe.session.user;frappe.set_user('Administrator')
         self.company='Marsavco SA'
@@ -190,19 +200,20 @@ class TechnicalStudyTests(unittest.TestCase):
         payload=[{k:r.get(k) for k in service.MACRO_FIELDS+('rate','rate_set','price_source')} for r in self.doc.lines]
         for row in payload:
             for field in ('length_mm','width_mm','thickness_mm'):row[field]=int(row[field])
-        result=service.save_commercial(self.doc.name,str(self.doc.modified),json.dumps(payload),currency=self.doc.currency,
-            selling_price_list=self.doc.selling_price_list,commercial_extras=json.dumps([dict(parent_line_id=self.doc.lines[0].line_id,
-                item_code='QA-EXTRA-SERVICE',manual_qty=0,qty=0,rate=10,rate_set=1)]))
+        with self.assertRaisesRegex(frappe.ValidationError,'Supprimer la fiche technique'):
+            service.save_commercial(self.doc.name,str(self.doc.modified),json.dumps(payload),currency=self.doc.currency,
+                selling_price_list=self.doc.selling_price_list,commercial_extras=json.dumps([dict(parent_line_id=self.doc.lines[0].line_id,
+                    item_code='QA-EXTRA-SERVICE',manual_qty=0,qty=0,rate=10,rate_set=1)]))
         self.doc.reload()
         self.assertEqual(service.source_hash(self.doc),before)
-        self.assertAlmostEqual(result['commercial_extras'][0]['qty'],21.6)
+        self.assertFalse(self.doc.commercial_extras)
         self.assertEqual(service.approved_study(self.doc).name,study.name)
 
     def test_commercial_hash_accepts_browser_prices_after_database_round_trip(self):
-        self.extras();study=self.study();study.submit();self.doc.reload()
+        self.extras()
         self.doc.lines[0].rate_set=0
         for row in self.doc.commercial_extras:row.rate=int(row.rate);row.rate_set=0
-        self.doc.save();self.doc.submit()
+        self.doc.save();study=self.study();study.submit();self.doc.reload();self.doc.submit()
         approved=self.doc.commercial_hash
         self.doc.reload()
         self.assertEqual(service.commercial_hash(self.doc,study),approved)
@@ -225,8 +236,15 @@ class TechnicalStudyTests(unittest.TestCase):
         sub=node('QA-TECH-SUB','OUVRAGE',[cut])
         return node('QA-TECH-FG','OUVRAGE',[sub])
 
+    def prepare(self):
+        from mat_reco.material_reconfiguration.services.ft_activation import set_ft_active
+        self.doc.reload()
+        if not self.doc.ft_active:
+            set_ft_active(self.doc.name,1,str(self.doc.modified));self.doc.reload()
+        return service.prepare_study(self.doc.name)
+
     def study(self,tree=None):
-        name=service.prepare_study(self.doc.name)
+        name=self.prepare()
         doc=frappe.get_doc('Chantier Technical Study',name)
         doc.lines[0].tree_json=json.dumps(tree or self.definition());doc.save()
         return doc
@@ -257,7 +275,7 @@ class TechnicalStudyTests(unittest.TestCase):
         self.doc.append('lines',dict(repere='V-2',designation='Autre dimension',qty=3,uom='PC',
             length_mm=900,width_mm=600,thickness_mm=6,rate=100,rate_set=1))
         self.doc.save()
-        study=frappe.get_doc('Chantier Technical Study',service.prepare_study(self.doc.name))
+        study=frappe.get_doc('Chantier Technical Study',self.prepare())
         definition=self.definition()
         payload=[dict(line_id=row.line_id,length_mm=row.length_mm,width_mm=row.width_mm,
             thickness_mm=8,tree_json=json.dumps(definition)) for row in study.lines]
@@ -331,8 +349,8 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertEqual(frappe.db.get_value('Chantier Technical Study',study.name,'docstatus'),0)
 
     def test_source_change_requires_new_technical_validation(self):
-        study=self.study();self.doc.lines[0].qty=5;self.doc.save()
-        with self.assertRaises(frappe.ValidationError):study.submit()
+        study=self.study();self.doc.lines[0].qty=5
+        with self.assertRaisesRegex(frappe.ValidationError,'Supprimer la fiche technique'):self.doc.save()
         self.assertFalse(frappe.db.exists('Item','QA-TECH-FG'))
 
     def test_old_nonserialized_test_item_is_not_a_model(self):
@@ -442,7 +460,7 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertTrue(all(row.custom_chantier_section==section.name for row in quote.items))
 
     def test_commercial_approval_preserves_unconfirmed_price(self):
-        study=self.study();study.submit();self.doc.reload();self.doc.lines[0].rate_set=0;self.doc.save()
+        self.doc.lines[0].rate_set=0;self.doc.save();study=self.study();study.submit();self.doc.reload()
         self.doc.submit()
         self.assertEqual(self.doc.lines[0].rate_set,0)
         quote=frappe.get_doc('Quotation',service.generate_quotation(self.doc.name,request_key='qa-optional-price'))
@@ -476,24 +494,24 @@ class TechnicalStudyTests(unittest.TestCase):
         self.assertFalse(frappe.db.exists('Item','QA-TECH-FG'))
 
     def test_catalog_lookup_and_approved_zero_price(self):
+        self.doc.lines[0].rate=0;self.doc.lines[0].rate_set=1;self.doc.save()
         study=self.study();study.submit()
         price=frappe.get_doc(dict(doctype='Item Price',item_code='QA-TECH-FG',price_list='Standard Selling',price_list_rate=125,uom='PC'))
         price.insert()
         found=service.get_rate(self.doc.name,'QA-TECH-FG','PC')
         self.assertTrue(found['found']);self.assertEqual(found['rate'],125)
-        self.doc.reload();self.doc.lines[0].rate=0;self.doc.lines[0].rate_set=1;self.doc.save();self.doc.submit()
+        self.doc.reload();self.doc.submit()
         name=service.generate_quotation(self.doc.name,request_key='qa-free-price')
         quote=frappe.get_doc('Quotation',name)
         self.assertEqual(quote.items[0].rate,0)
         self.assertEqual(quote.grand_total,0)
 
-    def test_new_study_carries_forward_definition_after_macro_revision(self):
-        previous=self.study()
+    def test_macro_revision_requires_deletion_and_a_new_activation(self):
+        previous=self.study();definition=json.loads(previous.lines[0].tree_json)
+        service.delete_study(previous.name,str(previous.modified));self.doc.reload()
         self.doc.lines[0].qty=5;self.doc.save()
-        name=service.prepare_study(self.doc.name)
-        current=frappe.get_doc('Chantier Technical Study',name)
-        self.assertNotEqual(name,previous.name)
-        self.assertEqual(json.loads(current.lines[0].tree_json),json.loads(previous.lines[0].tree_json))
+        current=self.study(tree=definition)
+        self.assertNotEqual(current.name,previous.name)
         current.submit()
         self.assertEqual(current.lines[0].result_item,'QA-TECH-FG')
 
@@ -518,11 +536,11 @@ class TechnicalStudyTests(unittest.TestCase):
         study=self.study()
         with self.assertRaises(frappe.ValidationError):
             service.cancel_dossier(self.doc.name,str(self.doc.modified))
-        service.delete_study(study.name,str(study.modified))
+        service.delete_study(study.name,str(study.modified));self.doc.reload()
         service.cancel_dossier(self.doc.name,str(self.doc.modified))
         self.doc.reload()
         self.assertEqual(self.doc.status,'Cancelled')
-        with self.assertRaises(frappe.ValidationError):service.prepare_study(self.doc.name)
+        with self.assertRaises(frappe.ValidationError):self.prepare()
         self.doc.designation='Modification interdite'
         with self.assertRaises(frappe.ValidationError):self.doc.save()
 

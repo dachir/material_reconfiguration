@@ -13,6 +13,8 @@ MACRO_FIELDS = ('line_id','repere','designation','section','proposed_item','leng
 
 
 def source_hash(chantier):
+    from .chantier_work_types import is_v2, technical_source_hash
+    if is_v2(chantier):return technical_source_hash(chantier)
     rows=[]
     for row in chantier.get('lines',[]):
         values={k:row.get(k) for k in MACRO_FIELDS}
@@ -52,6 +54,8 @@ def assign_commercial_reperes(chantier):
 
 
 def validate_macro(chantier):
+    from .chantier_work_types import validate_types
+    validate_types(chantier)
     assign_commercial_reperes(chantier)
     seen, ids = set(), set()
     if not chantier.currency:
@@ -95,6 +99,8 @@ def approved_study(chantier, lock=False):
 
 
 def submit_chantier(doc):
+    from .chantier_work_types import is_v2, approve_commercial
+    if is_v2(doc):return approve_commercial(doc)
     if not doc.lines:
         frappe.throw('Ajouter les ouvrages commerciaux avant validation.')
     frappe.db.get_value('Chantier',doc.name,'name',for_update=True)
@@ -108,7 +114,8 @@ def submit_chantier(doc):
 def cancel_chantier(doc):
     if frappe.db.exists('Quotation',{'custom_chantier':doc.name,'docstatus':['!=',2]}) or frappe.db.exists('Sales Order',{'custom_chantier':doc.name,'docstatus':['!=',2]}):
         frappe.throw('Traiter les devis et commandes liés avant d’annuler le chantier ; supprimer les brouillons ou annuler les documents validés.')
-    if frappe.db.exists('Chantier Technical Study',{'chantier':doc.name,'docstatus':['!=',2]}):
+    from .chantier_work_types import is_v2
+    if not is_v2(doc) and frappe.db.exists('Chantier Technical Study',{'chantier':doc.name,'docstatus':['!=',2]}):
         frappe.throw('Supprimer les études en brouillon ou annuler les études validées avant d’annuler le chantier.')
 
 
@@ -233,14 +240,22 @@ def air_layers(node, path=(), ratio=1):
 
 
 def validate_study(doc):
-    chantier=chantier_doc(doc.chantier)
-    if chantier.docstatus!=0 or chantier.status=='Cancelled':
+    chantier=frappe.get_doc('Chantier',doc.chantier,for_update=True)
+    chantier.check_permission('read')
+    from .chantier_work_types import is_v2, prepare_type_rows
+    loose=is_v2(chantier)
+    if (chantier.docstatus!=0 and not loose) or chantier.docstatus==2 or chantier.status=='Cancelled':
         frappe.throw('L’étude technique doit être préparée et validée avant la validation commerciale finale.')
     if not chantier.lines:
         frappe.throw('Ajouter les besoins commerciaux au chantier avant l’étude.')
-    if doc.is_new():doc.source_hash=source_hash(chantier)
+    if doc.is_new():
+        from .ft_activation import require_activation, has_study
+        require_activation(chantier)
+        if not loose and has_study(chantier.name):
+            frappe.throw('Supprimer la fiche technique existante avant d’en préparer une nouvelle.')
+        doc.source_hash=source_hash(chantier)
     if not doc.source_hash:frappe.throw('Empreinte des besoins absente.')
-    expected={r.line_id:r for r in chantier.lines}
+    expected={r.line_id:r for r in (prepare_type_rows(chantier) if loose else chantier.lines)}
     if len(doc.lines)!=len(expected) or {r.line_id for r in doc.lines}!=set(expected):
         frappe.throw('L’étude doit couvrir exactement les lignes du chantier. Recharger les besoins.')
     for row in doc.lines:
@@ -251,7 +266,9 @@ def validate_study(doc):
         if doc.source_hash!=source_hash(chantier):
             frappe.throw('Les besoins commerciaux ont changé. Préparer une nouvelle étude correspondant à la version actuelle.')
         for row in doc.lines:
-            if min(flt(row.length_mm),flt(row.width_mm),flt(row.thickness_mm))<=0:
+            if loose and abs(flt(row.thickness_mm)-flt(expected[row.line_id].thickness_mm))>.001:
+                frappe.throw('L’épaisseur technique doit correspondre au type d’ouvrage du chantier.')
+            if (flt(row.thickness_mm)<=0 if loose else min(flt(row.length_mm),flt(row.width_mm),flt(row.thickness_mm))<=0):
                 frappe.throw(f'{row.repere} : compléter les trois dimensions.')
             node=frappe.parse_json(row.tree_json or '{}')
             if node.get('item_type') not in ('OUVRAGE','DECOUPE'):
@@ -301,9 +318,11 @@ def _resolve(node, company, created):
 def submit_study(doc):
     chantier=frappe.get_doc('Chantier',doc.chantier,for_update=True)
     chantier.check_permission('read')
-    if chantier.docstatus!=0 or doc.source_hash!=source_hash(chantier):
+    from .chantier_work_types import is_v2
+    loose=is_v2(chantier)
+    if (chantier.docstatus!=0 and not loose) or chantier.docstatus==2 or doc.source_hash!=source_hash(chantier):
         frappe.throw('Les besoins ont changé pendant la validation. Actualiser l’étude avant de recommencer.')
-    if frappe.db.get_value('Chantier Technical Study',{'chantier':chantier.name,'docstatus':1,'name':['!=',doc.name]},'name',for_update=True):
+    if not loose and frappe.db.get_value('Chantier Technical Study',{'chantier':chantier.name,'docstatus':1,'name':['!=',doc.name]},'name',for_update=True):
         frappe.throw('Une étude technique validée existe déjà. L’annuler avant de valider sa révision.')
     # Serialize generated Item names. External Item inserts remain protected by ERPNext's unique key.
     frappe.db.sql("SELECT name FROM tabDocType WHERE name='Item' FOR UPDATE")
@@ -314,7 +333,7 @@ def submit_study(doc):
             row.result_item=_resolve(frappe.parse_json(row.tree_json),chantier.company,created)
             from mat_reco.material_reconfiguration.services.workshop_service import _tree
             source=frappe._dict(name=row.line_id,idx=row.idx,item_code=row.result_item,
-                custom_client_length_mm=row.length_mm,custom_client_width_mm=row.width_mm,custom_client_thickness_mm=row.thickness_mm)
+                custom_client_length_mm=(1 if loose else row.length_mm),custom_client_width_mm=(1 if loose else row.width_mm),custom_client_thickness_mm=row.thickness_mm)
             tree=_tree(frappe._dict(name=chantier.name,company=chantier.company),source,item_code=row.result_item)
             definition=frappe.parse_json(row.tree_json)
             tree['air_layers']=air_layers(definition)
@@ -330,8 +349,12 @@ def submit_study(doc):
 @frappe.whitelist(methods=['POST'])
 def prepare_study(chantier):
     dossier=chantier_doc(chantier)
+    from .chantier_work_types import is_v2, prepare_study as prepare_types
+    if is_v2(dossier):return prepare_types(chantier)
     if dossier.docstatus!=0 or dossier.status=='Cancelled':frappe.throw('Le chantier commercial doit être un brouillon actif.')
     frappe.db.get_value('Chantier',dossier.name,'name',for_update=True)
+    from .ft_activation import require_activation
+    require_activation(dossier)
     if not dossier.lines:frappe.throw('Ajouter au moins un ouvrage commercial.')
     current=source_hash(dossier)
     existing=frappe.db.get_value('Chantier Technical Study',{'chantier':chantier,'docstatus':['<',2],'source_hash':current},'name',for_update=True)
@@ -396,6 +419,8 @@ def quotation_rows(chantier, study):
 
 
 def validate_quote(doc, chantier):
+    from .chantier_work_types import is_v2, validate_commercial_quote
+    if is_v2(chantier):return validate_commercial_quote(doc,chantier)
     if chantier.docstatus!=1:frappe.throw('Valider le chantier commercial avant de créer le devis.')
     study=approved_study(chantier)
     if chantier.technical_study!=study.name or not commercial_hash_matches(chantier,study):
@@ -433,7 +458,9 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
     dossier=chantier_doc(chantier)
     if dossier.docstatus!=1:frappe.throw('Valider le chantier commercial avant de générer le devis.')
     frappe.db.get_value('Chantier',dossier.name,'name',for_update=True)
-    study=approved_study(dossier,lock=True)
+    from .chantier_work_types import is_v2, types
+    loose=is_v2(dossier)
+    study=None if loose else approved_study(dossier,lock=True)
     if not request_key or len(request_key)>100:frappe.throw('Clé de génération requise.')
     selection=frappe.parse_json(selections) if selections is not None else None
     if selection is not None and (not isinstance(selection,list) or not selection or any(not isinstance(r,dict) or not r.get('line_id') for r in selection)):frappe.throw('Sélection invalide.')
@@ -450,13 +477,19 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
         selection=[dict(line_id=r.line_id,qty=max(0,flt(r.qty)-flt(usage.get(r.line_id)))) for r in dossier.lines]
         selection=[r for r in selection if r['qty']>0]
         if not selection:frappe.throw('Tous les ouvrages de ce chantier sont déjà au devis.')
-    definitions=quotation_rows(dossier,study)
+    definitions={r.line_id:(r,None) for r in dossier.lines} if loose else quotation_rows(dossier,study)
     if not isinstance(selection,list) or not selection or len(selection)>500 or len({r.get('line_id') for r in selection})!=len(selection):frappe.throw('Sélection de lignes invalide.')
     quote=frappe.new_doc('Quotation')
-    quote.update(dict(quotation_to='Customer',party_name=dossier.customer,company=dossier.company,currency=dossier.currency,selling_price_list=dossier.selling_price_list,custom_chantier=dossier.name,custom_technical_study=study.name,custom_chantier_request_key=key,custom_chantier_request_scope=scope,ignore_pricing_rule=1,valid_till=add_days(nowdate(),30),terms=dossier.terms))
+    quote.update(dict(quotation_to='Customer',party_name=dossier.customer,company=dossier.company,currency=dossier.currency,selling_price_list=dossier.selling_price_list,custom_chantier=dossier.name,custom_technical_study=None if loose else study.name,custom_chantier_request_key=key,custom_chantier_request_scope=scope,ignore_pricing_rule=1,valid_till=add_days(nowdate(),30),terms=dossier.terms))
+    if loose:
+        section_order={row.name:i for i,row in enumerate(frappe.get_list('Chantier Section',filters={'chantier':dossier.name},fields=['name'],order_by='lft asc',limit_page_length=0))}
+        type_order={row.type_id:i for i,row in enumerate(dossier.work_types)}
+        macros={row.line_id:row for row in dossier.lines}
+        selection.sort(key=lambda chosen:(section_order.get(macros.get(chosen.get('line_id'),frappe._dict()).get('section'),-1),type_order.get(macros.get(chosen.get('line_id'),frappe._dict()).get('work_type'),0)))
     for chosen in selection:
         if chosen.get('line_id') not in definitions or flt(chosen.get('qty'))<=0 or flt(chosen['qty'])!=cint(chosen['qty']):frappe.throw('Quantité entière positive requise sur une ligne du chantier.')
         macro,tech=definitions[chosen['line_id']]
+        if loose:tech=frappe._dict(result_item=types(dossier)[macro.work_type].commercial_item,length_mm=macro.length_mm,width_mm=macro.width_mm,thickness_mm=macro.thickness_mm)
         quote.append('items',dict(item_code=tech.result_item,qty=chosen['qty'],uom=frappe.get_cached_value('Item',tech.result_item,'stock_uom'),rate=macro.rate,
             custom_repere=macro.repere,custom_chantier_section=macro.section,custom_chantier_line=macro.line_id,
             custom_client_length_mm=tech.length_mm,custom_client_width_mm=tech.width_mm,custom_client_thickness_mm=tech.thickness_mm))
@@ -472,6 +505,8 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
     # Preserve the manager-approved price, including an explicitly free line.
     for row in quote.items:
         macro=prices[row.custom_chantier_line]
+        if loose and macro.get('work_type'):
+            row.item_name=macro.designation;row.description=frappe.utils.escape_html(macro.designation)
         row.rate=macro.rate;row.price_list_rate=macro.rate;row.discount_percentage=0;row.discount_amount=0
         row.is_free_item=int(flt(macro.rate)==0)
     quote.run_method('calculate_taxes_and_totals');quote.insert()
@@ -480,17 +515,31 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
 
 
 @frappe.whitelist(methods=['POST'])
-def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None, header=None, taxes_and_charges=None):
+def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None, header=None, taxes_and_charges=None, work_types=None, upgrade_types=False):
     doc=frappe.get_doc('Chantier',chantier,for_update=True);doc.check_permission('write')
     if doc.docstatus!=0 or str(doc.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant de l’enregistrer.')
+    if cint(upgrade_types) and not doc.get('workflow_version'):
+        if any(frappe.db.exists(dt,{key:chantier}) for dt,key in [('Chantier Technical Study','chantier'),('Quotation','custom_chantier'),('Sales Order','custom_chantier')]):
+            frappe.throw('Conserver les documents existants : utiliser un nouveau chantier pour le nouveau parcours.')
+        doc.workflow_version=2
     incoming=frappe.parse_json(lines)
     if not isinstance(incoming,list) or len(incoming)>500:frappe.throw('Saisir au maximum 500 ouvrages.')
-    allowed=MACRO_FIELDS+('rate','rate_set','price_source')
+    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras')
+    if work_types is not None:
+        type_rows=frappe.parse_json(work_types)
+        if not isinstance(type_rows,list) or len(type_rows)>200:frappe.throw('Types d’ouvrage invalides.')
+        existing={r.type_id:r for r in doc.get('work_types',[])}
+        doc.set('work_types',[])
+        for row in type_rows:
+            prior=existing.get(row.get('type_id'))
+            values={k:row.get(k) for k in ('type_id','designation','thickness_mm','proposed_item','common_extras')}
+            if prior:values.update(name=prior.name,commercial_item=prior.commercial_item)
+            doc.append('work_types',values)
     doc.set('lines',[{k:r.get(k) for k in allowed} for r in incoming])
     if commercial_extras is not None:
         supplements=frappe.parse_json(commercial_extras)
         if not isinstance(supplements,list) or len(supplements)>2000:frappe.throw('Liste de compléments invalide (maximum 2000).')
-        doc.set('commercial_extras',[{k:r.get(k) for k in chantier_extras.FIELDS} for r in supplements])
+        doc.set('commercial_extras',[{k:r.get(k) for k in chantier_extras.FIELDS+('inherited_from','inherited_key','inherited_qty_override','inherited_rate_override')} for r in supplements])
     if header is not None:
         values = frappe.parse_json(header)
         if not isinstance(values, dict):
@@ -524,6 +573,8 @@ def confirm_order(quotation, acceptance_reference, delivery_date, request_key):
 
 
 def before_insert_chantier(doc):
+    # Amendments retain their original model and historical technical identities.
+    doc.workflow_version=frappe.get_cached_value("Chantier",doc.amended_from,"workflow_version") if doc.amended_from else 2
     if doc.amended_from and doc.reference==frappe.get_cached_value('Chantier',doc.amended_from,'reference'):
         from frappe.model.naming import getseries
         prefix=doc.reference+'-R';doc.reference=prefix+getseries(prefix,2)
@@ -574,7 +625,15 @@ def designation_suggestions(txt=''):
     # Query parents through get_list so document-level permissions still apply.
     parents=frappe.get_list('Chantier',pluck='name',limit_page_length=0)
     if not parents:return []
-    return frappe.get_all('Chantier Line',
-        filters={'parent':['in',parents],'parenttype':'Chantier','designation':['like','%'+txt+'%']},
-        fields=['designation'],group_by='designation',order_by='designation asc',limit_page_length=10,
-        pluck='designation')
+    values=[]
+    for child in ('Chantier Line','Chantier Work Type'):
+        values.extend(frappe.get_all(child,
+            filters={'parent':['in',parents],'parenttype':'Chantier','designation':['like','%'+txt+'%']},
+            fields=['designation'],group_by='designation',order_by='designation asc',limit_page_length=10,
+            pluck='designation'))
+    return sorted(set(values),key=str.casefold)[:10]
+
+
+@frappe.whitelist()
+def designation_autocomplete(txt='', query=None):
+    return [dict(value=value,label=frappe.utils.escape_html(value)) for value in designation_suggestions(txt)]

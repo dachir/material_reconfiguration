@@ -121,6 +121,39 @@
    "label": "Services et accessoires",
    "fieldtype": "Table",
    "options": "Chantier Commercial Extra"
+  },
+  {
+   "fieldname": "ft_active",
+   "label": "FT activée",
+   "fieldtype": "Check",
+   "default": "0",
+   "read_only": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "ft_activation_key",
+   "label": "Clé activation FT",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "workflow_version",
+   "label": "Version du parcours",
+   "fieldtype": "Int",
+   "default": "0",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "work_types",
+   "label": "Types d’ouvrage",
+   "fieldtype": "Table",
+   "options": "Chantier Work Type"
   }
  ],
  "field_order": [
@@ -136,7 +169,11 @@
   "currency",
   "selling_price_list",
   "taxes_and_charges",
+  "workflow_version",
+  "work_types",
   "lines",
+  "ft_active",
+  "ft_activation_key",
   "technical_study",
   "commercial_hash",
   "terms",

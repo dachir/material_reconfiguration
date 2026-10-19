@@ -34,6 +34,8 @@ def validate_chantier(doc):
 
 
 def validate_section(doc):
+    from .ft_activation import guard_section
+    guard_section(doc)
     parent_dossier = chantier_doc(doc.chantier)
     if parent_dossier.docstatus != 0:
         frappe.throw('Les sections d’un chantier validé ou annulé ne peuvent pas être modifiées.')
@@ -110,6 +112,8 @@ def validate_commercial(doc, method=None):
         # Preserve existing non-chantier workflows and their Item composition behavior.
         return
     chantier = chantier_doc(doc.custom_chantier)
+    from .chantier_work_types import is_v2
+    loose=is_v2(chantier)
     if chantier.status in ('Cancelled', 'On Hold') and doc.docstatus != 2:
         frappe.throw('Ce chantier est suspendu ou annulé.')
     customer = doc.get('customer') if doc.doctype == 'Sales Order' else (doc.party_name if doc.quotation_to == 'Customer' else None)
@@ -156,6 +160,15 @@ def validate_commercial(doc, method=None):
             # The submitted technical study is authoritative; validate_quote filled the frozen definition.
             pass
         else:
+            if loose and not origin.get('custom_technical_snapshot'):
+                if row.item_code!=origin.item_code or row.uom!=origin.uom or flt(row.rate)!=flt(origin.rate) or row.custom_repere!=origin.custom_repere or any(abs(flt(row.get(f))-flt(origin.get(f)))>.001 for f,_ in DIMENSIONS):
+                    frappe.throw('La commande doit reprendre l’ouvrage commercial du devis accepté.')
+                saved=frappe.db.get_value('Sales Order Item',row.name,['custom_technical_snapshot','custom_technical_hash'],as_dict=True) if not doc.is_new() else None
+                row.custom_technical_snapshot=saved.custom_technical_snapshot if saved else None
+                row.custom_technical_hash=saved.custom_technical_hash if saved else None
+                row.custom_ug_work_type=origin.get('custom_ug_work_type')
+                row.custom_ug_work_type_name=origin.get('custom_ug_work_type_name')
+                continue
             _check_source(row, origin)
             # Only the submitted source is authoritative, never values sent by the browser.
             row.custom_technical_snapshot = origin.custom_technical_snapshot
@@ -163,7 +176,7 @@ def validate_commercial(doc, method=None):
     if doc.doctype == 'Sales Order':
         frappe.db.get_value('Chantier', chantier.name, 'name', for_update=True)
         for row in doc.get('items', []):
-            if not row.get('custom_technical_snapshot'):
+            if not row.get('custom_technical_snapshot') and not (loose and row.get('custom_chantier_line') and not row.get('custom_is_service_row') and not row.get('custom_is_accessory_row')):
                 continue
             # Serialize confirmations against the same quote row, including concurrent operators.
             previous = frappe.db.sql('''SELECT i.qty FROM `tabSales Order Item` i
@@ -194,22 +207,29 @@ def protect_produced_order(doc, method=None):
 def frozen_tree(order, row):
     if not row.get('custom_technical_snapshot'):
         if order.get('custom_chantier'):
-            frappe.throw('Composition technique validée manquante sur la ligne de commande.')
-        return None
-    tree = json.loads(row.custom_technical_snapshot)
-    if fingerprint(tree) != row.get('custom_technical_hash'):
+            from .chantier_work_types import is_v2, technical_tree
+            dossier=chantier_doc(order.custom_chantier)
+            if not is_v2(dossier):frappe.throw('Composition technique validée manquante sur la ligne de commande.')
+            tree=technical_tree(order,row)
+        else:
+            return None
+    else:
+        tree = json.loads(row.custom_technical_snapshot)
+    if row.get('custom_technical_snapshot') and fingerprint(tree) != row.get('custom_technical_hash'):
         frappe.throw('Empreinte technique invalide.')
     if tree.get('item_code') != row.item_code or any(abs(flt(tree.get(n)) - flt(row.get(f))) > .001 for f,n in DIMENSIONS):
         frappe.throw('La définition technique ne correspond pas à la ligne de commande.')
     if order.get('custom_chantier'):
         chantier_doc(order.custom_chantier)
     from mat_reco.material_reconfiguration.services.repack_from_sales_order_service import _get_default_target_warehouse
+    from .chantier_work_types import logical_section
+    section=logical_section(order,row)
     def bind(node, path=()):
         item = frappe.get_cached_doc('Item', node['item_code'])
         item.check_permission('read')
         node['id'] = row.name + ':' + ('.'.join(map(str,path)) or 'root')
         node.update(sales_order=order.name, sales_order_item=row.name, chantier=order.get('custom_chantier'),
-            section=row.get('custom_chantier_section'), repere=row.get('custom_repere'), company=order.company,
+            section=section, repere=row.get('custom_repere'), company=order.company,
             warehouse=_get_default_target_warehouse(node['item_code'], order.company), has_serial_no=bool(item.has_serial_no),
             has_batch_no=bool(item.has_batch_no))
         for idx, child in enumerate(node['children']):
@@ -304,6 +324,9 @@ def get_dossier(chantier=None):
         return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], sales_orders=[], lines=[], summary={})
     dossier = chantier_doc(chantier)
     studies = frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash','technical_hash'],order_by='modified desc',limit_page_length=0) if frappe.has_permission('Chantier Technical Study','read') else []
+    from .ft_activation import has_study
+    from .chantier_work_types import is_v2
+    permissions['ft_locked'] = not is_v2(dossier) and has_study(chantier)
     permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')),cancel=bool(dossier.has_permission('cancel')))
     from mat_reco.material_reconfiguration.services.technical_study_service import source_hash
     current_hash = source_hash(dossier)
@@ -331,14 +354,14 @@ def get_dossier(chantier=None):
     lines = []
     for order in orders:
         for row in order.items:
-            if not row.get('custom_technical_snapshot'):
+            if not row.get('custom_technical_snapshot') and not (is_v2(dossier) and row.get('custom_chantier_line') and not row.get('custom_is_service_row') and not row.get('custom_is_accessory_row')):
                 continue
             area = flt(row.get('custom_client_length_mm'))*flt(row.get('custom_client_width_mm'))/1e6
             rework = extra.get(row.name,0)
             good = min(row.qty,max(0,accepted[row.name]-rework))
             state = live.get(row.name,{})
             lines.append(dict(sales_order=order.name,sales_order_item=row.name,repere=row.custom_repere,
-                section=row.custom_chantier_section,item_code=row.item_code,mpp=plan_map.get(row.name),
+                section=next((r.section for r in dossier.lines if r.line_id==row.get('custom_chantier_line')),row.custom_chantier_section),item_code=row.item_code,mpp=plan_map.get(row.name),
                 qty=row.qty,produced=accepted[row.name],refabrication=rework,remaining=max(0,row.qty+rework-accepted[row.name]),
                 pending_quality=pending[row.name],area=area*row.qty,conform_area=area*good,
                 fabricable=state.get('fabricable_qty',0),state=state.get('state','completed'),status=order.status))

@@ -11,6 +11,15 @@ from frappe.desk.doctype.notification_log.notification_log import NotificationLo
 
 class TaskNotificationTests(unittest.TestCase):
     def setUp(self):
+        # Reproduce historical projects created before the type-based workflow.
+        from mat_reco.material_reconfiguration.doctype.chantier.chantier import Chantier
+        original_before_insert = Chantier.before_insert
+        def historical_before_insert(doc):
+            original_before_insert(doc)
+            doc.workflow_version = 0
+        legacy = patch.object(Chantier, 'before_insert', historical_before_insert)
+        legacy.start()
+        self.addCleanup(legacy.stop)
         self.user = frappe.session.user
         frappe.set_user('Administrator')
         frappe.db.savepoint('qa_ug_notifications')
@@ -34,7 +43,15 @@ class TaskNotificationTests(unittest.TestCase):
         self.chantier = frappe.get_doc(dict(doctype='Chantier', designation='QA Notifications',
             company='Marsavco SA', customer='AQUA LOISIR', currency='USD',
             lines=[dict(repere='QA-1', designation='Vitre QA', qty=2, uom='PC')])).insert()
+        from mat_reco.material_reconfiguration.services.ft_activation import set_ft_active
+        set_ft_active(self.chantier.name,1,str(self.chantier.modified));self.chantier.reload()
         self.study = frappe.get_doc('Chantier Technical Study', prepare_study(self.chantier.name))
+        # Recipient tests below start from an empty delivery history; activation
+        # lifecycle itself is covered by test_ft_activation.
+        for row in frappe.get_all('Notification Log',filters={'document_type':self.study.doctype,'document_name':self.study.name},pluck='name'):
+            frappe.delete_doc('Notification Log',row,ignore_permissions=True)
+        for row in frappe.get_all('ToDo',filters={'reference_type':self.study.doctype,'reference_name':self.study.name},pluck='name'):
+            frappe.delete_doc('ToDo',row,ignore_permissions=True)
 
     def tearDown(self):
         frappe.db.rollback(save_point='qa_ug_notifications')
@@ -104,17 +121,17 @@ class TaskNotificationTests(unittest.TestCase):
         self.assertTrue(frappe.has_permission(doc=self.study,user=user.name,ptype='read'))
         self.assertFalse(frappe.has_permission(doc=self.study,user=user.name,ptype='submit'))
         frappe.db.set_single_value('Mat Reco Settings','technical_notification_role','UG FICHE TECHNIQUE')
-        service.handoff_study(self.chantier.name,'qa-named-role',self.study.name)
+        service.send_tasks(self.study,'technical','qa-named-role')
         self.assertIn(user.name,{r.for_user for r in self.logs()})
 
     def test_each_authorized_role_member_gets_notification_and_task(self):
-        service.handoff_study(self.chantier.name, 'qa-first', self.study.name)
+        service.send_tasks(self.study, 'technical', 'qa-first')
         self.assertEqual({r.for_user for r in self.logs()}, set(self.users[:2]))
         self.assertEqual({r.allocated_to for r in self.todos()}, set(self.users[:2]))
 
-    def test_retry_is_idempotent_but_new_handoff_notifies_again(self):
+    def test_retry_is_idempotent_but_new_activation_event_notifies_again(self):
         for key in ['qa-first','qa-first','qa-second']:
-            service.handoff_study(self.chantier.name,key,self.study.name)
+            service.send_tasks(self.study,'technical',key)
         self.assertEqual(len(self.logs()),4)
         self.assertEqual(len(self.todos()),2)
 

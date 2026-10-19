@@ -171,8 +171,9 @@ doc_events = {
         "on_submit": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.task_notifications.order_created"],
         "on_cancel": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.task_notifications.order_cancelled"],
     },
-    "Chantier": {"on_submit": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished"},
-    "Chantier Technical Study": {"on_submit": "mat_reco.material_reconfiguration.services.task_notifications.study_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.study_finished"},
+    "Chantier Section": {"on_trash": "mat_reco.material_reconfiguration.services.ft_activation.guard_section_delete"},
+    "Chantier": {"before_update_after_submit": "mat_reco.material_reconfiguration.services.ft_activation.validate_activation", "on_update_after_submit": "mat_reco.material_reconfiguration.services.ft_activation.after_chantier_update", "on_update": "mat_reco.material_reconfiguration.services.ft_activation.after_chantier_update", "on_submit": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished"},
+    "Chantier Technical Study": {"after_insert": "mat_reco.material_reconfiguration.services.ft_activation.study_created", "on_trash": "mat_reco.material_reconfiguration.services.ft_activation.study_before_delete", "after_delete": "mat_reco.material_reconfiguration.services.ft_activation.study_deleted", "on_submit": "mat_reco.material_reconfiguration.services.task_notifications.study_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.study_finished"},
     "Quotation": {"validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial"},
     "Stock Entry": {
         "before_validate": "mat_reco.stock_hooks.stock_entry_before_validate",
@@ -314,3 +315,5 @@ after_migrate.append("mat_reco.printing.install_print_formats")
 after_install = "mat_reco.printing.install_print_formats"
 
 after_migrate.append("mat_reco.material_reconfiguration.services.task_notifications.install_task_notifications")
+
+after_migrate.extend(["mat_reco.material_reconfiguration.services.chantier_work_types.install_fields", "mat_reco.material_reconfiguration.services.chantier_work_types.migrate_draft_types"])

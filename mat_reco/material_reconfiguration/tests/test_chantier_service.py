@@ -147,6 +147,8 @@ class NativeChantierTests(unittest.TestCase):
                 length_mm=1234,width_mm=987,thickness_mm=candidate.custom_client_thickness_mm,qty=2,uom=parent.stock_uom,rate=candidate.rate,rate_set=1))
             chantier.save()
             from mat_reco.material_reconfiguration.services.technical_study_service import prepare_study
+            from mat_reco.material_reconfiguration.services.ft_activation import set_ft_active
+            set_ft_active(chantier.name,1,str(chantier.modified));chantier.reload()
             study=frappe.get_doc('Chantier Technical Study',prepare_study(chantier.name));study.submit();chantier.reload();chantier.submit()
             quote=frappe.copy_doc(source);quote.custom_project=None;quote.custom_chantier=chantier.name;quote.amended_from=None;quote.valid_till=add_days(nowdate(),30)
             quote.set('items',[]);row=quote.append('items',candidate.as_dict());row.name=None;row.item_code=parent.name;row.item_name=parent.item_name;row.qty=2;row.ordered_qty=0;row.is_alternative=0;row.custom_is_service_row=0;row.custom_is_accessory_row=0;row.custom_client_length_mm=1234;row.custom_client_width_mm=987;row.custom_repere='V-001';row.custom_chantier_section=child.name

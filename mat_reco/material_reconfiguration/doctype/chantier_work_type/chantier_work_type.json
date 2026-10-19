@@ -1,0 +1,58 @@
+{
+ "doctype": "DocType",
+ "name": "Chantier Work Type",
+ "module": "Material Reconfiguration",
+ "istable": 1,
+ "autoname": "hash",
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "type_id",
+   "label": "Identifiant type",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "designation",
+   "label": "Type d’ouvrage",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "thickness_mm",
+   "label": "Épaisseur (mm)",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "proposed_item",
+   "label": "Modèle technique existant (facultatif)",
+   "fieldtype": "Link",
+   "options": "Item"
+  },
+  {
+   "fieldname": "commercial_item",
+   "label": "Article commercial",
+   "fieldtype": "Link",
+   "options": "Item",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "common_extras",
+   "label": "Services et accessoires communs",
+   "fieldtype": "Long Text"
+  }
+ ],
+ "field_order": [
+  "type_id",
+  "designation",
+  "thickness_mm",
+  "proposed_item",
+  "commercial_item",
+  "common_extras"
+ ],
+ "permissions": []
+}
