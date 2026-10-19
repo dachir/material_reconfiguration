@@ -7,7 +7,7 @@ from frappe.utils import escape_html
 
 SETTINGS = 'Mat Reco Settings'
 STAGES = {
-    'chantier': ('chantier_notification_role', 'Validation chantier', 'chantier'),
+    'chantier': ('chantier_notification_role', 'Validation chantier', 'chantiers'),
     'technical': ('technical_notification_role', 'Fiche technique', 'technical-study'),
     'workshop': ('workshop_notification_role', 'Atelier', 'workshop-cockpit'),
 }
@@ -29,7 +29,7 @@ def send_tasks(doc, stage, event_key):
     # Serialize task creation per source document, including concurrent requests.
     frappe.db.get_value(doc.doctype, doc.name, 'name', for_update=True)
     label, route = STAGES[stage][1:]
-    link = '/app/' + route + ('/' + doc.name if stage in ('technical', 'chantier') else '')
+    link = '/app/' + route + ('/' + doc.name if stage in ('technical', 'chantier', 'workshop') else '')
     prefix = f'[Univers Glass — {label}]'
     description = f'{prefix} {escape_html(doc.name)} — <a href="{escape_html(link)}">Ouvrir {label.lower()}</a>'
     if stage == 'workshop':

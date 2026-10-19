@@ -237,6 +237,8 @@ function onUpdate() {
 }
 function openChantiers() { frappe.set_route("chantiers"); }
 function show() {
+ const order=frappe.get_route()[1];
+ if(order) filters.sales_order=order;
  const chantier = sessionStorage.getItem("univers-workshop-chantier");
  if (chantier) { filters.chantier=chantier;filters.section="";sessionStorage.removeItem("univers-workshop-chantier"); }
 	if (active.value) {

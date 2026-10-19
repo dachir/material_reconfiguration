@@ -27,6 +27,7 @@ app_license = "mit"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mat_reco/css/app.css"
 # app_include_js = "/assets/mat_reco/js/mat_reco.js"
+app_include_js = ["/assets/mat_reco/js/ug_task_links.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/mat_reco/css/mat_reco.css"
@@ -51,6 +52,7 @@ doctype_js = {
     "Stock Entry": "public/js/stock_entry_repack_from_so.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"ToDo": "public/js/ug_todo_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

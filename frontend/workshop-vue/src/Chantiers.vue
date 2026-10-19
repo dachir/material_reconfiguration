@@ -88,7 +88,7 @@ function confirmOrder(quote){const dialog=new frappe.ui.Dialog({title:'Confirmer
 async function mpp(line){busy.value=true;error.value='';try{const name=await call('create_mpp',{sales_order:line.sales_order,sales_order_item:line.sales_order_item});open('Material Production Plan',name);}catch(e){error.value=describe(e);}finally{busy.value=false;}}
 function workshop(){sessionStorage.setItem('univers-workshop-chantier',selected.value);frappe.set_route('workshop-cockpit');}
 function onOrderUpdate(event){if(event?.doctype==='Sales Order'&&!busy.value&&!dirty.value)refresh();}
-function show(){frappe.realtime?.off('workshop_updated',onOrderUpdate);frappe.realtime?.on('workshop_updated',onOrderUpdate);document.body.classList.remove('ug-chantier-active');const stored=sessionStorage.getItem("univers-chantier-selected");if(stored){selected.value=stored;section.value="";sessionStorage.removeItem("univers-chantier-selected");}refresh();clearInterval(timer);timer=setInterval(()=>{if(!busy.value&&!dirty.value)refresh();},60000);}
+function show(){frappe.realtime?.off('workshop_updated',onOrderUpdate);frappe.realtime?.on('workshop_updated',onOrderUpdate);document.body.classList.remove('ug-chantier-active');const stored=frappe.get_route()[1]||sessionStorage.getItem("univers-chantier-selected");if(stored){selected.value=stored;section.value="";sessionStorage.removeItem("univers-chantier-selected");}refresh();clearInterval(timer);timer=setInterval(()=>{if(!busy.value&&!dirty.value)refresh();},60000);}
 function hide(){frappe.realtime?.off('workshop_updated',onOrderUpdate);document.body.classList.remove('ug-chantier-active');serial++;clearInterval(timer);timer=null;}
 onBeforeUnmount(hide);defineExpose({show,hide});
 </script>
