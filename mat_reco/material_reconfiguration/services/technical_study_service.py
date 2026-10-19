@@ -115,6 +115,7 @@ def cancel_chantier(doc):
     if frappe.db.exists('Quotation',{'custom_chantier':doc.name,'docstatus':['!=',2]}) or frappe.db.exists('Sales Order',{'custom_chantier':doc.name,'docstatus':['!=',2]}):
         frappe.throw('Traiter les devis et commandes liés avant d’annuler le chantier ; supprimer les brouillons ou annuler les documents validés.')
     from .chantier_work_types import is_v2
+    if is_v2(doc):doc.ignore_linked_doctypes=['Chantier Technical Study']
     if not is_v2(doc) and frappe.db.exists('Chantier Technical Study',{'chantier':doc.name,'docstatus':['!=',2]}):
         frappe.throw('Supprimer les études en brouillon ou annuler les études validées avant d’annuler le chantier.')
 
@@ -581,23 +582,34 @@ def confirm_order(quotation, acceptance_reference, delivery_date, request_key, d
 
 
 def before_insert_chantier(doc):
-    # Amendments retain their original model and historical technical identities.
-    doc.workflow_version=frappe.get_cached_value("Chantier",doc.amended_from,"workflow_version") if doc.amended_from else 2
-    if doc.amended_from and doc.reference==frappe.get_cached_value('Chantier',doc.amended_from,'reference'):
-        from frappe.model.naming import getseries
-        prefix=doc.reference+'-R';doc.reference=prefix+getseries(prefix,2)
+    source=doc.amended_from or doc.get('__ug_copy_source')
+    if not source:
+        owners={frappe.db.get_value('Chantier Section',r.section,'chantier') for r in doc.lines if r.section}
+        if len(owners)==1:source=next(iter(owners))
+    if source:
+        original=frappe.get_doc('Chantier',source);original.check_permission('read')
+        doc.workflow_version=original.get('workflow_version') or 0
+        doc.flags.ug_copy_sections_from=source
+        doc.flags.ug_copy_line_sections={r.line_id:r.section for r in doc.lines}
+        for row in doc.lines:row.section=None
+        doc.status='Preparation';doc.technical_study=None;doc.commercial_hash=None
+        doc.ft_active=0;doc.ft_activation_key=None
+        for row in doc.work_types:row.commercial_item=None
+    else:doc.workflow_version=2
 
 
 def clone_sections(doc):
-    if not doc.amended_from:return
-    originals=frappe.get_all('Chantier Section',filters={'chantier':doc.amended_from},fields=['name','section_name','parent_chantier_section','is_group'],order_by='lft',limit_page_length=0)
+    source=doc.amended_from or doc.flags.ug_copy_sections_from
+    if not source:return
+    originals=frappe.get_all('Chantier Section',filters={'chantier':source},fields=['name','section_name','parent_chantier_section','is_group'],order_by='lft',limit_page_length=0)
     mapping={}
     for old in originals:
         section=frappe.get_doc(dict(doctype='Chantier Section',chantier=doc.name,section_name=old.section_name,is_group=old.is_group,parent_chantier_section=mapping.get(old.parent_chantier_section)))
         section.insert();mapping[old.name]=section.name
     for row in doc.lines:
-        if row.section:
-            row.section=mapping.get(row.section);frappe.db.set_value('Chantier Line',row.name,'section',row.section,update_modified=False)
+        original=(doc.flags.ug_copy_line_sections or {}).get(row.line_id,row.section)
+        if original:
+            row.section=mapping.get(original);frappe.db.set_value('Chantier Line',row.name,'section',row.section,update_modified=False)
 
 
 @frappe.whitelist(methods=['POST'])

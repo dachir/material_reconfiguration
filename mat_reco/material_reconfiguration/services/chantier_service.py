@@ -333,7 +333,7 @@ def get_dossier(chantier=None):
     from .ft_activation import has_study
     from .chantier_work_types import is_v2, is_direct
     permissions['ft_locked'] = not is_v2(dossier) and has_study(chantier)
-    permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')),cancel=bool(dossier.has_permission('cancel')))
+    permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')),cancel=bool(dossier.has_permission('cancel')),amend=bool(dossier.has_permission('amend')))
     from mat_reco.material_reconfiguration.services.technical_study_service import source_hash
     current_hash = source_hash(dossier)
     relevant = next((r for r in studies if r.source_hash == current_hash), studies[0] if studies else None)

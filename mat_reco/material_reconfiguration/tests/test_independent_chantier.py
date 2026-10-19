@@ -265,3 +265,26 @@ class IndependentChantierTests(unittest.TestCase):
         self.doc.submit()
         with self.assertRaisesRegex(frappe.ValidationError,'validation du chantier'):
             create_section(self.doc.name,str(self.doc.modified),'QA Trop tard')
+
+    def test_native_duplicate_copies_sections_and_resets_technical_approval(self):
+        section=frappe.get_doc(dict(doctype='Chantier Section',chantier=self.doc.name,section_name='QA Structure',is_group=1)).insert()
+        self.doc.lines[0].section=section.name;self.doc.save();self.study();self.doc.reload()
+        copied=frappe.copy_doc(self.doc,ignore_no_copy=False);copied.__ug_copy_source=self.doc.name
+        # Frappe receives the same internal marker from its native copy form.
+        copied.set('__ug_copy_source',self.doc.name);copied.insert();copied.reload()
+        self.assertNotEqual(copied.name,self.doc.name);self.assertEqual(copied.designation,self.doc.designation)
+        self.assertEqual(copied.docstatus,0);self.assertEqual(len(copied.lines),2);self.assertEqual(len(copied.work_types),1)
+        self.assertFalse(copied.ft_active);self.assertFalse(copied.technical_study);self.assertFalse(copied.amended_from)
+        self.assertNotEqual(copied.lines[0].section,section.name)
+        self.assertEqual(frappe.db.get_value('Chantier Section',copied.lines[0].section,'chantier'),copied.name)
+        self.assertFalse(frappe.db.exists('Chantier Technical Study',{'chantier':copied.name}))
+
+    def test_native_cancel_amend_keeps_standard_number_and_source_link(self):
+        self.doc.submit();study=self.study();study.submit();self.doc.reload()
+        self.doc.cancel();self.assertEqual(self.doc.docstatus,2)
+        amendment=frappe.copy_doc(self.doc);amendment.amended_from=self.doc.name;amendment.docstatus=0;amendment.insert();amendment.reload()
+        self.assertEqual(amendment.amended_from,self.doc.name)
+        self.assertEqual(amendment.name,self.doc.name+'-1')
+        self.assertEqual(amendment.docstatus,0);self.assertEqual(amendment.status,'Preparation')
+        self.assertFalse(amendment.ft_active);self.assertFalse(amendment.technical_study);self.assertFalse(amendment.work_types[0].commercial_item)
+        self.assertEqual(frappe.get_doc('Chantier Technical Study',study.name).chantier,self.doc.name)
