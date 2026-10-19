@@ -98,6 +98,19 @@
    "label": "Compléments communs retirés",
    "fieldtype": "Long Text",
    "hidden": 1
+  },
+  {
+   "fieldname": "line_kind",
+   "label": "Nature de ligne",
+   "fieldtype": "Select",
+   "options": "Fabrication\nVente directe",
+   "default": "Fabrication"
+  },
+  {
+   "fieldname": "sale_item",
+   "label": "Article vendu directement",
+   "fieldtype": "Link",
+   "options": "Item"
   }
  ],
  "field_order": [

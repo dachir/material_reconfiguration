@@ -18,9 +18,9 @@ async function apply(){
  if(applying.value||props.disabled)return;
  if(props.workType){
   error.value='';notice.value='';
-  const definitions=selection.value.map(r=>{const setting=settings.value[r.name];setting.key||=globalThis.crypto?.randomUUID?.()||'extra-'+Date.now()+'-'+Math.random().toString(16).slice(2);return {item_code:r.name,key:setting.key,qty:Number(setting.qty),factor:Number(setting.factor),rate:Number(setting.rate)};});
+  const definitions=selection.value.map(r=>{const setting=settings.value[r.name];setting.key||=globalThis.crypto?.randomUUID?.()||'extra-'+Date.now()+'-'+Math.random().toString(16).slice(2);return {item_code:r.name,key:setting.key,item_name:r.item_name,item_type:r.custom_item_types,basis:r.basis,uom:r.stock_uom,fixed_qty:r.custom_service_fixed_qty,qty:Number(setting.qty),factor:Number(setting.factor),rate:Number(setting.rate)};});
   if(definitions.some(d=>!Number.isFinite(d.rate)||d.rate<0||!Number.isFinite(d.qty)||d.qty<=0||!Number.isFinite(d.factor)||d.factor<=0)){error.value='Saisir un prix positif ou nul, une quantité et un coefficient positifs.';return;}
-  emit('type-applied',definitions);notice.value='Compléments communs mis à jour. Enregistrer le chantier pour les appliquer aux ouvrages du type.';return;
+  emit('type-applied',definitions);emit('close');return;
  }
  if(!selection.value.length||!props.parentLineIds.length)return;
  applying.value=true;error.value='';notice.value='';
@@ -33,7 +33,7 @@ async function apply(){
   if(!active)return;
   if(snapshot!==JSON.stringify(props.chantier))throw new Error('Le chantier a été modifié pendant le calcul. Recommencer l’affectation.');
   emit('applied',result.rows);
-  notice.value=`${result.rows.length} affectation(s) ajoutée(s). ${result.skipped} déjà présente(s), conservée(s). Enregistrer les ouvrages pour sauvegarder.`;
+  emit('close');
  }catch(e){error.value=describe(e);}finally{applying.value=false;}
 }
 onMounted(load);

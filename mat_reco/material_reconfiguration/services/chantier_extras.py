@@ -157,7 +157,7 @@ def catalogue():
     """Permission-filtered commercial catalogue; quantities remain server-calculated."""
     rows = frappe.get_list('Item', filters={'custom_item_types': ['in', ['SERVICE', 'ACCESSOIRE']],
         'disabled': 0, 'is_sales_item': 1}, fields=['name', 'item_name', 'custom_item_types',
-        'custom_service_calc_basis', 'stock_uom'], order_by='item_name asc', limit_page_length=0)
+        'custom_service_calc_basis', 'custom_service_fixed_qty', 'stock_uom'], order_by='item_name asc', limit_page_length=0)
     for row in rows:
         row['basis'] = 'MANUEL' if row.custom_item_types=='ACCESSOIRE' else (row.custom_service_calc_basis or 'MANUEL')
     return rows

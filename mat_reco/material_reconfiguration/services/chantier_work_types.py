@@ -13,6 +13,10 @@ def is_v2(doc):
     return cint(doc.get('workflow_version')) >= 2
 
 
+def is_direct(row):
+    return row.get('line_kind')=='Vente directe'
+
+
 def types(doc):
     return {row.type_id: row for row in doc.get('work_types', [])}
 
@@ -49,6 +53,13 @@ def validate_types(doc):
         row.common_extras=json.dumps(definitions,ensure_ascii=False)
     known=types(doc)
     for row in doc.get('lines', []):
+        if is_direct(row):
+            item=frappe.get_doc('Item',row.sale_item);item.check_permission('read')
+            if item.disabled or not item.is_sales_item or item.custom_item_types not in ('PRIMAIRE','ACCESSOIRE','SERVICE'):
+                frappe.throw('Vente directe : choisir une plaque, un accessoire ou un service actif et vendable.')
+            row.work_type=None;row.designation=row.designation or item.item_name;row.uom=item.stock_uom
+            row.length_mm=row.width_mm=row.thickness_mm=0
+            continue
         if row.work_type not in known:
             frappe.throw('Choisir un type d’ouvrage pour chaque ouvrage.')
         selected=known[row.work_type]
@@ -64,12 +75,12 @@ def sync_inherited(doc):
     saved={r.line_id:r for r in doc.get('commercial_extras',[]) if r.get('inherited_from')}
     extras=[r.as_dict() for r in doc.get('commercial_extras',[]) if not r.get('inherited_from')]
     for row in doc.get('lines',[]):
+        if is_direct(row):continue
         if not row.line_id:row.line_id=uuid.uuid4().hex
-        excluded=frappe.parse_json(row.excluded_type_extras or '[]')
-        if not isinstance(excluded,list):frappe.throw('Exceptions de compléments invalides.')
+        # Type complements are mandatory on every associated work line.
+        row.excluded_type_extras=None
         type_row=known[row.work_type]
         for definition in frappe.parse_json(type_row.common_extras or '[]'):
-            if definition['key'] in excluded:continue
             identity=uuid.uuid5(uuid.NAMESPACE_URL,f"ug:{row.line_id}:{type_row.type_id}:{definition['key']}").hex
             item=frappe.get_doc('Item',definition['item_code'])
             basis,amount=quantity(item,row)
@@ -78,8 +89,8 @@ def sync_inherited(doc):
             extra=dict(line_id=identity,parent_line_id=row.line_id,item_code=item.name,qty=amount,
                 manual_qty=1,rate=flt(definition.get('rate')),rate_set=1,
                 inherited_from=type_row.type_id,inherited_key=definition['key'])
-            if identity in saved:
-                previous=saved[identity]
+            previous=saved.get(identity) or next((e for e in saved.values() if e.parent_line_id==row.line_id and e.inherited_from==type_row.type_id and e.inherited_key==definition['key']),None)
+            if previous:
                 if previous.name and not previous.is_new():extra['name']=previous.name
                 for flag,field in [('inherited_qty_override','qty'),('inherited_rate_override','rate')]:
                     if cint(previous.get(flag)):
@@ -117,7 +128,7 @@ def commercial_hash(doc):
 def approve_commercial(doc):
     if not doc.lines:frappe.throw('Ajouter les ouvrages avant validation commerciale.')
     for row in doc.lines:
-        if min(flt(row.length_mm),flt(row.width_mm),flt(row.thickness_mm))<=0:
+        if not is_direct(row) and min(flt(row.length_mm),flt(row.width_mm),flt(row.thickness_mm))<=0:
             frappe.throw(f'{row.repere} : compléter longueur, hauteur et épaisseur.')
     for type_row in doc.work_types:
         if len({r.uom for r in doc.lines if r.work_type==type_row.type_id})>1:
@@ -153,10 +164,11 @@ def validate_commercial_quote(quote, doc):
         macro=macros.get(row.custom_chantier_line)
         if not macro or macro.line_id in seen:frappe.throw('Ouvrage commercial inconnu ou dupliqué.')
         seen.add(macro.line_id)
-        expected=known[macro.work_type]
-        row.custom_ug_work_type=expected.type_id
-        row.custom_ug_work_type_name=expected.designation
-        if row.item_code!=expected.commercial_item or row.uom!=macro.uom or flt(row.rate)!=flt(macro.rate) or row.custom_repere!=macro.repere or row.custom_chantier_section!=macro.section:
+        expected=known.get(macro.work_type)
+        row.custom_ug_work_type=expected.type_id if expected else None
+        row.custom_ug_work_type_name=expected.designation if expected else None
+        expected_item=macro.sale_item if is_direct(macro) else expected.commercial_item
+        if row.item_code!=expected_item or row.uom!=macro.uom or flt(row.rate)!=flt(macro.rate) or row.custom_repere!=macro.repere or row.custom_chantier_section!=macro.section:
             frappe.throw('Le devis diffère du chantier commercial approuvé.')
         for field,source in [('custom_client_length_mm','length_mm'),('custom_client_width_mm','width_mm'),('custom_client_thickness_mm','thickness_mm')]:
             if abs(flt(row.get(field))-flt(macro.get(source)))>.001:frappe.throw('Dimensions commerciales différentes du chantier.')
@@ -173,6 +185,7 @@ def technical_tree(order, row, study_name=None):
     doc=chantier_doc(order.custom_chantier)
     macro=next((r for r in doc.lines if r.line_id==row.get('custom_chantier_line')),None)
     if not macro:frappe.throw('Ouvrage commercial du chantier introuvable.')
+    if is_direct(macro):frappe.throw('Cette vente directe ne nécessite pas de fabrication.')
     candidates=frappe.get_list('Chantier Technical Study',filters={'chantier':doc.name,'docstatus':1,
         **({'name':study_name} if study_name else {})},pluck='name',order_by='modified desc',limit_page_length=0)
     for name in candidates:
@@ -199,7 +212,7 @@ def freeze_order(order, study_name=None, node_id=None):
     if not is_v2(doc):return
     for row in order.items:
         if node_id and node_id!=order.name and not node_id.startswith(row.name+':'):continue
-        if row.get('custom_is_service_row') or row.get('custom_is_accessory_row') or not row.get('custom_chantier_line') or row.get('custom_technical_snapshot'):continue
+        if row.get('custom_is_service_row') or row.get('custom_is_accessory_row') or not row.get('custom_chantier_line') or row.get('custom_technical_snapshot') or any(m.line_id==row.get('custom_chantier_line') and is_direct(m) for m in doc.lines):continue
         tree=technical_tree(order,row,study_name)
         frappe.db.set_value('Sales Order Item',row.name,dict(custom_technical_snapshot=json.dumps(tree,ensure_ascii=False),custom_technical_hash=fingerprint(tree)),update_modified=False)
         row.custom_technical_snapshot=json.dumps(tree,ensure_ascii=False);row.custom_technical_hash=fingerprint(tree)
@@ -261,3 +274,22 @@ def logical_section(order, row):
     doc=frappe.get_doc('Chantier',order.custom_chantier)
     if not is_v2(doc):return row.get('custom_chantier_section')
     return next((r.section for r in doc.lines if r.line_id==row.get('custom_chantier_line')),None)
+
+
+def require_order_technical(order, doc):
+    """Gate new orders and draft submissions; retain existing submitted histories."""
+    old=order.get_doc_before_save()
+    if not order.is_new() and not (order.docstatus==1 and old and old.docstatus==0):return
+    macros={r.line_id:r for r in doc.lines}
+    frappe.db.get_value('Chantier',doc.name,'name',for_update=True)
+    current=technical_source_hash(doc)
+    approved=frappe.get_all('Chantier Technical Study',filters={'chantier':doc.name,'docstatus':1,'source_hash':current},pluck='name')
+    definitions=set()
+    for name in approved:
+        definitions.update(r.line_id for r in frappe.get_doc('Chantier Technical Study',name).lines if r.snapshot_json)
+    missing=[]
+    for row in order.items:
+        macro=macros.get(row.get('custom_chantier_line'))
+        if not macro or is_direct(macro):continue
+        if macro.work_type not in definitions:missing.append(types(doc)[macro.work_type].designation)
+    if missing:frappe.throw('Fiche technique validée requise avant commande pour : '+', '.join(dict.fromkeys(missing)))

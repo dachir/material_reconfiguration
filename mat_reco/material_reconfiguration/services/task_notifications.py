@@ -82,6 +82,14 @@ def handoff_study(chantier, request_key, study=None):
 
 
 def order_created(doc, method=None):
+    if doc.get('custom_chantier'):
+        from .chantier_work_types import is_v2, is_direct
+        dossier=frappe.get_doc('Chantier',doc.custom_chantier)
+        if is_v2(dossier):
+            manufacturing={r.line_id for r in dossier.lines if not is_direct(r)}
+            if any(r.get('custom_chantier_line') in manufacturing for r in doc.get('items',[])):
+                send_tasks(doc,'workshop','order-created')
+            return
     if any(frappe.get_cached_value('Item', r.item_code, 'custom_item_types') in ('PRIMAIRE', 'DECOUPE', 'OUVRAGE') for r in doc.get('items', [])):
         send_tasks(doc, 'workshop', 'order-created')
 

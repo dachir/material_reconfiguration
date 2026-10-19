@@ -92,6 +92,8 @@ def set_ft_active(chantier, active, modified):
         frappe.throw('Supprimer la fiche technique avant de désactiver FT.')
     if bool(doc.get('ft_active')) == bool(active):
         return doc.as_dict()
+    if active and loose and not any(r.get('line_kind')!='Vente directe' for r in doc.lines):
+        frappe.throw('Aucun ouvrage ou découpe à préparer : les ventes directes ne nécessitent pas de fiche technique.')
     if active and not doc.lines:
         frappe.throw('Ajouter au moins un ouvrage avant d’activer FT.')
     with activation_change():

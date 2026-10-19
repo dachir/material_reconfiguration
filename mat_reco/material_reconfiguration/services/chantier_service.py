@@ -112,7 +112,7 @@ def validate_commercial(doc, method=None):
         # Preserve existing non-chantier workflows and their Item composition behavior.
         return
     chantier = chantier_doc(doc.custom_chantier)
-    from .chantier_work_types import is_v2
+    from .chantier_work_types import is_v2, is_direct, require_order_technical
     loose=is_v2(chantier)
     if chantier.status in ('Cancelled', 'On Hold') and doc.docstatus != 2:
         frappe.throw('Ce chantier est suspendu ou annulé.')
@@ -127,6 +127,7 @@ def validate_commercial(doc, method=None):
     if doc.doctype=='Sales Order':
         from .chantier_extras import map_order_extras
         map_order_extras(doc)
+        if loose:require_order_technical(doc,chantier)
     seen, quotations = set(), {}
     for row in doc.get('items', []):
         if doc.doctype == 'Sales Order':
@@ -144,7 +145,12 @@ def validate_commercial(doc, method=None):
             origin = next((r for r in source.items if r.name == row.quotation_item), None)
             if source.docstatus != 1 or source.get('custom_chantier') != chantier.name or not origin:
                 frappe.throw('Le devis d’origine doit être validé et appartenir au même chantier.')
+        if loose and origin and row.get('custom_chantier_line')!=origin.get('custom_chantier_line'):
+            frappe.throw('La ligne de commande doit reprendre l’identifiant du devis accepté.')
         kind = (json.loads(origin.custom_technical_snapshot).get('item_type') if origin and origin.get('custom_technical_snapshot') else frappe.get_cached_value('Item', row.item_code, 'custom_item_types'))
+        if loose and origin and any(m.line_id==origin.get('custom_chantier_line') and is_direct(m) for m in chantier.lines):
+            if row.item_code!=origin.item_code or row.uom!=origin.uom or flt(row.rate)!=flt(origin.rate) or row.get('custom_chantier_line')!=origin.get('custom_chantier_line'):
+                frappe.throw('La vente directe doit reprendre l’article, l’unité et le prix du devis accepté.')
         if kind not in ('OUVRAGE', 'DECOUPE'):
             # Commercial services and accessories do not create physical production branches.
             row.custom_technical_snapshot = None
@@ -325,7 +331,7 @@ def get_dossier(chantier=None):
     dossier = chantier_doc(chantier)
     studies = frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash','technical_hash'],order_by='modified desc',limit_page_length=0) if frappe.has_permission('Chantier Technical Study','read') else []
     from .ft_activation import has_study
-    from .chantier_work_types import is_v2
+    from .chantier_work_types import is_v2, is_direct
     permissions['ft_locked'] = not is_v2(dossier) and has_study(chantier)
     permissions.update(technical=frappe.has_permission('Chantier Technical Study','create'),submit=bool(dossier.has_permission('submit')),write=bool(dossier.has_permission('write')),cancel=bool(dossier.has_permission('cancel')))
     from mat_reco.material_reconfiguration.services.technical_study_service import source_hash
@@ -354,6 +360,7 @@ def get_dossier(chantier=None):
     lines = []
     for order in orders:
         for row in order.items:
+            if is_v2(dossier) and any(m.line_id==row.get('custom_chantier_line') and is_direct(m) for m in dossier.lines):continue
             if not row.get('custom_technical_snapshot') and not (is_v2(dossier) and row.get('custom_chantier_line') and not row.get('custom_is_service_row') and not row.get('custom_is_accessory_row')):
                 continue
             area = flt(row.get('custom_client_length_mm'))*flt(row.get('custom_client_width_mm'))/1e6
@@ -381,3 +388,17 @@ def summarize(lines):
         blocked=sum(r['remaining']>0 and r['state']=='blocked' for r in lines),pending_quality=sum(r['pending_quality'] for r in lines))
     result['progress'] = 100*result['conform_area']/result['area'] if result['area'] else 0
     return result
+
+
+@frappe.whitelist(methods=['POST'])
+def create_section(chantier, modified, section_name, parent_chantier_section=None):
+    """Create structure without forcing the browser to save unfinished work lines."""
+    doc=frappe.get_doc('Chantier',chantier,for_update=True);doc.check_permission('write')
+    if doc.docstatus!=0 or doc.status=='Cancelled':frappe.throw('Les sections sont modifiables jusqu’à la validation du chantier.')
+    if str(doc.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant d’ajouter une section.')
+    if not (section_name or '').strip():frappe.throw('Saisir la désignation de la section.')
+    section=frappe.get_doc(dict(doctype='Chantier Section',chantier=chantier,section_name=section_name.strip(),
+        parent_chantier_section=parent_chantier_section or None,is_group=1)).insert()
+    doc.reload()
+    return dict(name=section.name,modified=str(doc.modified),ft_active=doc.ft_active,ft_activation_key=doc.ft_activation_key,
+        sections=frappe.get_list('Chantier Section',filters={'chantier':chantier},fields=['name','section_name','parent_chantier_section','is_group','lft'],order_by='lft',limit_page_length=0))

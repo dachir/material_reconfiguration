@@ -54,7 +54,7 @@ def assign_commercial_reperes(chantier):
 
 
 def validate_macro(chantier):
-    from .chantier_work_types import validate_types
+    from .chantier_work_types import validate_types, is_direct
     validate_types(chantier)
     assign_commercial_reperes(chantier)
     seen, ids = set(), set()
@@ -80,7 +80,7 @@ def validate_macro(chantier):
             if chantier.is_new() and chantier.amended_from:
                 owner=chantier.amended_from
             section_matches(row.section,owner)
-        if row.proposed_item:
+        if row.proposed_item and not is_direct(row):
             item=frappe.get_doc('Item',row.proposed_item);item.check_permission('read')
             if item.disabled or item.custom_item_types not in ('OUVRAGE','DECOUPE'):
                 frappe.throw('Choisir un ouvrage ou une découpe actif comme référence commerciale.')
@@ -458,7 +458,7 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
     dossier=chantier_doc(chantier)
     if dossier.docstatus!=1:frappe.throw('Valider le chantier commercial avant de générer le devis.')
     frappe.db.get_value('Chantier',dossier.name,'name',for_update=True)
-    from .chantier_work_types import is_v2, types
+    from .chantier_work_types import is_v2, types, is_direct
     loose=is_v2(dossier)
     study=None if loose else approved_study(dossier,lock=True)
     if not request_key or len(request_key)>100:frappe.throw('Clé de génération requise.')
@@ -489,7 +489,7 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
     for chosen in selection:
         if chosen.get('line_id') not in definitions or flt(chosen.get('qty'))<=0 or flt(chosen['qty'])!=cint(chosen['qty']):frappe.throw('Quantité entière positive requise sur une ligne du chantier.')
         macro,tech=definitions[chosen['line_id']]
-        if loose:tech=frappe._dict(result_item=types(dossier)[macro.work_type].commercial_item,length_mm=macro.length_mm,width_mm=macro.width_mm,thickness_mm=macro.thickness_mm)
+        if loose:tech=frappe._dict(result_item=macro.sale_item if is_direct(macro) else types(dossier)[macro.work_type].commercial_item,length_mm=macro.length_mm,width_mm=macro.width_mm,thickness_mm=macro.thickness_mm)
         quote.append('items',dict(item_code=tech.result_item,qty=chosen['qty'],uom=frappe.get_cached_value('Item',tech.result_item,'stock_uom'),rate=macro.rate,
             custom_repere=macro.repere,custom_chantier_section=macro.section,custom_chantier_line=macro.line_id,
             custom_client_length_mm=tech.length_mm,custom_client_width_mm=tech.width_mm,custom_client_thickness_mm=tech.thickness_mm))
@@ -505,7 +505,7 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
     # Preserve the manager-approved price, including an explicitly free line.
     for row in quote.items:
         macro=prices[row.custom_chantier_line]
-        if loose and macro.get('work_type'):
+        if loose and macro.line_id in {r.line_id for r in dossier.lines}:
             row.item_name=macro.designation;row.description=frappe.utils.escape_html(macro.designation)
         row.rate=macro.rate;row.price_list_rate=macro.rate;row.discount_percentage=0;row.discount_amount=0
         row.is_free_item=int(flt(macro.rate)==0)
@@ -524,7 +524,7 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
         doc.workflow_version=2
     incoming=frappe.parse_json(lines)
     if not isinstance(incoming,list) or len(incoming)>500:frappe.throw('Saisir au maximum 500 ouvrages.')
-    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras')
+    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras','line_kind','sale_item')
     if work_types is not None:
         type_rows=frappe.parse_json(work_types)
         if not isinstance(type_rows,list) or len(type_rows)>200:frappe.throw('Types d’ouvrage invalides.')
@@ -552,13 +552,15 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
 
 
 @frappe.whitelist(methods=['POST'])
-def confirm_order(quotation, acceptance_reference, delivery_date, request_key):
+def confirm_order(quotation, acceptance_reference, delivery_date, request_key, direct_only=False):
     quote=frappe.get_doc('Quotation',quotation);quote.check_permission('read')
     if quote.docstatus!=1 or not quote.custom_chantier:frappe.throw('Un devis de chantier validé est requis.')
     if not acceptance_reference or not acceptance_reference.strip() or not delivery_date or not request_key or len(request_key)>100:frappe.throw('Renseigner l’acceptation client, la date et une clé de confirmation.')
     frappe.db.get_value('Chantier',quote.custom_chantier,'name',for_update=True)
     frappe.db.get_value('Quotation',quote.name,'name',for_update=True)
-    scope=fingerprint(dict(quotation=quotation,acceptance=acceptance_reference.strip(),date=str(frappe.utils.getdate(delivery_date))))
+    intent=dict(quotation=quotation,acceptance=acceptance_reference.strip(),date=str(frappe.utils.getdate(delivery_date)))
+    if cint(direct_only):intent['direct_only']=True
+    scope=fingerprint(intent)
     key=fingerprint(dict(user=frappe.session.user,key=request_key))
     existing=frappe.db.get_value('Sales Order',{'custom_chantier_order_key':key},['name','custom_chantier','docstatus','custom_chantier_order_scope'],as_dict=True,for_update=True)
     if existing:
@@ -566,6 +568,12 @@ def confirm_order(quotation, acceptance_reference, delivery_date, request_key):
         frappe.get_doc('Sales Order',existing.name).check_permission('read');return existing.name
     from erpnext.selling.doctype.quotation.quotation import make_sales_order
     order=make_sales_order(quote.name)
+    if cint(direct_only):
+        from .chantier_work_types import is_direct
+        parent=frappe.get_doc('Chantier',quote.custom_chantier)
+        direct={r.line_id for r in parent.lines if is_direct(r)}
+        direct_quote_names={r.name for r in quote.items if r.custom_chantier_line in direct}
+        order.set('items',[r for r in order.items if r.get('custom_chantier_line') in direct or next((q.get('custom_parent_row') in direct_quote_names for q in quote.items if q.name==r.quotation_item),False)])
     if not order.items:frappe.throw('Ce devis a déjà été entièrement transformé en commande.')
     order.custom_customer_acceptance=acceptance_reference.strip();order.custom_chantier_order_key=key;order.custom_chantier_order_scope=scope;order.delivery_date=delivery_date
     for row in order.items:row.delivery_date=delivery_date
