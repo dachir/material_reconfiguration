@@ -44,10 +44,11 @@ const stateName=(value)=>({completed:'Terminée',ready:'Réalisable',partial:'Pa
 const sectionName=(name)=>data.value.sections.find(s=>s.name===name)?.section_name||'Sans section';
 const fmt=(n)=>Number(n||0).toLocaleString('fr-FR',{maximumFractionDigits:2});
 function open(dt,name){frappe.set_route('Form',dt,name);}
-function form(title,fields,onSave) {const dialog=new frappe.ui.Dialog({title,fields,primary_action_label:'Enregistrer',async primary_action(values){dialog.disable_primary_action();try{await onSave(values);dialog.hide();await refresh();}catch(e){frappe.msgprint(describe(e));}finally{dialog.enable_primary_action();}}});dialog.show();}
-function newChantier(){form('Nouveau chantier',[
+function form(title,fields,onSave) {const dialog=new frappe.ui.Dialog({title,fields,primary_action_label:'Enregistrer',async primary_action(values){dialog.disable_primary_action();try{await onSave(values);dialog.hide();await refresh();}catch(e){frappe.msgprint(describe(e));}finally{dialog.enable_primary_action();}}});dialog.show();return dialog;}
+function newChantier(){let dialog;dialog=form('Nouveau chantier',[
  {fieldname:'reference',label:'Référence',fieldtype:'Data',read_only:1,description:'Numéro automatique attribué à l’enregistrement (YYCHANTMM#####).'},{fieldname:'designation',label:'Désignation',fieldtype:'Data',reqd:1},
- {fieldname:'company',label:'Société',fieldtype:'Link',options:'Company',reqd:1,default:frappe.defaults.get_user_default('Company')},
+ {fieldname:'company',label:'Société',fieldtype:'Link',options:'Company',reqd:1,default:frappe.defaults.get_user_default('Company'),onchange(){dialog?.set_value('taxes_and_charges','');}},
+ {fieldname:'taxes_and_charges',label:'Modèle de taxes',fieldtype:'Link',options:'Sales Taxes and Charges Template',get_query:()=>({filters:{company:dialog?.get_value('company')||'',disabled:0}})},
  {fieldname:'customer',label:'Client',fieldtype:'Link',options:'Customer',reqd:1},{fieldname:'responsible',label:'Responsable',fieldtype:'Link',options:'User',default:frappe.session.user},
  {fieldname:'expected_start_date',label:'Début prévu',fieldtype:'Date'},{fieldname:'expected_end_date',label:'Fin de fabrication prévue',fieldtype:'Date'}
  ],async(values)=>{const result=await frappe.call({method:'frappe.client.insert',args:{doc:{doctype:'Chantier',...values}}});selected.value=result.message.name;section.value='';});}
