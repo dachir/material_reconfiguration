@@ -23,6 +23,7 @@ def validate_chantier(doc):
     if doc.expected_start_date and doc.expected_end_date and getdate(doc.expected_end_date) < getdate(doc.expected_start_date):
         frappe.throw('La fin prévue doit être postérieure au début prévu.')
     old = doc.get_doc_before_save()
+    if old and old.get('downstream_started'):doc.downstream_started=1
     if doc.status=='Cancelled' and (not old or old.status!='Cancelled'):
         from mat_reco.material_reconfiguration.services.technical_study_service import cancel_chantier
         cancel_chantier(doc)
@@ -402,3 +403,18 @@ def create_section(chantier, modified, section_name, parent_chantier_section=Non
     doc.reload()
     return dict(name=section.name,modified=str(doc.modified),ft_active=doc.ft_active,ft_activation_key=doc.ft_activation_key,
         sections=frappe.get_list('Chantier Section',filters={'chantier':chantier},fields=['name','section_name','parent_chantier_section','is_group','lft'],order_by='lft',limit_page_length=0))
+
+
+def mark_chantier_used(doc, method=None):
+    if doc.doctype=='Material Cutting Plan':
+        names={frappe.db.get_value('Sales Order',r.sales_order,'custom_chantier') for r in doc.get('selected_sales_orders',[]) if r.sales_order}
+    else:names={doc.get('custom_chantier')}
+    for name in sorted(n for n in names if n):
+        frappe.db.get_value('Chantier',name,'name',for_update=True)
+        frappe.db.set_value('Chantier',name,'downstream_started',1,update_modified=False)
+
+
+def backfill_chantier_usage():
+    for dt in ('Quotation','Sales Order'):
+        for name in frappe.get_all(dt,filters={'custom_chantier':['is','set']},pluck='custom_chantier'):
+            if frappe.db.exists('Chantier',name):frappe.db.set_value('Chantier',name,'downstream_started',1,update_modified=False)

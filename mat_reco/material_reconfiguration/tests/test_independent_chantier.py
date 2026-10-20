@@ -288,3 +288,29 @@ class IndependentChantierTests(unittest.TestCase):
         self.assertEqual(amendment.docstatus,0);self.assertEqual(amendment.status,'Preparation')
         self.assertFalse(amendment.ft_active);self.assertFalse(amendment.technical_study);self.assertFalse(amendment.work_types[0].commercial_item)
         self.assertEqual(frappe.get_doc('Chantier Technical Study',study.name).chantier,self.doc.name)
+
+    def test_vue_copy_endpoint_creates_draft_and_uses_native_amend_numbering(self):
+        self.doc.reload()
+        duplicate=frappe.get_doc('Chantier',technical.copy_dossier(self.doc.name,str(self.doc.modified)))
+        self.assertEqual(duplicate.docstatus,0);self.assertEqual(duplicate.designation,self.doc.designation)
+        self.assertFalse(duplicate.amended_from);self.assertEqual(len(duplicate.lines),2)
+        self.doc.submit()
+        amendment=frappe.get_doc('Chantier',technical.copy_dossier(self.doc.name,str(self.doc.modified),'cancel_and_amend'))
+        self.assertEqual(amendment.name,self.doc.name+'-1');self.assertEqual(amendment.amended_from,self.doc.name)
+        self.assertEqual(amendment.docstatus,0);self.doc.reload();self.assertEqual(self.doc.docstatus,2)
+
+    def test_cancellation_remains_blocked_after_quote_cancellation_and_deletion(self):
+        quote=self.quote();quote.submit();quote.cancel();self.doc.reload()
+        self.assertTrue(self.doc.downstream_started)
+        with self.assertRaisesRegex(frappe.ValidationError,'Annulation interdite'):self.doc.cancel()
+        frappe.delete_doc('Quotation',quote.name);self.doc.reload()
+        with self.assertRaisesRegex(frappe.ValidationError,'Annulation interdite'):self.doc.cancel()
+        self.doc.reload()
+        with self.assertRaisesRegex(frappe.ValidationError,'Annulation interdite'):
+            technical.copy_dossier(self.doc.name,str(self.doc.modified),'cancel_and_amend')
+
+    def test_duplicate_of_used_chantier_has_its_own_cancellation_history(self):
+        self.quote();self.doc.reload();self.assertTrue(self.doc.downstream_started)
+        duplicate=frappe.get_doc('Chantier',technical.copy_dossier(self.doc.name,str(self.doc.modified)))
+        self.assertFalse(duplicate.downstream_started)
+        duplicate.submit();duplicate.cancel();self.assertEqual(duplicate.docstatus,2)

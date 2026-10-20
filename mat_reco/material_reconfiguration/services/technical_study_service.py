@@ -112,8 +112,9 @@ def submit_chantier(doc):
 
 
 def cancel_chantier(doc):
-    if frappe.db.exists('Quotation',{'custom_chantier':doc.name,'docstatus':['!=',2]}) or frappe.db.exists('Sales Order',{'custom_chantier':doc.name,'docstatus':['!=',2]}):
-        frappe.throw('Traiter les devis et commandes liés avant d’annuler le chantier ; supprimer les brouillons ou annuler les documents validés.')
+    used=frappe.db.get_value('Chantier',doc.name,'downstream_started',for_update=True)
+    if used or frappe.db.exists('Quotation',{'custom_chantier':doc.name}) or frappe.db.exists('Sales Order',{'custom_chantier':doc.name}):
+        frappe.throw('Annulation interdite : ce chantier a déjà participé à un devis, une commande ou un MCP, même annulé.')
     from .chantier_work_types import is_v2
     if is_v2(doc):doc.ignore_linked_doctypes=['Chantier Technical Study']
     if not is_v2(doc) and frappe.db.exists('Chantier Technical Study',{'chantier':doc.name,'docstatus':['!=',2]}):
@@ -582,6 +583,7 @@ def confirm_order(quotation, acceptance_reference, delivery_date, request_key, d
 
 
 def before_insert_chantier(doc):
+    doc.downstream_started=0
     source=doc.amended_from or doc.get('__ug_copy_source')
     if not source:
         owners={frappe.db.get_value('Chantier Section',r.section,'chantier') for r in doc.lines if r.section}
@@ -657,3 +659,25 @@ def designation_suggestions(txt=''):
 @frappe.whitelist()
 def designation_autocomplete(txt='', query=None):
     return [dict(value=value,label=frappe.utils.escape_html(value)) for value in designation_suggestions(txt)]
+
+
+@frappe.whitelist(methods=['POST'])
+def copy_dossier(chantier, modified, action='duplicate'):
+    """Use Frappe copy/insert/cancel rules while keeping the custom-page navigation."""
+    if action not in ('duplicate','amend','cancel_and_amend'):frappe.throw('Action invalide.')
+    source=frappe.get_doc('Chantier',chantier,for_update=True);source.check_permission('read')
+    if not frappe.has_permission('Chantier','create'):frappe.throw('Droit de création du chantier requis.',frappe.PermissionError)
+    if str(source.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant de continuer.')
+    amendment=action!='duplicate'
+    if amendment:
+        source.check_permission('amend')
+        if frappe.db.exists('Chantier',{'amended_from':source.name,'docstatus':['<',2]}):frappe.throw('Ce chantier possède déjà un amendement.')
+        if action=='cancel_and_amend':
+            if source.docstatus!=1:frappe.throw('Un chantier validé est requis pour annuler puis amender.')
+            source.check_permission('cancel');source.cancel()
+        elif source.docstatus!=2:frappe.throw('Annuler le chantier avant de l’amender.')
+    copied=frappe.copy_doc(source,ignore_no_copy=amendment)
+    copied.docstatus=0;copied.amended_from=source.name if amendment else None
+    copied.set('__ug_copy_source',source.name)
+    copied.insert()
+    return copied.name

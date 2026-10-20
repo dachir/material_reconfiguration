@@ -147,7 +147,7 @@ doctype_list_js = {"ToDo": "public/js/ug_todo_list.js"}
 
 doc_events = {
     "Material Cutting Plan": {
-        "on_update": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
+        "on_update": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.chantier_service.mark_chantier_used"],
         "on_cancel": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
         "before_submit": "mat_reco.material_reconfiguration.services.task_notifications.lock_workshop_validation",
         "on_submit": [
@@ -162,7 +162,7 @@ doc_events = {
             for event in ("on_submit", "on_cancel")}
        for dt in ("Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
     "Sales Order": {
-        "after_insert": "mat_reco.material_reconfiguration.services.task_notifications.order_created",
+        "after_insert": ["mat_reco.material_reconfiguration.services.task_notifications.order_created", "mat_reco.material_reconfiguration.services.chantier_service.mark_chantier_used"],
         "on_update": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
         "after_mapping": "mat_reco.material_reconfiguration.services.chantier_service.map_chantier",
         "validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
@@ -174,7 +174,7 @@ doc_events = {
     "Chantier Section": {"on_trash": "mat_reco.material_reconfiguration.services.ft_activation.guard_section_delete"},
     "Chantier": {"before_update_after_submit": "mat_reco.material_reconfiguration.services.ft_activation.validate_activation", "on_update_after_submit": "mat_reco.material_reconfiguration.services.ft_activation.after_chantier_update", "on_update": "mat_reco.material_reconfiguration.services.ft_activation.after_chantier_update", "on_submit": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.chantier_finished"},
     "Chantier Technical Study": {"after_insert": "mat_reco.material_reconfiguration.services.ft_activation.study_created", "on_trash": "mat_reco.material_reconfiguration.services.ft_activation.study_before_delete", "after_delete": "mat_reco.material_reconfiguration.services.ft_activation.study_deleted", "on_submit": "mat_reco.material_reconfiguration.services.task_notifications.study_finished", "on_cancel": "mat_reco.material_reconfiguration.services.task_notifications.study_finished"},
-    "Quotation": {"validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial"},
+    "Quotation": {"validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial", "after_insert": "mat_reco.material_reconfiguration.services.chantier_service.mark_chantier_used"},
     "Stock Entry": {
         "before_validate": "mat_reco.stock_hooks.stock_entry_before_validate",
         "validate": "mat_reco.stock_hooks.stock_entry_validate",
@@ -317,3 +317,5 @@ after_install = "mat_reco.printing.install_print_formats"
 after_migrate.append("mat_reco.material_reconfiguration.services.task_notifications.install_task_notifications")
 
 after_migrate.extend(["mat_reco.material_reconfiguration.services.chantier_work_types.install_fields", "mat_reco.material_reconfiguration.services.chantier_work_types.migrate_draft_types"])
+
+after_migrate.append("mat_reco.material_reconfiguration.services.chantier_service.backfill_chantier_usage")
