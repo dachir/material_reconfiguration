@@ -314,3 +314,67 @@ class IndependentChantierTests(unittest.TestCase):
         duplicate=frappe.get_doc('Chantier',technical.copy_dossier(self.doc.name,str(self.doc.modified)))
         self.assertFalse(duplicate.downstream_started)
         duplicate.submit();duplicate.cancel();self.assertEqual(duplicate.docstatus,2)
+
+    def discount_tax_template(self):
+        account=frappe.db.get_value('Account',{'company':self.company,'account_type':'Tax','is_group':0},'name')
+        if not account:self.skipTest('Requires company tax account')
+        template=frappe.get_doc(dict(doctype='Sales Taxes and Charges Template',title='QA Remise TVA',company=self.company,
+            taxes=[dict(charge_type='On Net Total',account_head=account,description='TVA 18 %',rate=18)])).insert()
+        self.doc.taxes_and_charges=template.name
+
+    def test_percentage_discount_line_zero_exception_reaches_invoice(self):
+        from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+        self.discount_tax_template();self.doc.discount_mode='Pourcentage';self.doc.discount_value=10
+        self.doc.lines[1].discount_percentage=0;self.doc.lines[1].discount_override=1;self.doc.save();self.doc.reload()
+        self.assertEqual([r.discount_percentage for r in self.doc.lines],[10,0])
+        order=self.order();invoice=make_sales_invoice(order.name)
+        self.assertEqual([r.discount_percentage for r in invoice.items],[10,0])
+        self.assertAlmostEqual(invoice.total,230);self.assertAlmostEqual(invoice.total_taxes_and_charges,41.4)
+        self.assertAlmostEqual(invoice.grand_total,271.4)
+        self.assertEqual(invoice.items[0].price_list_rate,100);self.assertEqual(invoice.items[0].discount_amount,10)
+
+    def test_fixed_global_discount_reaches_invoice_and_prorates_partial_invoice(self):
+        from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+        self.discount_tax_template();self.doc.discount_mode='Montant';self.doc.discount_value=50;self.doc.save()
+        order=self.order();invoice=make_sales_invoice(order.name)
+        self.assertAlmostEqual(order.discount_amount,50);self.assertAlmostEqual(invoice.discount_amount,50)
+        self.assertAlmostEqual(invoice.net_total,200);self.assertAlmostEqual(invoice.grand_total,236)
+        invoice.set('items',[invoice.items[0]]);invoice.items[0].qty=1;invoice.run_method('calculate_taxes_and_totals')
+        self.assertAlmostEqual(invoice.discount_amount,20);self.assertAlmostEqual(invoice.net_total,80)
+        self.assertAlmostEqual(invoice.total_taxes_and_charges,14.4)
+
+    def test_fixed_discount_is_not_duplicated_across_successive_quotes(self):
+        self.doc.discount_mode='Montant';self.doc.discount_value=50;self.doc.save();self.doc.submit()
+        first=frappe.get_doc('Quotation',technical.generate_quotation(self.doc.name,selections=frappe.as_json([dict(line_id=self.doc.lines[0].line_id,qty=1)]),request_key=uuid.uuid4().hex))
+        second=frappe.get_doc('Quotation',technical.generate_quotation(self.doc.name,request_key=uuid.uuid4().hex))
+        self.assertAlmostEqual(first.discount_amount,20);self.assertAlmostEqual(second.discount_amount,30)
+
+    def test_invalid_discounts_rejected(self):
+        self.doc.discount_mode='Pourcentage';self.doc.discount_value=101
+        with self.assertRaises(frappe.ValidationError):self.doc.save()
+        self.doc.reload();self.doc.discount_mode='Montant';self.doc.discount_value=251
+        with self.assertRaises(frappe.ValidationError):self.doc.save()
+
+    def test_percentage_discount_applies_to_inherited_services_with_line_exception(self):
+        group=frappe.db.get_value('Item Group',{'is_group':0},'name')
+        item=frappe.get_doc(dict(doctype='Item',item_code='QA-DISCOUNT-SERVICE',item_name='QA Service remise',item_group=group,
+            stock_uom='PC',is_stock_item=0,is_sales_item=1,custom_item_types='SERVICE',custom_service_calc_basis='MANUEL')).insert()
+        self.doc.work_types[0].common_extras=json.dumps([dict(key='DISCOUNT',item_code=item.name,qty=1,factor=1,rate=10)])
+        self.doc.discount_mode='Pourcentage';self.doc.discount_value=10;self.doc.save()
+        self.assertTrue(all(r.discount_percentage==10 for r in self.doc.commercial_extras))
+        self.doc.commercial_extras[0].discount_percentage=0;self.doc.commercial_extras[0].discount_override=1;self.doc.save()
+        quote=self.quote();rows=[r for r in quote.items if r.item_code==item.name]
+        self.assertEqual([r.discount_percentage for r in rows],[0,10])
+        self.assertEqual([r.rate for r in rows],[10,9])
+
+    def test_global_discount_distributed_between_direct_and_manufacturing_orders(self):
+        from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+        self.direct_lines();self.doc.discount_mode='Montant';self.doc.discount_value=45;self.doc.save()
+        quote=self.quote();quote.submit()
+        direct=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'QA Direct remise',add_days(nowdate(),7),uuid.uuid4().hex,direct_only=1))
+        self.assertAlmostEqual(direct.discount_amount,20)
+        self.study().submit()
+        rest=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'QA Atelier remise',add_days(nowdate(),7),uuid.uuid4().hex))
+        self.assertAlmostEqual(rest.discount_amount,25)
+        invoices=[make_sales_invoice(o.name) for o in (direct,rest)]
+        self.assertAlmostEqual(sum(i.discount_amount for i in invoices),45)

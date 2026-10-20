@@ -96,6 +96,7 @@ def add_quote_rows(quote, dossier):
 
 
 def validate_quote_extras(quote, dossier):
+    from .chantier_discounts import rate_matches
     extras = {r.line_id: r for r in dossier.get('commercial_extras', [])}
     parents = {r.custom_chantier_line: r for r in quote.items if r.custom_chantier_line not in extras}
     macros = {r.line_id: r for r in dossier.lines}
@@ -107,7 +108,7 @@ def validate_quote_extras(quote, dossier):
         if not parent or extra.line_id in seen: frappe.throw('Complément dupliqué ou sans ouvrage parent dans le devis.')
         seen.add(extra.line_id)
         expected = flt(extra.qty)*flt(parent.qty)/flt(macros[extra.parent_line_id].qty)
-        if (row.item_code!=extra.item_code or row.uom!=extra.uom or abs(flt(row.rate)-flt(extra.rate))>.000001
+        if (row.item_code!=extra.item_code or row.uom!=extra.uom or not rate_matches(dossier,extra,row)
             or abs(flt(row.qty)-expected)>.000001 or row.custom_parent_row!=parent.name
             or cint(row.custom_is_service_row)!=int(extra.item_type=='SERVICE')
             or cint(row.custom_is_accessory_row)!=int(extra.item_type=='ACCESSOIRE')

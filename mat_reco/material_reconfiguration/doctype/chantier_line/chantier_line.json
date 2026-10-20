@@ -111,6 +111,19 @@
    "label": "Article vendu directement",
    "fieldtype": "Link",
    "options": "Item"
+  },
+  {
+   "fieldname": "discount_percentage",
+   "label": "Remise (%)",
+   "fieldtype": "Percent",
+   "default": "0"
+  },
+  {
+   "fieldname": "discount_override",
+   "label": "Remise ajustée",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "default": "0"
   }
  ],
  "field_order": [
@@ -128,7 +141,9 @@
   "uom",
   "rate",
   "rate_set",
-  "price_source"
+  "price_source",
+  "discount_percentage",
+  "discount_override"
  ],
  "track_changes": 1,
  "permissions": [],

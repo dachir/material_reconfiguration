@@ -30,6 +30,8 @@ def commercial_hash(chantier, study, legacy=None):
         prices=[dict(id=r.line_id,rate=flt(r.rate),confirmed=cint(r.rate_set)) for r in chantier.lines])
     if chantier.get('taxes_and_charges'):values['taxes_and_charges']=chantier.taxes_and_charges
     if chantier.get('commercial_extras'):values['extras']=chantier_extras.signature(chantier,legacy=legacy)
+    from .chantier_discounts import signature
+    if signature(chantier):values['discounts']=signature(chantier)
     return fingerprint(values)
 
 
@@ -86,6 +88,8 @@ def validate_macro(chantier):
                 frappe.throw('Choisir un ouvrage ou une découpe actif comme référence commerciale.')
 
     chantier_extras.validate_extras(chantier)
+    from .chantier_discounts import normalize
+    normalize(chantier)
 
 
 def approved_study(chantier, lock=False):
@@ -422,6 +426,8 @@ def quotation_rows(chantier, study):
 
 def validate_quote(doc, chantier):
     from .chantier_work_types import is_v2, validate_commercial_quote
+    from .chantier_discounts import validate_quote as validate_discounts
+    validate_discounts(doc,chantier)
     if is_v2(chantier):return validate_commercial_quote(doc,chantier)
     if chantier.docstatus!=1:frappe.throw('Valider le chantier commercial avant de créer le devis.')
     study=approved_study(chantier)
@@ -443,7 +449,8 @@ def validate_quote(doc, chantier):
         if identity in seen:frappe.throw('Ouvrage dupliqué dans le devis.')
         seen.add(identity)
         macro,tech=definitions[identity]
-        if row.item_code!=tech.result_item or row.custom_repere!=macro.repere or row.custom_chantier_section!=macro.section or flt(row.rate)!=flt(macro.rate):
+        from .chantier_discounts import rate_matches
+        if row.item_code!=tech.result_item or row.custom_repere!=macro.repere or row.custom_chantier_section!=macro.section or not rate_matches(chantier,macro,row):
             frappe.throw('Article, repère, section ou prix différent du chantier approuvé.')
         if row.uom!=frappe.get_cached_value('Item',tech.result_item,'stock_uom'):frappe.throw('Unité de prix incompatible.')
         for field,technical in [('custom_client_length_mm','length_mm'),('custom_client_width_mm','width_mm'),('custom_client_thickness_mm','thickness_mm')]:
@@ -511,6 +518,8 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
             row.item_name=macro.designation;row.description=frappe.utils.escape_html(macro.designation)
         row.rate=macro.rate;row.price_list_rate=macro.rate;row.discount_percentage=0;row.discount_amount=0
         row.is_free_item=int(flt(macro.rate)==0)
+    from .chantier_discounts import apply_quote
+    apply_quote(quote,dossier)
     quote.run_method('calculate_taxes_and_totals');quote.insert()
     if cint(submit):quote.submit()
     return quote.name
@@ -526,7 +535,7 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
         doc.workflow_version=2
     incoming=frappe.parse_json(lines)
     if not isinstance(incoming,list) or len(incoming)>500:frappe.throw('Saisir au maximum 500 ouvrages.')
-    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras','line_kind','sale_item')
+    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras','line_kind','sale_item','discount_percentage','discount_override')
     if work_types is not None:
         type_rows=frappe.parse_json(work_types)
         if not isinstance(type_rows,list) or len(type_rows)>200:frappe.throw('Types d’ouvrage invalides.')
@@ -541,12 +550,12 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
     if commercial_extras is not None:
         supplements=frappe.parse_json(commercial_extras)
         if not isinstance(supplements,list) or len(supplements)>2000:frappe.throw('Liste de compléments invalide (maximum 2000).')
-        doc.set('commercial_extras',[{k:r.get(k) for k in chantier_extras.FIELDS+('inherited_from','inherited_key','inherited_qty_override','inherited_rate_override')} for r in supplements])
+        doc.set('commercial_extras',[{k:r.get(k) for k in chantier_extras.FIELDS+('inherited_from','inherited_key','inherited_qty_override','inherited_rate_override','discount_percentage','discount_override')} for r in supplements])
     if header is not None:
         values = frappe.parse_json(header)
         if not isinstance(values, dict):
             frappe.throw('En-tête de chantier invalide.')
-        for field in ('customer', 'designation', 'responsible', 'expected_start_date', 'expected_end_date'):
+        for field in ('customer', 'designation', 'responsible', 'expected_start_date', 'expected_end_date', 'discount_mode', 'discount_value'):
             if field in values:
                 doc.set(field, values[field])
     if taxes_and_charges is not None:doc.taxes_and_charges=taxes_and_charges

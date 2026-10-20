@@ -109,6 +109,19 @@
    "label": "Prix ajusté pour cet ouvrage",
    "fieldtype": "Check",
    "hidden": 1
+  },
+  {
+   "fieldname": "discount_percentage",
+   "label": "Remise (%)",
+   "fieldtype": "Percent",
+   "default": "0"
+  },
+  {
+   "fieldname": "discount_override",
+   "label": "Remise ajustée",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "default": "0"
   }
  ],
  "permissions": []

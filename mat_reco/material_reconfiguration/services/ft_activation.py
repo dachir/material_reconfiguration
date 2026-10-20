@@ -17,9 +17,12 @@ def snapshot(doc):
         if isinstance(value, list):
             return [clean(v.as_dict() if hasattr(v, 'as_dict') else v) for v in value]
         if isinstance(value, dict):
-            return {k: clean(v) for k,v in value.items() if k not in SYSTEM and not k.startswith('_')}
+            return {k: clean(v) for k,v in value.items() if k not in SYSTEM and k not in ('discount_percentage','discount_override') and not k.startswith('_')}
         return value or None
-    return json.dumps({k:clean(doc.get(k)) for k in FIELDS}, sort_keys=True, default=str)
+    values={k:clean(doc.get(k)) for k in FIELDS}
+    from .chantier_discounts import signature
+    if signature(doc):values['discounts']=signature(doc)
+    return json.dumps(values,sort_keys=True,default=str)
 
 
 def has_study(chantier):

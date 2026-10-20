@@ -92,6 +92,7 @@ def sync_inherited(doc):
             previous=saved.get(identity) or next((e for e in saved.values() if e.parent_line_id==row.line_id and e.inherited_from==type_row.type_id and e.inherited_key==definition['key']),None)
             if previous:
                 if previous.name and not previous.is_new():extra['name']=previous.name
+                extra['discount_percentage']=previous.get('discount_percentage');extra['discount_override']=previous.get('discount_override')
                 for flag,field in [('inherited_qty_override','qty'),('inherited_rate_override','rate')]:
                     if cint(previous.get(flag)):
                         extra[flag]=1;extra[field]=previous.get(field)
@@ -152,6 +153,7 @@ def technical_source_hash(doc):
 def validate_commercial_quote(quote, doc):
     from .chantier_service import fingerprint
     from .chantier_extras import validate_quote_extras
+    from .chantier_discounts import rate_matches
     if doc.docstatus!=1 or doc.commercial_hash!=commercial_hash(doc):
         frappe.throw('Valider la version commerciale du chantier avant de générer le devis.')
     if quote.currency!=doc.currency or (doc.taxes_and_charges and quote.taxes_and_charges!=doc.taxes_and_charges):
@@ -168,7 +170,7 @@ def validate_commercial_quote(quote, doc):
         row.custom_ug_work_type=expected.type_id if expected else None
         row.custom_ug_work_type_name=expected.designation if expected else None
         expected_item=macro.sale_item if is_direct(macro) else expected.commercial_item
-        if row.item_code!=expected_item or row.uom!=macro.uom or flt(row.rate)!=flt(macro.rate) or row.custom_repere!=macro.repere or row.custom_chantier_section!=macro.section:
+        if row.item_code!=expected_item or row.uom!=macro.uom or not rate_matches(doc,macro,row) or row.custom_repere!=macro.repere or row.custom_chantier_section!=macro.section:
             frappe.throw('Le devis diffère du chantier commercial approuvé.')
         for field,source in [('custom_client_length_mm','length_mm'),('custom_client_width_mm','width_mm'),('custom_client_thickness_mm','thickness_mm')]:
             if abs(flt(row.get(field))-flt(macro.get(source)))>.001:frappe.throw('Dimensions commerciales différentes du chantier.')
