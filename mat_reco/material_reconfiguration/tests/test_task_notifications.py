@@ -141,14 +141,12 @@ class TaskNotificationTests(unittest.TestCase):
         service.study_finished(self.study)
         self.assertEqual({r.status for r in self.todos()},{'Closed'})
 
-    def test_only_glass_orders_trigger_workshop_notifications(self):
-        order=frappe._dict(items=[frappe._dict(item_code='QA-ITEM')])
-        with patch.object(frappe,'get_cached_value',return_value='DECOUPE'), patch.object(service,'send_tasks') as send:
+    def test_order_event_delegates_to_submitted_order_technical_handoff(self):
+        from mat_reco.material_reconfiguration.services import order_technical
+        order=frappe._dict(doctype='Sales Order',docstatus=0,items=[])
+        with patch.object(order_technical,'prepare') as prepare:
             service.order_created(order)
-            send.assert_called_once_with(order,'workshop','order-created')
-        with patch.object(frappe,'get_cached_value',return_value='SERVICE'), patch.object(service,'send_tasks') as send:
-            service.order_created(order)
-            send.assert_not_called()
+            prepare.assert_called_once_with(order)
 
     def test_other_chantier_cannot_be_used_for_handoff(self):
         with self.assertRaises(frappe.DoesNotExistError):

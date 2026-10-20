@@ -10,7 +10,16 @@
    "label": "Chantier",
    "fieldtype": "Link",
    "options": "Chantier",
-   "reqd": 1,
+   "reqd": 0,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "label": "Commande client",
+   "fieldtype": "Link",
+   "options": "Sales Order",
+   "read_only": 1,
+   "no_copy": 1,
    "search_index": 1
   },
   {
@@ -32,7 +41,7 @@
    "label": "Ouvrages à étudier",
    "fieldtype": "Table",
    "options": "Chantier Technical Line",
-   "reqd": 1
+   "reqd": 0
   },
   {
    "fieldname": "notes",
@@ -58,6 +67,7 @@
  ],
  "field_order": [
   "chantier",
+  "sales_order",
   "source_hash",
   "technical_hash",
   "lines",

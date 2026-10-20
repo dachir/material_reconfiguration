@@ -74,7 +74,7 @@ def after_chantier_update(doc, method=None):
         cancel_generated(doc)
         from .chantier_work_types import is_v2
         if is_v2(doc):
-            for name in frappe.get_all('Chantier Technical Study',filters={'chantier':doc.name},pluck='name'):
+            for name in frappe.get_all('Chantier Technical Study',filters={'chantier':doc.name,'sales_order':['is','not set']},pluck='name'):
                 cancel_generated(frappe._dict(doctype='Chantier Technical Study',name=name))
 
 
@@ -116,6 +116,7 @@ def require_activation(doc):
 
 
 def study_created(doc, method=None):
+    if doc.get('sales_order'):return
     from frappe.utils import escape_html
     old_link='/app/chantiers/'+doc.chantier
     new_link='/app/technical-study/'+doc.name
@@ -136,7 +137,8 @@ def study_created(doc, method=None):
 
 def study_deleted(doc, method=None):
     cancel_generated(doc)
-    if not has_study(doc.chantier):
+    if doc.get('sales_order'):return
+    if doc.chantier and not has_study(doc.chantier):
         dossier=frappe.get_doc('Chantier',doc.chantier,for_update=True)
         cancel_generated(dossier)
         frappe.db.set_value('Chantier',doc.chantier,{'ft_active':0,'ft_activation_key':None})

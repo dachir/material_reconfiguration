@@ -113,7 +113,7 @@ def validate_commercial(doc, method=None):
         # Preserve existing non-chantier workflows and their Item composition behavior.
         return
     chantier = chantier_doc(doc.custom_chantier)
-    from .chantier_work_types import is_v2, is_direct, require_order_technical
+    from .chantier_work_types import is_v2, is_direct
     loose=is_v2(chantier)
     if chantier.status in ('Cancelled', 'On Hold') and doc.docstatus != 2:
         frappe.throw('Ce chantier est suspendu ou annulé.')
@@ -130,7 +130,6 @@ def validate_commercial(doc, method=None):
         map_order_extras(doc)
         from .chantier_discounts import validate_quote as validate_discount
         validate_discount(doc,chantier)
-        if loose:require_order_technical(doc,chantier)
     seen, quotations = set(), {}
     for row in doc.get('items', []):
         if doc.doctype == 'Sales Order':
@@ -202,7 +201,7 @@ def validate_commercial(doc, method=None):
 
 def protect_produced_order(doc, method=None):
     """Cancellation changes row identities on amendment; never orphan production."""
-    if not doc.get('custom_chantier'):
+    if not doc.get('custom_chantier') and not doc.get('custom_technical_study'):
         return
     rows = [r.name for r in doc.items]
     produced = frappe.db.sql('''SELECT d.name FROM `tabStock Entry Detail` d
@@ -219,10 +218,10 @@ def protect_produced_order(doc, method=None):
 
 def frozen_tree(order, row):
     if not row.get('custom_technical_snapshot'):
-        if order.get('custom_chantier'):
+        if order.get('custom_chantier') or order.get('custom_technical_study'):
             from .chantier_work_types import is_v2, technical_tree
-            dossier=chantier_doc(order.custom_chantier)
-            if not is_v2(dossier):frappe.throw('Composition technique validée manquante sur la ligne de commande.')
+            dossier=chantier_doc(order.custom_chantier) if order.get('custom_chantier') else None
+            if dossier and not is_v2(dossier):frappe.throw('Composition technique validée manquante sur la ligne de commande.')
             tree=technical_tree(order,row)
         else:
             return None

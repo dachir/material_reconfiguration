@@ -185,15 +185,26 @@ def technical_tree(order, row, study_name=None):
     if not frappe.has_permission('Chantier Technical Study','read'):
         frappe.throw('Lecture de la fiche technique requise avant fabrication.')
     from .chantier_service import chantier_doc
-    doc=chantier_doc(order.custom_chantier)
-    macro=next((r for r in doc.lines if r.line_id==row.get('custom_chantier_line')),None)
+    if order.get('custom_technical_study'):
+        from .order_technical import context
+        linked=frappe.get_doc('Chantier Technical Study',order.custom_technical_study)
+        if linked.get('sales_order'):
+            if linked.sales_order!=order.name:frappe.throw('La fiche technique appartient à une autre commande.')
+            _,doc,current_hash=context(linked)
+            if linked.docstatus!=1:frappe.throw('Valider la fiche technique de la commande avant fabrication.')
+            candidates=[linked.name]
+        else:
+            doc=chantier_doc(order.custom_chantier);current_hash=technical_source_hash(doc);candidates=[linked.name]
+    else:
+        doc=chantier_doc(order.custom_chantier);current_hash=technical_source_hash(doc)
+        candidates=frappe.get_list('Chantier Technical Study',filters={'chantier':doc.name,'docstatus':1,'sales_order':['is','not set'],
+            **({'name':study_name} if study_name else {})},pluck='name',order_by='modified desc',limit_page_length=0)
+    macro=next((r for r in doc.lines if r.line_id==row.get('custom_chantier_line') or (not order.get('custom_chantier') and r.line_id==row.name)),None)
     if not macro:frappe.throw('Ouvrage commercial du chantier introuvable.')
     if is_direct(macro):frappe.throw('Cette vente directe ne nécessite pas de fabrication.')
-    candidates=frappe.get_list('Chantier Technical Study',filters={'chantier':doc.name,'docstatus':1,
-        **({'name':study_name} if study_name else {})},pluck='name',order_by='modified desc',limit_page_length=0)
     for name in candidates:
         study=frappe.get_doc('Chantier Technical Study',name)
-        if study.source_hash!=technical_source_hash(doc):continue
+        if study.docstatus!=1 or study.source_hash!=current_hash:continue
         definition=next((r for r in study.lines if r.line_id==macro.work_type),None)
         if not definition or not definition.snapshot_json:continue
         tree=copy.deepcopy(frappe.parse_json(definition.snapshot_json))
@@ -211,11 +222,17 @@ def technical_tree(order, row, study_name=None):
 
 def freeze_order(order, study_name=None, node_id=None):
     from .chantier_service import fingerprint
-    doc=frappe.get_doc('Chantier',order.custom_chantier)
-    if not is_v2(doc):return
+    if order.get('custom_chantier'):
+        doc=frappe.get_doc('Chantier',order.custom_chantier)
+        if not is_v2(doc):return
+    elif order.get('custom_technical_study'):
+        from .order_technical import context
+        _,doc,_=context(frappe.get_doc('Chantier Technical Study',order.custom_technical_study))
+    else:return
     for row in order.items:
         if node_id and node_id!=order.name and not node_id.startswith(row.name+':'):continue
-        if row.get('custom_is_service_row') or row.get('custom_is_accessory_row') or not row.get('custom_chantier_line') or row.get('custom_technical_snapshot') or any(m.line_id==row.get('custom_chantier_line') and is_direct(m) for m in doc.lines):continue
+        if not order.get('custom_chantier') and frappe.get_cached_value('Item',row.item_code,'custom_item_types') not in ('OUVRAGE','DECOUPE'):continue
+        if row.get('custom_is_service_row') or row.get('custom_is_accessory_row') or (not row.get('custom_chantier_line') and order.get('custom_chantier')) or row.get('custom_technical_snapshot') or any(m.line_id==row.get('custom_chantier_line') and is_direct(m) for m in doc.lines):continue
         tree=technical_tree(order,row,study_name)
         frappe.db.set_value('Sales Order Item',row.name,dict(custom_technical_snapshot=json.dumps(tree,ensure_ascii=False),custom_technical_hash=fingerprint(tree)),update_modified=False)
         row.custom_technical_snapshot=json.dumps(tree,ensure_ascii=False);row.custom_technical_hash=fingerprint(tree)
@@ -249,7 +266,7 @@ def prepare_study(chantier):
     expected=prepare_type_rows(doc)
     if not expected:frappe.throw('Ajouter un type et ses ouvrages avant de préparer la fiche.')
     current=technical_source_hash(doc)
-    previous=frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash'],order_by='modified desc',limit_page_length=0)
+    previous=frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2],'sales_order':['is','not set']},fields=['name','docstatus','source_hash'],order_by='modified desc',limit_page_length=0)
     matching=next((r for r in previous if r.source_hash==current),None)
     if matching:return matching.name
     draft=next((r for r in previous if r.docstatus==0),None)
@@ -277,22 +294,3 @@ def logical_section(order, row):
     doc=frappe.get_doc('Chantier',order.custom_chantier)
     if not is_v2(doc):return row.get('custom_chantier_section')
     return next((r.section for r in doc.lines if r.line_id==row.get('custom_chantier_line')),None)
-
-
-def require_order_technical(order, doc):
-    """Gate new orders and draft submissions; retain existing submitted histories."""
-    old=order.get_doc_before_save()
-    if not order.is_new() and not (order.docstatus==1 and old and old.docstatus==0):return
-    macros={r.line_id:r for r in doc.lines}
-    frappe.db.get_value('Chantier',doc.name,'name',for_update=True)
-    current=technical_source_hash(doc)
-    approved=frappe.get_all('Chantier Technical Study',filters={'chantier':doc.name,'docstatus':1,'source_hash':current},pluck='name')
-    definitions=set()
-    for name in approved:
-        definitions.update(r.line_id for r in frappe.get_doc('Chantier Technical Study',name).lines if r.snapshot_json)
-    missing=[]
-    for row in order.items:
-        macro=macros.get(row.get('custom_chantier_line'))
-        if not macro or is_direct(macro):continue
-        if macro.work_type not in definitions:missing.append(types(doc)[macro.work_type].designation)
-    if missing:frappe.throw('Fiche technique validée requise avant commande pour : '+', '.join(dict.fromkeys(missing)))

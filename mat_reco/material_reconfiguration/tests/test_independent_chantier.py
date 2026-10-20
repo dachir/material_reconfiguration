@@ -47,8 +47,9 @@ class IndependentChantierTests(unittest.TestCase):
 
     def order(self):
         quote=self.quote();quote.submit()
-        study=self.study();study.submit()
-        return frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'QA accord',add_days(nowdate(),7),uuid.uuid4().hex))
+        order=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'QA accord',add_days(nowdate(),7),uuid.uuid4().hex))
+        frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        return order
 
     def test_type_mandatory_and_thickness_inherited(self):
         self.assertEqual(self.doc.workflow_version,2)
@@ -64,17 +65,16 @@ class IndependentChantierTests(unittest.TestCase):
         self.assertEqual(len(work.prepare_type_rows(self.doc)),1)
         self.assertNotEqual(self.doc.lines[0].section,self.doc.lines[1].section)
 
-    def test_quote_without_ft_but_order_requires_validated_ft(self):
+    def test_quote_and_order_precede_technical_validation(self):
         quote=self.quote();quote.submit()
         self.assertFalse(frappe.db.exists('Chantier Technical Study',{'chantier':self.doc.name}))
-        with self.assertRaisesRegex(frappe.ValidationError,'Fiche technique validée'):
-            technical.confirm_order(quote.name,'QA',add_days(nowdate(),7),uuid.uuid4().hex)
-        study=self.study()
-        with self.assertRaisesRegex(frappe.ValidationError,'Fiche technique validée'):
-            technical.confirm_order(quote.name,'QA',add_days(nowdate(),7),uuid.uuid4().hex)
-        study.submit()
         name=technical.confirm_order(quote.name,'QA',add_days(nowdate(),7),uuid.uuid4().hex)
-        self.assertEqual(frappe.get_doc('Sales Order',name).docstatus,1)
+        order=frappe.get_doc('Sales Order',name)
+        study=frappe.get_doc('Chantier Technical Study',order.custom_technical_study)
+        self.assertEqual(order.docstatus,1);self.assertEqual(study.docstatus,0)
+        self.assertEqual(study.sales_order,order.name)
+        with self.assertRaisesRegex(frappe.ValidationError,'Valider la fiche technique'):_tree(order,order.items[0])
+        study.submit();self.assertTrue(_tree(order,order.items[0]))
 
     def test_ft_before_commercial_does_not_lock_project(self):
         study=self.study();self.assertEqual(len(study.lines),1)
@@ -84,7 +84,7 @@ class IndependentChantierTests(unittest.TestCase):
         study.reload();study.submit();self.assertEqual(study.docstatus,1)
 
     def test_study_after_commercial_and_frozen_manufacturing_definition(self):
-        order=self.order();study=self.study()
+        order=self.order();study=frappe.get_doc('Chantier Technical Study',order.custom_technical_study)
         self.assertEqual(len(study.lines),1)
         tree=_tree(order,order.items[0]);self.assertEqual(tree['length_mm'],1200)
         self.assertFalse(order.items[0].custom_technical_snapshot)
@@ -160,7 +160,7 @@ class IndependentChantierTests(unittest.TestCase):
 
     def test_cockpit_mcp_freezes_and_expands_new_commercial_sku(self):
         from mat_reco.material_reconfiguration.services import workshop_service as ws
-        order=self.order();study=self.study();row=order.items[0]
+        order=self.order();study=frappe.get_doc('Chantier Technical Study',order.custom_technical_study);row=order.items[0]
         tree=_tree(order,row)
         source=next(n['primary_item'] for n in ws._walk(tree) if n['item_type']=='DECOUPE')
         node=next(n for n in ws._walk(tree) if n['item_type']=='DECOUPE')
@@ -225,12 +225,13 @@ class IndependentChantierTests(unittest.TestCase):
         self.assertTrue(primary)
         self.doc.append('lines',dict(line_kind='Vente directe',sale_item=primary,qty=1,rate=100))
 
-    def test_standalone_plates_accessories_and_services_without_types_or_ft(self):
+    def test_standalone_plates_accessories_and_services_have_review_ft_without_manufacturing(self):
         self.doc.set('lines',[]);self.doc.set('work_types',[]);self.direct_lines();self.doc.save()
         quote=self.quote();quote.submit()
         order=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'Vente directe QA',add_days(nowdate(),7),uuid.uuid4().hex))
         self.assertEqual(len(order.items),3);self.assertEqual(order.docstatus,1)
-        self.assertFalse(frappe.db.exists('Chantier Technical Study',{'chantier':self.doc.name}))
+        sheet=frappe.get_doc('Chantier Technical Study',order.custom_technical_study)
+        self.assertFalse(sheet.lines);self.assertEqual(sheet.sales_order,order.name)
         self.assertTrue(all(not r.custom_technical_snapshot and not r.custom_ug_work_type for r in order.items))
         self.assertAlmostEqual(order.net_total,200)
         self.assertFalse(frappe.db.exists('ToDo',{'reference_type':'Sales Order','reference_name':order.name,'description':['like','[Univers Glass — Atelier]%']}))
@@ -239,20 +240,20 @@ class IndependentChantierTests(unittest.TestCase):
 
     def test_mixed_quote_direct_order_then_manufacturing_order_after_ft(self):
         self.direct_lines();self.doc.save();quote=self.quote();quote.submit()
-        with self.assertRaisesRegex(frappe.ValidationError,'Fiche technique validée'):
-            technical.confirm_order(quote.name,'Mixte QA',add_days(nowdate(),7),uuid.uuid4().hex)
         direct=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'Direct QA',add_days(nowdate(),7),uuid.uuid4().hex,direct_only=1))
         self.assertEqual(len(direct.items),3)
-        study=self.study();self.assertEqual(len(study.lines),1);study.submit()
+        self.assertFalse(frappe.get_doc('Chantier Technical Study',direct.custom_technical_study).lines)
         rest=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'Fabrication QA',add_days(nowdate(),7),uuid.uuid4().hex))
         self.assertEqual(len(rest.items),2);self.assertTrue(all(r.custom_ug_work_type==self.typeid for r in rest.items))
 
-    def test_native_erp_order_creation_cannot_bypass_ft_gate(self):
+    def test_native_erp_order_submission_also_creates_ft(self):
         from erpnext.selling.doctype.quotation.quotation import make_sales_order
         quote=self.quote();quote.submit();order=make_sales_order(quote.name)
         order.custom_customer_acceptance='QA ERPNext';order.delivery_date=add_days(nowdate(),7)
         for row in order.items:row.delivery_date=order.delivery_date
-        with self.assertRaisesRegex(frappe.ValidationError,'Fiche technique validée'):order.insert()
+        order.insert();self.assertFalse(order.custom_technical_study)
+        order.submit()
+        self.assertEqual(frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'sales_order'),order.name)
 
     def test_sections_remain_creatable_after_types_works_and_ft_until_validation(self):
         from mat_reco.material_reconfiguration.services.chantier_service import create_section
@@ -414,3 +415,13 @@ class IndependentChantierTests(unittest.TestCase):
         self.assertTrue(row.price_per_sqm)
         quote=self.quote();self.assertAlmostEqual(quote.total,334);self.assertAlmostEqual(quote.discount_amount,33.4)
         self.assertAlmostEqual(quote.net_total,300.6)
+
+    def test_order_type_b_selected_from_vue_is_preserved_on_retry(self):
+        self.doc.set('lines',[]);self.doc.set('work_types',[]);self.direct_lines();self.doc.save()
+        quote=self.quote();quote.submit();key=uuid.uuid4().hex;date=add_days(nowdate(),7)
+        name=technical.confirm_order(quote.name,'QA Type B',date,key,order_type='B')
+        self.assertTrue(name.startswith('SAL-ORD-B-'))
+        self.assertEqual(frappe.db.get_value('Sales Order',name,'custom_ug_order_type'),'B')
+        self.assertEqual(technical.confirm_order(quote.name,'QA Type B',date,key,order_type='B'),name)
+        with self.assertRaisesRegex(frappe.ValidationError,'Clé déjà utilisée'):
+            technical.confirm_order(quote.name,'QA Type B',date,key,order_type='A')

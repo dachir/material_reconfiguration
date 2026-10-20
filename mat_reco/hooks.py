@@ -46,7 +46,7 @@ app_include_js = ["/assets/mat_reco/js/ug_task_links.js"]
 # include js in doctype views
 doctype_js = {
     "Quotation": "public/js/chantier_commercial.js",
-    "Sales Order": "public/js/chantier_commercial.js",
+    "Sales Order": ["public/js/chantier_commercial.js","public/js/order_b_actions.js"],
     "Delivery Note": "public/js/dimension_from_serial.js",
     "Sales Invoice": "public/js/dimension_from_serial.js",
     "Stock Entry": "public/js/stock_entry_repack_from_so.js",
@@ -162,11 +162,12 @@ doc_events = {
             for event in ("on_submit", "on_cancel")}
        for dt in ("Workshop Refabrication", "Stock Reservation Entry", "Sales Order", "Delivery Note")},
     "Sales Order": {
-        "after_insert": ["mat_reco.material_reconfiguration.services.task_notifications.order_created", "mat_reco.material_reconfiguration.services.chantier_service.mark_chantier_used"],
+        "before_naming": "mat_reco.material_reconfiguration.services.sales_order_types.before_naming",
+        "after_insert": "mat_reco.material_reconfiguration.services.chantier_service.mark_chantier_used",
         "on_update": "mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change",
         "after_mapping": "mat_reco.material_reconfiguration.services.chantier_service.map_chantier",
-        "validate": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
-        "before_update_after_submit": "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial",
+        "validate": ["mat_reco.material_reconfiguration.services.order_b.validate_order", "mat_reco.material_reconfiguration.services.sales_order_types.validate", "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial"],
+        "before_update_after_submit": ["mat_reco.material_reconfiguration.services.order_b.validate_order", "mat_reco.material_reconfiguration.services.sales_order_types.validate", "mat_reco.material_reconfiguration.services.chantier_service.validate_commercial"],
         "before_cancel": "mat_reco.material_reconfiguration.services.chantier_service.protect_produced_order",
         "on_submit": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.task_notifications.order_created"],
         "on_cancel": ["mat_reco.material_reconfiguration.services.workshop_service.notify_stock_change", "mat_reco.material_reconfiguration.services.task_notifications.order_cancelled"],
@@ -321,3 +322,40 @@ after_migrate.extend(["mat_reco.material_reconfiguration.services.chantier_work_
 after_migrate.append("mat_reco.material_reconfiguration.services.chantier_service.backfill_chantier_usage")
 
 after_migrate.append("mat_reco.material_reconfiguration.services.chantier_pricing.install_fields")
+
+after_migrate.append("mat_reco.material_reconfiguration.services.sales_order_types.install")
+
+after_migrate.append("mat_reco.material_reconfiguration.services.order_technical.install")
+
+after_migrate.append("mat_reco.material_reconfiguration.services.order_b.install")
+permission_query_conditions = {
+    "Sales Order": "mat_reco.material_reconfiguration.services.order_b.query_conditions",
+    "Chantier Technical Study": "mat_reco.material_reconfiguration.services.order_b.study_query_conditions",
+}
+has_permission = {
+    "Sales Order": "mat_reco.material_reconfiguration.services.order_b.has_permission",
+    "Chantier Technical Study": "mat_reco.material_reconfiguration.services.order_b.study_has_permission",
+}
+for _ug_dt in ('Delivery Note', 'Sales Invoice'):
+    for _ug_event in ('validate', 'before_submit'):
+        _ug_previous=doc_events.setdefault(_ug_dt,{}).get(_ug_event,[])
+        if isinstance(_ug_previous,str):_ug_previous=[_ug_previous]
+        doc_events[_ug_dt][_ug_event]=_ug_previous + ['mat_reco.material_reconfiguration.services.order_b.validate_downstream']
+
+after_migrate.extend([
+    "mat_reco.material_reconfiguration.services.order_b_stock.install",
+    "mat_reco.material_reconfiguration.services.order_b_export.install",
+])
+for _ug_event in ('validate','before_submit'):
+    _ug_previous=doc_events['Stock Entry'].get(_ug_event,[])
+    if isinstance(_ug_previous,str):_ug_previous=[_ug_previous]
+    doc_events['Stock Entry'][_ug_event]=_ug_previous+['mat_reco.material_reconfiguration.services.order_b_stock.validate_issue']
+doc_events['Stock Entry']['before_cancel']='mat_reco.material_reconfiguration.services.order_b_stock.before_cancel'
+for _ug_event in ('on_submit','on_cancel'):
+    _ug_previous=doc_events['Stock Entry'][_ug_event]
+    if isinstance(_ug_previous,str):_ug_previous=[_ug_previous]
+    doc_events['Stock Entry'][_ug_event]=_ug_previous+['mat_reco.material_reconfiguration.services.order_b_stock.stock_updated']
+for _ug_dt in ('Payment Entry','Journal Entry'):
+    doc_events[_ug_dt]={_ug_event:'mat_reco.material_reconfiguration.services.order_b.validate_customer_entries' for _ug_event in ('validate','before_submit')}
+for _ug_event in ('validate','before_update_after_submit'):
+    doc_events['Sales Order'][_ug_event].append('mat_reco.material_reconfiguration.services.order_b_export.validate_order')

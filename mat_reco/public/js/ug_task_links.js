@@ -3,7 +3,8 @@
  const routes = {'Sales Order':'workshop-cockpit','Chantier':'chantiers','Chantier Technical Study':'technical-study'};
  function href(doc) {
   if (!String(doc.description || '').startsWith('[Univers Glass — ') || !doc.reference_name) return null;
-  const route = routes[doc.reference_type];
+  const stockOrExport=doc.reference_type==='Sales Order'&&/^\[Univers Glass — (Sortie directe B|Export Sage B)\]/.test(doc.description||'');
+  const route = stockOrExport?'sales-order':routes[doc.reference_type];
   return route ? `/app/${route}/${encodeURIComponent(doc.reference_name)}` : null;
  }
  frappe.ug_task_links = {href};

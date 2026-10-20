@@ -129,6 +129,13 @@ def cancel_chantier(doc):
 
 
 def cancel_study(doc):
+    if doc.get('sales_order'):
+        order=frappe.get_doc('Sales Order',doc.sales_order)
+        from .chantier_service import protect_produced_order
+        protect_produced_order(order)
+        if any(row.get('custom_technical_snapshot') for row in order.items):frappe.throw('Cette fiche a été utilisée en fabrication. Conserver sa traçabilité.')
+        doc.ignore_linked_doctypes=['Chantier','Sales Order']
+        return
     if any(frappe.db.exists(dt,{'custom_technical_study':doc.name,'docstatus':['!=',2]}) for dt in ('Quotation','Sales Order')):
         frappe.throw('Traiter les devis et commandes liés avant d’annuler l’étude technique.')
     # The header points back to its approved study. Permit this one backlink
@@ -249,20 +256,33 @@ def air_layers(node, path=(), ratio=1):
 
 
 def validate_study(doc):
-    chantier=frappe.get_doc('Chantier',doc.chantier,for_update=True)
-    chantier.check_permission('read')
+    previous=doc.get_doc_before_save()
+    if previous and previous.get('sales_order')!=doc.get('sales_order'):frappe.throw('La commande de la fiche technique ne peut pas être modifiée.')
+    from .order_technical import source, source_hash as study_source_hash
+    chantier=source(doc)
+    if doc.get('sales_order'):
+        order=frappe.get_doc('Sales Order',doc.sales_order)
+        if not doc.flags.ignore_permissions:order.check_permission('read')
+        old=doc.get_doc_before_save()
+        if old and old.sales_order!=doc.sales_order:frappe.throw('La commande de la fiche technique ne peut pas être modifiée.')
+        if (doc.chantier or '')!=(order.custom_chantier or ''):frappe.throw('Le chantier doit correspondre à la commande.')
+        existing=frappe.db.get_value('Chantier Technical Study',{'sales_order':order.name,'docstatus':['<',2],'name':['!=',doc.name or '']},'name')
+        if existing and doc.docstatus!=2:frappe.throw('Une fiche technique active existe déjà pour cette commande.')
+    else:
+        if not doc.chantier:frappe.throw('Renseigner le chantier ou la commande de la fiche technique.')
+        chantier.check_permission('read')
     from .chantier_work_types import is_v2, prepare_type_rows
     loose=is_v2(chantier)
     if (chantier.docstatus!=0 and not loose) or chantier.docstatus==2 or chantier.status=='Cancelled':
         frappe.throw('L’étude technique doit être préparée et validée avant la validation commerciale finale.')
-    if not chantier.lines:
+    if not chantier.lines and not doc.get('sales_order'):
         frappe.throw('Ajouter les besoins commerciaux au chantier avant l’étude.')
     if doc.is_new():
         from .ft_activation import require_activation, has_study
-        require_activation(chantier)
+        if not doc.get('sales_order'):require_activation(chantier)
         if not loose and has_study(chantier.name):
             frappe.throw('Supprimer la fiche technique existante avant d’en préparer une nouvelle.')
-        doc.source_hash=source_hash(chantier)
+        doc.source_hash=study_source_hash(doc,chantier)
     if not doc.source_hash:frappe.throw('Empreinte des besoins absente.')
     expected={r.line_id:r for r in (prepare_type_rows(chantier) if loose else chantier.lines)}
     if len(doc.lines)!=len(expected) or {r.line_id for r in doc.lines}!=set(expected):
@@ -272,7 +292,7 @@ def validate_study(doc):
         if doc.docstatus==0:
             row.result_item=None;row.snapshot_json=None;row.snapshot_hash=None
     if doc.docstatus==1:
-        if doc.source_hash!=source_hash(chantier):
+        if doc.source_hash!=study_source_hash(doc,chantier):
             frappe.throw('Les besoins commerciaux ont changé. Préparer une nouvelle étude correspondant à la version actuelle.')
         for row in doc.lines:
             if loose and abs(flt(row.thickness_mm)-flt(expected[row.line_id].thickness_mm))>.001:
@@ -325,11 +345,12 @@ def _resolve(node, company, created):
 
 
 def submit_study(doc):
-    chantier=frappe.get_doc('Chantier',doc.chantier,for_update=True)
-    chantier.check_permission('read')
+    from .order_technical import source, source_hash as study_source_hash
+    chantier=source(doc)
+    if not doc.get('sales_order'):chantier.check_permission('read')
     from .chantier_work_types import is_v2
     loose=is_v2(chantier)
-    if (chantier.docstatus!=0 and not loose) or chantier.docstatus==2 or doc.source_hash!=source_hash(chantier):
+    if (chantier.docstatus!=0 and not loose) or chantier.docstatus==2 or doc.source_hash!=study_source_hash(doc,chantier):
         frappe.throw('Les besoins ont changé pendant la validation. Actualiser l’étude avant de recommencer.')
     if not loose and frappe.db.get_value('Chantier Technical Study',{'chantier':chantier.name,'docstatus':1,'name':['!=',doc.name]},'name',for_update=True):
         frappe.throw('Une étude technique validée existe déjà. L’annuler avant de valider sa révision.')
@@ -391,11 +412,13 @@ def prepare_study(chantier):
 
 @frappe.whitelist()
 def get_study(name=None):
-    available=frappe.get_list('Chantier Technical Study',fields=['name','chantier','docstatus','modified'],order_by='modified desc',limit_page_length=100)
+    available=frappe.get_list('Chantier Technical Study',fields=['name','chantier','sales_order','docstatus','modified'],order_by='modified desc',limit_page_length=100)
     if not name:return dict(studies=available)
-    doc=frappe.get_doc('Chantier Technical Study',name);doc.check_permission('read');chantier=chantier_doc(doc.chantier)
-    return dict(studies=available,study=doc.as_dict(),chantier=chantier.as_dict(),stale=doc.source_hash!=source_hash(chantier),
-        sections=frappe.get_list('Chantier Section',filters={'chantier':chantier.name},fields=['name','section_name','parent_chantier_section'],limit_page_length=0),
+    doc=frappe.get_doc('Chantier Technical Study',name);doc.check_permission('read')
+    from .order_technical import source, source_hash as study_source_hash
+    chantier=source(doc)
+    return dict(studies=available,study=doc.as_dict(),chantier=chantier.as_dict(),stale=doc.source_hash!=study_source_hash(doc,chantier),
+        sections=frappe.get_list('Chantier Section',filters={'chantier':doc.chantier},fields=['name','section_name','parent_chantier_section'],limit_page_length=0) if doc.chantier else [],
         permissions=dict(write=doc.has_permission('write'),submit=doc.has_permission('submit'),cancel=doc.has_permission('cancel'),delete=doc.has_permission('delete')))
 
 
@@ -566,7 +589,9 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
 
 
 @frappe.whitelist(methods=['POST'])
-def confirm_order(quotation, acceptance_reference, delivery_date, request_key, direct_only=False):
+def confirm_order(quotation, acceptance_reference, delivery_date, request_key, direct_only=False, order_type='A'):
+    from .sales_order_types import kind
+    order_type=kind(order_type)
     quote=frappe.get_doc('Quotation',quotation);quote.check_permission('read')
     if quote.docstatus!=1 or not quote.custom_chantier:frappe.throw('Un devis de chantier validé est requis.')
     if not acceptance_reference or not acceptance_reference.strip() or not delivery_date or not request_key or len(request_key)>100:frappe.throw('Renseigner l’acceptation client, la date et une clé de confirmation.')
@@ -574,6 +599,7 @@ def confirm_order(quotation, acceptance_reference, delivery_date, request_key, d
     frappe.db.get_value('Quotation',quote.name,'name',for_update=True)
     intent=dict(quotation=quotation,acceptance=acceptance_reference.strip(),date=str(frappe.utils.getdate(delivery_date)))
     if cint(direct_only):intent['direct_only']=True
+    if order_type!='A':intent['order_type']=order_type
     scope=fingerprint(intent)
     key=fingerprint(dict(user=frappe.session.user,key=request_key))
     existing=frappe.db.get_value('Sales Order',{'custom_chantier_order_key':key},['name','custom_chantier','docstatus','custom_chantier_order_scope'],as_dict=True,for_update=True)
@@ -582,6 +608,7 @@ def confirm_order(quotation, acceptance_reference, delivery_date, request_key, d
         frappe.get_doc('Sales Order',existing.name).check_permission('read');return existing.name
     from erpnext.selling.doctype.quotation.quotation import make_sales_order
     order=make_sales_order(quote.name)
+    order.custom_ug_order_type=order_type
     if cint(direct_only):
         from .chantier_work_types import is_direct
         parent=frappe.get_doc('Chantier',quote.custom_chantier)
@@ -635,6 +662,10 @@ def delete_study(name, modified):
     if doc.docstatus==1:
         frappe.throw('Annuler l’étude validée avant de la supprimer.')
     chantier=doc.chantier
+    if doc.get('sales_order'):
+        order=frappe.get_doc('Sales Order',doc.sales_order,for_update=True)
+        order.check_permission('read')
+        if order.custom_technical_study==doc.name:frappe.db.set_value('Sales Order',order.name,'custom_technical_study',None,update_modified=False)
     frappe.delete_doc(doc.doctype,doc.name)
     return chantier
 

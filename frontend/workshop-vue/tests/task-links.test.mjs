@@ -38,3 +38,10 @@ test('ToDo table and Open action use the same page while preserving ordinary tas
  const ordinary={...task('Chantier'),description:'Ordinary'};
  assert.equal(settings.get_form_link(ordinary),'/app/todo/TODO1');settings.button.action(ordinary);assert.equal(fallback,'TODO1');
 });
+test('B stock exit and Sage tasks open the source Sales Order',()=>{
+ const {context}=setup();
+ for(const stage of ['Sortie directe B','Export Sage B']){
+  const doc={...task('Sales Order'),description:`[Univers Glass — ${stage}] tâche`};
+  assert.equal(context.frappe.ug_task_links.href(doc),'/app/sales-order/DOC%201');
+ }
+});

@@ -10,11 +10,14 @@ STAGES = {
     'chantier': ('chantier_notification_role', 'Validation chantier', 'chantiers'),
     'technical': ('technical_notification_role', 'Fiche technique', 'technical-study'),
     'workshop': ('workshop_notification_role', 'Atelier', 'workshop-cockpit'),
+    'b_issue': ('workshop_notification_role', 'Sortie directe B', 'sales-order'),
+    'b_export': (None, 'Export Sage B', 'sales-order'),
 }
 
 
 def recipients(stage, doc):
-    role = frappe.db.get_single_value(SETTINGS, STAGES[stage][0])
+    field=STAGES[stage][0]
+    role = frappe.db.get_single_value(SETTINGS,field) if field else 'UG COMMANDES B'
     if not role:
         return []
     users = frappe.db.sql('''SELECT DISTINCT u.name FROM `tabUser` u
@@ -22,7 +25,7 @@ def recipients(stage, doc):
         WHERE r.role=%s AND u.enabled=1 AND u.user_type='System User'
         AND u.name!=%s''', (role, 'Guest'), pluck=True)
     return [u for u in users if frappe.has_permission(doc=doc, user=u,
-        ptype='submit' if stage == 'chantier' else 'read')]
+        ptype='submit' if stage == 'chantier' else 'write' if stage=='b_export' else 'read')]
 
 
 def send_tasks(doc, stage, event_key):
@@ -30,9 +33,11 @@ def send_tasks(doc, stage, event_key):
     frappe.db.get_value(doc.doctype, doc.name, 'name', for_update=True)
     label, route = STAGES[stage][1:]
     if stage == 'technical' and doc.doctype == 'Chantier':route = 'chantiers'
-    link = '/app/' + route + ('/' + doc.name if stage in ('technical', 'chantier', 'workshop') else '')
+    link = '/app/' + route + '/' + doc.name
     prefix = f'[Univers Glass — {label}]'
     description = f'{prefix} {escape_html(doc.name)} — <a href="{escape_html(link)}">Ouvrir {label.lower()}</a>'
+    if stage=='technical' and doc.get('sales_order'):
+        description += ' — Commande : '+escape_html(doc.sales_order)
     if stage == 'workshop':
         order_link = '/app/sales-order/' + doc.name
         description += f' — <a href="{escape_html(order_link)}">Voir la commande</a>'
@@ -82,16 +87,8 @@ def handoff_study(chantier, request_key, study=None):
 
 
 def order_created(doc, method=None):
-    if doc.get('custom_chantier'):
-        from .chantier_work_types import is_v2, is_direct
-        dossier=frappe.get_doc('Chantier',doc.custom_chantier)
-        if is_v2(dossier):
-            manufacturing={r.line_id for r in dossier.lines if not is_direct(r)}
-            if any(r.get('custom_chantier_line') in manufacturing for r in doc.get('items',[])):
-                send_tasks(doc,'workshop','order-created')
-            return
-    if any(frappe.get_cached_value('Item', r.item_code, 'custom_item_types') in ('PRIMAIRE', 'DECOUPE', 'OUVRAGE') for r in doc.get('items', [])):
-        send_tasks(doc, 'workshop', 'order-created')
+    from .order_technical import prepare
+    return prepare(doc)
 
 
 def close_tasks(doc, stage):
@@ -105,6 +102,17 @@ def close_tasks(doc, stage):
 
 def study_finished(doc, method=None):
     close_tasks(doc, 'technical')
+    if doc.get('sales_order'):
+        order=frappe.get_doc('Sales Order',doc.sales_order)
+        if doc.docstatus==1 and order.docstatus==1 and doc.lines:
+            send_tasks(order,'workshop','study-validated:'+doc.name)
+        elif doc.docstatus==2:
+            close_tasks(frappe._dict(doctype='Sales Order',name=order.name,docstatus=2),'workshop')
+        if doc.docstatus==1 and order.custom_ug_order_type=='B':
+            from .order_b_stock import refresh_tasks
+            refresh_tasks(order.name,'study:'+doc.name)
+        frappe.publish_realtime('workshop_updated',{'doctype':doc.doctype,'name':doc.name},after_commit=True)
+        return
     dossier = frappe.get_doc('Chantier', doc.chantier)
     from .chantier_work_types import is_v2
     if is_v2(dossier):
@@ -122,6 +130,9 @@ def chantier_finished(doc, method=None):
 
 def order_cancelled(doc, method=None):
     close_tasks(doc, 'workshop')
+    close_tasks(doc,'b_issue');close_tasks(doc,'b_export')
+    for name in frappe.get_all('Chantier Technical Study',filters={'sales_order':doc.name},pluck='name'):
+        close_tasks(frappe._dict(doctype='Chantier Technical Study',name=name,docstatus=2),'technical')
 
 
 
@@ -180,6 +191,7 @@ def install_workspace_tasks():
     doc = frappe.get_doc('Workspace', 'Univers Glass')
     existing_roles = {r.role for r in doc.roles}
     for field, _, _ in STAGES.values():
+        if not field:continue
         role = frappe.db.get_single_value(SETTINGS, field)
         if role and role not in existing_roles:
             doc.append('roles', dict(role=role))
@@ -211,7 +223,7 @@ def install_task_notifications():
             frappe.db.set_single_value(SETTINGS, field, role)
     grants = {
         'UG CHANTIER': ['Chantier','Chantier Section','Chantier Technical Study','Company','Customer','Item','Item Group','UOM','Sales Taxes and Charges Template'],
-        'UG FICHE TECHNIQUE': ['Chantier','Chantier Section','Chantier Technical Study','Item','Company','Item Group','UOM','Warehouse'],
+        'UG FICHE TECHNIQUE': ['Chantier','Chantier Section','Chantier Technical Study','Sales Order','Item','Company','Item Group','UOM','Warehouse'],
         'UG ATELIER': ['Sales Order','Chantier','Chantier Section','Chantier Technical Study','Item','Company','Item Group','UOM','Warehouse','Serial No','Stock Entry','Stock Entry Type','Stock Reservation Entry','Material Cutting Plan','Workshop Operation','Workshop Refabrication'],
     }
     for role, doctypes in grants.items():

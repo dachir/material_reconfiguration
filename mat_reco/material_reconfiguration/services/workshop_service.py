@@ -53,7 +53,7 @@ def _item_thickness(item_code):
 
 
 def _tree(order, row, item_code=None, path=(), ancestors=(), allow_invalid=False):
-    if item_code is None and (row.get('custom_technical_snapshot') or order.get('custom_chantier')):
+    if item_code is None and (row.get('custom_technical_snapshot') or order.get('custom_chantier') or order.get('custom_technical_study')):
         from mat_reco.material_reconfiguration.services.chantier_service import frozen_tree
         return frozen_tree(order, row)
     item_code = item_code or row.item_code
@@ -932,7 +932,7 @@ def workshop_cutting_demands(doc):
             frappe.throw('Les commandes du MCP doivent être validées et de la même société.')
         trees=[]
         from .chantier_work_types import is_v2, freeze_order
-        loose=is_v2(frappe.get_doc('Chantier',so.custom_chantier)) if so.get('custom_chantier') else False
+        loose=is_v2(frappe.get_doc('Chantier',so.custom_chantier)) if so.get('custom_chantier') else bool(so.get('custom_technical_study'))
         for row in so.items:
             if frappe.get_cached_value('Item',row.item_code,'custom_item_types') not in ('OUVRAGE','DECOUPE'):continue
             try:
@@ -992,7 +992,7 @@ def execute_action(sales_order,node_id,qty,request_key,version,dimensions=None):
         if (existing.sales_order,existing.node_id,existing.requested_qty)!=(sales_order,node_id,_qty(qty)):
             frappe.throw('Cette clé a déjà servi pour une autre opération.')
         return _json(existing.result_json)
-    if so.get('custom_chantier'):
+    if so.get('custom_chantier') or so.get('custom_technical_study'):
         from .chantier_work_types import freeze_order
         freeze_order(so,node_id=node_id)
     root,node,request=_fresh_request(sales_order,node_id,qty,lock=True,dimensions=dimensions)
