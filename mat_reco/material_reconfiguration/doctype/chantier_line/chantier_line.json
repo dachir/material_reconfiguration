@@ -124,6 +124,19 @@
    "fieldtype": "Check",
    "hidden": 1,
    "default": "0"
+  },
+  {
+   "fieldname": "price_per_sqm",
+   "label": "Au m²",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "price_per_sqm_override",
+   "label": "Tarification ajustée sur la ligne",
+   "fieldtype": "Check",
+   "default": "0",
+   "hidden": 1
   }
  ],
  "field_order": [

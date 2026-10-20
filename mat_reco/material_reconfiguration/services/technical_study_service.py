@@ -32,6 +32,7 @@ def commercial_hash(chantier, study, legacy=None):
     if chantier.get('commercial_extras'):values['extras']=chantier_extras.signature(chantier,legacy=legacy)
     from .chantier_discounts import signature
     if signature(chantier):values['discounts']=signature(chantier)
+    if any(cint(r.get('price_per_sqm')) for r in chantier.lines):values['surface_pricing']=[r.line_id for r in chantier.lines if cint(r.get('price_per_sqm'))]
     return fingerprint(values)
 
 
@@ -75,6 +76,8 @@ def validate_macro(chantier):
         ids.add(row.line_id);seen.add(row.repere)
         if flt(row.qty)<=0 or flt(row.qty)!=cint(row.qty):
             frappe.throw('Les quantités commerciales doivent être des entiers positifs.')
+        if cint(row.get('price_per_sqm')) and (row.get('line_kind')=='Vente directe' or min(flt(row.length_mm),flt(row.width_mm))<=0):
+            frappe.throw('Tarification au m² : renseigner longueur et hauteur sur une ligne d’ouvrage ou découpe.')
         if flt(row.rate)<0 or any(flt(row.get(n))<0 for n in ('length_mm','width_mm','thickness_mm')):
             frappe.throw('Les dimensions et prix ne peuvent pas être négatifs.')
         if row.section:
@@ -535,7 +538,7 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
         doc.workflow_version=2
     incoming=frappe.parse_json(lines)
     if not isinstance(incoming,list) or len(incoming)>500:frappe.throw('Saisir au maximum 500 ouvrages.')
-    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras','line_kind','sale_item','discount_percentage','discount_override')
+    allowed=MACRO_FIELDS+('rate','rate_set','price_source','work_type','excluded_type_extras','line_kind','sale_item','discount_percentage','discount_override','price_per_sqm','price_per_sqm_override')
     if work_types is not None:
         type_rows=frappe.parse_json(work_types)
         if not isinstance(type_rows,list) or len(type_rows)>200:frappe.throw('Types d’ouvrage invalides.')
@@ -543,7 +546,7 @@ def save_commercial(chantier, modified, lines, currency=None, selling_price_list
         doc.set('work_types',[])
         for row in type_rows:
             prior=existing.get(row.get('type_id'))
-            values={k:row.get(k) for k in ('type_id','designation','thickness_mm','proposed_item','common_extras')}
+            values={k:row.get(k) for k in ('type_id','designation','thickness_mm','proposed_item','common_extras','price_per_sqm')}
             if prior:values.update(name=prior.name,commercial_item=prior.commercial_item)
             doc.append('work_types',values)
     doc.set('lines',[{k:r.get(k) for k in allowed} for r in incoming])

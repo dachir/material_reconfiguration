@@ -2,12 +2,13 @@
 import math
 import frappe
 from frappe.utils import flt,cint
+from .chantier_pricing import unit_rate,set_sales_fields,matches
 
 
 def all_rows(doc):return list(doc.lines)+list(doc.get('commercial_extras',[]))
 
 
-def gross_total(doc):return sum(flt(r.qty)*flt(r.rate) for r in all_rows(doc))
+def gross_total(doc):return sum(flt(r.qty)*unit_rate(r) for r in all_rows(doc))
 
 
 def percentage(doc,row):return flt(row.get('discount_percentage')) if doc.get('discount_mode')!='Montant' else 0
@@ -31,16 +32,17 @@ def signature(doc):
 
 
 def rate_matches(doc,macro,row):
-    pct=percentage(doc,macro);expected=flt(flt(macro.rate)*(1-pct/100),row.precision('rate'))
-    return abs(flt(row.rate)-expected)<.000001 and abs(flt(row.discount_percentage)-pct)<.000001 and (not pct or abs(flt(row.price_list_rate)-flt(macro.rate))<.000001)
+    pct=percentage(doc,macro);expected=flt(unit_rate(macro)*(1-pct/100),row.precision('rate'))
+    return matches(row,macro) and abs(flt(row.rate)-expected)<.000001 and abs(flt(row.discount_percentage)-pct)<.000001 and (not pct or abs(flt(row.price_list_rate)-unit_rate(macro))<.000001)
 
 
 def apply_quote(quote,doc):
     by_id={r.line_id:r for r in all_rows(doc)}
     for row in quote.items:
         macro=by_id[row.custom_chantier_line];pct=percentage(doc,macro)
-        row.price_list_rate=macro.rate;row.discount_percentage=pct;row.discount_amount=flt(macro.rate)*pct/100
-        row.rate=flt(flt(macro.rate)*(1-pct/100),row.precision('rate'))
+        set_sales_fields(row,macro)
+        row.price_list_rate=unit_rate(macro);row.discount_percentage=pct;row.discount_amount=unit_rate(macro)*pct/100
+        row.rate=flt(unit_rate(macro)*(1-pct/100),row.precision('rate'))
     ratio=flt(doc.discount_value)/gross_total(doc)*100 if doc.get('discount_mode')=='Montant' and gross_total(doc)>0 else 0
     quote.apply_discount_on='Net Total' if ratio else ''
     quote.additional_discount_percentage=ratio;quote.discount_amount=0

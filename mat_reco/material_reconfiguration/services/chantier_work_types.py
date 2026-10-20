@@ -63,6 +63,7 @@ def validate_types(doc):
         if row.work_type not in known:
             frappe.throw('Choisir un type d’ouvrage pour chaque ouvrage.')
         selected=known[row.work_type]
+        if not cint(row.get('price_per_sqm_override')):row.price_per_sqm=cint(selected.get('price_per_sqm'))
         row.thickness_mm=selected.thickness_mm
         if not (row.designation or '').strip():row.designation=selected.designation
         row.uom=row.uom or ('PC' if frappe.db.exists('UOM','PC') else 'Nos')

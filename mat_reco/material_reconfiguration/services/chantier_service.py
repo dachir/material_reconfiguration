@@ -150,6 +150,8 @@ def validate_commercial(doc, method=None):
                 frappe.throw('Le devis d’origine doit être validé et appartenir au même chantier.')
         if loose and origin and row.get('custom_chantier_line')!=origin.get('custom_chantier_line'):
             frappe.throw('La ligne de commande doit reprendre l’identifiant du devis accepté.')
+        if origin and any(row.get(f)!=origin.get(f) for f in ('custom_ug_price_per_sqm','custom_ug_pricing_rate','custom_ug_pricing_surface')):
+            frappe.throw('La tarification de la commande doit reprendre celle du devis accepté.')
         if origin and abs(flt(row.discount_percentage)-flt(origin.discount_percentage))>.000001:
             frappe.throw('La remise de la commande doit reprendre celle du devis accepté.')
         kind = (json.loads(origin.custom_technical_snapshot).get('item_type') if origin and origin.get('custom_technical_snapshot') else frappe.get_cached_value('Item', row.item_code, 'custom_item_types'))

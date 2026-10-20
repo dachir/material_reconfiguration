@@ -44,6 +44,12 @@
    "fieldname": "common_extras",
    "label": "Services et accessoires communs",
    "fieldtype": "Long Text"
+  },
+  {
+   "fieldname": "price_per_sqm",
+   "label": "Au m² par défaut",
+   "fieldtype": "Check",
+   "default": "0"
   }
  ],
  "field_order": [
@@ -52,7 +58,8 @@
   "thickness_mm",
   "proposed_item",
   "commercial_item",
-  "common_extras"
+  "common_extras",
+  "price_per_sqm"
  ],
  "permissions": []
 }

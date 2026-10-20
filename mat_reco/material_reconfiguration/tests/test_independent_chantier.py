@@ -378,3 +378,39 @@ class IndependentChantierTests(unittest.TestCase):
         self.assertAlmostEqual(rest.discount_amount,25)
         invoices=[make_sales_invoice(o.name) for o in (direct,rest)]
         self.assertAlmostEqual(sum(i.discount_amount for i in invoices),45)
+
+    def test_surface_pricing_inherits_type_with_line_override_and_keeps_piece_qty(self):
+        from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+        self.assertFalse(self.doc.work_types[0].price_per_sqm)
+        self.doc.work_types[0].price_per_sqm=1
+        self.doc.lines[1].price_per_sqm=0;self.doc.lines[1].price_per_sqm_override=1
+        self.doc.save();self.doc.reload()
+        self.assertEqual([r.price_per_sqm for r in self.doc.lines],[1,0])
+        order=self.order();invoice=make_sales_invoice(order.name)
+        self.assertEqual([r.qty for r in order.items],[2,1]);self.assertEqual([r.rate for r in order.items],[108,50])
+        self.assertAlmostEqual(invoice.total,266)
+        self.assertEqual(invoice.items[0].custom_ug_pricing_rate,100)
+        self.assertEqual(invoice.items[0].custom_ug_price_per_sqm,1)
+        self.assertAlmostEqual(invoice.items[0].custom_ug_pricing_surface,1.08)
+        tree=_tree(order,order.items[0]);self.assertEqual((tree['length_mm'],tree['width_mm']),(1200,900))
+
+    def test_surface_pricing_works_with_line_and_global_discounts(self):
+        self.doc.lines[0].price_per_sqm=1;self.doc.lines[0].price_per_sqm_override=1
+        self.doc.discount_mode='Pourcentage';self.doc.discount_value=10;self.doc.save()
+        quote=self.quote()
+        self.assertAlmostEqual(quote.items[0].price_list_rate,108)
+        self.assertAlmostEqual(quote.items[0].rate,97.2)
+        self.assertAlmostEqual(quote.total,239.4)
+        from pathlib import Path
+        from bs4 import BeautifulSoup
+        fmt=next(p for p in json.loads(Path(frappe.get_app_path('mat_reco','fixtures','print_format.json')).read_text()) if p['name']=='Devis v2')
+        html=frappe.render_template(fmt['html'],dict(doc=quote))
+        self.assertIn('/ m²',BeautifulSoup(html,'html.parser').get_text())
+
+    def test_surface_pricing_default_applies_to_new_works_and_global_discount_base(self):
+        self.doc.work_types[0].price_per_sqm=1
+        row=self.doc.append('lines',dict(work_type=self.typeid,qty=1,rate=100,length_mm=1000,width_mm=1000,uom='PC'))
+        self.doc.discount_mode='Montant';self.doc.discount_value=33.4;self.doc.save()
+        self.assertTrue(row.price_per_sqm)
+        quote=self.quote();self.assertAlmostEqual(quote.total,334);self.assertAlmostEqual(quote.discount_amount,33.4)
+        self.assertAlmostEqual(quote.net_total,300.6)

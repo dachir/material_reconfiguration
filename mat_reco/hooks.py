@@ -319,3 +319,5 @@ after_migrate.append("mat_reco.material_reconfiguration.services.task_notificati
 after_migrate.extend(["mat_reco.material_reconfiguration.services.chantier_work_types.install_fields", "mat_reco.material_reconfiguration.services.chantier_work_types.migrate_draft_types"])
 
 after_migrate.append("mat_reco.material_reconfiguration.services.chantier_service.backfill_chantier_usage")
+
+after_migrate.append("mat_reco.material_reconfiguration.services.chantier_pricing.install_fields")
