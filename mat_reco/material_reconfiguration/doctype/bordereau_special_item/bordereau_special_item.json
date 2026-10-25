@@ -1,0 +1,165 @@
+{
+ "doctype": "DocType",
+ "name": "Bordereau Special Item",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "sales_order_item",
+   "label": "Ligne commande",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 0,
+   "print_hide": 1,
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "label": "Article",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "in_list_view": 0,
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "fieldname": "ordered_qty",
+   "label": "Commandées",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "delivered_qty",
+   "label": "Déjà livrées",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "remaining_qty",
+   "label": "Restantes avant ce BL",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "qty",
+   "label": "À livrer",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "uom",
+   "label": "Unité",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "options": "UOM",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "label": "Dépôt",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "in_list_view": 0
+  },
+  {
+   "fieldname": "serial_no",
+   "label": "Numéros de série",
+   "fieldtype": "Small Text",
+   "in_list_view": 0,
+   "description": "Un numéro de série par ligne. Utiliser uniquement les séries disponibles de cette commande."
+  },
+  {
+   "fieldname": "batch_no",
+   "label": "Lot",
+   "fieldtype": "Link",
+   "options": "Batch",
+   "in_list_view": 0
+  },
+  {
+   "fieldname": "rate",
+   "label": "Prix net HT",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "options": "currency",
+   "in_list_view": 0
+  },
+  {
+   "fieldname": "amount",
+   "label": "Montant HT",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "options": "currency",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "currency",
+   "label": "Devise",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "hidden": 1,
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "in_list_view": 0
+  },
+  {
+   "fieldname": "length_mm",
+   "label": "Longueur (mm)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "width_mm",
+   "label": "Largeur (mm)",
+   "fieldtype": "Float",
+   "read_only": 1
+  },
+  {
+   "fieldname": "thickness_mm",
+   "label": "Épaisseur (mm)",
+   "fieldtype": "Float",
+   "read_only": 1
+  }
+ ],
+ "field_order": [
+  "sales_order_item",
+  "item_code",
+  "item_name",
+  "ordered_qty",
+  "delivered_qty",
+  "remaining_qty",
+  "qty",
+  "uom",
+  "warehouse",
+  "serial_no",
+  "batch_no",
+  "rate",
+  "amount",
+  "currency",
+  "length_mm",
+  "width_mm",
+  "thickness_mm"
+ ],
+ "track_changes": 1,
+ "istable": 1
+}

@@ -1,0 +1,120 @@
+{
+ "doctype": "DocType",
+ "name": "Solde Initial Client B",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Company"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Customer",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "label": "Commande B",
+   "fieldtype": "Link",
+   "options": "Sales Order",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "account_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "label": "Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "currency",
+   "label": "Devise",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Currency",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount_section",
+   "fieldtype": "Section Break",
+   "label": "Reprise historique B"
+  },
+  {
+   "fieldname": "amount",
+   "label": "Solde initial (+ débiteur / − créditeur)",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1,
+   "options": "currency",
+   "description": "Solde historique du circuit B uniquement. Exclure les commandes, factures et règlements de type A."
+  },
+  {
+   "fieldname": "migration_reference",
+   "label": "Référence unique de reprise",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "remarks",
+   "label": "Justificatif / périmètre historique repris",
+   "fieldtype": "Small Text",
+   "reqd": 1
+  }
+ ],
+ "field_order": [
+  "company",
+  "customer",
+  "sales_order",
+  "account_column",
+  "posting_date",
+  "currency",
+  "amount_section",
+  "amount",
+  "migration_reference",
+  "remarks"
+ ],
+ "track_changes": 1,
+ "autoname": "UG-SOLDE-B-.YYYY.-.#####",
+ "is_submittable": 1,
+ "permissions": [
+  {
+   "role": "UG COMMANDES B",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  }
+ ],
+ "allow_import": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "default_print_format": "Mat Reco A4 - Solde Initial Client B"
+}

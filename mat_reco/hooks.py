@@ -359,3 +359,10 @@ for _ug_dt in ('Payment Entry','Journal Entry'):
     doc_events[_ug_dt]={_ug_event:'mat_reco.material_reconfiguration.services.order_b.validate_customer_entries' for _ug_event in ('validate','before_submit')}
 for _ug_event in ('validate','before_update_after_submit'):
     doc_events['Sales Order'][_ug_event].append('mat_reco.material_reconfiguration.services.order_b_export.validate_order')
+
+# Circuit B operational deliveries/receipts; no customer GL documents are created.
+after_migrate.append('mat_reco.material_reconfiguration.services.special_b.install')
+for _ug_special_dt in ('Bordereau Special','Reglement Special','Solde Initial Client B'):
+    permission_query_conditions[_ug_special_dt]='mat_reco.material_reconfiguration.services.special_b.query_conditions'
+    has_permission[_ug_special_dt]='mat_reco.material_reconfiguration.services.special_b.permission'
+    doctype_js[_ug_special_dt]='public/js/special_b_forms.js'

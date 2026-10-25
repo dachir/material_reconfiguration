@@ -1,0 +1,42 @@
+{
+ "doctype": "DocType",
+ "name": "Reglement Special Allocation",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "bordereau",
+   "label": "Bordereau Spécial",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "in_list_view": 1,
+   "allow_on_submit": 1,
+   "options": "Bordereau Special"
+  },
+  {
+   "fieldname": "amount",
+   "label": "Montant affecté",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1,
+   "allow_on_submit": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "currency",
+   "label": "Devise",
+   "fieldtype": "Link",
+   "options": "Currency",
+   "hidden": 1,
+   "read_only": 1,
+   "allow_on_submit": 1
+  }
+ ],
+ "field_order": [
+  "bordereau",
+  "amount",
+  "currency"
+ ],
+ "track_changes": 1,
+ "istable": 1
+}

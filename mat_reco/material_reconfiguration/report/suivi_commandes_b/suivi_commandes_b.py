@@ -29,6 +29,12 @@ def execute(filters=None):
         physical=physical_rows(order);issued=issued_quantities(order)
         row.issued_qty=sum(issued.values())
         row.to_issue_qty=sum(max(0,flt(r.stock_qty or r.qty*r.conversion_factor)-issued.get(r.name,0)) for r in physical)
+        if row.docstatus==1:
+            from mat_reco.material_reconfiguration.services.special_b import get_order_summary
+            followup=get_order_summary(row.name)
+            row.bl_count=sum(b.docstatus==1 for b in followup['deliveries'])
+            row.bl_amount=followup['delivery_amount'];row.received=followup['received'];row.order_balance=followup['balance']
+            row.bl_balance=sum(flt(b.balance) for b in followup['deliveries'] if b.docstatus==1)
         row.stage=('Annulée' if row.docstatus==2 else 'Brouillon' if row.docstatus==0 else
             'Fiche technique à préparer' if not study or study.docstatus!=1 else
             'Import Sage confirmé' if row.custom_ug_b_sage_reference else 'Exportée vers Sage' if row.custom_ug_b_export_file else
@@ -47,4 +53,7 @@ def execute(filters=None):
     columns.extend([dict(fieldname='grand_total',label='Montant commande',fieldtype='Currency',options='currency',width=140),
         dict(fieldname='custom_ug_b_sage_reference',label='Référence Sage',fieldtype='Data',width=150),
         dict(fieldname='currency',label='Devise',fieldtype='Link',options='Currency',hidden=1)])
+    columns.append(dict(fieldname='bl_count',label='BL validés',fieldtype='Int',width=100))
+    columns.extend(dict(fieldname=k,label=label,fieldtype='Currency',options='currency',width=140) for k,label in
+        [('bl_amount','Montants BL'),('received','Règlements B'),('bl_balance','Solde des BL'),('order_balance','Solde commande B')])
     return columns,result

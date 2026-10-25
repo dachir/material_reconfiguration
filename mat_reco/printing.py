@@ -21,6 +21,9 @@ TITLES = {
     'Quotation': 'Devis', 'Sales Order': 'Commande client',
     'Stock Entry': 'Mouvement de stock', 'Quality Inspection': 'Contrôle qualité',
     'Serial No': 'Fiche de traçabilité du verre',
+    'Bordereau Special': 'Bordereau Spécial B',
+    'Reglement Special': 'Reçu de Règlement Spécial B',
+    'Solde Initial Client B': 'Reprise du solde initial client B',
 }
 LAYOUT_FIELDS = {'Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button', 'Password', 'Fold'}
 INTERNAL = {'lft', 'rgt', 'old_parent', 'request_key', 'source_hash', 'technical_hash',
@@ -75,6 +78,10 @@ def printable_fields(meta, doc):
 
 def value_html(row, field):
     value = row.get(field.fieldname)
+    if field.fieldtype=='Link' and value and row.doctype in ('Bordereau Special','Bordereau Special Item','Reglement Special','Reglement Special Allocation','Solde Initial Client B'):
+        return '<a href="'+e(frappe.utils.get_url_to_form(field.options,value))+'">'+e(value)+'</a>'
+    if field.fieldtype=='Currency' and row.doctype in ('Bordereau Special','Bordereau Special Item','Reglement Special','Reglement Special Allocation','Solde Initial Client B') and row.get('currency') in ('XOF','XAF'):
+        return e(frappe.utils.fmt_money(value,precision=0,format='#,###'))
     if field.fieldname.endswith('_json'):
         return detail(structured(value))
     if field.fieldtype == 'Check':
@@ -212,7 +219,8 @@ def render_mat_reco_a4(doc):
         field = doc.meta.get_field('result_json')
         if field and not field.get('print_hide') and (not field.get('permlevel') or doc.has_permlevel_access_to(field.fieldname, field)):
             out.append('<h2>Résultat de fabrication</h2>' + detail(structured(doc.get('result_json'))))
-    out.append('<footer>Document enregistré · Dimensions indiquées en mm ; schémas sans échelle.</footer></article>')
+    footer='Document enregistré · Circuit commercial B.' if doc.doctype in ('Bordereau Special','Reglement Special','Solde Initial Client B') else 'Document enregistré · Dimensions indiquées en mm ; schémas sans échelle.'
+    out.append('<footer>'+footer+'</footer></article>')
     return ''.join(out)
 
 

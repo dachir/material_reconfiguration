@@ -1,0 +1,168 @@
+{
+ "doctype": "DocType",
+ "name": "Reglement Special",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Company"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Customer",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "label": "Commande B",
+   "fieldtype": "Link",
+   "options": "Sales Order",
+   "in_list_view": 1,
+   "description": "Facultative : laisser vide pour couvrir plusieurs commandes B. Une avance sans commande reste au niveau du client B."
+  },
+  {
+   "fieldname": "account_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "label": "Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "currency",
+   "label": "Devise",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Currency",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "mode_of_payment_section",
+   "fieldtype": "Section Break",
+   "label": "Règlement"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "label": "Mode de règlement",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "reference",
+   "label": "Référence du règlement",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "label": "Montant encaissé",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "in_list_view": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "allocations_section",
+   "fieldtype": "Section Break",
+   "label": "Affectations"
+  },
+  {
+   "fieldname": "allocations",
+   "label": "Affectations aux BL",
+   "fieldtype": "Table",
+   "allow_on_submit": 1,
+   "options": "Reglement Special Allocation"
+  },
+  {
+   "fieldname": "allocated_amount",
+   "label": "Montant affecté",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "unallocated_amount",
+   "label": "Montant non affecté",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "options": "currency",
+   "description": "Conservé au compte client B : avance éventuelle ou règlement du solde historique non détaillé en BL."
+  },
+  {
+   "fieldname": "status",
+   "label": "État",
+   "fieldtype": "Select",
+   "default": "Brouillon",
+   "read_only": 1,
+   "options": "Brouillon\nValidé\nAnnulé"
+  },
+  {
+   "fieldname": "remarks",
+   "label": "Observations",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "field_order": [
+  "company",
+  "customer",
+  "sales_order",
+  "account_column",
+  "posting_date",
+  "currency",
+  "mode_of_payment_section",
+  "mode_of_payment",
+  "reference",
+  "amount",
+  "allocations_section",
+  "allocations",
+  "allocated_amount",
+  "unallocated_amount",
+  "status",
+  "remarks"
+ ],
+ "track_changes": 1,
+ "autoname": "UG-REG-B-.YYYY.-.#####",
+ "is_submittable": 1,
+ "permissions": [
+  {
+   "role": "UG COMMANDES B",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  }
+ ],
+ "allow_import": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "default_print_format": "Mat Reco A4 - Reglement Special"
+}

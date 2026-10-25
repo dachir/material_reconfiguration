@@ -1,0 +1,186 @@
+{
+ "doctype": "DocType",
+ "name": "Bordereau Special",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Company"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Customer",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "label": "Commande B",
+   "fieldtype": "Link",
+   "options": "Sales Order",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "account_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "label": "Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "currency",
+   "label": "Devise",
+   "fieldtype": "Link",
+   "reqd": 1,
+   "options": "Currency",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "label": "Dépôt de livraison",
+   "fieldtype": "Link",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Livraison"
+  },
+  {
+   "fieldname": "items",
+   "label": "Articles",
+   "fieldtype": "Table",
+   "reqd": 1,
+   "options": "Bordereau Special Item"
+  },
+  {
+   "fieldname": "net_total",
+   "label": "Montant HT net",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "tax_amount",
+   "label": "Taxes réparties",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "grand_total",
+   "label": "Montant du BL",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "in_list_view": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "stock_entry",
+   "label": "Sortie de stock",
+   "fieldtype": "Link",
+   "read_only": 1,
+   "no_copy": 1,
+   "options": "Stock Entry"
+  },
+  {
+   "fieldname": "adopt_existing_stock",
+   "label": "Reprise d’une sortie B existante",
+   "fieldtype": "Check",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_json",
+   "label": "Dimensions de la sortie",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "options": "JSON"
+  },
+  {
+   "fieldname": "status",
+   "label": "État",
+   "fieldtype": "Select",
+   "read_only": 1,
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "options": "Brouillon\nValidé\nAnnulé"
+  },
+  {
+   "fieldname": "remarks",
+   "label": "Observations",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "billing_basis",
+   "label": "Base proportionnelle non arrondie",
+   "fieldtype": "Float",
+   "precision": "9",
+   "hidden": 1,
+   "read_only": 1
+  }
+ ],
+ "field_order": [
+  "company",
+  "customer",
+  "sales_order",
+  "account_column",
+  "posting_date",
+  "currency",
+  "warehouse",
+  "items_section",
+  "items",
+  "net_total",
+  "tax_amount",
+  "grand_total",
+  "stock_entry",
+  "adopt_existing_stock",
+  "accounting_dimensions_json",
+  "status",
+  "remarks",
+  "billing_basis"
+ ],
+ "track_changes": 1,
+ "autoname": "UG-BL-B-.YYYY.-.#####",
+ "is_submittable": 1,
+ "permissions": [
+  {
+   "role": "UG COMMANDES B",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  }
+ ],
+ "allow_import": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "default_print_format": "Mat Reco A4 - Bordereau Special"
+}

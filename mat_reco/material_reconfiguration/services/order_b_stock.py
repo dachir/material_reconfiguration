@@ -23,11 +23,11 @@ def get_order(name, write=False, lock=False):
     return order
 
 
-def issued_quantities(order, exclude=None, include_drafts=False):
+def issued_quantities(order, exclude=None, include_drafts=False, lock=False):
     rows=frappe.db.sql('''SELECT d.custom_sales_order_item, SUM(d.qty*d.conversion_factor) qty
         FROM `tabStock Entry` s JOIN `tabStock Entry Detail` d ON d.parent=s.name
         WHERE s.custom_ug_b_sales_order=%s AND s.docstatus '''+('<2' if include_drafts else '=1')+'''
-        AND s.name!=%s GROUP BY d.custom_sales_order_item''',(order.name,exclude or ''),as_dict=True)
+        AND s.name!=%s GROUP BY d.custom_sales_order_item'''+(' FOR UPDATE' if lock else ''),(order.name,exclude or ''),as_dict=True)
     return {r.custom_sales_order_item:flt(r.qty) for r in rows}
 
 
@@ -55,9 +55,11 @@ def _unreserved(row,warehouse,serials,quantity):
 
 def validate_issue(doc,method=None):
     previous=doc.get_doc_before_save()
-    if previous and any(previous.get(f)!=doc.get(f) for f in ('custom_ug_b_sales_order','custom_ug_b_request_key','custom_ug_b_request_scope')):
+    if previous and any(previous.get(f)!=doc.get(f) for f in ('custom_ug_b_sales_order','custom_ug_b_request_key','custom_ug_b_request_scope','custom_ug_special_delivery')):
         frappe.throw('La référence de sortie B ne peut pas être modifiée.')
     if not doc.get('custom_ug_b_sales_order'):return
+    from .special_b import guard_stock
+    guard_stock(doc)
     order=get_order(doc.custom_ug_b_sales_order,lock=True)
     if doc.company!=order.company or doc.stock_entry_type!='Material Issue':frappe.throw('La sortie B doit être un Material Issue de la société de la commande.')
     if order.status in ('Closed','On Hold'):frappe.throw('Cette commande B est clôturée ou suspendue.')
@@ -65,7 +67,7 @@ def validate_issue(doc,method=None):
     if not order.custom_technical_study or frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'docstatus')!=1:
         frappe.throw('Valider la fiche technique avant la sortie B.')
     expected={r.name:r for r in physical_rows(order)}
-    booked=issued_quantities(order,exclude=doc.name,include_drafts=True)
+    booked=issued_quantities(order,exclude=doc.name,include_drafts=True,lock=True)
     _,_,_,owners=_receipts([order],lock=True)
     quantities=defaultdict(float);by_stock=defaultdict(float);selected=set()
     for detail in doc.items:
@@ -99,6 +101,8 @@ def validate_issue(doc,method=None):
 
 
 def before_cancel(doc,method=None):
+    from .special_b import guard_stock
+    guard_stock(doc)
     if doc.get('custom_ug_b_sales_order'):
         order=get_order(doc.custom_ug_b_sales_order,lock=True)
         if order.get('custom_ug_b_export_file'):frappe.throw('Traiter l’export Sage avant d’annuler cette sortie B.')
@@ -133,7 +137,7 @@ def get_issue_data(sales_order):
 
 
 @frappe.whitelist(methods=['POST'])
-def create_issue(sales_order,rows,request_key,accounting_dimensions=None):
+def create_issue(sales_order,rows,request_key,accounting_dimensions=None,special_delivery=None,posting_date=None):
     frappe.has_permission('Stock Entry','create',throw=True);frappe.has_permission('Stock Entry','submit',throw=True)
     order=get_order(sales_order,lock=True)
     if not request_key or len(request_key)>100:frappe.throw('Clé de sortie requise (100 caractères maximum).')
@@ -145,7 +149,9 @@ def create_issue(sales_order,rows,request_key,accounting_dimensions=None):
     for fieldname,value in dimensions.items():
         field=frappe.get_meta('Stock Entry').get_field(fieldname)
         if value and field and field.fieldtype=='Link':frappe.get_doc(field.options,value).check_permission('read')
-    scope=hashlib.sha256(json.dumps(dict(order=order.name,rows=incoming,dimensions=dimensions),sort_keys=True,default=str).encode()).hexdigest()
+    scope_data=dict(order=order.name,rows=incoming,dimensions=dimensions)
+    if special_delivery:scope_data.update(special_delivery=special_delivery,posting_date=str(posting_date))
+    scope=hashlib.sha256(json.dumps(scope_data,sort_keys=True,default=str).encode()).hexdigest()
     key=hashlib.sha256(f'{frappe.session.user}:{request_key}'.encode()).hexdigest()
     existing=frappe.db.get_value('Stock Entry',{'custom_ug_b_request_key':key},['name','docstatus','custom_ug_b_request_scope'],as_dict=True)
     if existing:
@@ -155,6 +161,8 @@ def create_issue(sales_order,rows,request_key,accounting_dimensions=None):
     entry=frappe.get_doc(dict(doctype='Stock Entry',stock_entry_type='Material Issue',company=order.company,
         custom_ug_b_sales_order=order.name,custom_ug_b_request_key=key,custom_ug_b_request_scope=scope,
         remarks='Sortie directe circuit B — '+order.name))
+    if special_delivery:entry.custom_ug_special_delivery=special_delivery
+    if posting_date:entry.posting_date=posting_date
     for fieldname,value in dimensions.items():entry.set(fieldname,value)
     for selected in incoming:
         if not isinstance(selected,dict) or selected.get('sales_order_item') not in order_rows:frappe.throw('Ligne de commande inconnue.')
@@ -176,6 +184,7 @@ def create_issue(sales_order,rows,request_key,accounting_dimensions=None):
 def install():
     from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
     fields=[dict(fieldname='custom_ug_b_sales_order',label='Commande B',fieldtype='Link',options='Sales Order',read_only=1,no_copy=1,search_index=1),
+        dict(fieldname='custom_ug_special_delivery',label='Bordereau Spécial',fieldtype='Link',options='Bordereau Special',read_only=1,no_copy=1,search_index=1),
         dict(fieldname='custom_ug_b_request_key',label='Clé sortie B',fieldtype='Data',read_only=1,hidden=1,no_copy=1,unique=1),
         dict(fieldname='custom_ug_b_request_scope',label='Empreinte sortie B',fieldtype='Data',read_only=1,hidden=1,no_copy=1)]
     for field in fields:field['module']='Material Reconfiguration'
@@ -199,6 +208,11 @@ def refresh_tasks(sales_order,event_key):
 
 
 def stock_updated(doc,method=None):
+    if doc.docstatus==2 and doc.get('custom_ug_special_delivery'):
+        from .special_b import guard_stock
+        guard_stock(doc)
+        # Native Stock Entry.on_cancel replaces this list. Extend it afterwards.
+        doc.ignore_linked_doctypes=list(doc.get('ignore_linked_doctypes') or [])+['Bordereau Special']
     orders={doc.get('custom_ug_b_sales_order')}-{None,''}
     row_ids={r.get('custom_sales_order_item') for r in doc.items}-{None,''}
     allocations=frappe.parse_json(doc.get('custom_workshop_allocations_json') or '{}')

@@ -4,12 +4,18 @@ import math
 import uuid
 
 import frappe
-from frappe.utils import flt, cint, nowdate, add_days
+from frappe.utils import flt, cint, nowdate, add_days, get_datetime
 from mat_reco.material_reconfiguration.services.chantier_service import fingerprint, chantier_doc, section_matches, get_quotation_usage
 from mat_reco.material_reconfiguration.services import chantier_extras
 
 GLASS = ('PRIMAIRE', 'DECOUPE', 'OUVRAGE')
 MACRO_FIELDS = ('line_id','repere','designation','section','proposed_item','length_mm','width_mm','thickness_mm','qty','uom')
+
+
+def check_dossier_revision(doc, modified):
+    if not modified or get_datetime(doc.modified) != get_datetime(modified):
+        frappe.throw('Le chantier a été modifié depuis son chargement. Cliquer sur Actualiser avant de continuer.',
+                     frappe.TimestampMismatchError)
 
 
 def source_hash(chantier):
@@ -554,7 +560,9 @@ def generate_quotation(chantier, selections=None, request_key=None, submit=False
 @frappe.whitelist(methods=['POST'])
 def save_commercial(chantier, modified, lines, currency=None, selling_price_list=None, terms=None, commercial_extras=None, header=None, taxes_and_charges=None, work_types=None, upgrade_types=False):
     doc=frappe.get_doc('Chantier',chantier,for_update=True);doc.check_permission('write')
-    if doc.docstatus!=0 or str(doc.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant de l’enregistrer.')
+    if doc.docstatus!=0:
+        frappe.throw('Ce chantier est déjà validé ou annulé et ne peut plus être enregistré. Utiliser Dupliquer pour créer un nouveau brouillon.')
+    check_dossier_revision(doc,modified)
     if cint(upgrade_types) and not doc.get('workflow_version'):
         if any(frappe.db.exists(dt,{key:chantier}) for dt,key in [('Chantier Technical Study','chantier'),('Quotation','custom_chantier'),('Sales Order','custom_chantier')]):
             frappe.throw('Conserver les documents existants : utiliser un nouveau chantier pour le nouveau parcours.')
@@ -710,7 +718,7 @@ def copy_dossier(chantier, modified, action='duplicate'):
     if action not in ('duplicate','amend','cancel_and_amend'):frappe.throw('Action invalide.')
     source=frappe.get_doc('Chantier',chantier,for_update=True);source.check_permission('read')
     if not frappe.has_permission('Chantier','create'):frappe.throw('Droit de création du chantier requis.',frappe.PermissionError)
-    if str(source.modified)!=str(modified):frappe.throw('Le chantier a changé. Actualiser avant de continuer.')
+    check_dossier_revision(source,modified)
     amendment=action!='duplicate'
     if amendment:
         source.check_permission('amend')

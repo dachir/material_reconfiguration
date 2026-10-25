@@ -112,6 +112,88 @@ class OrderBStockTests(unittest.TestCase):
         self.assertEqual(frappe.db.count('Delivery Note'),before_delivery)
         self.assertFalse(stock.issued_quantities(self.order))
 
+    def test_preprinted_delivery_fits_fourteen_lines_and_keeps_last_page_signatures(self):
+        from bs4 import BeautifulSoup
+
+        doc=frappe.copy_doc(self.order)
+        row=doc.items[0].as_dict()
+        for format_name in ('Bon de livraison B','Bon Livraison v2'):
+            template=frappe.get_doc('Print Format',format_name)
+            for count,long_name in ((14,False),(33,False),(14,True)):
+                items=[]
+                for index in range(count):
+                    item=dict(row,idx=index+1)
+                    item['item_name']=('VITRE CLAIRE AVEC UNE DESIGNATION TRES LONGUE ' * 6) if long_name else 'VITRE CLAIRE'
+                    items.append(item)
+                doc.set('items',items)
+                soup=BeautifulSoup(frappe.render_template(template.html,dict(doc=doc)),'html.parser')
+                pages=soup.select('.ug-delivery-sheet')
+                self.assertEqual(len(soup.select('.ug-delivery-items tr')),count)
+                self.assertEqual(len(soup.select('.ug-signature')),2)
+                self.assertEqual(len(pages[-1].select('.ug-signature')),2)
+                self.assertTrue(all(not page.select('.ug-signature') for page in pages[:-1]))
+                if count==14 and not long_name:
+                    self.assertEqual(len(pages),1)
+                else:
+                    self.assertGreater(len(pages),1)
+
+    def test_delivery_print_groups_supplements_and_keeps_parent_on_same_page(self):
+        from bs4 import BeautifulSoup
+
+        doc=frappe.copy_doc(self.order)
+        template=frappe.get_doc('Print Format','Bon Livraison v2')
+        row=doc.items[0].as_dict()
+        fillers=[dict(row,name='filler-'+str(i),item_name='ARTICLE',custom_parent_row=None) for i in range(15)]
+        parent=dict(row,name='parent',item_name='VITRE',custom_parent_row=None)
+        service=dict(row,name='service',item_name='RABOTAGE',custom_parent_row='parent',custom_is_service_row=1)
+        accessory=dict(row,name='accessory',item_name='FIXATION',custom_parent_row='parent',custom_is_accessory_row=1)
+        doc.set('items',fillers+[service,parent,accessory])
+        soup=BeautifulSoup(frappe.render_template(template.html,dict(doc=doc)),'html.parser')
+        pages=soup.select('.ug-delivery-sheet')
+        self.assertEqual(len(pages),2)
+        self.assertEqual([r['data-row'] for r in pages[-1].select('tr')],['parent','service','accessory'])
+        self.assertEqual([r['data-parent'] for r in pages[-1].select('tr.ug-child')],['parent','parent'])
+        self.assertEqual(len(soup.select('tr')),18)
+        self.assertTrue(all('↳' in r.get_text() for r in pages[-1].select('tr.ug-child')))
+
+    def test_delivery_print_resolves_parent_using_sales_order_rows(self):
+        from bs4 import BeautifulSoup
+
+        row=self.order.items[0].as_dict()
+        doc=frappe.get_doc(dict(doctype='Delivery Note',customer_name='QA',posting_date=nowdate(),items=[
+            dict(row,name='dn-child',so_detail='so-child',against_sales_order=self.order.name,
+                 custom_parent_row=None,item_name='RABOTAGE',custom_is_service_row=1),
+            dict(row,name='dn-parent',so_detail='so-parent',against_sales_order=self.order.name,
+                 custom_parent_row=None,item_name='VITRE'),
+        ]))
+        source=[frappe._dict(name='so-child',parent=self.order.name,custom_parent_row='so-parent'),
+                frappe._dict(name='so-parent',parent=self.order.name,custom_parent_row=None)]
+        template=frappe.get_doc('Print Format','Bon Livraison v2')
+        from frappe.utils.jinja import get_jenv
+        with patch.dict(get_jenv().globals['frappe'],{'get_all':lambda *args,**kwargs:source}):
+            soup=BeautifulSoup(frappe.render_template(template.html,dict(doc=doc)),'html.parser')
+        rows=soup.select('.ug-delivery-items tr')
+        self.assertEqual([r['data-row'] for r in rows],['dn-parent','dn-child'])
+        self.assertEqual(rows[1]['data-parent'],'dn-parent')
+
+    def test_delivery_service_description_shows_per_piece_calculation_without_result(self):
+        from bs4 import BeautifulSoup
+
+        doc=frappe.copy_doc(self.order)
+        row=doc.items[0].as_dict()
+        doc.set('items',[
+            dict(row,name='parent',item_name='VITRE',qty=12,custom_parent_row=None),
+            dict(row,name='service',item_name='RABOTAGE',qty=162.84,custom_parent_row='parent',custom_is_service_row=1),
+            dict(row,name='accessory',item_name='FIXATION',qty=24,custom_parent_row='parent',custom_is_service_row=0,custom_is_accessory_row=1),
+        ])
+        template=frappe.get_doc('Print Format','Bon Livraison v2')
+        soup=BeautifulSoup(frappe.render_template(template.html,dict(doc=doc)),'html.parser')
+        service=soup.select_one('tr[data-row="service"]')
+        self.assertEqual(service.select_one('.ug-service-calculation').get_text(strip=True),'— 13,57 × 12')
+        self.assertNotIn('162.84',service.select_one('.ug-designation').get_text())
+        self.assertEqual(service.select_one('.ug-qty').get_text(strip=True),'162.84')
+        self.assertFalse(soup.select_one('tr[data-row="accessory"] .ug-service-calculation'))
+
     def test_foreign_line_is_rejected(self):
         other=self.new_order()
         selection=self.selection();selection[0]['sales_order_item']=other.items[0].name

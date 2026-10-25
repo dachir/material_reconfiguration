@@ -9,6 +9,7 @@ import math
 
 import frappe
 from frappe.utils import flt, now_datetime
+from .order_b import cockpit_read
 
 from mat_reco.material_reconfiguration.services.workshop_planner import Pool, plan, capacity, annotate, stock_key, whole
 from mat_reco.material_reconfiguration.services.order_explosion_service import get_ouvrage_components
@@ -443,6 +444,7 @@ def _validated_dimensions(value):
 
 
 @frappe.whitelist()
+@cockpit_read()
 def get_dashboard(filters=None,expanded_orders=None):
     filters = _json(filters)
     roots,errors,_ = _load(filters.get('company'))
@@ -507,6 +509,7 @@ def get_dashboard(filters=None,expanded_orders=None):
 
 
 @frappe.whitelist()
+@cockpit_read()
 def get_branch(sales_order):
     so=frappe.get_doc('Sales Order',sales_order)
     so.check_permission('read')

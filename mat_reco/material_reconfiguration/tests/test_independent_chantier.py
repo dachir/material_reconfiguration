@@ -310,6 +310,28 @@ class IndependentChantierTests(unittest.TestCase):
         with self.assertRaisesRegex(frappe.ValidationError,'Annulation interdite'):
             technical.copy_dossier(self.doc.name,str(self.doc.modified),'cancel_and_amend')
 
+    def test_submitted_copy_does_not_save_source_and_save_error_is_not_a_conflict(self):
+        self.doc.submit()
+        before=frappe.db.get_value('Chantier',self.doc.name,'modified')
+        with self.assertRaisesRegex(frappe.ValidationError,'déjà validé ou annulé'):
+            technical.save_commercial(self.doc.name,str(before),frappe.as_json(self.doc.lines))
+        duplicate=frappe.get_doc('Chantier',technical.copy_dossier(self.doc.name,str(before)))
+        self.assertEqual(duplicate.docstatus,0)
+        self.assertEqual(duplicate.designation,self.doc.designation)
+        self.assertEqual(frappe.db.get_value('Chantier',self.doc.name,'modified'),before)
+        self.assertEqual(frappe.db.get_value('Chantier',self.doc.name,'docstatus'),1)
+
+    def test_real_revision_conflicts_remain_blocked_without_creating_copies(self):
+        from frappe.utils import add_to_date
+        before=frappe.db.count('Chantier')
+        stale=str(add_to_date(self.doc.modified,seconds=-1))
+        with self.assertRaises(frappe.TimestampMismatchError):
+            technical.copy_dossier(self.doc.name,stale)
+        self.assertEqual(frappe.db.count('Chantier'),before)
+        with self.assertRaises(frappe.TimestampMismatchError):
+            technical.save_commercial(self.doc.name,stale,frappe.as_json(self.doc.lines))
+        technical.check_dossier_revision(frappe._dict(modified='2026-10-23 09:00:00.000000'),'2026-10-23T09:00:00')
+
     def test_duplicate_of_used_chantier_has_its_own_cancellation_history(self):
         self.quote();self.doc.reload();self.assertTrue(self.doc.downstream_started)
         duplicate=frappe.get_doc('Chantier',technical.copy_dossier(self.doc.name,str(self.doc.modified)))
