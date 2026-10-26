@@ -18,6 +18,16 @@ OPENING='Solde Initial Client B'
 EPS=.000001
 
 
+def sales_order_dashboard(data):
+    transactions = data.setdefault("transactions", [])
+    existing = {doctype for group in transactions for doctype in group.get("items", [])}
+    items = [doctype for doctype in (DELIVERY, PAYMENT) if doctype not in existing]
+    if items:
+        transactions.append({"label": frappe._("Circuit B"), "items": items})
+    data.setdefault("non_standard_fieldnames", {}).update({DELIVERY: "sales_order", PAYMENT: "sales_order"})
+    return data
+
+
 def permission(doc=None,user=None,ptype=None):
     if not can_access(user):return False
     return None

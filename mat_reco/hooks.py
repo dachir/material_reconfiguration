@@ -229,6 +229,9 @@ doc_events = {
 # override_doctype_dashboards = {
 # 	"Task": "mat_reco.task.get_dashboard_data"
 # }
+override_doctype_dashboards = {
+    "Sales Order": "mat_reco.material_reconfiguration.services.special_b.sales_order_dashboard"
+}
 
 # exempt linked doctypes from being automatically cancelled
 #

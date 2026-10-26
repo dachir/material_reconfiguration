@@ -1,5 +1,15 @@
 /* Circuit B actions stay on the native Sales Order form. */
 frappe.ui.form.on('Sales Order', {
+ setup(frm) {
+  if(frappe.session.user==='Administrator'||frappe.user_roles.includes('UG COMMANDES B'))return;
+  // Filter in the user's browser: dashboard metadata is cached across users on the server.
+  const dashboard=frm.meta.__dashboard;
+  if(!dashboard)return;
+  const restricted=new Set(['Bordereau Special','Reglement Special']);
+  dashboard.transactions=(dashboard.transactions||[])
+   .map(group=>({...group,items:group.items.filter(doctype=>!restricted.has(doctype))}))
+   .filter(group=>group.items.length);
+ },
  refresh(frm) {
   if(frm.doc.custom_ug_order_type!=='B'||frm.doc.docstatus!==1)return;
   for(const label of ['Delivery Note','Sales Invoice','Payment'])frm.remove_custom_button(__(label),__('Create'));
