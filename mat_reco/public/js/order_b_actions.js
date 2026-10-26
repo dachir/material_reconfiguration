@@ -7,7 +7,7 @@ frappe.ui.form.on('Sales Order', {
   frm.add_custom_button(__(frm.doc.custom_ug_b_export_file?'Télécharger export B':'Exporter pour Sage'),async()=>{
    const result=await frappe.call({method:api+'order_b_export.export_order',args:{sales_order:frm.doc.name},type:'POST'});
    await frm.reload_doc();window.open(result.message.file_url,'_blank','noopener,noreferrer');
-  });
+  },__('Rapport'));
   if(frm.doc.custom_ug_b_export_file&&!frm.doc.custom_ug_b_sage_reference)frm.add_custom_button(__('Confirmer import Sage'),()=>frappe.prompt([{fieldname:'reference',fieldtype:'Data',label:__('Référence du document dans Sage'),reqd:1}],async(v)=>{
    await frappe.call({method:api+'order_b_export.confirm_import',args:{sales_order:frm.doc.name,sage_reference:v.reference},type:'POST'});await frm.reload_doc();
   },__('Confirmer import Sage'),__('Confirmer')));
@@ -21,7 +21,7 @@ frappe.ui.form.on('Sales Order',{
   const create=async(method,args)=>{const r=await frappe.call({method:api+method,args});await frappe.model.with_doctype(r.message.doctype);const doc=frappe.model.sync(r.message)[0];frappe.set_route('Form',doc.doctype,doc.name);};
   frm.add_custom_button(__('Bordereau Spécial'),()=>create('make_delivery',{sales_order:frm.doc.name}),__('Create'));
   frm.add_custom_button(__('Règlement Spécial'),()=>create('make_payment',{sales_order:frm.doc.name}),__('Create'));
-  frm.add_custom_button(__('Situation client B'),()=>frappe.set_route('query-report','Situation des comptes clients B',{company:frm.doc.company,customer:frm.doc.customer,currency:frm.doc.currency}));
+  frm.add_custom_button(__('Situation client B'),()=>frappe.set_route('query-report','Situation des comptes clients B',{company:frm.doc.company,customer:frm.doc.customer,currency:frm.doc.currency}),__('Rapport'));
   frm.add_custom_button(__('Livraisons et règlements B'),async()=>{
    const r=await frappe.call({method:api+'get_order_summary',args:{sales_order:frm.doc.name}});const data=r.message,esc=frappe.utils.escape_html;
    const dialog=new frappe.ui.Dialog({title:__('Suivi de la commande B'),size:'extra-large',fields:[{fieldtype:'HTML',fieldname:'overview'}]});
@@ -33,7 +33,7 @@ frappe.ui.form.on('Sales Order',{
     table(['BL','Date','État','Montant','Affecté','Solde','Sortie'],data.deliveries.map(i=>[link('Bordereau Special',i.name),esc(i.posting_date),i.docstatus===1?'Validé':i.docstatus===2?'Annulé':'Brouillon',money(i.grand_total),money(i.received),money(i.balance),i.stock_entry?link('Stock Entry',i.stock_entry):'']))+
     table(['Règlement','Date','Montant commande','Montant non affecté'],data.payments.map(i=>[link('Reglement Special',i.name),esc(i.posting_date),money(i.amount),money(i.unallocated_amount)])));
    dialog.show();
-  });
+  },__('Rapport'));
  }
 });
 
