@@ -657,6 +657,7 @@ def _preview(root,node,request):
 
 
 @frappe.whitelist()
+@cockpit_read()
 def preview_action(sales_order,node_id,qty,dimensions=None):
     root,node,request = _fresh_request(sales_order,node_id,qty,dimensions=dimensions)
     result = _preview(root,node,request)
@@ -981,6 +982,7 @@ def workshop_cutting_demands(doc):
 
 
 @frappe.whitelist(methods=['POST'])
+@cockpit_read()
 def execute_action(sales_order,node_id,qty,request_key,version,dimensions=None):
     _permission('Workshop Operation','read')
     if not request_key or len(request_key)>100:

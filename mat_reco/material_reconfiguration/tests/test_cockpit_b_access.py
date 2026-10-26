@@ -3,10 +3,35 @@ import unittest
 from unittest.mock import patch
 
 import frappe
-from mat_reco.material_reconfiguration.services import order_b
+from mat_reco.material_reconfiguration.services import order_b, workshop_service
 
 
 class CockpitBAccessTests(unittest.TestCase):
+    def test_preview_scopes_order_read_and_restores_after_failure(self):
+        def fresh(*args, **kwargs):
+            self.assertTrue(order_b.can_read_cockpit('operator'))
+            self.assertIsNone(order_b.has_permission(frappe._dict(custom_ug_order_type='B'),'operator','read'))
+            raise RuntimeError('stop before planning')
+
+        with patch.object(frappe,'get_roles',return_value=[order_b.COCKPIT_ROLE]), \
+             patch.object(workshop_service,'_fresh_request',side_effect=fresh):
+            with self.assertRaisesRegex(RuntimeError,'stop before planning'):
+                workshop_service.preview_action('B-ORDER','NODE',1)
+        self.assertFalse(frappe.flags.get('ug_cockpit_b_read'))
+
+    def test_execute_keeps_native_operation_permission_and_restores_scope(self):
+        def permission(doctype, action):
+            self.assertEqual((doctype,action),('Workshop Operation','read'))
+            self.assertTrue(order_b.can_read_cockpit('operator'))
+            self.assertFalse(order_b.has_permission(frappe._dict(custom_ug_order_type='B'),'operator','write'))
+            raise frappe.PermissionError('operation denied')
+
+        with patch.object(frappe,'get_roles',return_value=[order_b.COCKPIT_ROLE]), \
+             patch.object(workshop_service,'_permission',side_effect=permission):
+            with self.assertRaises(frappe.PermissionError):
+                workshop_service.execute_action('B-ORDER','NODE',1,'key','version')
+        self.assertFalse(frappe.flags.get('ug_cockpit_b_read'))
+
     def test_scoped_read_excludes_form_and_writes(self):
         doc=frappe._dict(custom_ug_order_type='B')
         with patch.object(frappe,'get_roles',return_value=[order_b.COCKPIT_ROLE]):
