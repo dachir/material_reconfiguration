@@ -50,7 +50,7 @@ def execute(filters=None):
         dict(fieldname='currency',label='Devise',fieldtype='Link',options='Currency',width=75),
         dict(fieldname='posting_date',label='Date',fieldtype='Date',width=100),
         dict(fieldname='description',label='Opération',fieldtype='Data',width=170),
-        dict(fieldname='reference_doctype',label='Document',fieldtype='Link',options='DocType',hidden=1),
+        dict(fieldname='reference_doctype',label='Document',fieldtype='Data',hidden=1),
         dict(fieldname='reference_name',label='Référence',fieldtype='Dynamic Link',options='reference_doctype',width=200),
         dict(fieldname='sales_order',label='Commande B',fieldtype='Link',options='Sales Order',width=190)]
     columns.extend(dict(fieldname=k,label=label,fieldtype='Currency',options='currency',width=140) for k,label in [('debit','BL / Débit'),('credit','Règlements / Crédit'),('balance','Solde progressif')])
