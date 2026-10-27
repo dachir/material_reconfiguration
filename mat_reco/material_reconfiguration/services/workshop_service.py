@@ -341,6 +341,15 @@ def _inventory(nodes, company, ownership, *, lock=False):
     return Pool(free), physical
 
 
+def _has_validated_study(order, row, *, lock=False):
+    study = order.get('custom_technical_study') or _json(row.get('custom_technical_snapshot')).get('technical_study')
+    if not study and order.get('custom_chantier'):
+        study = frappe.db.get_value('Chantier', order.custom_chantier, 'technical_study')
+    if not study:
+        return False
+    return frappe.db.get_value('Chantier Technical Study', study, 'docstatus', for_update=lock) == 1
+
+
 def _load(company=None, *, lock=False):
     from .chantier_work_types import logical_section
     _permission('Sales Order')
@@ -360,6 +369,8 @@ def _load(company=None, *, lock=False):
         for row in order.items:
             kind = _json(row.get('custom_technical_snapshot')).get('item_type') if row.get('custom_technical_snapshot') else frappe.get_cached_value('Item',row.item_code,'custom_item_types')
             if kind not in ('OUVRAGE','DECOUPE'):
+                continue
+            if not _has_validated_study(order, row, lock=lock):
                 continue
             total = flt(row.qty) + extra[row.name]
             remaining = max(0,total-accepted[row.name])
