@@ -46,6 +46,9 @@ def _set_stock_uom_fields(row, item_code: str, qty: float):
 
 
 def _get_default_target_warehouse(item_code: str, company: str | None = None) -> str | None:
+    from .ug_warehouse import operational_warehouse, is_glass, COMPANY
+    if company == COMPANY and is_glass(item_code):
+        return operational_warehouse(company)
     if company:
         val = frappe.db.get_value("Item Default", {"parent": item_code, "company": company}, "default_warehouse")
         if val:

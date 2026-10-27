@@ -1,0 +1,10 @@
+﻿Date;Document;Type;Libellé;Débit XOF;Crédit XOF;Solde XOF
+2026-10-27;;;Solde initial;0;0;0.0
+2026-10-27;UG-REG-B-2026-00001;Reglement Special;Règlement reçu;0;25000.0;-25000.0
+2026-10-27;UG-BL-B-2026-00003;Bordereau Special;BL validé;30000.0;0;5000.0
+2026-10-27;UG-REG-B-2026-00002;Reglement Special;Règlement reçu;0;10000.0;-5000.0
+2026-10-27;UG-BL-B-2026-00004;Bordereau Special;BL validé;120000.0;0;115000.0
+2026-10-27;UG-BL-B-2026-00006;Bordereau Special;BL validé;130000.0;0;245000.0
+2026-10-27;UG-REG-B-2026-00003;Reglement Special;Règlement reçu;0;100000.0;145000.0
+2026-10-27;UG-REG-B-2026-00005;Reglement Special;Règlement reçu;0;145000.0;0.0
+2026-10-27;;;Solde final;0;0;0.0

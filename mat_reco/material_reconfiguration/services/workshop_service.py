@@ -10,6 +10,7 @@ import math
 import frappe
 from frappe.utils import flt, now_datetime
 from .order_b import cockpit_read
+from .ug_warehouse import operational_warehouse
 
 from mat_reco.material_reconfiguration.services.workshop_planner import Pool, plan, capacity, annotate, stock_key, whole
 from mat_reco.material_reconfiguration.services.order_explosion_service import get_ouvrage_components
@@ -868,7 +869,8 @@ def _prepare_mcp(root,node,request,operation):
             frappe.throw(f'Aucune plaque libre compatible pour {source}. Vérifiez les stocks, réservations et MCP ouverts.')
         # Keep the normal MCP warehouse semantics. Choose a single warehouse,
         # leaving the operator to adjust its sources through the usual screen.
-        warehouse=bins[0]['warehouse']
+        preferred=operational_warehouse(root['company'])
+        warehouse=preferred if any(b['warehouse']==preferred for b in bins) else bins[0]['warehouse']
         bins=[b for b in bins if b['warehouse']==warehouse]
         for serial in sorted(b['serial_no'] for b in bins):
             frappe.db.sql('SELECT name FROM `tabSerial No` WHERE name=%s FOR UPDATE',serial)

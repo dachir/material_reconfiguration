@@ -115,7 +115,9 @@ def ensure_commercial_item(doc, type_row):
         description=type_row.designation,item_group=group,stock_uom=unit,is_stock_item=1,has_serial_no=1,
         has_batch_no=0,is_sales_item=1,custom_item_types='OUVRAGE',custom_is_composite=1,
         custom_requires_dimensions=1))
-    warehouses=frappe.get_list('Warehouse',filters={'company':doc.company,'is_group':0,'disabled':0},pluck='name',limit_page_length=1)
+    from .ug_warehouse import operational_warehouse
+    preferred=operational_warehouse(doc.company)
+    warehouses=[preferred] if preferred else frappe.get_list('Warehouse',filters={'company':doc.company,'is_group':0,'disabled':0},pluck='name',limit_page_length=1)
     if warehouses:item.append('item_defaults',dict(company=doc.company,default_warehouse=warehouses[0]))
     item.insert(ignore_permissions=True)
     return item.name

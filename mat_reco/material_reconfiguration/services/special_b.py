@@ -288,14 +288,20 @@ def make_delivery(sales_order):
     order=stock.get_order(sales_order)
     frappe.has_permission(DELIVERY,'create',throw=True)
     booked=delivered(order)
+    from .ug_warehouse import operational_warehouse, is_glass
+    stores=operational_warehouse(order.company)
+    other_stock=any(not is_glass(r.item_code) and frappe.get_cached_value('Item',r.item_code,'is_stock_item') for r in order.items)
+    preferred=stores if any(is_glass(r.item_code) for r in order.items) and not other_stock else None
     doc=frappe.new_doc(DELIVERY)
     doc.update(dict(company=order.company,customer=order.customer,sales_order=order.name,currency=order.currency,
-        posting_date=nowdate(),warehouse=order.set_warehouse or next((r.warehouse for r in order.items if r.warehouse),None)))
+        posting_date=nowdate(),warehouse=preferred or order.set_warehouse or next((r.warehouse for r in order.items if r.warehouse),None)))
     for row in order.items:
         remaining=max(0,flt(row.qty)-booked[row.name])
         if remaining>EPS:doc.append('items',dict(sales_order_item=row.name,item_code=row.item_code,item_name=row.item_name,
-            ordered_qty=row.qty,delivered_qty=booked[row.name],remaining_qty=remaining,qty=remaining,uom=row.uom,warehouse=row.warehouse or doc.warehouse))
+            ordered_qty=row.qty,delivered_qty=booked[row.name],remaining_qty=remaining,qty=remaining,uom=row.uom,warehouse=(stores if is_glass(row.item_code) else None) or row.warehouse or doc.warehouse))
     if not doc.items:frappe.throw('Cette commande B est déjà entièrement livrée ou sortie du stock.')
+    from .ug_warehouse import apply_defaults
+    apply_defaults(doc)
     delivery_validate(doc)
     return doc.as_dict()
 

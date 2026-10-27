@@ -369,3 +369,12 @@ for _ug_special_dt in ('Bordereau Special','Reglement Special','Solde Initial Cl
     permission_query_conditions[_ug_special_dt]='mat_reco.material_reconfiguration.services.special_b.query_conditions'
     has_permission[_ug_special_dt]='mat_reco.material_reconfiguration.services.special_b.permission'
     doctype_js[_ug_special_dt]='public/js/special_b_forms.js'
+
+# Prefill the operational warehouse for glass without restricting manual choices.
+for _ug_warehouse_dt in ('Item', 'Quotation', 'Sales Order', 'Material Cutting Plan', 'Bordereau Special'):
+    _ug_events = doc_events.setdefault(_ug_warehouse_dt, {})
+    _ug_previous = _ug_events.get('before_validate', [])
+    if isinstance(_ug_previous, str):
+        _ug_previous = [_ug_previous]
+    _ug_events['before_validate'] = _ug_previous + ['mat_reco.material_reconfiguration.services.ug_warehouse.apply_defaults']
+after_migrate.append('mat_reco.material_reconfiguration.services.ug_warehouse.install_defaults')

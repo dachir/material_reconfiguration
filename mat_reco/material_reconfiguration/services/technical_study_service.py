@@ -13,7 +13,11 @@ MACRO_FIELDS = ('line_id','repere','designation','section','proposed_item','leng
 
 
 def check_dossier_revision(doc, modified):
-    if not modified or get_datetime(doc.modified) != get_datetime(modified):
+    try:
+        matches = bool(modified) and get_datetime(doc.modified) == get_datetime(modified)
+    except (ValueError, TypeError, OverflowError):
+        matches = False
+    if not matches:
         frappe.throw('Le chantier a été modifié depuis son chargement. Cliquer sur Actualiser avant de continuer.',
                      frappe.TimestampMismatchError)
 
@@ -341,8 +345,10 @@ def _resolve(node, company, created):
     if node['item_type']=='DECOUPE':item.custom_parent_item=children[0][0]
     if node['item_type']=='OUVRAGE':
         for child,factor in children:item.append('custom_composite_items',dict(component_item_code=child,qty_factor=factor))
-    if node.get('warehouse'):
-        warehouse=frappe.get_doc('Warehouse',node['warehouse']);warehouse.check_permission('read')
+    from .ug_warehouse import operational_warehouse
+    target_warehouse=node.get('warehouse') or (operational_warehouse(company) if node['item_type'] in ('PRIMAIRE','DECOUPE','OUVRAGE') else None)
+    if target_warehouse:
+        warehouse=frappe.get_doc('Warehouse',target_warehouse);warehouse.check_permission('read')
         if warehouse.company!=company or warehouse.is_group:frappe.throw('Entrepôt incompatible avec la société.')
         item.append('item_defaults',dict(company=company,default_warehouse=warehouse.name))
     item.insert()  # Run existing codification, stock controllers with the operator's rights.
