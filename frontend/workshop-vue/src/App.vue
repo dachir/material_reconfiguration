@@ -1,11 +1,11 @@
 <script setup>
 import {printDocument} from "./printing.js";
-import { ref, reactive, computed, onBeforeUnmount } from "vue";
+import { ref, shallowRef, reactive, computed, onBeforeUnmount } from "vue";
 import { flatten, layout, routeFor } from "./layout.js";
 import { defaultQuantity } from "./quantity.js";
 const api = "mat_reco.material_reconfiguration.services.workshop_service.";
-const mcps = ref([]);
-const roots = ref([]),
+const mcps = shallowRef([]);
+const roots = shallowRef([]),
 	errors = ref([]),
 	counters = ref({}),
 	primaryItems = ref([]),
@@ -43,6 +43,7 @@ let timer = null,
 	drag = null,
 	lastFocus = null;
 const loadedOrders = new Set();
+let hasLoaded = false, refreshing = false, rootsSnapshot = "", mcpsSnapshot = "";
 const index = computed(() => flatten(roots.value));
 const selected = computed(() => index.value.get(selectedId.value));
 const scene = computed(() => layout(roots.value, expanded.value, false, mcps.value));
@@ -90,13 +91,15 @@ function message(e) {
 		"Impossible de terminer l’opération. Consultez le message ERPNext puis actualisez."
 	);
 }
-async function refresh() {
+async function refresh({ background = false } = {}) {
+	if (background && (refreshing || drag || document.hidden)) return;
 	if (acting.value) {
 		stale.value = true;
 		return;
 	}
 	const current = ++requestId;
-	busy.value = true;
+	refreshing = true;
+	busy.value = !background || !hasLoaded;
 	error.value = "";
 	try {
 		const data = await call("get_dashboard", {
@@ -104,8 +107,12 @@ async function refresh() {
 			expanded_orders: JSON.stringify([...loadedOrders]),
 		});
 		if (current !== requestId) return;
-		roots.value = data.roots;
-		mcps.value = data.mcps || [];
+		if (background && drag) { stale.value = true; return; }
+		// Keep the graph and its layout untouched when the server data has not changed.
+		const nextRoots = JSON.stringify(data.roots);
+		const nextMcps = JSON.stringify(data.mcps || []);
+		if (nextRoots !== rootsSnapshot) { roots.value = data.roots; rootsSnapshot = nextRoots; }
+		if (nextMcps !== mcpsSnapshot) { mcps.value = data.mcps || []; mcpsSnapshot = nextMcps; }
 		errors.value = data.errors;
 		counters.value = data.counters;
 		primaryItems.value = data.primary_items;
@@ -114,15 +121,17 @@ async function refresh() {
 		dimensionFields.value = data.dimension_fields || [];
 		asOf.value = data.as_of;
 		if (selectedId.value && !index.value.has(selectedId.value)) selectedId.value = null;
-		expanded.value = new Set([...expanded.value].filter((id) => index.value.has(id)));
+		const retained = [...expanded.value].filter((id) => index.value.has(id));
+		if (retained.length !== expanded.value.size) expanded.value = new Set(retained);
 		stale.value = false;
+		hasLoaded = true;
 	} catch (e) {
 		if (current === requestId) {
 			error.value = message(e);
 			stale.value = true;
 		}
 	} finally {
-		if (current === requestId) busy.value = false;
+		if (current === requestId) { busy.value = false; refreshing = false; }
 	}
 }
 function search() {
@@ -233,7 +242,7 @@ async function execute() {
 function onUpdate() {
 	stale.value = true;
 	clearTimeout(debounce);
-	debounce = setTimeout(refresh, 500);
+	debounce = setTimeout(() => refresh({ background: true }), 500);
 }
 function openChantiers() { frappe.set_route("chantiers"); }
 function show() {
@@ -248,7 +257,7 @@ function show() {
 	active.value = true;
 	refresh();
 	frappe.realtime.on("workshop_updated", onUpdate);
-	timer = setInterval(refresh, 45000);
+	timer = setInterval(() => refresh({ background: true }), 45000);
 }
 function hide() {
 	active.value = false;
@@ -276,6 +285,7 @@ function panMove(e) {
 }
 function panEnd() {
 	drag = null;
+	if (stale.value) refresh({ background: true });
 }
 function wheel(e) {
 	if (!e.ctrlKey && !e.metaKey) return;
