@@ -161,7 +161,7 @@ class SpecialBTests(unittest.TestCase):
         self.assertEqual(doc.stock_entry,entry);self.assertEqual(b.delivered(self.order)[self.order.items[0].name],1)
         with self.assertRaises(frappe.ValidationError):b.make_from_issue(entry)
 
-    def test_fractional_partial_amounts_reconcile_with_order_including_taxes(self):
+    def test_fractional_partial_deliveries_exclude_order_taxes(self):
         tax=frappe.db.get_value('Account',{'company':self.company,'account_type':'Tax','is_group':0},'name')
         order=frappe.get_doc(dict(doctype='Sales Order',company=self.order.company,customer=self.order.customer,custom_ug_order_type='B',branch=self.branch,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=self.item.name,qty=3,rate=.333333,warehouse=self.warehouse)],
@@ -169,7 +169,15 @@ class SpecialBTests(unittest.TestCase):
         order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         deliveries=[self.delivery(1,order=order) for _ in range(3)]
         self.assertAlmostEqual(sum(d.net_total for d in deliveries),order.net_total)
-        self.assertAlmostEqual(sum(d.grand_total for d in deliveries),order.grand_total)
+        self.assertAlmostEqual(sum(d.grand_total for d in deliveries),order.net_total)
+        self.assertTrue(all(d.tax_amount == 0 for d in deliveries))
+        self.assertTrue(all(d.grand_total == d.net_total for d in deliveries))
+        for delivery in deliveries:
+            self.payment(delivery.grand_total, [(delivery, delivery.grand_total)], order=False)
+        rows=execute(dict(company=order.company,customer=order.customer,currency=order.currency,
+            sales_order=order.name,from_date=nowdate(),to_date=nowdate()))[1]
+        self.assertEqual(rows[-1]['balance'],0)
+        self.assertAlmostEqual(sum(r.get('debit',0) for r in rows),order.net_total)
 
     def test_access_foreign_currency_and_duplicate_receipt_are_rejected(self):
         first=self.delivery(1)
@@ -193,7 +201,7 @@ class SpecialBTests(unittest.TestCase):
             taxes=[dict(charge_type='On Net Total',account_head=tax,description='TVA 18',rate=18)] if tax else [])).insert()
         order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         bl=self.delivery(order=order)
-        self.assertEqual(bl.grand_total,b.money(order.grand_total,'XOF'))
+        self.assertEqual(bl.grand_total,b.money(order.net_total,'XOF'))
         self.assertEqual(bl.grand_total,int(bl.grand_total))
 
     def test_service_only_bl_and_native_excel_pdf_exports(self):

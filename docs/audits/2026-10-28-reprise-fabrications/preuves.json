@@ -1,0 +1,2304 @@
+{
+  "reservations": [
+    {
+      "name": "MAT-SRE-2026-00001",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00008",
+      "voucher_detail_no": "1g1corjohb",
+      "custom_ug_production_entry": "MAT-STE-2026-00136",
+      "item_code": "UG-COM-524A27D3E5C71140",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00002",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00008",
+      "voucher_detail_no": "1g1cdecci2",
+      "custom_ug_production_entry": "MAT-STE-2026-00135",
+      "item_code": "UG-COM-1345B78B903751FB",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00003",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00008",
+      "voucher_detail_no": "1g1cqtl2up",
+      "custom_ug_production_entry": "MAT-STE-2026-00135",
+      "item_code": "UG-COM-1345B78B903751FB",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00004",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00008",
+      "voucher_detail_no": "1g1csne06u",
+      "custom_ug_production_entry": "MAT-STE-2026-00137",
+      "item_code": "UG-COM-A6F505DF0933F95C",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00005",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00008",
+      "voucher_detail_no": "1g1c0phumt",
+      "custom_ug_production_entry": "MAT-STE-2026-00138",
+      "item_code": "UG-COM-69311D36ADC6A99F",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00006",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5m2j9bj",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00007",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5h1lhpk",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00008",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv590dh95",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00009",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv50j1mol",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00010",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5b99si7",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00011",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5gmh001",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00012",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5m9kmj3",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00013",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5hsepe3",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00014",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5bshc15",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00015",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5hrtdrc",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00016",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv55vao81",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00017",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5s7o7he",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00018",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5s7o7he",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00019",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5kjnnve",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00020",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5kjnnve",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00021",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5fntv96",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00022",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5g11pvf",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00023",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5g11pvf",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00024",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5g11pvf",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00025",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00005",
+      "voucher_detail_no": "apv5fjqtc1",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-EAC7C28E12CBFA96",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00026",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljog9p74",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00027",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljfof08u",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00028",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dlj2ri9mk",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00029",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dlj2qoauk",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00030",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljvd9u1l",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00031",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dlj0pa8ko",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00032",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dlj9ops1r",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00033",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dlj20ric4",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00034",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljmveelm",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00035",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljfp428m",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00036",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljf6j5nu",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00037",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljfrk38s",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00038",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljf1e0l2",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00039",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljb98mrv",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00040",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dlje4uob7",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00041",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljb0dp3p",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00042",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljt3ie5e",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00043",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljgel8ln",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00044",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljdtkgtc",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00045",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljrsbcd7",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00046",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljquo641",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00047",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00046",
+      "voucher_detail_no": "1dljiq07j6",
+      "custom_ug_production_entry": "MAT-STE-2026-00117",
+      "item_code": "UG-COM-505587960C03B1C6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00048",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpj1sc0g",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00049",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpi27jp6",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00050",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpr4p3cs",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00051",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlp4gccbo",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00052",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpmgbfla",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00053",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpcnhk4u",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00054",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpiqcqca",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00055",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpge3hjl",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00056",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpn60oo8",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00057",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpq8keid",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00058",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpf82gcl",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00059",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpce3m3j",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00060",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpce3m3j",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00061",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlp5ml8v6",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00062",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlp5ml8v6",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00063",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlp2od654",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00064",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpriqn5m",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00065",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpriqn5m",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00066",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpriqn5m",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00067",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00045",
+      "voucher_detail_no": "fhlpflp541",
+      "custom_ug_production_entry": "MAT-STE-2026-00121",
+      "item_code": "UG-COM-ADEC3A3EA05D8943",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00068",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00044",
+      "voucher_detail_no": "14mkhmiejk",
+      "custom_ug_production_entry": "MAT-STE-2026-00118",
+      "item_code": "UG-COM-572162ED6BCDF08E",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00069",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00044",
+      "voucher_detail_no": "14mkepavrf",
+      "custom_ug_production_entry": "MAT-STE-2026-00118",
+      "item_code": "UG-COM-572162ED6BCDF08E",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00070",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00004",
+      "voucher_detail_no": "ehhh78oie5",
+      "custom_ug_production_entry": "MAT-STE-2026-00122",
+      "item_code": "UG-COM-3EB8ABB7C2F29309",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00071",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00039",
+      "voucher_detail_no": "asfu23nja4",
+      "custom_ug_production_entry": "MAT-STE-2026-00116",
+      "item_code": "UG-COM-6A2EB3133AA59BB8",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00072",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00039",
+      "voucher_detail_no": "asfu23nja4",
+      "custom_ug_production_entry": "MAT-STE-2026-00116",
+      "item_code": "UG-COM-6A2EB3133AA59BB8",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00073",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00039",
+      "voucher_detail_no": "asfu23nja4",
+      "custom_ug_production_entry": "MAT-STE-2026-00116",
+      "item_code": "UG-COM-6A2EB3133AA59BB8",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00074",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00003",
+      "voucher_detail_no": "albpqclg8q",
+      "custom_ug_production_entry": "MAT-STE-2026-00123",
+      "item_code": "UG-COM-16AB8FBACCE58A8C",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00075",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00003",
+      "voucher_detail_no": "albpsmro05",
+      "custom_ug_production_entry": "MAT-STE-2026-00124",
+      "item_code": "UG-COM-16AB8FBACCE58A8C",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00076",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00037",
+      "voucher_detail_no": "ehb8s9fcqo",
+      "custom_ug_production_entry": "MAT-STE-2026-00112",
+      "item_code": "UG-COM-812AFFCFAC3E13FB",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00077",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00037",
+      "voucher_detail_no": "ehb8f1t08n",
+      "custom_ug_production_entry": "MAT-STE-2026-00114",
+      "item_code": "UG-COM-812AFFCFAC3E13FB",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00078",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00002",
+      "voucher_detail_no": "fbn61r9l26",
+      "custom_ug_production_entry": "MAT-STE-2026-00119",
+      "item_code": "UG-COM-8BF0BD22E9C2515F",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00079",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00002",
+      "voucher_detail_no": "fbn696352u",
+      "custom_ug_production_entry": "MAT-STE-2026-00120",
+      "item_code": "UG-COM-8BF0BD22E9C2515F",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00080",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00036",
+      "voucher_detail_no": "5aci7jhka6",
+      "custom_ug_production_entry": "MAT-STE-2026-00109",
+      "item_code": "UG-COM-8C9D9BB493558B9B",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00081",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00036",
+      "voucher_detail_no": "5aci45lrno",
+      "custom_ug_production_entry": "MAT-STE-2026-00110",
+      "item_code": "UG-COM-8C9D9BB493558B9B",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00082",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dglml9q",
+      "custom_ug_production_entry": "MAT-STE-2026-00099",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00083",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dglml9q",
+      "custom_ug_production_entry": "MAT-STE-2026-00099",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00084",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dglml9q",
+      "custom_ug_production_entry": "MAT-STE-2026-00099",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00085",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dahqdev",
+      "custom_ug_production_entry": "MAT-STE-2026-00101",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00086",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dahqdev",
+      "custom_ug_production_entry": "MAT-STE-2026-00101",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00087",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dahqdev",
+      "custom_ug_production_entry": "MAT-STE-2026-00101",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00088",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dv8lmkc",
+      "custom_ug_production_entry": "MAT-STE-2026-00103",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00089",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dv8lmkc",
+      "custom_ug_production_entry": "MAT-STE-2026-00103",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00090",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dv8lmkc",
+      "custom_ug_production_entry": "MAT-STE-2026-00103",
+      "item_code": "UG-COM-55D81B041C603BC9",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00091",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dkb8v9j",
+      "custom_ug_production_entry": "MAT-STE-2026-00104",
+      "item_code": "UG-COM-D398427AE5247524",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00092",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dkb8v9j",
+      "custom_ug_production_entry": "MAT-STE-2026-00104",
+      "item_code": "UG-COM-D398427AE5247524",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00093",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dkb8v9j",
+      "custom_ug_production_entry": "MAT-STE-2026-00104",
+      "item_code": "UG-COM-D398427AE5247524",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00094",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dg6f8i0",
+      "custom_ug_production_entry": "MAT-STE-2026-00105",
+      "item_code": "UG-COM-D398427AE5247524",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00095",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00035",
+      "voucher_detail_no": "139dg6f8i0",
+      "custom_ug_production_entry": "MAT-STE-2026-00105",
+      "item_code": "UG-COM-D398427AE5247524",
+      "warehouse": "Dépôt Usine Dépôt Autre - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00096",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00001",
+      "voucher_detail_no": "cv8pcn14c0",
+      "custom_ug_production_entry": "MAT-STE-2026-00108",
+      "item_code": "UG-COM-BA61F0680065EC10",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00097",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-B-2026-00001",
+      "voucher_detail_no": "cv8pcn14c0",
+      "custom_ug_production_entry": "MAT-STE-2026-00108",
+      "item_code": "UG-COM-BA61F0680065EC10",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00098",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00034",
+      "voucher_detail_no": "bfnhah1iqb",
+      "custom_ug_production_entry": "MAT-STE-2026-00125",
+      "item_code": "UG-COM-1E3C526E49EDCB6A",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00099",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00034",
+      "voucher_detail_no": "bfnhah1iqb",
+      "custom_ug_production_entry": "MAT-STE-2026-00125",
+      "item_code": "UG-COM-1E3C526E49EDCB6A",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00100",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00033",
+      "voucher_detail_no": "6oo3l6osgf",
+      "custom_ug_production_entry": "MAT-STE-2026-00088",
+      "item_code": "DVT24MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00101",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00033",
+      "voucher_detail_no": "6oo3ss43nq",
+      "custom_ug_production_entry": "MAT-STE-2026-00090",
+      "item_code": "DVT24MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00102",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00033",
+      "voucher_detail_no": "6oo3qllvrn",
+      "custom_ug_production_entry": "MAT-STE-2026-00091",
+      "item_code": "DVT24MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00103",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00033",
+      "voucher_detail_no": "6oo344ut7a",
+      "custom_ug_production_entry": "MAT-STE-2026-00093",
+      "item_code": "DVT24MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00104",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00033",
+      "voucher_detail_no": "6oo39bur23",
+      "custom_ug_production_entry": "MAT-STE-2026-00095",
+      "item_code": "DVT24MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00105",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00032",
+      "voucher_detail_no": "ch2acm9t5l",
+      "custom_ug_production_entry": "MAT-STE-2026-00084",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00106",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00032",
+      "voucher_detail_no": "ch2acm9t5l",
+      "custom_ug_production_entry": "MAT-STE-2026-00084",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00107",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00032",
+      "voucher_detail_no": "ch2acm9t5l",
+      "custom_ug_production_entry": "MAT-STE-2026-00084",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00108",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00032",
+      "voucher_detail_no": "ch2acm9t5l",
+      "custom_ug_production_entry": "MAT-STE-2026-00084",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00109",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00032",
+      "voucher_detail_no": "ch2acm9t5l",
+      "custom_ug_production_entry": "MAT-STE-2026-00084",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00110",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00031",
+      "voucher_detail_no": "0dum10llm6",
+      "custom_ug_production_entry": "MAT-STE-2026-00082",
+      "item_code": "DVVC6-10-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00111",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00031",
+      "voucher_detail_no": "0dum10llm6",
+      "custom_ug_production_entry": "MAT-STE-2026-00082",
+      "item_code": "DVVC6-10-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00112",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00030",
+      "voucher_detail_no": "7t0m7p6g94",
+      "custom_ug_production_entry": "MAT-STE-2026-00080",
+      "item_code": "TVB20",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00113",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00030",
+      "voucher_detail_no": "7t0m7p6g94",
+      "custom_ug_production_entry": "MAT-STE-2026-00080",
+      "item_code": "TVB20",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00114",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00030",
+      "voucher_detail_no": "7t0m7p6g94",
+      "custom_ug_production_entry": "MAT-STE-2026-00080",
+      "item_code": "TVB20",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00115",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00030",
+      "voucher_detail_no": "7t0m7p6g94",
+      "custom_ug_production_entry": "MAT-STE-2026-00080",
+      "item_code": "TVB20",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00116",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00030",
+      "voucher_detail_no": "7t0m7p6g94",
+      "custom_ug_production_entry": "MAT-STE-2026-00080",
+      "item_code": "TVB20",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00117",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00023",
+      "voucher_detail_no": "ctr0cdneiq",
+      "custom_ug_production_entry": "MAT-STE-2026-00065",
+      "item_code": "DPV10MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00118",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00023",
+      "voucher_detail_no": "ctr0q0nsjv",
+      "custom_ug_production_entry": "MAT-STE-2026-00065",
+      "item_code": "DPV10MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00119",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00023",
+      "voucher_detail_no": "ctr0ovqb0q",
+      "custom_ug_production_entry": "MAT-STE-2026-00065",
+      "item_code": "DPV10MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00120",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00023",
+      "voucher_detail_no": "ctr0bq8qah",
+      "custom_ug_production_entry": "MAT-STE-2026-00065",
+      "item_code": "DPV10MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00121",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00023",
+      "voucher_detail_no": "ctr0bq8qah",
+      "custom_ug_production_entry": "MAT-STE-2026-00065",
+      "item_code": "DPV10MM",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00122",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00123",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00124",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00125",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00126",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00127",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00128",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00129",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00130",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00131",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00022",
+      "voucher_detail_no": "f3o5e54lne",
+      "custom_ug_production_entry": "MAT-STE-2026-00064",
+      "item_code": "DVBC6-12-6",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00132",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00021",
+      "voucher_detail_no": "dug5mb20f3",
+      "custom_ug_production_entry": "MAT-STE-2026-00059",
+      "item_code": "DBVC24",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00133",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00021",
+      "voucher_detail_no": "dug5mb20f3",
+      "custom_ug_production_entry": "MAT-STE-2026-00059",
+      "item_code": "DBVC24",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00134",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00021",
+      "voucher_detail_no": "dug5mb20f3",
+      "custom_ug_production_entry": "MAT-STE-2026-00059",
+      "item_code": "DBVC24",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00135",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00020",
+      "voucher_detail_no": "d9ipvkpcl4",
+      "custom_ug_production_entry": "MAT-STE-2026-00061",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00136",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00020",
+      "voucher_detail_no": "d9ipvkpcl4",
+      "custom_ug_production_entry": "MAT-STE-2026-00061",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00137",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00020",
+      "voucher_detail_no": "d9ipvkpcl4",
+      "custom_ug_production_entry": "MAT-STE-2026-00061",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00138",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00020",
+      "voucher_detail_no": "d9ipvkpcl4",
+      "custom_ug_production_entry": "MAT-STE-2026-00061",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00139",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00020",
+      "voucher_detail_no": "d9ipvkpcl4",
+      "custom_ug_production_entry": "MAT-STE-2026-00061",
+      "item_code": "DVTEST",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    },
+    {
+      "name": "MAT-SRE-2026-00140",
+      "docstatus": 1,
+      "voucher_no": "SAL-ORD-2026-00019",
+      "voucher_detail_no": "9v3qqc1eb6",
+      "custom_ug_production_entry": "MAT-STE-2026-00058",
+      "item_code": "DBVC024",
+      "warehouse": "Stores - UG",
+      "reserved_qty": 1.0,
+      "delivered_qty": 0.0
+    }
+  ],
+  "series": [
+    {
+      "parent": "MAT-SRE-2026-00001",
+      "serial_no": "WREP-0e42400c38476baf94-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00002",
+      "serial_no": "WC-604cfa7d8dd6482d7eec4e6ea7ea",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00003",
+      "serial_no": "WC-6cff01584d9981edfe61ae5454b7",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00004",
+      "serial_no": "WREP-bcb0adf90ddd5d92cd-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00005",
+      "serial_no": "WREP-94812809d171fca181-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00006",
+      "serial_no": "WC-897b80c6cbf9b780ac48c771151b",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00007",
+      "serial_no": "WC-938c7553249e61ed989e6f4c86b2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00008",
+      "serial_no": "WC-4a78ee737a2b2bebc984673ede52",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00009",
+      "serial_no": "WC-6ef8e5de71117c54bfc6b9b23ebd",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00010",
+      "serial_no": "WC-65502994e954fa459bbe3c3ccdaf",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00011",
+      "serial_no": "WC-7d6bf34d3936d031ea0576010622",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00012",
+      "serial_no": "WC-bac08d6c576e8ccb17931c715c26",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00013",
+      "serial_no": "WC-2f9a994bcda8a08a2724d6a83bb5",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00014",
+      "serial_no": "WC-d499d3d44e4bcc8aa89452bfc866",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00015",
+      "serial_no": "WC-b5f17192feab01ebbad7e50f8d42",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00016",
+      "serial_no": "WC-712fab3412516caba62614649fcc",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00017",
+      "serial_no": "WC-23ef2e8a44bd9d4bae3c616922f7",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00018",
+      "serial_no": "WC-c35351f6e26e679cd159aa78c1ca",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00019",
+      "serial_no": "WC-1563e5d62680f7e31ad64121ee04",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00020",
+      "serial_no": "WC-96abf52b2f70e217487b48dc6e2e",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00021",
+      "serial_no": "WC-24e453cc270ac736d6dd91c9606e",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00022",
+      "serial_no": "WC-0898dcfdd3fb5d1808243b9d8449",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00023",
+      "serial_no": "WC-5154b2fb4c819a28e05f426af946",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00024",
+      "serial_no": "WC-6e7a880da7417cc76f09ff14109a",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00025",
+      "serial_no": "WC-ed7949d2153834e4baeff4124806",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00026",
+      "serial_no": "WC-a8cfcaf9ed57097ff525e63a5e2c",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00027",
+      "serial_no": "WC-92018d2524545958331d2698d59d",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00028",
+      "serial_no": "WC-80e98f1daf2bfc607ce8a07d31f4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00029",
+      "serial_no": "WC-f8daa1095050eff4935d5f45bc14",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00030",
+      "serial_no": "WC-0eae6c1db61752f5d972a9f490cf",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00031",
+      "serial_no": "WC-02a37ac9cf362ce81f47c8d9b937",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00032",
+      "serial_no": "WC-54346a2c2601e8736af14a6e8d4f",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00033",
+      "serial_no": "WC-d14195ba3b92f6d77fd13ffe0ee4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00034",
+      "serial_no": "WC-6f71bdbcf5a83e7234bbd3641848",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00035",
+      "serial_no": "WC-e43a0057572c2038c64aeee09e70",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00036",
+      "serial_no": "WC-b7a316b4abfc10db3c76588079de",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00037",
+      "serial_no": "WC-2480ef879d190441f4c9fad7ac31",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00038",
+      "serial_no": "WC-3de01566006e681f34234f5b9b01",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00039",
+      "serial_no": "WC-bf36156a404931ec39b3cbca284f",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00040",
+      "serial_no": "WC-6fee8e8cee9190f862fb5099ad83",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00041",
+      "serial_no": "WC-762f691777cfd2ff0f0c6951a865",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00042",
+      "serial_no": "WC-868a146a16a1105cbd2d81206b31",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00043",
+      "serial_no": "WC-fe7ca0703c8fcbf98fc273fe2f37",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00044",
+      "serial_no": "WC-3b984eabe9d5609c7082c37cec9a",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00045",
+      "serial_no": "WC-c12b1024160907cb69a1319f95ee",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00046",
+      "serial_no": "WC-95c916011da665becab270a207ef",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00047",
+      "serial_no": "WC-e7a8552de3b0fcd055676aef9348",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00048",
+      "serial_no": "WC-2f1c3a6cb653b7d227ed65b68ead",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00049",
+      "serial_no": "WC-54d37fca038245e4253da26a9d0d",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00050",
+      "serial_no": "WC-02f257c753d49142927ae9886bf5",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00051",
+      "serial_no": "WC-28db026a247466074b525152a93d",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00052",
+      "serial_no": "WC-ab5fa00190b611000fa570e0103c",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00053",
+      "serial_no": "WC-481af928b988a2d555b24256f32e",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00054",
+      "serial_no": "WC-84c1f1a4aaa4b25d441eb40d272f",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00055",
+      "serial_no": "WC-737eadf2d891d4c67bd97a7842eb",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00056",
+      "serial_no": "WC-da2e044d7fa95707791fb0561495",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00057",
+      "serial_no": "WC-bc3e08440bc5364e5e21e21fa9ae",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00058",
+      "serial_no": "WC-5672e09a29128f9615377f55c64f",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00059",
+      "serial_no": "WC-0683991465d276d117e90cb50038",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00060",
+      "serial_no": "WC-f1a153f67240cffd03eb68d2ee59",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00061",
+      "serial_no": "WC-56516a289cb2426b520a7aefb3f4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00062",
+      "serial_no": "WC-f83eaac161636c0815e1df94e722",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00063",
+      "serial_no": "WC-a7458a7b004e7ab17ec4851fa13e",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00064",
+      "serial_no": "WC-39eb82f65d2fbc7c0b62b7c2e914",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00065",
+      "serial_no": "WC-7752343b5bb8055b419b7ce68475",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00066",
+      "serial_no": "WC-861aaea2bf4d33bd5837835805ea",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00067",
+      "serial_no": "WC-f8ec84bdf3d695b698f8a2a2452c",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00068",
+      "serial_no": "WC-3494a90f66d9f1540e2b3b2a85e9",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00069",
+      "serial_no": "WC-a1ad2a5738967e84a350c2f50c8c",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00070",
+      "serial_no": "WC-f614d35f6130a79baa362201b9f7",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00071",
+      "serial_no": "WREP-5fe923866bb499ddc7-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00072",
+      "serial_no": "WREP-5fe923866bb499ddc7-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00073",
+      "serial_no": "WREP-5fe923866bb499ddc7-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00074",
+      "serial_no": "WREP-74a6589364ed14678e-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00075",
+      "serial_no": "WREP-46ae7dcec18ef35405-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00076",
+      "serial_no": "WREP-77815b9779457764da-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00077",
+      "serial_no": "WREP-30a01cd0b1c73dc88f-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00078",
+      "serial_no": "WREP-86ac187749bef6110f-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00079",
+      "serial_no": "WREP-7692c78c56af91bd44-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00080",
+      "serial_no": "WREP-8f88db58e45b0cbebd-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00081",
+      "serial_no": "WREP-a442b769a617048d56-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00082",
+      "serial_no": "WREP-b1e7c4ac90db4e72c7-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00083",
+      "serial_no": "WREP-b1e7c4ac90db4e72c7-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00084",
+      "serial_no": "WREP-b1e7c4ac90db4e72c7-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00085",
+      "serial_no": "WREP-32823968ec25e3f97c-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00086",
+      "serial_no": "WREP-32823968ec25e3f97c-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00087",
+      "serial_no": "WREP-32823968ec25e3f97c-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00088",
+      "serial_no": "WREP-f0f561a0d461c8eb28-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00089",
+      "serial_no": "WREP-f0f561a0d461c8eb28-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00090",
+      "serial_no": "WREP-f0f561a0d461c8eb28-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00091",
+      "serial_no": "WREP-1edf726d6f66298893-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00092",
+      "serial_no": "WREP-1edf726d6f66298893-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00093",
+      "serial_no": "WREP-1edf726d6f66298893-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00094",
+      "serial_no": "WREP-75fdacd77634ad6ad9-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00095",
+      "serial_no": "WREP-75fdacd77634ad6ad9-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00096",
+      "serial_no": "WC-9a73f5f9e3cda86cc4d22f199ea4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00097",
+      "serial_no": "WC-be09e3447218122ce112147f43cc",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00098",
+      "serial_no": "WC-1166eb2a7bda127ba4ece4823848",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00099",
+      "serial_no": "WC-7b6c3a7c9bf5241655dc86a7ae58",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00100",
+      "serial_no": "WREP-33b1a8f51ca3007db5-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00101",
+      "serial_no": "WREP-bbdef8e8de4838bc29-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00102",
+      "serial_no": "WREP-5e5ad3a66962ace2ee-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00103",
+      "serial_no": "WREP-05095d3f1861ec6af9-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00104",
+      "serial_no": "WREP-5c4b1dbfcd7162acbf-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00105",
+      "serial_no": "WREP-120d0c940c98b93114-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00106",
+      "serial_no": "WREP-120d0c940c98b93114-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00107",
+      "serial_no": "WREP-120d0c940c98b93114-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00108",
+      "serial_no": "WREP-120d0c940c98b93114-4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00109",
+      "serial_no": "WREP-120d0c940c98b93114-5",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00110",
+      "serial_no": "WREP-06c29f83b73b686b21-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00111",
+      "serial_no": "WREP-06c29f83b73b686b21-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00112",
+      "serial_no": "WREP-c92ea558a92d675c71-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00113",
+      "serial_no": "WREP-c92ea558a92d675c71-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00114",
+      "serial_no": "WREP-c92ea558a92d675c71-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00115",
+      "serial_no": "WREP-c92ea558a92d675c71-4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00116",
+      "serial_no": "WREP-c92ea558a92d675c71-5",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00117",
+      "serial_no": "WC-c70a89e1b86fa5c39d8c2ea10f0f",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00118",
+      "serial_no": "WC-00e8dc8f31888e3b0e0768e7b96e",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00119",
+      "serial_no": "WC-1179152a0059bcee5411c34d80c1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00120",
+      "serial_no": "WC-6c6d57de3001d57d058beedcd672",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00121",
+      "serial_no": "WC-d837516f57baffb05523f9337a4b",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00122",
+      "serial_no": "WREP-f1abece00b263367b0-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00123",
+      "serial_no": "WREP-f1abece00b263367b0-10",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00124",
+      "serial_no": "WREP-f1abece00b263367b0-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00125",
+      "serial_no": "WREP-f1abece00b263367b0-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00126",
+      "serial_no": "WREP-f1abece00b263367b0-4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00127",
+      "serial_no": "WREP-f1abece00b263367b0-5",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00128",
+      "serial_no": "WREP-f1abece00b263367b0-6",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00129",
+      "serial_no": "WREP-f1abece00b263367b0-7",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00130",
+      "serial_no": "WREP-f1abece00b263367b0-8",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00131",
+      "serial_no": "WREP-f1abece00b263367b0-9",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00132",
+      "serial_no": "WREP-633c6feddeeadeefa1-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00133",
+      "serial_no": "WREP-633c6feddeeadeefa1-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00134",
+      "serial_no": "WREP-633c6feddeeadeefa1-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00135",
+      "serial_no": "WREP-64fa7cbd4716190428-1",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00136",
+      "serial_no": "WREP-64fa7cbd4716190428-2",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00137",
+      "serial_no": "WREP-64fa7cbd4716190428-3",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00138",
+      "serial_no": "WREP-64fa7cbd4716190428-4",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00139",
+      "serial_no": "WREP-64fa7cbd4716190428-5",
+      "qty": 1.0
+    },
+    {
+      "parent": "MAT-SRE-2026-00140",
+      "serial_no": "WREP-d40180120d72796cd1-1",
+      "qty": 1.0
+    }
+  ],
+  "validation_sans_commit": [
+    {
+      "bordereau": "UG-BL-B-2026-00001",
+      "sales_order": "SAL-ORD-B-2026-00005",
+      "quantity": 17.0,
+      "series": 17,
+      "result": {
+        "bordereau": "UG-BL-B-2026-00001",
+        "committed": false,
+        "success": true,
+        "simulated_stock_entry": "MAT-STE-2026-00139",
+        "quantity": 17.0
+      },
+      "bordereau_unchanged": true,
+      "series_unchanged": true,
+      "reservations_unchanged": 140,
+      "stock_issue_persisted": false
+    },
+    {
+      "bordereau": "UG-BL-B-2026-00007",
+      "sales_order": "SAL-ORD-B-2026-00008",
+      "quantity": 5.0,
+      "series": 5,
+      "result": {
+        "bordereau": "UG-BL-B-2026-00007",
+        "committed": false,
+        "success": true,
+        "simulated_stock_entry": "MAT-STE-2026-00139",
+        "quantity": 5.0
+      },
+      "bordereau_unchanged": true,
+      "series_unchanged": true,
+      "reservations_unchanged": 140,
+      "stock_issue_persisted": false
+    },
+    {
+      "bordereau": "UG-BL-B-2026-00008",
+      "sales_order": "SAL-ORD-B-2026-00009",
+      "quantity": 2.0,
+      "series": 0,
+      "result": {
+        "bordereau": "UG-BL-B-2026-00008",
+        "committed": false,
+        "success": false,
+        "error": "Valider la fiche technique avant la sortie B."
+      },
+      "bordereau_unchanged": true,
+      "series_unchanged": true,
+      "reservations_unchanged": 140,
+      "stock_issue_persisted": false
+    }
+  ],
+  "idempotence": {
+    "dry_run": true,
+    "reservations": [],
+    "bordereaux": [],
+    "posted_stock_modified": false
+  }
+}

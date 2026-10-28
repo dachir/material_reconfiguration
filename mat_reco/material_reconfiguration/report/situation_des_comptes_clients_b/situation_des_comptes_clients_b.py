@@ -19,7 +19,7 @@ def execute(filters=None):
             doc=frappe.get_doc(dt,name)
             if dt==b.PAYMENT:amount=b.payment_share(doc,f.sales_order)
             elif f.sales_order and doc.sales_order!=f.sales_order:continue
-            else:amount=flt(doc.amount if dt==b.OPENING else doc.grand_total)
+            else:amount=flt(doc.amount if dt==b.OPENING else doc.net_total)
             if not amount and dt!=b.DELIVERY:continue
             key=(doc.company,doc.customer,doc.currency)
             groups[key].append(dict(posting_date=doc.posting_date,reference_doctype=dt,reference_name=doc.name,
@@ -53,5 +53,5 @@ def execute(filters=None):
         dict(fieldname='reference_doctype',label='Document',fieldtype='Data',hidden=1),
         dict(fieldname='reference_name',label='Référence',fieldtype='Dynamic Link',options='reference_doctype',width=200),
         dict(fieldname='sales_order',label='Commande B',fieldtype='Link',options='Sales Order',width=190)]
-    columns.extend(dict(fieldname=k,label=label,fieldtype='Currency',options='currency',width=140) for k,label in [('debit','BL / Débit'),('credit','Règlements / Crédit'),('balance','Solde progressif')])
+    columns.extend(dict(fieldname=k,label=label,fieldtype='Currency',options='currency',width=140) for k,label in [('debit','BL HT / Débit'),('credit','Règlements / Crédit'),('balance','Solde progressif HT')])
     return columns,data

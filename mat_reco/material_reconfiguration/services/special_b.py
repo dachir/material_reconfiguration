@@ -155,15 +155,13 @@ def delivery_validate(doc):
                 frappe.throw('Reprendre séparément les sorties comportant plusieurs dépôts ou lots pour une même ligne.')
             row.warehouse=originals[0].s_warehouse;row.batch_no=originals[0].batch_no
             row.serial_no='\n'.join(serial for r in originals for serial in stock._serials(r))
-    previous=frappe.db.sql('''SELECT COALESCE(SUM(billing_basis),0),COALESCE(SUM(grand_total),0)
-        FROM `tabBordereau Special` WHERE sales_order=%s AND docstatus=1 AND name!=%s FOR UPDATE''',(order.name,doc.name or ''))[0]
+    # B deliveries settle the commercial net amount only; order taxes are excluded.
+    # Row amounts already distribute currency rounding across partial deliveries.
     doc.net_total=money(net,doc.currency)
     doc.billing_basis=basis
-    if not flt(order.net_total) and flt(order.grand_total):frappe.throw('Commande sans base HT : répartition des montants impossible.')
-    ratio=flt(order.grand_total)/flt(order.net_total) if order.net_total else 0
-    doc.grand_total=money((flt(previous[0])+basis)*ratio,doc.currency)-flt(previous[1])
-    if doc.net_total<0 or doc.grand_total<0:frappe.throw('Un bordereau de livraison B ne peut pas avoir un montant négatif.')
-    doc.tax_amount=money(doc.grand_total-doc.net_total,doc.currency)
+    doc.grand_total=doc.net_total
+    if doc.net_total<0:frappe.throw('Un bordereau de livraison B ne peut pas avoir un montant négatif.')
+    doc.tax_amount=0
     doc.status='Validé' if doc.docstatus==1 else 'Brouillon'
     from .production_reservations import fill_delivery
     fill_delivery(doc)
@@ -237,7 +235,7 @@ def payment_validate(doc):
         if doc.sales_order and bl.sales_order!=doc.sales_order:frappe.throw('Le BL ne correspond pas à la commande du règlement.')
         row.amount=money(number(row.amount,positive=True),doc.currency)
         row.currency=doc.currency
-        if row.amount<=0 or row.amount+allocated(bl.name,doc.name,lock=True)>flt(bl.grand_total)+EPS:frappe.throw('L’affectation dépasse le solde du BL.')
+        if row.amount<=0 or row.amount+allocated(bl.name,doc.name,lock=True)>flt(bl.net_total)+EPS:frappe.throw('L’affectation dépasse le solde du BL.')
         total+=row.amount
     if total>doc.amount+EPS:frappe.throw('Les affectations dépassent le montant encaissé.')
     doc.allocated_amount=money(total,doc.currency);doc.unallocated_amount=money(doc.amount-total,doc.currency)
@@ -315,7 +313,7 @@ def make_payment(sales_order=None,bordereau=None):
         bl=frappe.get_doc(DELIVERY,bordereau);bl.check_permission('read')
         if bl.docstatus!=1:frappe.throw('Valider le BL avant de l’affecter.')
         doc=frappe.new_doc(PAYMENT);doc.update({k:bl.get(k) for k in ('company','customer','currency','sales_order')})
-        balance=max(0,flt(bl.grand_total)-allocated(bl.name));doc.amount=balance
+        balance=max(0,flt(bl.net_total)-allocated(bl.name));doc.amount=balance
         doc.append('allocations',dict(bordereau=bl.name,amount=balance));return doc.as_dict()
     order=stock.get_order(sales_order)
     doc=frappe.new_doc(PAYMENT)
@@ -348,10 +346,11 @@ def payment_share(payment,sales_order=None):
 @frappe.whitelist()
 def get_order_summary(sales_order):
     order=stock.get_order(sales_order)
-    deliveries=frappe.get_list(DELIVERY,filters={'sales_order':order.name},fields=['name','posting_date','docstatus','grand_total','stock_entry'],order_by='posting_date,name',limit_page_length=0)
+    deliveries=frappe.get_list(DELIVERY,filters={'sales_order':order.name},fields=['name','posting_date','docstatus','net_total','grand_total','stock_entry'],order_by='posting_date,name',limit_page_length=0)
     for bl in deliveries:
+        bl.grand_total=bl.net_total
         bl.received=allocated(bl.name) if bl.docstatus==1 else 0
-        bl.balance=flt(bl.grand_total)-bl.received if bl.docstatus==1 else 0
+        bl.balance=flt(bl.net_total)-bl.received if bl.docstatus==1 else 0
     payments=[]
     for record in frappe.get_list(PAYMENT,filters=dict(company=order.company,customer=order.customer,currency=order.currency,docstatus=1),pluck='name',limit_page_length=0):
         p=frappe.get_doc(PAYMENT,record);share=payment_share(p,order.name)

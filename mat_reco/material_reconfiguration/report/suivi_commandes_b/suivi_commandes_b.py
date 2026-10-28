@@ -14,7 +14,7 @@ def execute(filters=None):
     elif filters.from_date:conditions['transaction_date']=['>=',filters.from_date]
     elif filters.to_date:conditions['transaction_date']=['<=',filters.to_date]
     rows=frappe.get_list('Sales Order',filters=conditions,fields=['name','transaction_date','company','customer','customer_name',
-        'docstatus','custom_chantier','custom_technical_study','grand_total','currency','custom_ug_b_export_file','custom_ug_b_sage_reference'],order_by='transaction_date desc, creation desc',limit_page_length=0)
+        'docstatus','custom_chantier','custom_technical_study','net_total','currency','custom_ug_b_export_file','custom_ug_b_sage_reference'],order_by='transaction_date desc, creation desc',limit_page_length=0)
     orders=[frappe.get_doc('Sales Order',r.name) for r in rows]
     from mat_reco.material_reconfiguration.services.workshop_service import _receipts
     accepted,_,_,_=_receipts(orders) if orders else ({},{},{},{})
@@ -50,10 +50,10 @@ def execute(filters=None):
         dict(fieldname='stage',label='Étape',fieldtype='Data',width=190)]
     columns.extend(dict(fieldname=field,label=label,fieldtype='Float',width=110) for field,label in
         [('required_qty','À produire'),('produced_qty','Produites'),('remaining_qty','Restantes'),('issued_qty','Sorties'),('to_issue_qty','À sortir')])
-    columns.extend([dict(fieldname='grand_total',label='Montant commande',fieldtype='Currency',options='currency',width=140),
+    columns.extend([dict(fieldname='net_total',label='Montant commande HT',fieldtype='Currency',options='currency',width=140),
         dict(fieldname='custom_ug_b_sage_reference',label='Référence Sage',fieldtype='Data',width=150),
         dict(fieldname='currency',label='Devise',fieldtype='Link',options='Currency',hidden=1)])
     columns.append(dict(fieldname='bl_count',label='BL validés',fieldtype='Int',width=100))
     columns.extend(dict(fieldname=k,label=label,fieldtype='Currency',options='currency',width=140) for k,label in
-        [('bl_amount','Montants BL'),('received','Règlements B'),('bl_balance','Solde des BL'),('order_balance','Solde commande B')])
+        [('bl_amount','Montants BL HT'),('received','Règlements B'),('bl_balance','Solde des BL HT'),('order_balance','Solde commande B HT')])
     return columns,result
