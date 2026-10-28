@@ -1,0 +1,46 @@
+Univers Glass — réservation des vitres fabriquées et Bordereau Spécial
+
+Périmètre : société Univers Glass, articles OUVRAGE/DECOUPE sérialisés,
+uniquement les séries finales correspondant à une ligne de commande.
+Les accessoires et les autres sociétés conservent leur circuit.
+
+Le Stock Entry Repack validé crée une Stock Reservation Entry native par
+série exacte, rattachée à la commande, sa ligne et son Stock Entry de fabrication.
+Les composants intermédiaires ne sont pas réservés comme produits finaux.
+Une reprise du même événement ne recrée pas une réservation existante.
+
+Les BL reprennent les séries disponibles de leur ligne et de leur dépôt.
+Le champ enfant caché auto_serial_no distingue une proposition automatique
+d'un choix manuel. Les quantités partielles réajustent la proposition ;
+un choix manuel différent est conservé et contrôlé normalement.
+
+Lors d'une sortie B, seules les réservations des séries choisies appartenant
+à la même commande ET à la même ligne sont libérées. Une réservation d'une
+autre commande reste intacte. La libération et la sortie se font dans la même
+transaction Frappe. Tout échec annule les deux modifications.
+L'annulation du BL rétablit le stock et une réservation pour ses séries.
+L'annulation d'un Repack annule auparavant ses réservations natives encore actives.
+
+Le contrôleur SRE spécialisé conserve la sélection exacte du fabricant au lieu
+de laisser l'autosélection native choisir une autre série du même article.
+Tous les contrôles natifs de disponibilité, quantité et séries restent exécutés.
+Aucun commit n'est introduit dans les services métier.
+
+Déploiement : publier le code puis exécuter la migration du site (Frappe Cloud :
+Deploy/Migrate), avec redémarrage normal des processus. La migration ajoute :
+- Stock Reservation Entry.custom_ug_production_entry (lien de traçabilité) ;
+- Bordereau Special Item.auto_serial_no (proposition automatique, champ caché) ;
+- l'activation de la réservation native Stock Settings pour la société UG.
+Cette activation reste incompatible avec le stock négatif, conformément à ERPNext.
+Pas de rétro-réservation automatique des fabrications historiques.
+
+Production au 28/10/2026 : UG-BL-B-2026-00007 a été complété avec ses cinq séries
+existantes, sans validation et sans création de mouvement de stock.
+La nouvelle automatisation nécessite le déploiement ci-dessus ; aucune réservation
+native n'a été ajoutée en production avant le déploiement du circuit de sortie adapté.
+
+Vérification : 6 tests spécifiques avec véritables Stock Entries/SRE en développement
+(rollback), et 27 tests de régression du circuit B. Cas : réservation exacte et
+idempotente, livraison partielle, annulation et reprise, commande concurrente,
+échec de sortie et rollback, annulation de fabrication, choix manuel et proposition
+périmée. Les écritures/notifications des fixtures sont annulées après les tests.

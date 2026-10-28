@@ -378,3 +378,14 @@ for _ug_warehouse_dt in ('Item', 'Quotation', 'Sales Order', 'Material Cutting P
         _ug_previous = [_ug_previous]
     _ug_events['before_validate'] = _ug_previous + ['mat_reco.material_reconfiguration.services.ug_warehouse.apply_defaults']
 after_migrate.append('mat_reco.material_reconfiguration.services.ug_warehouse.install_defaults')
+
+override_doctype_class = {
+    'Stock Reservation Entry': 'mat_reco.overrides.stock_reservation_entry.UGStockReservationEntry'
+}
+after_migrate.append('mat_reco.material_reconfiguration.services.production_reservations.install')
+_ug_previous = doc_events['Stock Entry']['before_cancel']
+doc_events['Stock Entry']['before_cancel'] = [
+    _ug_previous, 'mat_reco.material_reconfiguration.services.production_reservations.before_cancel_production'
+]
+for _ug_event in ('on_submit', 'on_cancel'):
+    doc_events['Stock Entry'][_ug_event].append('mat_reco.material_reconfiguration.services.production_reservations.stock_updated')

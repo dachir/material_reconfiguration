@@ -165,6 +165,8 @@ def delivery_validate(doc):
     if doc.net_total<0 or doc.grand_total<0:frappe.throw('Un bordereau de livraison B ne peut pas avoir un montant négatif.')
     doc.tax_amount=money(doc.grand_total-doc.net_total,doc.currency)
     doc.status='Validé' if doc.docstatus==1 else 'Brouillon'
+    from .production_reservations import fill_delivery
+    fill_delivery(doc)
 
 
 @contextmanager

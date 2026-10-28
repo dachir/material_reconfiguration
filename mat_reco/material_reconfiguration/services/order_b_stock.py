@@ -177,6 +177,8 @@ def create_issue(sales_order,rows,request_key,accounting_dimensions=None,special
             custom_dimension_thickness_mm=row.get('custom_client_thickness_mm')))
     from mat_reco.material_reconfiguration.utils.accounting_dimensions import resolve_and_apply_stock_entry_dimensions
     resolve_and_apply_stock_entry_dimensions(entry,source_doc=entry,fallback_docs=[order],validate_mandatory=True)
+    from .production_reservations import release_for_issue
+    release_for_issue(order, incoming)
     entry.insert();entry.submit()
     return entry.name
 
