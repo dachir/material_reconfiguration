@@ -71,6 +71,11 @@ def reserve_order(order, serials=None, production_entry=None):
                 ORDER BY r.creation DESC LIMIT 1''', (order.name, row.name, name))
             if isinstance(source, (list, tuple)):
                 source = source[0][0] if source else None
+            if not source:
+                source = sn.get('purchase_document_no')
+                origin = frappe.db.get_value('Stock Entry', source, ['docstatus', 'purpose', 'company'], as_dict=True) if source else None
+                if not origin or origin.docstatus != 1 or origin.purpose != 'Repack' or origin.company != order.company:
+                    continue  # No inferred manufacturing ownership from dimensions alone.
             reservation = frappe.get_doc(dict(doctype=SRE, company=order.company, item_code=row.item_code,
                 warehouse=sn.warehouse, voucher_type='Sales Order', voucher_no=order.name,
                 voucher_detail_no=row.name, voucher_qty=flt(row.stock_qty or row.qty * (row.conversion_factor or 1)),
@@ -191,3 +196,90 @@ def install():
     if not settings.enable_stock_reservation:
         settings.enable_stock_reservation = 1
         settings.save(ignore_permissions=True)
+
+
+@contextmanager
+def rollback_test():
+    """Isolate DB writes and transaction callbacks; leave no phantom notifications."""
+    from frappe.utils import CallbackManager
+    point = 'ug_preview_' + frappe.generate_hash(length=12)
+    callbacks = {name: getattr(frappe.db, name) for name in (
+        'before_commit', 'after_commit', 'before_rollback', 'after_rollback')}
+    realtime = getattr(frappe.local, '_realtime_log', None)
+    frappe.db.savepoint(point)
+    for name in callbacks:
+        setattr(frappe.db, name, CallbackManager())
+    if hasattr(frappe.local, '_realtime_log'):
+        del frappe.local._realtime_log
+    try:
+        yield
+    finally:
+        try:
+            frappe.db.before_rollback.run()
+            frappe.db.rollback(save_point=point)
+            frappe.db.after_rollback.run()
+        finally:
+            for name, manager in callbacks.items():
+                setattr(frappe.db, name, manager)
+            if realtime is None:
+                if hasattr(frappe.local, '_realtime_log'):
+                    del frappe.local._realtime_log
+            else:
+                frappe.local._realtime_log = realtime
+
+
+def _maintenance_access():
+    frappe.only_for(('System Manager', 'Stock Manager'))
+    from .order_b import can_access
+    if not can_access():
+        frappe.throw('Le rôle UG COMMANDES B est requis.', frappe.PermissionError)
+
+
+@frappe.whitelist(methods=['POST'])
+def reconcile_existing(sales_orders=None, dry_run=True):
+    """Backfill only provably owned, active final glass; never edit posted production."""
+    from frappe.utils import cint
+    from contextlib import nullcontext
+    _maintenance_access()
+    names = frappe.parse_json(sales_orders) if isinstance(sales_orders, str) else sales_orders
+    if names is not None and (not isinstance(names, list) or len(names) > 500):
+        frappe.throw('Fournir une liste de commandes (500 maximum).')
+    filters = {'company': COMPANY, 'docstatus': 1, 'status': ['not in', ['Closed', 'On Hold', 'Cancelled']]}
+    if names is not None:
+        filters['name'] = ['in', names]
+    result = {'dry_run': bool(cint(dry_run)), 'reservations': [], 'bordereaux': [], 'posted_stock_modified': False}
+    with rollback_test() if result['dry_run'] else nullcontext():
+        for name in frappe.get_list('Sales Order', filters=filters, pluck='name', limit_page_length=0):
+            order = frappe.get_doc('Sales Order', name)
+            order.check_permission('read')
+            created = reserve_order(order)
+            result['reservations'].extend(created)
+            for bl_name in frappe.get_list('Bordereau Special', filters={'sales_order': name, 'docstatus': 0}, pluck='name'):
+                bl = frappe.get_doc('Bordereau Special', bl_name)
+                bl.check_permission('write')
+                before = [(r.serial_no, r.get('auto_serial_no')) for r in bl.items]
+                fill_delivery(bl)
+                if before != [(r.serial_no, r.get('auto_serial_no')) for r in bl.items]:
+                    bl.save()
+                    result['bordereaux'].append(bl.name)
+    return result
+
+
+@frappe.whitelist(methods=['POST'])
+def test_delivery_submission(bordereau):
+    """Run the actual submit inside a rollback-only transaction scope."""
+    _maintenance_access()
+    doc = frappe.get_doc('Bordereau Special', bordereau)
+    doc.check_permission('submit')
+    if doc.docstatus != 0:
+        frappe.throw('Choisir un Bordereau Spécial en brouillon.')
+    result = {'bordereau': doc.name, 'committed': False, 'success': False}
+    with rollback_test():
+        try:
+            doc.submit()
+            entry = frappe.get_doc('Stock Entry', doc.stock_entry) if doc.stock_entry else None
+            result.update(success=True, simulated_stock_entry=doc.stock_entry,
+                          quantity=sum(flt(r.qty) for r in entry.items) if entry else 0)
+        except frappe.ValidationError as exc:
+            result['error'] = str(exc)
+    return result

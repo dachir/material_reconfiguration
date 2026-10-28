@@ -125,3 +125,36 @@ class ProductionReservationTests(unittest.TestCase):
         reservations.fill_delivery(doc)
         self.assertEqual(row.serial_no,'')
         self.assertEqual(row.auto_serial_no,'')
+
+    def test_preview_submit_has_no_persisted_stock_or_reservation_changes(self):
+        doc=frappe.get_doc(special_b.make_delivery(self.manufacturing_order.name))
+        doc.items[0].qty=1
+        doc.accounting_dimensions_json=frappe.as_json({'branch':self.branch})
+        doc.insert()
+        before=set(self.active());stock_count=frappe.db.count('Stock Entry')
+        manager=frappe.db.after_commit
+        callbacks=len(manager._functions)
+        result=reservations.test_delivery_submission(doc.name)
+        self.assertTrue(result['success']);self.assertFalse(result['committed'])
+        doc.reload();self.assertEqual(doc.docstatus,0)
+        self.assertFalse(doc.stock_entry)
+        self.assertEqual(set(self.active()),before)
+        self.assertEqual(frappe.db.count('Stock Entry'),stock_count)
+        self.assertIs(frappe.db.after_commit,manager)
+        self.assertEqual(len(manager._functions),callbacks)
+
+    def test_backfill_dry_run_rolls_back_then_real_run_is_idempotent(self):
+        for name in self.active():
+            doc=frappe.get_doc('Stock Reservation Entry',name);doc.cancel()
+            frappe.db.set_value('Stock Reservation Entry',name,'custom_ug_production_entry',None)
+        count=frappe.db.count('Stock Reservation Entry')
+        result=reservations.reconcile_existing([self.manufacturing_order.name],dry_run=True)
+        self.assertEqual(len(result['reservations']),3)
+        self.assertFalse(self.active())
+        self.assertEqual(frappe.db.count('Stock Reservation Entry'),count)
+        result=reservations.reconcile_existing([self.manufacturing_order.name],dry_run=False)
+        self.assertEqual(len(self.active()),3)
+        for name in self.active():
+            self.assertEqual(frappe.db.get_value('Stock Reservation Entry',name,'custom_ug_production_entry'),self.production.name)
+        again=reservations.reconcile_existing([self.manufacturing_order.name],dry_run=False)
+        self.assertFalse(again['reservations'])
