@@ -4,6 +4,7 @@ import hashlib
 import json
 import math
 import uuid
+from decimal import Decimal, ROUND_HALF_UP
 
 import frappe
 from frappe.utils import flt, cint
@@ -123,10 +124,95 @@ def ensure_commercial_item(doc, type_row):
     return item.name
 
 
-def commercial_hash(doc):
-    from .chantier_service import fingerprint
+def _storage_numbers(value):
+    """Use the decimal(21,9) representation persisted by Frappe/MariaDB."""
+    if isinstance(value, float) and math.isfinite(value):
+        return float(Decimal(str(value)).quantize(Decimal('0.000000001'), rounding=ROUND_HALF_UP)) or 0.0
+    if isinstance(value, list):
+        return [_storage_numbers(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _storage_numbers(v) for k, v in value.items()}
+    return value
+
+
+def _commercial_payload(doc, legacy=False):
     from .ft_activation import snapshot
-    return fingerprint(dict(commercial=snapshot(doc),types=[dict(id=t.type_id,name=t.designation,thickness=flt(t.thickness_mm),extras=t.common_extras) for t in doc.work_types]))
+    payload = dict(commercial=snapshot(doc), types=[dict(id=t.type_id, name=t.designation,
+        thickness=flt(t.thickness_mm), extras=t.common_extras) for t in doc.work_types])
+    if not legacy:
+        payload['commercial'] = json.dumps(_storage_numbers(json.loads(payload['commercial'])), sort_keys=True)
+        payload['types'] = _storage_numbers(payload['types'])
+    return payload
+
+
+def commercial_hash(doc, legacy=False):
+    from .chantier_service import fingerprint
+    return fingerprint(_commercial_payload(doc, legacy=legacy))
+
+
+def _restore_legacy_quantities(values):
+    """Rebuild old calculation tails only when they persist to the same values.
+
+    No Item lookup or document write is allowed here: only the saved approval
+    inputs may establish equivalence with a historical SHA-256 signature.
+    """
+    parents = {r['line_id']: r for r in values.get('lines') or []}
+    known = {r['type_id']: r for r in values.get('work_types') or []}
+
+    def restore(row, field, calculated):
+        stored = row.get(field)
+        if isinstance(stored, (int, float)) and _storage_numbers(calculated) == _storage_numbers(stored):
+            row[field] = calculated
+
+    for extra in values.get('commercial_extras') or []:
+        parent = parents.get(extra.get('parent_line_id'))
+        if not parent:
+            continue
+        length, width, count = (flt(parent.get(k)) for k in ('length_mm', 'width_mm', 'qty'))
+        basis = extra.get('calculation_basis')
+        calculated = {
+            'SURFACE': length * width / 1_000_000 * count,
+            'PERIMETRE': 2 * (length + width) / 1000 * count,
+            'PIECE': count,
+            'MANUEL': 0.0,
+            'FIXE': flt(extra.get('calculated_qty')),
+        }.get(basis)
+        if calculated is None:
+            continue
+        restore(extra, 'calculated_qty', calculated)
+        if not cint(extra.get('manual_qty')):
+            restore(extra, 'qty', calculated)
+        elif extra.get('inherited_from') and not cint(extra.get('inherited_qty_override')):
+            type_row = known.get(extra['inherited_from'])
+            if not type_row:
+                continue
+            try:
+                definitions = json.loads(type_row.get('common_extras') or '[]')
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(definitions, list):
+                continue
+            definition = next((r for r in definitions if isinstance(r, dict)
+                and r.get('key') == extra.get('inherited_key') and r.get('item_code') == extra.get('item_code')), None)
+            if definition:
+                amount = flt(definition.get('qty', 1)) * count if basis == 'MANUEL' else calculated
+                restore(extra, 'qty', amount * flt(definition.get('factor', 1)))
+
+
+def commercial_hash_matches(doc):
+    from .chantier_service import fingerprint
+    approved = doc.get('commercial_hash')
+    if not approved:
+        return False
+    if approved == commercial_hash(doc):
+        return True
+    legacy = _commercial_payload(doc, legacy=True)
+    if approved == fingerprint(legacy):
+        return True
+    values = json.loads(legacy['commercial'])
+    _restore_legacy_quantities(values)
+    legacy['commercial'] = json.dumps(values, sort_keys=True)
+    return approved == fingerprint(legacy)
 
 
 def approve_commercial(doc):
@@ -157,7 +243,7 @@ def validate_commercial_quote(quote, doc):
     from .chantier_service import fingerprint
     from .chantier_extras import validate_quote_extras
     from .chantier_discounts import rate_matches
-    if doc.docstatus!=1 or doc.commercial_hash!=commercial_hash(doc):
+    if doc.docstatus!=1 or not commercial_hash_matches(doc):
         frappe.throw('Valider la version commerciale du chantier avant de générer le devis.')
     if quote.currency!=doc.currency or (doc.taxes_and_charges and quote.taxes_and_charges!=doc.taxes_and_charges):
         frappe.throw('Reprendre la devise et le modèle de taxes du chantier approuvé.')
