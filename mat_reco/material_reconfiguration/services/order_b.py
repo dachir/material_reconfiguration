@@ -71,16 +71,8 @@ def validate_downstream(doc,method=None):
 def install():
     for role in (ROLE,COCKPIT_ROLE):
         if not frappe.db.exists('Role',role):frappe.get_doc(dict(doctype='Role',role_name=role,desk_access=1)).insert(ignore_permissions=True)
-    frappe.reload_doc('material_reconfiguration','report','suivi_commandes_b')
-    if frappe.db.exists('Workspace','Univers Glass'):
-        workspace=frappe.get_doc('Workspace','Univers Glass')
-        if not any(row.label=='Suivi commandes B' for row in workspace.shortcuts):
-            import json
-            workspace.append('shortcuts',dict(label='Suivi commandes B',type='Report',link_to='Suivi commandes B',color='Orange'))
-            content=json.loads(workspace.content or '[]')
-            content.append(dict(id='ug-orders-b',type='shortcut',data=dict(shortcut_name='Suivi commandes B',col=4)))
-            workspace.content=json.dumps(content,ensure_ascii=False)
-            workspace.save(ignore_permissions=True)
+    from .commercial_reports import install_report
+    install_report('orders')
 
 
 def validate_customer_entries(doc,method=None):

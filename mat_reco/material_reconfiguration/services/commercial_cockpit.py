@@ -144,6 +144,8 @@ def _snapshot(filters, capabilities):
         limit_page_length=200, order_by='name')] if frappe.has_permission('Company', 'read') else []
     order_filters = _base(filters)
     _period(order_filters, 'transaction_date', filters)
+    if filters.get('sales_order'):
+        order_filters['name'] = filters['sales_order']
     if filters['circuit'] != 'all':
         order_filters['custom_ug_order_type'] = filters['circuit']
     search = filters.get('search')
@@ -155,7 +157,7 @@ def _snapshot(filters, capabilities):
         'item_name', 'qty', 'delivered_qty', 'stock_qty', 'conversion_factor', 'uom', 'net_amount', 'amount',
         'prevdoc_docname', 'custom_ug_work_type_name', 'stock_uom', 'is_stock_item'])
     order_names = [row['name'] for row in orders]
-    scoped = bool(filters.get('from_date') or filters.get('to_date') or search or filters['circuit'] != 'all')
+    scoped = bool(filters.get('sales_order') or filters.get('from_date') or filters.get('to_date') or search or filters['circuit'] != 'all')
 
     for kind in ('delivery', 'payment'):
         values = _base(filters)
@@ -212,7 +214,7 @@ def _snapshot(filters, capabilities):
             values['party'] = filters['customer']
         if filters.get('company'):
             values['company'] = filters['company']
-        _parents(data, 'native_payment', ['name', 'company', 'party', 'posting_date', 'status', 'docstatus', 'paid_amount',
+        _parents(data, 'native_payment', ['name', 'company', 'party', 'posting_date', 'status', 'docstatus', 'payment_type', 'paid_amount',
             'paid_from_account_currency', 'paid_to_account_currency', 'unallocated_amount', 'custom_ug_special_payment'], values, pe_or)
         _children(data, 'payment_references', 'Payment Entry Reference', 'native_payment', 'references',
             ['parent', 'idx', 'reference_doctype', 'reference_name', 'allocated_amount'])

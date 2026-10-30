@@ -490,16 +490,9 @@ def install():
     special_a.install()
     from mat_reco.printing import install_print_formats
     install_print_formats()
-    frappe.reload_doc('material_reconfiguration','report','situation_des_comptes_clients_b')
+    from .commercial_reports import install_report
+    install_report('accounts')
     frappe.db.add_index(DELIVERY,['sales_order','docstatus'])
     frappe.db.add_index(DELIVERY,['stock_entry','docstatus'])
     frappe.db.add_index('Reglement Special Allocation',['bordereau'])
     frappe.db.add_index(PAYMENT,['company','customer','currency','docstatus'])
-    if frappe.db.exists('Workspace','Univers Glass'):
-        import json
-        workspace=frappe.get_doc('Workspace','Univers Glass')
-        label='Situation des comptes clients B'
-        if not any(r.label==label for r in workspace.shortcuts):
-            workspace.append('shortcuts',dict(label=label,type='Report',link_to=label,color='Orange'))
-            content=json.loads(workspace.content or '[]');content.append(dict(id='ug-b-balances',type='shortcut',data=dict(shortcut_name=label,col=4)))
-            workspace.content=json.dumps(content,ensure_ascii=False);workspace.save(ignore_permissions=True)

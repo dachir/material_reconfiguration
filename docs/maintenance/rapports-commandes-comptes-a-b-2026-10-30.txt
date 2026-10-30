@@ -1,0 +1,86 @@
+UNIVERS GLASS — RAPPORTS COMMERCIAUX A / B
+30 octobre 2026
+
+Les rapports existants sont renommés :
+  Suivi commandes B -> Suivi commandes
+  Situation des comptes clients B -> Situation des comptes clients
+
+Chaque rapport propose Type de commande : A, B ou A + B (par défaut).
+La colonne Type et la base des montants distinguent A TTC et B HT. Les devises
+et les sociétés restent distinctes ; la situation conserve aussi des soldes
+séparés par type, sans total additionnant des bases différentes.
+Les références ouvrent leurs documents natifs. Les exports Excel et l'impression
+utilisent les filtres du rapport. Les montants CFA restent sans décimales ; une
+information non disponible n'est jamais remplacée par un zéro.
+
+Suivi commandes
+---------------
+Réutilise le read model commercial_cockpit pour les montants et les permissions,
+workshop_service._receipts pour la production et les mécanismes de sorties B.
+A : livraisons ERPNext, factures et règlements natifs, y compris ceux générés
+depuis les formulaires spéciaux. Un BL spécial et son Delivery Note ne sont pas
+deux livraisons. B : sorties et suivi opérationnel HT existants, sans ajout de
+facturation client ERPNext. Les étapes tiennent compte des services seuls.
+Les montants non attribuables d'un document partagé restent indisponibles ; les
+rapports tronqués demandent d'affiner les filtres plutôt que de fournir un faux
+total financier.
+
+Situation des comptes clients
+-----------------------------
+B : solde historique + bordereaux validés HT - part B des règlements validés.
+Les avances et les règlements couvrant plusieurs BL sont comptés une seule fois.
+A : factures/avoirs et affectations ERPNext rattachables à des commandes A
+lisibles, en TTC ; les avances identifiables et les remboursements sont inclus.
+Les documents spéciaux A ne sont pas ajoutés aux factures/Payment Entries qu'ils
+génèrent. Les écritures comptables sans lien avec une commande ne font pas partie
+de cette consultation : elle ne remplace pas le Grand Livre ERPNext.
+Les affectations natives peuvent inclure des ajustements de règlement ; elles
+ne constituent pas un relevé exhaustif des seuls mouvements bancaires.
+Une facture couvrant plusieurs commandes conserve son total client exact. Un
+filtre Commande nécessitant une répartition estimée est refusé explicitement.
+Une avance antérieure ensuite rapprochée d'une facture future reste présente
+dans le solde à la date demandée, sans anticiper le débit de cette facture.
+
+Permissions et migration
+------------------------
+Les droits d'accès aux modules spéciaux et les permissions natives de chaque
+document restent appliqués. L'affichage A nécessite la lecture des documents
+comptables concernés. Aucun droit comptable n'est attribué automatiquement.
+Les rôles des rapports incluent les rôles ayant explicitement accès aux modules
+spéciaux. Le menu Rapport de Sales Order utilise désormais Situation client,
+avec le type de la commande présélectionné.
+
+services/commercial_reports.py centralise les filtres et le renommage technique.
+Les hooks existants order_b.install et special_b.install appellent l'installateur.
+Après publication des nouveaux dossiers de rapports et suppression des anciens
+JSON/JS/HTML, exécuter la migration Frappe Cloud. Le renommage natif préserve les
+liens Report existants ; les références Custom Report et les raccourcis du
+workspace sont également mis à jour, sans créer de deuxième rapport visible.
+Les anciens imports Python restent disponibles avec le filtre B par défaut.
+Aucun DocType métier ou mouvement commercial n'est créé par cette migration.
+
+Vérifications
+-------------
+Installation réelle en développement : nouveaux noms présents, anciens Report
+absents et deux raccourcis du workspace correctement renommés.
+Lecture native execute_module sur les données existantes :
+  Suivi commandes : A 19 lignes ; B 7 ; A + B 26.
+  Situation des comptes clients : A 55 lignes ; B 6 ; A + B 61.
+Les types retournés respectent les six filtres. Les compteurs Sales Order,
+Delivery Note, Sales Invoice, Payment Entry, Bordereau Special, Reglement Special,
+Solde Initial Client B, Stock Entry, Stock Ledger Entry, GL Entry et ToDo sont
+inchangés après ces consultations. Aucune transaction métier créée ou modifiée.
+
+Tests reproductibles depuis la racine du bench :
+  env/bin/python -m unittest mat_reco.material_reconfiguration.tests.test_commercial_reports mat_reco.material_reconfiguration.tests.test_suivi_commandes mat_reco.material_reconfiguration.tests.test_customer_accounts_report mat_reco.material_reconfiguration.tests.test_b_report_metadata mat_reco.material_reconfiguration.tests.test_commercial_cockpit
+Depuis frontend/workshop-vue :
+  npm test
+
+Les cas isolés vérifient notamment types A/B/les deux, avances, règlements mixtes,
+avoirs/remboursements, permissions et champs cachés, dates, devises, factures
+partagées, absence de double comptage et conservation des valeurs indisponibles.
+La vérification regroupée passe : 117 tests Python (rapports et régressions du
+cockpit/actions commerciales) et 65 tests JavaScript, dont huit nouveaux cas
+de filtres et de formatage des rapports.
+Le renommage et les nouvelles fonctions n'ont pas été déployés en production
+depuis cette session. Ils seront installés par la prochaine migration du site.

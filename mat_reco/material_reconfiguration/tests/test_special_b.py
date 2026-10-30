@@ -216,8 +216,8 @@ class SpecialBTests(unittest.TestCase):
         self.assertIn(bl.name,html);self.assertIn('QA Prestation',html)
         self.assertIn('50',html)
         from frappe.desk.query_report import _export_query
-        params=frappe._dict(report_name='Situation des comptes clients B',file_format_type='Excel',filters=frappe.as_json(dict(
-            company=self.company,customer=order.customer,from_date=add_days(nowdate(),-1),to_date=nowdate())),custom_columns='[]',visible_idx=[])
+        params=frappe._dict(report_name='Situation des comptes clients',file_format_type='Excel',filters=frappe.as_json(dict(
+            company=self.company,customer=order.customer,order_type='B',from_date=add_days(nowdate(),-1),to_date=nowdate())),custom_columns='[]',visible_idx=[])
         name,extension,content=_export_query(params,{},populate_response=False)
         self.assertEqual(extension,'xlsx');self.assertTrue(content.startswith(b'PK'))
         from frappe.utils.pdf import get_pdf

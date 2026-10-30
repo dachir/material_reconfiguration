@@ -1,0 +1,7 @@
+<h2>{%= __("Situation des comptes clients") %}</h2>
+<p>{%= filters.from_date %} — {%= filters.to_date %} · {%= __("Type") %} : {%= !filters.order_type || filters.order_type === 'All' ? 'A + B' : filters.order_type %}</p>
+<p>{%= __("A : factures et règlements ERPNext liés aux commandes, en TTC. B : bordereaux et règlements spéciaux, en HT. Les soldes sont séparés par type et devise.") %}</p>
+<table class="table table-bordered"><thead><tr><th>Société</th><th>Client</th><th>Devise</th><th>Type / base</th><th>Date</th><th>Opération / référence</th><th>Débit</th><th>Crédit</th><th>Solde</th></tr></thead><tbody>
+{% for(var i=0;i<data.length;i++){var row=data[i]; %}
+<tr><td>{%= row.company %}</td><td>{%= row.customer %}</td><td>{%= row.currency %}</td><td>{%= row.order_type %} / {%= row.basis %}</td><td>{%= row.posting_date %}</td><td>{%= row.description %} {%= row.reference_name || '' %}</td><td>{%= format_currency(row.debit,row.currency,['XOF','XAF'].includes(row.currency)?0:undefined) %}</td><td>{%= format_currency(row.credit,row.currency,['XOF','XAF'].includes(row.currency)?0:undefined) %}</td><td>{%= format_currency(row.balance,row.currency,['XOF','XAF'].includes(row.currency)?0:undefined) %}</td></tr>
+{% } %}</tbody></table>
