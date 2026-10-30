@@ -1,16 +1,19 @@
 <script setup>
-import {ref,shallowRef,reactive,computed,nextTick,onBeforeUnmount} from 'vue';
+import {ref,shallowRef,reactive,computed,nextTick,watch,onBeforeUnmount} from 'vue';
 import Icon from './commercial-icon.vue';
+import CommercialActionModal from './CommercialActionModal.vue';
 import {COMMERCIAL_COLUMNS,buildCommercialLayout,formatCommercialAmount,periodRange,connectedPath,nodeCanOpen,commercialRouteFor,commercialStatus,commercialKindLabel} from './commercial-layout.js';
 import './commercial-cockpit.css';
 
 const frappe=window.frappe;
 const endpoint='mat_reco.material_reconfiguration.services.commercial_cockpit.get_dashboard';
-const special='mat_reco.material_reconfiguration.services.special_b.';
+const actionApi='mat_reco.material_reconfiguration.services.commercial_actions.';
 const empty=()=>({clients:[],kpis:{orders:0,remaining_qty:0,balances_a:[],balances_b:[]},documents:[],edges:[],details:{},capabilities:{},warnings:[],currencies:[],companies:[]});
 const data=shallowRef(empty()),loading=ref(false),refreshing=ref(false),acting=ref(false),error=ref(''),active=ref(false),stale=ref(false);
 const filters=reactive({search:'',customer:'',company:'',currency:'',circuit:'all',state:'open',followup:'all',...periodRange('month',frappe.datetime?.get_today?.())});
 const period=ref('month'),clientTab=ref('all'),mode=ref('tree'),zoom=ref(.65),selectedId=ref(''),collapsed=ref(new Set()),viewport=ref(null),root=ref(null),lastUpdated=ref('');
+const actionOptions=shallowRef([]),actionsLoading=ref(false),actionModal=shallowRef(null),feedback=ref('');
+let actionRequest=0;
 let poll=null,searchTimer=null,requestId=0,snapshot='',drag=null,hasLoaded=false;
 const clients=computed(()=>Array.isArray(data.value.clients)?data.value.clients:[]);
 const documents=computed(()=>Array.isArray(data.value.documents)?data.value.documents:[]);
@@ -32,11 +35,8 @@ const detailLinks=computed(()=>{
  return linked.map(link=>({...link,kind:link.kind||kindForDoctype(link.doctype)})).filter(link=>link.name&&nodeCanOpen(link,capabilities.value));
 });
 const tasks=computed(()=>(detail.value.tasks||[]).filter(task=>task.status==='Open'||task.status==='Overdue'));
-const canCreateDelivery=computed(()=>canCreate('Bordereau Special','can_create_deliveries','can_create_delivery'));
-const canCreatePayment=computed(()=>canCreate('Reglement Special','can_create_payments','can_create_payment'));
 const canCreateClient=computed(()=>canCreate('Customer','can_create_customers','can_create_customer'));
 const isOrder=computed(()=>selected.value?.kind==='order');
-const selectedOrder=computed(()=>isOrder.value?selected.value?.name:selected.value?.sales_order||detail.value.sales_order);
 const selectedA=computed(()=>selected.value?.order_type==='A');
 const balanceCards=computed(()=>[
  {key:'a',label:'Solde BL A · TTC',values:data.value.kpis?.balances_a||[],icon:'coins'},
@@ -46,7 +46,6 @@ const progress=computed(()=>Math.max(0,Math.min(100,100*Number(metrics.value.del
 const printOrders=computed(()=>documents.value.filter(document=>document.kind==='order'));
 const asOf=computed(()=>lastUpdated.value?String(lastUpdated.value).replace('T',' ').slice(0,19):'');
 const showCompanyLabels=computed(()=>data.value.companies?.length>1);
-const canDeliver=computed(()=>metrics.value.can_deliver!==undefined?Boolean(metrics.value.can_deliver):metrics.value.all_remaining_qty!==undefined?Number(metrics.value.all_remaining_qty)>0:true);
 function qty(value){return value===null||value===undefined?'—':new Intl.NumberFormat('fr-FR',{maximumFractionDigits:3}).format(Number(value)||0);}
 function money(value,currency){return formatCommercialAmount(value,currency||selected.value?.currency);}
 function balanceKey(value){return (value.company||'')+'::'+(value.currency||'');}
@@ -67,7 +66,7 @@ function errorText(err){
 function plainText(value){return new DOMParser().parseFromString(String(value||''),'text/html').body.textContent||'';}
 function permissionDenied(err){return err?.httpStatus===403||err?.status===403||err?.xhr?.status===403||err?.response?.status===403||String(err?.exc_type||err?.exception||'').includes('PermissionError');}
 async function refresh({background=false,selectFirst=false}={}){
- if(background&&(!active.value||refreshing.value||drag||document.hidden||acting.value))return;
+ if(background&&(!active.value||refreshing.value||drag||document.hidden||acting.value||actionModal.value))return;
  if(acting.value){stale.value=true;return;}
  const request=++requestId;refreshing.value=true;loading.value=!background&&!hasLoaded;error.value='';
  try{
@@ -85,22 +84,37 @@ async function refresh({background=false,selectFirst=false}={}){
  finally{if(request===requestId){refreshing.value=false;loading.value=false;}}
 }
 function search(){clearTimeout(searchTimer);searchTimer=setTimeout(()=>refresh(),350);}
-function chooseCustomer(customer){filters.customer=customer;selectedId.value='';collapsed.value=new Set();zoom.value=.65;data.value={...data.value,documents:[],orders:[],edges:[],details:{}};snapshot='';hasLoaded=false;refresh({selectFirst:Boolean(customer)});}
+function chooseCustomer(customer){filters.customer=customer;selectedId.value='';feedback.value='';collapsed.value=new Set();zoom.value=.65;data.value={...data.value,documents:[],orders:[],edges:[],details:{}};snapshot='';hasLoaded=false;refresh({selectFirst:Boolean(customer)});}
 function changePeriod(){if(period.value!=='custom')Object.assign(filters,periodRange(period.value,frappe.datetime?.get_today?.()));refresh();}
 function select(node){selectedId.value=node.id;}
 function collapse(node){const next=new Set(collapsed.value);next.has(node.id)?next.delete(node.id):next.add(node.id);collapsed.value=next;}
 function openDocument(node){if(!canOpen(node))return;const route=commercialRouteFor(node);if(route)frappe.set_route(...route);}
 function openWorkshop(order){if(order&&capabilities.value.can_open_workshop)frappe.set_route('workshop-cockpit',order);}
-async function createSpecial(kind,node=selected.value){
- if(!node||acting.value)return;
- const args=kind==='payment'&&node.kind==='delivery'?{bordereau:node.name}:{sales_order:node.kind==='order'?node.name:node.sales_order||detail.value.sales_order};
- if(!args.bordereau&&!args.sales_order)return;
- acting.value=true;error.value='';
+async function loadActions(){
+ const serial=++actionRequest,node=selected.value;actionOptions.value=[];
+ if(!node||!['project','quotation','order','delivery','payment'].includes(node.kind)){actionsLoading.value=false;return;}
+ actionsLoading.value=true;
  try{
-  const response=await frappe.call({method:special+(kind==='delivery'?'make_delivery':'make_payment'),args,type:'POST'});
-  const docData=response.message;await frappe.model.with_doctype(docData.doctype);
-  const document=frappe.model.sync(docData)[0];frappe.set_route('Form',document.doctype,document.name);
- }catch(err){error.value=errorText(err);}finally{acting.value=false;}
+  const response=await frappe.call({method:actionApi+'get_actions',args:{source_doctype:node.doctype,source_name:node.name},type:'GET'});
+  if(serial!==actionRequest)return;
+  actionOptions.value=Array.isArray(response.message)?response.message:response.message?.actions||[];
+ }catch(err){if(serial===actionRequest){if(permissionDenied(err))actionOptions.value=[];error.value=errorText(err);}}
+ finally{if(serial===actionRequest)actionsLoading.value=false;}
+}
+watch([selectedId,()=>selected.value?.modified,()=>selected.value?.docstatus,capabilities],loadActions);
+function beginAction(option){
+ if(!selected.value||acting.value||option.enabled===false)return;
+ feedback.value='';actionModal.value={source:{...selected.value},action:option.action};
+}
+async function actionCompleted(result){
+ actionModal.value=null;acting.value=false;
+ const target=result.document||result;
+ feedback.value=result.message||`${target.doctype||'Document'} ${target.name||''} ${target.docstatus===1?'validé':'enregistré'}.`;
+ if(!active.value){stale.value=true;return;}
+ await refresh();
+ const identity=target.doctype&&target.name?target.doctype+'::'+target.name:null;
+ if(identity&&byId.value.has(identity))selectedId.value=identity;
+ else await loadActions();
 }
 function addClient(){if(canCreateClient.value)frappe.new_doc('Customer');}
 function panStart(event){
@@ -120,8 +134,8 @@ async function setZoom(value,event=null){
 function wheel(event){if(!event.ctrlKey&&!event.metaKey)return;event.preventDefault();setZoom(zoom.value-event.deltaY*.001,event);}
 async function fit(){const element=viewport.value;if(!element)return;await setZoom(Math.min((element.clientWidth-24)/scene.value.width,(element.clientHeight-25)/scene.value.height,1));element.scrollLeft=0;element.scrollTop=0;}
 async function printOverview(){await nextTick();window.print();}
-function show(){if(active.value){refresh({background:true});return;}active.value=true;refresh();poll=setInterval(()=>refresh({background:true}),45000);}
-function hide(){active.value=false;requestId++;refreshing.value=false;loading.value=false;clearInterval(poll);clearTimeout(searchTimer);drag=null;}
+function show(){if(active.value){refresh({background:true});return;}active.value=true;refresh().then(()=>{if(active.value&&selected.value&&!actionsLoading.value)loadActions();});poll=setInterval(()=>refresh({background:true}),45000);}
+function hide(){active.value=false;requestId++;actionRequest++;actionOptions.value=[];actionModal.value=null;actionsLoading.value=false;refreshing.value=false;loading.value=false;clearInterval(poll);clearTimeout(searchTimer);drag=null;}
 onBeforeUnmount(hide);
 defineExpose({show,hide});
 </script>
@@ -140,6 +154,7 @@ defineExpose({show,hide});
     <div class="ugc-toolbar-actions"><button class="ugc-icon-button" :disabled="refreshing||acting" title="Rafraîchir les données" aria-label="Rafraîchir les données" @click="refresh()"><Icon name="refresh" :class="{'ugc-spinning':refreshing}"/></button><button class="ugc-icon-button" :disabled="loading" title="Imprimer le récapitulatif" aria-label="Imprimer le récapitulatif" @click="printOverview"><Icon name="print"/></button><span class="ugc-live" :class="{stale}"><i/>{{refreshing?'Actualisation…':stale?'À actualiser':'À jour'}}</span></div>
    </header>
    <div v-if="period==='custom'" class="ugc-date-range"><label>Du <input v-model="filters.from_date" type="date" @change="refresh()"/></label><label>Au <input v-model="filters.to_date" type="date" @change="refresh()"/></label></div>
+   <div v-if="feedback" class="ugc-feedback" role="status">{{feedback}}<button class="ugc-icon-button" aria-label="Fermer la confirmation" @click="feedback=''"><Icon name="close"/></button></div>
    <div v-if="error" class="ugc-alert" role="alert">{{error}}<button @click="refresh()">Réessayer</button></div>
    <div v-if="data.truncated||data.warnings?.length" class="ugc-notice" role="status"><span v-if="data.truncated">Affichage limité : précisez le client, la période ou la recherche.</span><span v-for="(warning,index) in data.warnings" :key="index">{{warning}}</span></div>
    <section class="ugc-kpis" aria-label="Indicateurs commerciaux">
@@ -181,13 +196,18 @@ defineExpose({show,hide});
      <div class="ugc-detail-title"><Icon :name="nodeIcon(selected)"/><div><h3>{{selected.title||selected.name}}</h3><p>{{selected.subtitle||clientLabel}}</p><span v-if="isOrder" class="ugc-circuit-tag" :class="{'ugc-type-b':!selectedA}">{{selectedA?'A · Facturation ERPNext':'B · Hors facturation ERPNext'}}</span><span v-else class="ugc-state-tag" :class="statusTone(selected)">{{commercialStatus(selected)}}</span></div></div>
      <template v-if="isOrder"><dl class="ugc-detail-amounts"><div><dt>{{selectedA?'Total commande TTC':'Total commande HT'}}</dt><dd>{{money(selectedMetric('order_amount',selected.amount),selected.currency)}}</dd></div><div><dt>{{selectedA?'Livré / facturé':'Bordereaux validés HT'}}</dt><dd>{{money(metrics.delivery_amount,selected.currency)}}</dd></div><div><dt>Règlements reçus</dt><dd>{{money(metrics.received,selected.currency)}}</dd></div><div class="ugc-balance"><dt>Solde des BL</dt><dd>{{money(deliveryBalance(metrics),selected.currency)}}</dd></div></dl><div class="ugc-delivery-progress"><strong>{{qty(metrics.delivered_qty)}} / {{qty(metrics.ordered_qty)}} pièces livrées</strong><div class="ugc-progress-track" role="progressbar" :aria-valuenow="Math.round(progress)" aria-valuemin="0" aria-valuemax="100" aria-label="Progression des livraisons"><span :style="{width:progress+'%'}"/></div><small>Reste à livrer : {{qty(metrics.remaining_qty)}} pièce(s)</small></div></template>
      <template v-else><dl class="ugc-detail-amounts"><div><dt>Montant {{basis(selected)}}</dt><dd>{{money(selected.amount,selected.currency)}}</dd></div><div v-if="selected.kind==='payment'"><dt>Montant non affecté</dt><dd>{{money(metrics.unallocated_amount,selected.currency)}}</dd></div><div v-if="selected.kind==='delivery'"><dt>Solde du bordereau</dt><dd>{{money(deliveryBalance(metrics),selected.currency)}}</dd></div></dl></template>
-     <div class="ugc-detail-actions"><button v-if="canOpen(selected)" @click="openDocument(selected)"><Icon name="external"/>{{isOrder?'Ouvrir la commande':'Ouvrir le document'}}</button><button v-if="isOrder&&selected.docstatus===1&&canCreateDelivery" class="ugc-primary" :disabled="acting||loading||stale||!canDeliver" @click="createSpecial('delivery')"><Icon name="plus"/>{{acting?'Préparation…':'Bordereau spécial'}}</button><button v-if="canCreatePayment&&selected.docstatus===1&&['order','delivery'].includes(selected.kind)" :disabled="acting||loading||stale" @click="createSpecial('payment')"><Icon name="card"/>Règlement spécial</button></div>
+     <div class="ugc-detail-actions">
+      <span v-if="actionsLoading" class="ugc-action-loading" role="status">Chargement des actions…</span>
+      <button v-for="option in actionOptions" :key="option.action" :class="{'ugc-primary':['quotation','order','delivery'].includes(option.action)}" :disabled="acting||loading||stale||option.enabled===false" :title="option.reason||''" @click="beginAction(option)"><Icon :name="option.action==='payment'?'card':option.action==='edit'?'document':option.action==='validate'?'check':'plus'"/>{{option.label}}</button>
+      <button v-if="canOpen(selected)" @click="openDocument(selected)"><Icon name="external"/>{{isOrder?'Ouvrir la commande':'Ouvrir le document'}}</button>
+     </div>
      <section v-if="detailLinks.length" class="ugc-associated"><h3>Documents associés</h3><button v-for="link in detailLinks" :key="link.id||link.doctype+'::'+link.name" :title="link.name" @click="openDocument(link)"><Icon :name="nodeIcon(link)"/><span>{{link.label||commercialKindLabel(link.kind)}}</span><small>{{link.name}}</small><Icon name="external"/></button></section>
      <section v-if="tasks.length" class="ugc-tasks"><h3>À faire</h3><div v-for="task in tasks" :key="task.name"><Icon name="square"/><span>{{plainText(task.description)}}</span></div></section>
     </aside>
    </div>
    <footer class="ugc-footer"><span>Les montants A sont TTC ; les montants B sont HT. Les devises sont présentées séparément.</span><small v-if="asOf">Actualisé : {{asOf}}</small></footer>
   </div>
+  <CommercialActionModal v-if="actionModal" :source="actionModal.source" :action="actionModal.action" @close="actionModal=null" @busy="acting=$event" @completed="actionCompleted"/>
   <section class="ugc-print" aria-label="Récapitulatif commercial à imprimer"><h1>Cockpit commercial</h1><p>{{clientLabel||'Tous les clients'}} · {{asOf}} · {{filters.from_date||'Début'}} → {{filters.to_date||'Aujourd’hui'}}</p><p>Commandes : {{qty(data.kpis?.orders)}} · Pièces à livrer : {{qty(data.kpis?.remaining_qty)}}</p><p v-for="card in balanceCards" :key="card.key">{{card.label}} : <span v-for="(value,index) in card.values" :key="balanceKey(value)">{{index?' · ':''}}{{balanceText(value)}}</span></p><table v-if="printOrders.length"><thead><tr><th>Commande</th><th>Circuit</th><th>Montant</th><th>Livré</th><th>Restant</th><th>Solde des BL</th></tr></thead><tbody><tr v-for="order in printOrders" :key="order.id"><td>{{order.name}}</td><td>{{order.order_type}}</td><td>{{money(order.amount,order.currency)}} {{basis(order)}}</td><td>{{qty(order.metrics?.delivered_qty)}}</td><td>{{qty(order.metrics?.remaining_qty)}}</td><td>{{money(deliveryBalance(order.metrics),order.currency)}}</td></tr></tbody></table><template v-for="group in listGroups" :key="group.kind"><h2 v-if="group.documents.length">{{group.label}}</h2><table v-if="group.documents.length"><thead><tr><th>Document</th><th>État</th><th>Montant</th></tr></thead><tbody><tr v-for="node in group.documents" :key="node.id"><td>{{node.name}}</td><td>{{commercialStatus(node)}}</td><td>{{money(node.amount,node.currency)}} {{basis(node)}}</td></tr></tbody></table></template><table v-if="!filters.customer"><thead><tr><th>Client</th><th>Commandes</th><th>Pièces à livrer</th><th>Soldes A TTC</th><th>Soldes B HT</th></tr></thead><tbody><tr v-for="client in clients" :key="client.customer||client.name"><td>{{client.label||client.customer_name}}</td><td>{{qty(client.orders)}}</td><td>{{qty(client.remaining_qty)}}</td><td><span v-for="value in client.balances_a||[]" :key="balanceKey(value)">{{balanceText(value)}} </span></td><td><span v-for="value in client.balances_b||[]" :key="balanceKey(value)">{{balanceText(value)}} </span></td></tr></tbody></table></section>
  </div>
 </template>

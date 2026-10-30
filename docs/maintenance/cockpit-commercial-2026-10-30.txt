@@ -8,6 +8,8 @@ Entrée « Cockpit commercial » dans le workspace Univers Glass.
 La maquette validée est conservée dans docs/mockups/cockpit-commercial/.
 L’aperçu de l’implémentation utilise exclusivement des données fictives :
   docs/mockups/cockpit-commercial/apercu-implementation-donnees-fictives.png
+L'aperçu de la modale de règlement utilise également des données fictives :
+  docs/mockups/cockpit-commercial/apercu-modale-reglement-donnees-fictives.png
 La page reste dans le cadre ERPNext habituel.
 
 Filtres client, recherche, période, circuit A/B, état, société et devise.
@@ -21,12 +23,42 @@ depuis les documents associés lorsque l'utilisateur peut les lire.
 
 Actions et règles métier
 -----------------------
-Les actions de création appellent special_b.make_delivery / make_payment,
-puis ouvrent le document prérempli dans son formulaire standard. Le cockpit
-ne sauvegarde et ne valide aucun document automatiquement. Les contrôleurs
-existants continuent de gérer stocks, séries, réservations, factures et paiements.
+Les actions ouvrent des modales, sans imposer un passage par les formulaires
+des DocTypes. Le responsable choisit les lignes, les quantités, puis enregistre
+un brouillon ou demande explicitement la validation du véritable document natif :
+  Chantier validé -> devis ; devis validé -> commande A ou B ;
+  commande validée -> bordereau spécial ; commande/bordereau -> règlement spécial.
+Les lignes non choisies restent disponibles pour une opération ultérieure.
+Les services liés suivent proportionnellement leur ouvrage dans les devis et
+commandes ; les lignes de livraison restent indépendantes. Les frais fixes et
+remises fixes des commandes partielles sont répartis sans dépassement du devis.
+
+La livraison propose les séries disponibles et les dépôts, dont Stores - UG
+selon les paramètres existants. La sélection, les dimensions de stock, les lots
+et les réservations passent par les contrôles natifs. Deux lignes ne reçoivent
+pas automatiquement la même série. Un choix manuel reste explicite.
+Le règlement permet plusieurs bordereaux A/B du même client, de la même société
+et devise, un paiement partiel et une avance non affectée. L'affectation d'un
+règlement déjà validé réutilise ce règlement, sans créer un nouvel encaissement.
+
+Les brouillons peuvent être repris et validés depuis la modale. En présence
+d'un workflow actif, seules ses transitions actuellement autorisées sont
+proposées ; le cockpit ne force pas de submit. Les contrôleurs existants gèrent
+les stocks, séries, réservations, factures, paiements et notifications. Pour A,
+la validation du bordereau génère les documents standards de livraison et de
+facturation ; pour B, elle conserve le circuit de sortie existant. Les écritures
+comptables des documents A restent sous la responsabilité des contrôleurs natifs.
+Le bouton explicite « Ouvrir le document » conserve l'accès au formulaire natif.
+
+Chaque opération vérifie les permissions natives, la version de la source et les
+quantités résiduelles, avec verrouillage et rollback transactionnel. Le nouveau
+DocType technique Commercial Operation conserve la clé de requête et le résultat
+dans la même transaction : répéter une requête identique ne crée pas un deuxième
+document. Ce journal immuable n'est pas un nouveau document commercial ; seule
+son insertion technique utilise ignore_permissions, après les contrôles métier.
 L'impression produit un récapitulatif du périmètre consulté.
-Les rafraîchissements de fond préservent la sélection et le positionnement.
+Les rafraîchissements de fond préservent la sélection et le positionnement et
+sont suspendus pendant l'édition dans une modale.
 
 Les montants A sont TTC et les montants B HT. Les sociétés et devises sont
 présentées séparément. Un indicateur indisponible pour cause de permissions
@@ -49,26 +81,38 @@ Les listes sont bornées et signalent une consultation tronquée.
 Fichiers
 --------
 frontend/workshop-vue/src/CommercialCockpit.vue
+frontend/workshop-vue/src/CommercialActionModal.vue
+frontend/workshop-vue/src/commercial-action.js
+frontend/workshop-vue/src/commercial-action-field.vue
+frontend/workshop-vue/src/commercial-action.css
 frontend/workshop-vue/src/commercial-cockpit.css
 frontend/workshop-vue/src/commercial-icon.vue
 frontend/workshop-vue/src/commercial-layout.js
 frontend/workshop-vue/src/main.js
 frontend/workshop-vue/tests/commercial-cockpit.test.mjs
 frontend/workshop-vue/tests/commercial-browser.cjs
+frontend/workshop-vue/tests/commercial-action.test.mjs
+frontend/workshop-vue/tests/commercial-modal-browser.cjs
 mat_reco/material_reconfiguration/page/commercial_cockpit/*
 mat_reco/material_reconfiguration/services/commercial_cockpit.py
 mat_reco/material_reconfiguration/services/commercial_cockpit_setup.py
+mat_reco/material_reconfiguration/services/commercial_actions.py
+mat_reco/material_reconfiguration/services/commercial_special_actions.py
+mat_reco/material_reconfiguration/doctype/commercial_operation/*
 mat_reco/hooks.py
 mat_reco/material_reconfiguration/workspace/univers_glass/univers_glass.json
 mat_reco/public/js/workshop_vue_dist/workshop.js et workshop.css (build suivi).
 mat_reco/material_reconfiguration/tests/test_commercial_cockpit.py
+mat_reco/material_reconfiguration/tests/test_commercial_actions.py
+mat_reco/material_reconfiguration/tests/test_commercial_special_actions.py
 
 Déploiement
 -----------
-Aucun nouveau DocType métier ou champ personnalisé n'est nécessaire.
+Seul le DocType technique Commercial Operation est ajouté ; aucun nouveau champ
+métier ni aucune reprise des transactions existantes n'est nécessaire.
 Après publication du code et du build, exécuter la migration du site. Le hook
-commercial_cockpit_setup.install installe la Page et le raccourci sans attribuer
-de nouvelles permissions sur les documents.
+commercial_cockpit_setup.install installe le journal technique, la Page et le
+raccourci sans attribuer de nouvelles permissions sur les documents métier.
 
 Les rôles ayant explicitement la lecture des modules spéciaux sont ajoutés aux
 rôles de la Page à l'installation. Pour un nouveau rôle configuré après migration,
@@ -78,29 +122,46 @@ immédiatement l'API, même si l'ancien raccourci est encore présent en cache.
 
 Vérification
 ------------
-Build Vite réussi. Les 44 tests JavaScript passent, dont 12 tests du graphe
-commercial (règlement mixte unique, allocations, repli, devises, routes et accès).
+Build Vite réussi. Les 57 tests JavaScript passent, dont 12 tests du graphe
+commercial et 13 tests des modales (sélections partielles, services, sérialisation,
+affectations mixtes, avances, limites, propositions de séries et workflows).
 Le test navigateur isolé utilise exclusivement des documents fictifs en mémoire :
-actions vers les formulaires natifs, routes Vue, arbre/liste, zoom, impression,
-affichage mobile et effacement des documents après refus d'accès.
+routes Vue, arbre/liste, zoom, impression, affichage mobile et effacement des
+documents après refus d'accès. Le second test navigateur couvre les modales :
+devis partiel et services proportionnels, commande, livraison partielle, séries,
+dépôt, dimensions, règlement mixte, avance, erreur serveur, nouvelle tentative
+idempotente, workflow explicite, retour au graphe et navigation au clavier.
 
 Les lectures de la base de développement ont vérifié les requêtes réelles et la
 lecture des tables enfants. Aucune transaction métier n'est créée pour ces tests.
-Les 21 tests Python du read model passent : soldes A/B, avances, arrondis, facture
-partagée, règlements mixtes, droits manquants, champs cachés et troncature.
+Les 68 tests Python passent : 21 pour le read model, 24 pour les transitions
+commerciales et 23 pour les adaptateurs bordereau/règlement. Ils couvrent les
+soldes A/B, permissions et champs cachés, services proportionnels, reliquats,
+frais/remises fixes, workflows, idempotence, rollback, séries, avances et
+affectations. Ces tests sont isolés et ne créent pas de transaction métier.
 Les consultations réelles all/A/B en développement passent également : documents
 et arêtes cohérents, refus pour un utilisateur sans accès aux modules spéciaux,
 et compteurs Stock Ledger Entry, GL Entry, Bordereau Special, Reglement Special
 et ToDo inchangés après consultation. Un index de 22 clients a été vérifié.
 Aucune donnée réelle du cockpit n’est exportée pour ces contrôles.
+Les préparations réelles des modales ont également été vérifiées en lecture
+seule sur le site de développement : devis, commande, livraison, règlement,
+édition d'un brouillon et affectation d'un règlement validé. Les trois API
+refusent un utilisateur sans accès spécial. Les compteurs Quotation, Sales
+Order, Bordereau Special, Reglement Special, Commercial Operation, Stock Ledger
+Entry, GL Entry et ToDo sont inchangés après ces contrôles.
+Des BL A historiques de test ont des factures associées manquantes/incohérentes.
+Ils conservent leurs refus natifs ; un candidat non choisi indisponible ne bloque
+pas un autre BL ni une avance. Aucune donnée historique n'est corrigée ici.
 
 Commandes reproductibles :
   cd frontend/workshop-vue
   npm run build
   npm test
   node tests/commercial-browser.cjs
+  node tests/commercial-modal-browser.cjs
   # Depuis la racine du bench, sans site ni écriture BDD :
-  env/bin/python -m unittest mat_reco.material_reconfiguration.tests.test_commercial_cockpit
+  env/bin/python -m unittest mat_reco.material_reconfiguration.tests.test_commercial_cockpit mat_reco.material_reconfiguration.tests.test_commercial_actions mat_reco.material_reconfiguration.tests.test_commercial_special_actions
 
 Limite de vérification : la revue automatique a refusé la création d'une session
 Administrateur de test hors authentification normale, puis l'export local du
@@ -108,3 +169,7 @@ payload complet. Ces actions n'ont pas été exécutées. La vérification visue
 reste isolée, avec données fictives, et les lectures réelles restent en base.
 Aucun nouveau déploiement ou test transactionnel de production n'est effectué
 pour ce cockpit. Les documents et ToDo de la recette A/B précédente sont conservés.
+Le journal technique est installé sur le site de développement et son cache a
+été vidé après le dernier build. La validation native réelle de bout en bout des
+nouvelles modales reste à effectuer en production après déploiement/migration ;
+les contrôles navigateur ci-dessus simulent leurs réponses API en mémoire.

@@ -72,7 +72,7 @@ def _parents(snapshot, kind, fields, filters=None, or_filters=None):
     if not snapshot['capabilities'].get('can_read_' + CAP[kind]):
         return []
     doctype = DT[kind]
-    fields = _read_fields(doctype, fields)
+    fields = _read_fields(doctype, list(dict.fromkeys(fields + ['modified'])))
     rows = frappe.get_list(doctype, fields=fields, filters=filters or {}, or_filters=or_filters or [],
         order_by=f'`tab{doctype}`.modified desc, `tab{doctype}`.name desc', limit_page_length=MAX_PARENTS + 1, distinct=True)
     if len(rows) > MAX_PARENTS:
@@ -273,7 +273,7 @@ def _add_visible_sources(snapshot, kind, names, fields):
     remaining = sorted(names - known)
     if not remaining or not snapshot['capabilities'].get('can_read_' + CAP[kind]):
         return
-    rows = frappe.get_list(DT[kind], fields=_read_fields(DT[kind], fields),
+    rows = frappe.get_list(DT[kind], fields=_read_fields(DT[kind], list(dict.fromkeys(fields + ['modified']))),
         filters={'name': ['in', remaining]}, limit_page_length=MAX_PARENTS + 1)
     snapshot[kind].extend(dict(row) for row in rows[:max(0, MAX_PARENTS - len(snapshot[kind]))])
     if len(rows) + len(known) > MAX_PARENTS:
@@ -710,7 +710,8 @@ def project(snapshot, filters):
             basis=('HT' if _kind(row) == 'B' else 'TTC') if kind in ('delivery', 'order') else
                 'TTC' if kind in ('quotation', 'native_delivery', 'invoice') else '',
             status=row.get('status') or {0:'Brouillon', 1:'Validé', 2:'Annulé'}.get(row.get('docstatus'), ''),
-            docstatus=row.get('docstatus'), order_type=_kind(row) if kind in ('order', 'delivery', 'payment') else None,
+            docstatus=row.get('docstatus'), modified=row.get('modified'),
+            order_type=_kind(row) if kind in ('order', 'delivery', 'payment') else None,
             sales_order=row.get('sales_order') if row.get('sales_order') in selected_orders else name if kind == 'order' else None,
             date=row.get('posting_date') or row.get('transaction_date') or row.get('creation'), metrics=metrics or {})
         if kind == 'order' and _kind(row) == 'B':

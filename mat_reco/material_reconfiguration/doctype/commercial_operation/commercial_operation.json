@@ -1,0 +1,25 @@
+{
+ "doctype": "DocType",
+ "name": "Commercial Operation",
+ "module": "Material Reconfiguration",
+ "engine": "InnoDB",
+ "autoname": "field:request_key",
+ "fields": [
+  {"fieldname": "request_key", "label": "Clé de requête", "fieldtype": "Data", "unique": 1, "reqd": 1, "read_only": 1},
+  {"fieldname": "user", "label": "Utilisateur", "fieldtype": "Link", "options": "User", "reqd": 1, "read_only": 1},
+  {"fieldname": "source_doctype", "label": "Type source", "fieldtype": "Link", "options": "DocType", "reqd": 1, "read_only": 1},
+  {"fieldname": "source_name", "label": "Document source", "fieldtype": "Dynamic Link", "options": "source_doctype", "reqd": 1, "read_only": 1},
+  {"fieldname": "action", "label": "Action", "fieldtype": "Data", "reqd": 1, "read_only": 1},
+  {"fieldname": "intent", "label": "Opération", "fieldtype": "Select", "options": "save\nsubmit\nworkflow", "reqd": 1, "read_only": 1},
+  {"fieldname": "scope", "label": "Empreinte de l’opération", "fieldtype": "Data", "length": 64, "reqd": 1, "read_only": 1},
+  {"fieldname": "target_doctype", "label": "Type créé ou modifié", "fieldtype": "Link", "options": "DocType", "reqd": 1, "read_only": 1},
+  {"fieldname": "target_name", "label": "Document créé ou modifié", "fieldtype": "Dynamic Link", "options": "target_doctype", "reqd": 1, "read_only": 1},
+  {"fieldname": "result_json", "label": "Résultat", "fieldtype": "Long Text", "read_only": 1}
+ ],
+ "field_order": ["request_key", "user", "source_doctype", "source_name", "action", "intent", "scope", "target_doctype", "target_name", "result_json"],
+ "permissions": [{"role": "System Manager", "read": 1}],
+ "allow_rename": 0,
+ "is_submittable": 0,
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

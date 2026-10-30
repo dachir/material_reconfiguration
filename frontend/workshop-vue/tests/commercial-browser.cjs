@@ -58,8 +58,10 @@ function fixture() {
       if(!filters.customer){result.documents=[];result.edges=[];result.details={};}
       return {message:result};
      }
-     if(options.method.endsWith('.make_delivery'))return {message:{doctype:'Bordereau Special',name:'new-bordereau-test'}};
-     if(options.method.endsWith('.make_payment'))return {message:{doctype:'Reglement Special',name:'new-reglement-test'}};
+     if(options.method.endsWith('.get_actions'))return {message:options.args.source_doctype==='Sales Order'?[
+      ...(testPayload.capabilities.can_create_delivery?[{action:'delivery',label:'Livrer'}]:[]),
+      ...(testPayload.capabilities.can_create_payment?[{action:'payment',label:'Enregistrer un règlement'}]:[])
+     ]:[]};
      throw new Error('Unexpected API call: '+options.method);
     }};
   },fixture());
@@ -77,10 +79,6 @@ function fixture() {
   await page.getByRole('button',{name:'Sélectionner SO-DEMO-A',exact:true}).click();
   assert.match(await page.locator('.ugc-details').innerText(),/136\s*000/);
   assert(!/121\s*000/.test(await page.locator('.ugc-details').innerText()),'The BL balance must not be confused with an advance-adjusted account balance');
-  await page.getByRole('button',{name:'Bordereau spécial',exact:true}).click();
-  assert.deepEqual(await page.evaluate(()=>window.routes.at(-1)),['Form','Bordereau Special','new-bordereau-test']);
-  await page.getByRole('button',{name:'Règlement spécial',exact:true}).click();
-  assert.deepEqual(await page.evaluate(()=>window.routes.at(-1)),['Form','Reglement Special','new-reglement-test']);
   await page.getByRole('button',{name:'Ouvrir la commande',exact:true}).click();
   assert.deepEqual(await page.evaluate(()=>window.routes.at(-1)),['Form','Sales Order','SO-DEMO-A']);
   await page.getByRole('button',{name:'Ouvrir FT-DEMO-A',exact:true}).click();
@@ -105,14 +103,15 @@ function fixture() {
   await page.evaluate(()=>{testPayload.capabilities.can_create_delivery=false;testPayload.capabilities.can_create_payment=false;});
   await page.getByRole('button',{name:'Rafraîchir les données',exact:true}).click();
   await page.waitForFunction(()=>!document.querySelector('.ugc-toolbar button[disabled]'));
+  await page.waitForFunction(()=>!document.querySelector('.ugc-detail-actions .ugc-action-loading'));
   assert.equal(await page.locator('.ugc-detail-actions .ugc-primary').count(),0);
-  assert.equal(await page.locator('.ugc-detail-actions').getByRole('button',{name:'Règlement spécial',exact:true}).count(),0);
+  assert.equal(await page.locator('.ugc-detail-actions').getByRole('button',{name:'Enregistrer un règlement',exact:true}).count(),0);
   await page.evaluate(()=>window.denyAccess=true);
   await page.getByRole('button',{name:'Rafraîchir les données',exact:true}).click();
   await page.getByRole('alert').waitFor();
   assert.equal(await page.locator('.ugc-node').count(),0,'Revoked access must clear the visible documents');
   assert.equal(errors.length,0,errors.join('\n'));
   await page.evaluate(()=>{component.hide();component.unmount();});
-  console.log('Cockpit commercial: graph, mixed allocations, native actions/routes, list, zoom, print, mobile and revoked permissions OK. Synthetic data only.');
+  console.log('Cockpit commercial: graph, mixed allocations, document routes, list, zoom, print, mobile and revoked permissions OK. Synthetic data only.');
  } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

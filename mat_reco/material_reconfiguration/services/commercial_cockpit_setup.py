@@ -27,6 +27,7 @@ def readable_roles():
 
 def install():
     """Idempotent; also usable after a new special-module role is configured."""
+    frappe.reload_doc("material_reconfiguration", "doctype", "commercial_operation")
     frappe.reload_doc("material_reconfiguration", "page", "commercial_cockpit")
     page = frappe.get_doc("Page", PAGE)
     roles = readable_roles()

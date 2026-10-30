@@ -172,6 +172,9 @@
 .ug-commercial-cockpit .ugc-list-row small{display:block;font-size:10px;color:#a9c1d1}
 .ug-commercial-cockpit .ugc-list-row>.ugc-icon-button{border:0;background:transparent;flex:none;width:30px}
 .ug-commercial-cockpit .ugc-print{display:none}
+.ug-commercial-cockpit .ugc-feedback{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 12px;padding:7px 12px;border:1px solid #328567;background:#0c49313b;border-radius:5px;color:#b1f5d2}
+.ug-commercial-cockpit .ugc-feedback .ugc-icon-button{width:25px;height:25px;background:transparent;border:0;padding:3px}
+.ug-commercial-cockpit .ugc-action-loading{font-size:11px;color:var(--ugc-muted)}
 @keyframes ugc-spin{to{transform:rotate(360deg)}}
 .ug-commercial-cockpit .ugc-spinning{animation:ugc-spin 1.5s linear infinite}
 @media(max-width:1450px){.ug-commercial-cockpit .ugc-content.ugc-with-details{grid-template-columns:200px minmax(0,1fr) 285px}.ug-commercial-cockpit .ugc-content{grid-template-columns:200px minmax(0,1fr)}.ug-commercial-cockpit .ugc-journey-heading{gap:10px;padding:10px}.ug-commercial-cockpit .ugc-journey-heading h2{font-size:17px}.ug-commercial-cockpit .ugc-kpi{padding:11px 14px;gap:15px}.ug-commercial-cockpit .ugc-kpi strong{font-size:22px}.ug-commercial-cockpit .ugc-column-headings>div{font-size:9px}.ug-commercial-cockpit .ugc-toolbar{gap:6px}.ug-commercial-cockpit .ugc-filter{height:36px;padding:0 6px;font-size:11px}.ug-commercial-cockpit .ugc-search{height:36px}.ug-commercial-cockpit .ugc-client-caption{display:none}}
