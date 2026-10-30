@@ -1,0 +1,49 @@
+UNIVERS GLASS — CRÉATION DE COMMANDE DEPUIS LE DEVIS 88
+30 octobre 2026
+
+Production : SAL-QTN-2026-00088, devis validé daté du 29 octobre 2026,
+valable jusqu'au 28 novembre. La commande préparée prend la date du 30 octobre.
+Le devis contient une échéance comptant à 100 %, datée du 29 octobre, sans
+modèle ni règle de délai. ERPNext la recopie dans la commande sans la décaler.
+Le paramètre Accounts Settings.automatically_fetch_payment_terms vaut 1.
+
+Reproduction
+------------
+La préparation native et commercial_actions.prepare_action réussissent.
+L'enregistrement en brouillon échoue dans le parcours natif puis dans le
+parcours exact du cockpit commercial (commercial_actions.execute_action,
+intent=save) avec l'erreur native :
+  Row 1: Due Date in the Payment Terms table cannot be before Posting Date
+La référence d'acceptation employée par le test cockpit est explicitement un
+marqueur TEST-DIAGNOSTIC. L'échec transactionnel ne l'enregistre pas.
+La liste des commandes du chantier est vide avant et après les deux essais.
+Aucune commande n'a été créée ou validée ; aucune fiche technique n'a été lancée.
+Le devis et le chantier n'ont pas été modifiés.
+
+Correction
+----------
+chantier_service.rebase_order_payment_schedule recalcule les échéances d'une
+commande brouillon quand sa date change : règles calendaires natives ERPNext
+pour les délais définis ; décalage du délai relatif pour les échéances manuelles.
+Les dates d'escompte suivent la même règle. Les portions, montants, modes de
+paiement, textes et données du devis restent intacts.
+map_chantier l'applique après le mapping Quotation -> Sales Order d'un chantier.
+Les cibles préremplies depuis plusieurs devis ne sont pas décalées arbitrairement.
+commercial_actions._headers l'applique ensuite si l'utilisateur choisit une autre
+date dans la modale. Les contrôles de dates ERPNext restent activés.
+
+Pour le cas reproduit, échéance du 29 octobre -> échéance du 30 octobre,
+sans modification du montant ni des taxes du devis.
+Les permissions et le workflow d'approbation Sales Order restent inchangés.
+
+Vérification et publication
+--------------------------
+Tests isolés sans écriture métier : cas comptant, crédit 30 jours, fin de mois,
+escompte, échéances manuelles multiples, source immuable, date choisie en modale,
+non-chantier inchangé, cible multi-devis et validation native avant/après.
+Les 10 nouveaux tests et les 117 tests de régression des rapports/cockpit passent
+ensemble : 127 tests réussis, sans écriture en base. Compilation et diff vérifiés.
+Le correctif Python est local, prêt à déployer. Aucun champ ni migration de
+données n'est nécessaire. Il n'a pas été publié par API en production.
+La création réussie du devis 88 reste à vérifier après déploiement ; aucun succès
+de sauvegarde ou de validation de cette commande en production n'est revendiqué.

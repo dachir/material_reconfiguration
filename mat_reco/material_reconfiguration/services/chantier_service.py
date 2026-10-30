@@ -3,7 +3,7 @@ import hashlib
 import json
 
 import frappe
-from frappe.utils import flt, getdate
+from frappe.utils import add_days, date_diff, flt, getdate
 
 
 DIMENSIONS = [('custom_client_length_mm', 'length_mm'), ('custom_client_width_mm', 'width_mm'), ('custom_client_thickness_mm', 'thickness_mm')]
@@ -77,8 +77,44 @@ def map_chantier(doc, method, source_doc):
         doc.custom_chantier = value
         # Sections organize the chantier and quote only, never the Sales Order.
         if doc.get('doctype') == 'Sales Order':
+            # A previously populated target can contain several quotations. Its
+            # existing schedule has no unambiguous single quotation date.
+            if not any(row.get('prevdoc_docname') not in (None, '', source_doc.get('name'))
+                    for row in doc.get('items', [])):
+                rebase_order_payment_schedule(doc, source_doc.get('transaction_date'))
             for row in doc.get('items', []):
                 row.custom_chantier_section = None
+
+
+def rebase_order_payment_schedule(doc, previous_date):
+    """Keep mapped payment terms relative to the Sales Order's own date.
+
+    ERPNext copies the quotation's Payment Schedule while defaulting the order
+    date to today. Reuse its term rules, preserving manually agreed intervals
+    when a schedule has no rule, without changing portions or monetary values.
+    """
+    current_date = doc.get('transaction_date')
+    rows = doc.get('payment_schedule') or []
+    if (doc.get('doctype') != 'Sales Order' or doc.get('docstatus') not in (None, 0)
+            or not previous_date or not current_date or not rows):
+        return
+    delta = date_diff(current_date, previous_date)
+    if not delta:
+        return
+    from erpnext.controllers.accounts_controller import get_discount_date, get_due_date
+
+    for row in rows:
+        due_date = get_due_date(row, current_date) if row.get('due_date_based_on') else None
+        discount_date = (get_discount_date(row, current_date)
+            if row.get('discount_validity_based_on') else None)
+        if due_date:
+            row.due_date = due_date
+        elif row.get('due_date'):
+            row.due_date = add_days(row.due_date, delta)
+        if discount_date:
+            row.discount_date = discount_date
+        elif row.get('discount_date'):
+            row.discount_date = add_days(row.discount_date, delta)
 
 
 def _validate_geometry(row):

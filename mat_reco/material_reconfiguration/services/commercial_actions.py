@@ -145,6 +145,7 @@ def _values(doc, fields):
 
 
 def _headers(doc, values):
+    previous_date = doc.get('transaction_date')
     allowed = HEADERS.get(doc.doctype, set())
     if set(values) - allowed:
         frappe.throw('Des champs non modifiables ont été transmis.')
@@ -159,6 +160,8 @@ def _headers(doc, values):
             frappe.throw('Valeur de champ invalide.')
         doc.set(actual, value)
     if doc.doctype == 'Sales Order':
+        from .chantier_service import rebase_order_payment_schedule
+        rebase_order_payment_schedule(doc, previous_date)
         for row in doc.get('items', []):
             row.delivery_date = doc.delivery_date
 
