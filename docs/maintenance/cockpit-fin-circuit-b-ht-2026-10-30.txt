@@ -1,0 +1,66 @@
+UNIVERS GLASS — FIN DU CIRCUIT COMMERCIAL B EN HT
+30 octobre 2026
+
+Constat en production
+--------------------
+SAL-ORD-B-2026-00016 : une vitre livrée, 45 000 HT de bordereau validé et
+45 000 de règlement validé ; quantités restantes, solde BL et solde commande
+à zéro. Le devis SAL-QTN-2026-00088 conserve normalement son total 53 100 TTC.
+Le cockpit conservait pourtant toute la branche du chantier 26CHANT1000079
+en vue En cours, car le statut ERPNext attendait une livraison/facturation
+standard que le circuit B ne produit pas. Les calculs financiers B étaient
+déjà HT ; il ne fallait ni effacer une taxe ni créer une facture B.
+
+Correction
+----------
+La projection calcule une fin de traitement B indépendante du statut de
+facturation ERPNext : commande validée, toutes les quantités et services livrés,
+montant HT couvert par les BL, soldes HT connus à zéro, aucune avance/crédit
+restant à traiter ni brouillon de livraison/règlement lié.
+Une différence de taxes TTC n'empêche plus cette fin de traitement. Les vrais
+reliquats de quantité, de services, de HT, les avances, les crédits et les
+données financières inconnues maintiennent la branche visible.
+
+En vue En cours, les commandes B terminées et leurs documents descendants
+disparaissent. Un devis disparaît seulement si toutes ses lignes ont été
+transformées en commandes B terminées. Un chantier disparaît seulement lorsque
+tous ses ouvrages et compléments sont couverts par des devis ainsi terminés,
+sans autre devis ou commande à traiter.
+Les documents apparentés sont recherchés sans filtre de période, de recherche
+ou de circuit, en lecture native et avec limites. Un périmètre incomplet ne
+permet jamais de masquer les ancêtres sur une simple supposition.
+
+La vue Tous les états conserve l'historique complet avec un statut Terminé
+calculé pour le cockpit et le statut ERPNext d'origine disponible séparément.
+Aucun statut ou montant du document source n'est modifié ; aucune commande
+ou facture n'est clôturée, supprimée, annulée ou validée par cette projection.
+Le circuit A, les rapports financiers et les tâches d'export Sage conservent
+leur fonctionnement existant.
+
+Fichiers
+--------
+services/commercial_completion.py : preuves de fin B et couverture des sources.
+services/commercial_cockpit.py : lectures bornées, filtre En cours et statut visuel.
+tests/test_b_tax_completion.py : 32 régressions métier isolées.
+tests/test_commercial_completion_loader.py : 8 tests des lectures et permissions.
+
+Vérifications
+-------------
+167 tests Python et 65 tests JavaScript réussis, compilation et diff vérifiés.
+Les tests incluent les reliquats réels, crédits, brouillons, inconnus, sources
+partielles, plusieurs commandes et BL pour un règlement, et le circuit A inchangé.
+Lectures réelles du schéma de développement réussies, sans écriture métier.
+
+Les six documents du cas de production ont été lus par API et projetés avec
+le nouveau code local, uniquement en mémoire, sans export du payload réel :
+  En cours : zéro commande et aucun document de cette branche.
+  Tous les états : commande, BL, règlement, devis, chantier et FT conservés ;
+  commande/devis/chantier portent le statut visuel Completed (Terminé).
+Les taxes et le statut des documents source sont restés inchangés.
+Aucun test transactionnel, stock, règlement ou validation en production.
+
+Publication
+-----------
+Correctif Python prêt à déployer. Aucun nouveau DocType, champ ou migration de
+données nécessaire. Pas de nouveau build Vue : le statut Completed est déjà
+pris en charge par l'interface. La production n'a pas été modifiée par API.

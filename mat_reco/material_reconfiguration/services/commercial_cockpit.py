@@ -101,6 +101,10 @@ def _children(snapshot, key, doctype, parent_kind, tablefield, fields):
     # with get_list, including user permissions and permission_query_conditions.
     readable = _read_fields(doctype, fields, parenttype=parenttype)
     required = {'order_items': ('qty', 'uom', 'delivered_qty'),
+        'quotation_items': ('qty', 'stock_qty', 'ordered_qty', 'conversion_factor', 'uom',
+            'custom_chantier_line', 'custom_repere', 'is_alternative'),
+        'project_lines': ('line_id', 'repere', 'qty'),
+        'project_extras': ('line_id', 'parent_line_id', 'qty'),
         'delivery_items': ('sales_order_item', 'qty'), 'allocations': ('bordereau', 'amount'),
         'invoice_items': ('sales_order',), 'payment_references': ('reference_doctype', 'reference_name', 'allocated_amount'),
         'native_delivery_items': ('against_sales_order',)}.get(key, ())
@@ -155,7 +159,7 @@ def _snapshot(filters, capabilities):
         'custom_ug_order_type', 'custom_chantier', 'custom_technical_study', 'conversion_rate', 'disable_rounded_total'], order_filters, order_or)
     _children(data, 'order_items', 'Sales Order Item', 'order', 'items', ['name', 'parent', 'idx', 'item_code',
         'item_name', 'qty', 'delivered_qty', 'stock_qty', 'conversion_factor', 'uom', 'net_amount', 'amount',
-        'prevdoc_docname', 'custom_ug_work_type_name', 'stock_uom', 'is_stock_item'])
+        'prevdoc_docname', 'quotation_item', 'custom_chantier_line', 'custom_ug_work_type_name', 'stock_uom', 'is_stock_item'])
     order_names = [row['name'] for row in orders]
     scoped = bool(filters.get('sales_order') or filters.get('from_date') or filters.get('to_date') or search or filters['circuit'] != 'all')
 
@@ -241,6 +245,9 @@ def _snapshot(filters, capabilities):
     _add_visible_sources(data, 'quotation', {row.get('prevdoc_docname') for row in data.get('order_items', [])},
         ['name', 'company', 'party_name', 'customer_name', 'currency', 'transaction_date', 'status', 'docstatus',
          'grand_total', 'rounded_total', 'disable_rounded_total', 'custom_chantier'])
+    _children(data, 'quotation_items', 'Quotation Item', 'quotation', 'items',
+        ['name', 'parent', 'qty', 'stock_qty', 'ordered_qty', 'conversion_factor', 'uom',
+         'custom_chantier_line', 'custom_repere', 'is_alternative'])
     project_filters = _base(filters)
     _period(project_filters, 'creation', filters)
     project_or = [[field, 'like', '%' + search + '%'] for field in ('name', 'customer', 'designation')] if search else []
@@ -248,6 +255,11 @@ def _snapshot(filters, capabilities):
         'docstatus', 'technical_study'], project_filters, project_or)
     _add_visible_sources(data, 'project', {row.get('custom_chantier') for row in orders + data['quotation']},
         ['name', 'company', 'customer', 'currency', 'creation', 'designation', 'status', 'docstatus', 'technical_study'])
+    _children(data, 'project_lines', 'Chantier Line', 'project', 'lines',
+        ['parent', 'name', 'line_id', 'repere', 'qty'])
+    _children(data, 'project_extras', 'Chantier Commercial Extra', 'project', 'commercial_extras',
+        ['parent', 'name', 'line_id', 'parent_line_id', 'qty'])
+    _completion_scope(data)
     if filters.get('customer'):
         study_or = []
         if order_names:
@@ -267,6 +279,55 @@ def _snapshot(filters, capabilities):
     data['customers'] = [dict(row) for row in frappe.get_list('Customer', fields=_read_fields('Customer', ['name', 'customer_name']),
         filters={'name': ['in', list(customer_names)]}, limit_page_length=MAX_PARENTS)] if customer_names and frappe.has_permission('Customer', 'read') else []
     return data
+
+
+def _completion_scope(snapshot):
+    """Visible peers outside filters prevent hiding a partially treated branch.
+
+    These bounded metadata-only reads do not widen the financial parent sets.
+    Dates, search and circuit deliberately do not apply to sibling documents.
+    """
+    snapshot['completion_orders'] = []
+    snapshot['completion_quotations'] = []
+    snapshot['completion_scope_incomplete'] = False
+    projects = sorted({row['name'] for row in snapshot.get('project', [])})
+    quotations = sorted({row['name'] for row in snapshot.get('quotation', [])})
+    if not projects and not quotations:
+        return
+
+    def load(kind, key, selectors):
+        if not selectors:
+            return
+        fields = ['name', 'docstatus', 'custom_chantier'] + (['status'] if kind == 'quotation' else [])
+        readable = _read_fields(DT[kind], fields)
+        if not snapshot['capabilities'].get('can_read_' + CAP[kind]) or set(fields) - set(readable):
+            snapshot['completion_scope_incomplete'] = True
+            return
+        try:
+            rows = frappe.get_list(DT[kind], fields=readable,
+                filters={'docstatus': ['<', 2]}, or_filters=selectors,
+                order_by=f'`tab{DT[kind]}`.name', limit_page_length=MAX_PARENTS + 1, distinct=True)
+        except frappe.PermissionError:
+            snapshot['completion_scope_incomplete'] = True
+            return
+        if len(rows) > MAX_PARENTS or any(set(fields) - set(row) for row in rows):
+            snapshot['completion_scope_incomplete'] = True
+        snapshot[key] = [dict(row) for row in rows[:MAX_PARENTS]]
+
+    order_selectors = [['Sales Order', 'custom_chantier', 'in', projects]] if projects else []
+    if quotations and snapshot['capabilities'].get('can_read_orders'):
+        meta = frappe.get_meta('Sales Order')
+        table = meta.get_field('items')
+        readable = _read_fields('Sales Order Item', ['prevdoc_docname'], parenttype='Sales Order')
+        if table and (table.permlevel or 0) in meta.get_permlevel_access('read') and 'prevdoc_docname' in readable:
+            order_selectors.append(['Sales Order Item', 'prevdoc_docname', 'in', quotations])
+        else:
+            snapshot['completion_scope_incomplete'] = True
+    elif quotations:
+        snapshot['completion_scope_incomplete'] = True
+    load('order', 'completion_orders', order_selectors)
+    if projects:
+        load('quotation', 'completion_quotations', [['Quotation', 'custom_chantier', 'in', projects]])
 
 
 def _add_visible_sources(snapshot, kind, names, fields):
@@ -524,10 +585,17 @@ def project(snapshot, filters):
                 metric[key] = None
             metric['balance_state'] = metric['order_balance_state'] = 'unavailable'
 
+    from .commercial_completion import completed_b_branches
+    completed_b = completed_b_branches(snapshot, order_metrics)
+    for name, metric in order_metrics.items():
+        metric['completed_b'] = name in completed_b['order']
+
     selected_orders = {}
     for name, order in rows['order'].items():
         metric = order_metrics[name]
         if filters.get('state') == 'open' and (order.get('docstatus') == 2 or order.get('status') in ('Closed', 'Completed', 'Cancelled')):
+            continue
+        if filters.get('state') == 'open' and name in completed_b['order']:
             continue
         if filters.get('followup') == 'unpaid' and (metric['balance'] is None or metric['balance'] <= EPS):
             continue
@@ -572,6 +640,8 @@ def project(snapshot, filters):
     for kind in ('quotation', 'project'):
         for row in rows[kind].values():
             if filters.get('state') == 'open' and (row.get('docstatus') == 2 or row.get('status') in ('Lost', 'Closed', 'Completed', 'Cancelled')):
+                continue
+            if filters.get('state') == 'open' and row['name'] in completed_b[kind]:
                 continue
             client(row.get('customer') or row.get('party_name'), row.get('customer_name'))
     for kind in ('delivery', 'payment'):
@@ -646,6 +716,8 @@ def project(snapshot, filters):
         for name, row in rows['payment'].items():
             if row.get('docstatus') != 1 or row.get('sales_order') or not row.get('currency'):
                 continue
+            if row.get('unallocated_amount') is not None and abs(flt(row['unallocated_amount'])) <= EPS:
+                continue  # A fully allocated global receipt creates no new work.
             account = client(row.get('customer'))
             if account is None:
                 continue
@@ -718,6 +790,10 @@ def project(snapshot, filters):
             date=row.get('posting_date') or row.get('transaction_date') or row.get('creation'), metrics=metrics or {})
         if kind == 'order' and _kind(row) == 'B':
             document['amount'] = row.get('net_total')
+        if name in completed_b.get(kind, ()):
+            document['native_status'] = document['status']
+            document['status'] = 'Completed'
+            document['metrics'] = dict(document['metrics'], completed_b=True)
         documents[identity] = document
         result['details'][identity] = dict(document, linked_documents=[], tasks=[])
         return identity
@@ -759,9 +835,13 @@ def project(snapshot, filters):
         for row in rows[kind].values():
             if filters.get('state') == 'open' and (row.get('docstatus') == 2 or row.get('status') in ('Lost', 'Closed', 'Completed', 'Cancelled')):
                 continue
+            if filters.get('state') == 'open' and row['name'] in completed_b[kind]:
+                continue
             if add(kind, row) and kind == 'quotation':
                 project_names.add(row.get('custom_chantier'))
     for row in rows['study'].values():
+        if filters.get('state') == 'open' and row.get('sales_order') in completed_b['order']:
+            continue
         if row.get('sales_order') in active_order_names or row.get('chantier') in project_names:
             add('study', row)
     for kind in ('native_delivery', 'invoice', 'native_payment'):
