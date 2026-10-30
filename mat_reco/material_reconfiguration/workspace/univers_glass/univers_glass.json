@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"ug-header\", \"type\": \"header\", \"data\": {\"text\": \"Univers Glass\", \"col\": 12}}, {\"id\": \"ug-cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cockpit atelier\", \"col\": 4}}, {\"id\": \"ug-glass-stock\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Glass Stock\", \"col\": 4}}, {\"id\": \"univers-glass-chantiers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Chantiers\", \"col\": 3}}, {\"id\": \"ug-technical-study\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fiche technique\", \"col\": 4}}, {\"id\": \"ug-llm-settings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mat Reco Settings\", \"col\": 4}}, {\"id\": \"ug-personal-tasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mes t\u00e2ches Univers Glass\", \"col\": 12}}, {\"id\": \"ug-orders-b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Suivi commandes B\", \"col\": 4}}, {\"id\": \"ug-b-balances\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Situation des comptes clients B\", \"col\": 4}}]",
+ "content": "[{\"id\": \"ug-header\", \"type\": \"header\", \"data\": {\"text\": \"Univers Glass\", \"col\": 12}}, {\"id\": \"ug-cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cockpit atelier\", \"col\": 4}}, {\"id\": \"ug-commercial-cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cockpit commercial\", \"col\": 4}}, {\"id\": \"ug-glass-stock\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Glass Stock\", \"col\": 4}}, {\"id\": \"univers-glass-chantiers\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Chantiers\", \"col\": 3}}, {\"id\": \"ug-technical-study\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fiche technique\", \"col\": 4}}, {\"id\": \"ug-llm-settings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mat Reco Settings\", \"col\": 4}}, {\"id\": \"ug-personal-tasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mes t\u00e2ches Univers Glass\", \"col\": 12}}, {\"id\": \"ug-orders-b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Suivi commandes B\", \"col\": 4}}, {\"id\": \"ug-b-balances\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Situation des comptes clients B\", \"col\": 4}}]",
  "creation": "2026-10-18 15:08:41.914164",
  "custom_blocks": [],
  "docstatus": 0,
@@ -11,7 +11,7 @@
  "is_hidden": 0,
  "label": "Univers Glass",
  "links": [],
- "modified": "2026-10-25 20:58:44.310697",
+ "modified": "2026-10-30 16:46:53.612272",
  "modified_by": "Administrator",
  "module": "Material Reconfiguration",
  "name": "Univers Glass",
@@ -49,6 +49,9 @@
   },
   {
    "role": "UG CHANTIER"
+  },
+  {
+   "role": "UG COMMANDES B"
   }
  ],
  "sequence_id": 0.0,
@@ -101,6 +104,13 @@
    "link_to": "Situation des comptes clients B",
    "report_ref_doctype": "Bordereau Special",
    "type": "Report"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Cockpit commercial",
+   "link_to": "commercial-cockpit",
+   "type": "Page"
   }
  ],
  "title": "Univers Glass"

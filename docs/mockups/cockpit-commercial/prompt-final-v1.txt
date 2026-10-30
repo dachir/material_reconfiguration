@@ -1,0 +1,15 @@
+Outil : image_gen intégré (imagegen), création puis retouche ciblée.
+Date : 30/10/2026.
+Maquette conceptuelle ; données fictives ; aucun écran ni droit déployé.
+Référence : première proposition générée à partir du cockpit atelier App.vue/style.css.
+
+Prompt exact de la retouche finale :
+
+Edit this proposed Univers Glass commercial cockpit screenshot. Preserve the entire existing layout, navy workshop theme, white ERPNext header, client navigator, document cards, connectors, monetary summaries and right drawer. Make ONLY these targeted refinements:
+1. To the right of the page title "Cockpit commercial", add a small discreet lock badge reading "Documents spéciaux · A et B". This workspace is for users authorized to Bordereau Special and/or Reglement Special; it is not an additional general sales workspace. No warning banner, no security checklist, no role editor.
+2. Rename the graph's delivery column header to "BORDEREAUX SPÉCIAUX" and the settlement header to "RÈGLEMENTS SPÉCIAUX", adjusting only header font size slightly if necessary to fit cleanly.
+3. In the selected order's right action drawer, change the cyan "+ Bordereau" action to "+ Bordereau spécial", and the next action to "Règlement spécial". Retain "Ouvrir la commande" as an existing-document link.
+4. On the DEV-069 quotation card, correct the amount to "354 000 XOF TTC", identical to the linked A order. No other amount should change.
+5. Replace the right drawer badge "A · Circuit standard" with "A · Facturation ERPNext" so it is clear the special documents generate native accounting for A.
+Keep the shared mixed payment ONE card with 180 000 XOF allocated 100 000 to A and 80 000 to B. Preserve the distinct A TTC and B HT figures. Keep the parallel FT/Atelier branches. Keep all other exact text and all data and graph edges unchanged. Deliver one crisp flat high fidelity desktop mockup with legible French labels, same landscape framing.
+

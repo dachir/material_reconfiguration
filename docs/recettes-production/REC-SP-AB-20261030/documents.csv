@@ -1,0 +1,52 @@
+﻿Repere;DocType;Reference;Docstatus;Etat;Circuit;Commande;HT;TTC_ou_montant_BL;Montant_reglement;Lien_production
+BL-A0;Bordereau Special;UG-BL-2026-00001;2;Annulé;A;;10000.0;11800.0;;https://fimaci.f.frappe.cloud/app/bordereau-special/UG-BL-2026-00001
+BL-B0;Bordereau Special;UG-BL-2026-00002;2;Annulé;B;;10000.0;10000.0;;https://fimaci.f.frappe.cloud/app/bordereau-special/UG-BL-2026-00002
+BL-A1;Bordereau Special;UG-BL-2026-00003;1;Validé;A;;20000.0;23600.0;;https://fimaci.f.frappe.cloud/app/bordereau-special/UG-BL-2026-00003
+BL-B1;Bordereau Special;UG-BL-2026-00004;1;Validé;B;;20000.0;20000.0;;https://fimaci.f.frappe.cloud/app/bordereau-special/UG-BL-2026-00004
+BL-A2;Bordereau Special;UG-BL-2026-00005;1;Validé;A;;40000.0;47200.0;;https://fimaci.f.frappe.cloud/app/bordereau-special/UG-BL-2026-00005
+BL-B2;Bordereau Special;UG-BL-2026-00006;1;Validé;B;;40000.0;40000.0;;https://fimaci.f.frappe.cloud/app/bordereau-special/UG-BL-2026-00006
+ft-B;Chantier Technical Study;1ucggau07s;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/chantier-technical-study/1ucggau07s
+ft-A;Chantier Technical Study;3uaentbh5l;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/chantier-technical-study/3uaentbh5l
+customer;Customer;CUST-2026-00023;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/customer/CUST-2026-00023
+;Delivery Note;MAT-DN-2026-00025;2;Annulé;;;10000.0;11800.0;;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00025
+;Delivery Note;MAT-DN-2026-00026;1;Validé;;;20000.0;23600.0;;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00026
+;Delivery Note;MAT-DN-2026-00027;1;Validé;;;40000.0;47200.0;;https://fimaci.f.frappe.cloud/app/delivery-note/MAT-DN-2026-00027
+cut;Item;REC-SP-AB-20261030-CUT;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/item/REC-SP-AB-20261030-CUT
+raw;Item;REC-SP-AB-20261030-RAW;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/item/REC-SP-AB-20261030-RAW
+mode;Mode of Payment;REC-SP-AB-20261030 — TEST;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/mode-of-payment/REC-SP-AB-20261030%20%E2%80%94%20TEST
+;Payment Entry;ACC-PAY-2026-00001;1;Validé;;;;;15000.0;https://fimaci.f.frappe.cloud/app/payment-entry/ACC-PAY-2026-00001
+;Payment Entry;ACC-PAY-2026-00002;2;Annulé;;;;;30000.0;https://fimaci.f.frappe.cloud/app/payment-entry/ACC-PAY-2026-00002
+;Payment Entry;ACC-PAY-2026-00003;1;Validé;;;;;20000.0;https://fimaci.f.frappe.cloud/app/payment-entry/ACC-PAY-2026-00003
+;Payment Entry;ACC-PAY-2026-00004;2;Annulé;;;;;35800.0;https://fimaci.f.frappe.cloud/app/payment-entry/ACC-PAY-2026-00004
+;Payment Entry;ACC-PAY-2026-00005;1;Validé;;;;;35800.0;https://fimaci.f.frappe.cloud/app/payment-entry/ACC-PAY-2026-00005
+R1;Reglement Special;UG-REG-2026-00001;1;Validé;A;SAL-ORD-2026-00051;;;15000.0;https://fimaci.f.frappe.cloud/app/reglement-special/UG-REG-2026-00001
+R2;Reglement Special;UG-REG-2026-00002;1;Validé;Mixte;SAL-ORD-2026-00051;;;50000.0;https://fimaci.f.frappe.cloud/app/reglement-special/UG-REG-2026-00002
+R3;Reglement Special;UG-REG-2026-00003;2;Annulé;Mixte;SAL-ORD-2026-00051;;;65800.0;https://fimaci.f.frappe.cloud/app/reglement-special/UG-REG-2026-00003
+R3bis;Reglement Special;UG-REG-2026-00004;1;Validé;Mixte;SAL-ORD-2026-00051;;;65800.0;https://fimaci.f.frappe.cloud/app/reglement-special/UG-REG-2026-00004
+;Sales Invoice;ACC-SINV-2026-00002;2;Annulé;;;10000.0;11800.0;;https://fimaci.f.frappe.cloud/app/sales-invoice/ACC-SINV-2026-00002
+;Sales Invoice;ACC-SINV-2026-00003;1;Validé;;;20000.0;23600.0;;https://fimaci.f.frappe.cloud/app/sales-invoice/ACC-SINV-2026-00003
+;Sales Invoice;ACC-SINV-2026-00004;1;Validé;;;40000.0;47200.0;;https://fimaci.f.frappe.cloud/app/sales-invoice/ACC-SINV-2026-00004
+order-A;Sales Order;SAL-ORD-2026-00051;1;Validé;A;;60000.0;70800.0;;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-2026-00051
+order-B;Sales Order;SAL-ORD-B-2026-00015;1;Validé;B;;60000.0;70800.0;;https://fimaci.f.frappe.cloud/app/sales-order/SAL-ORD-B-2026-00015
+serial-A1;Serial No;REC-SP-AB-20261030-A01;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-A01
+serial-A2;Serial No;REC-SP-AB-20261030-A02;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-A02
+serial-A3;Serial No;REC-SP-AB-20261030-A03;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-A03
+serial-A4;Serial No;REC-SP-AB-20261030-A04;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-A04
+serial-A5;Serial No;REC-SP-AB-20261030-A05;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-A05
+serial-A6;Serial No;REC-SP-AB-20261030-A06;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-A06
+serial-B1;Serial No;REC-SP-AB-20261030-B01;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-B01
+serial-B2;Serial No;REC-SP-AB-20261030-B02;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-B02
+serial-B3;Serial No;REC-SP-AB-20261030-B03;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-B03
+serial-B4;Serial No;REC-SP-AB-20261030-B04;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-B04
+serial-B5;Serial No;REC-SP-AB-20261030-B05;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-B05
+serial-B6;Serial No;REC-SP-AB-20261030-B06;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-B06
+serial-P1;Serial No;REC-SP-AB-20261030-P01;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-P01
+serial-P2;Serial No;REC-SP-AB-20261030-P02;0;Enregistré;;;;;;https://fimaci.f.frappe.cloud/app/serial-no/REC-SP-AB-20261030-P02
+opening-debit;Solde Initial Client B;UG-SOLDE-B-2026-00001;2;Annulé;;;;;;https://fimaci.f.frappe.cloud/app/solde-initial-client-b/UG-SOLDE-B-2026-00001
+opening-credit;Solde Initial Client B;UG-SOLDE-B-2026-00002;2;Annulé;;;;;;https://fimaci.f.frappe.cloud/app/solde-initial-client-b/UG-SOLDE-B-2026-00002
+receipt;Stock Entry;MAT-STE-2026-00173;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00173
+repack-A;Stock Entry;MAT-STE-2026-00174;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00174
+repack-B;Stock Entry;MAT-STE-2026-00175;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00175
+;Stock Entry;MAT-STE-2026-00176;2;Annulé;;;;;;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00176
+;Stock Entry;MAT-STE-2026-00177;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00177
+;Stock Entry;MAT-STE-2026-00178;1;Validé;;;;;;https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00178

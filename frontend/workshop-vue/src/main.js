@@ -21,3 +21,14 @@ export function mountChantiers(element) {
 
 import TechnicalStudy from "./TechnicalStudy.vue";
 export function mountTechnicalStudy(element,onStatusChange){const app=createApp(TechnicalStudy,{onStatusChange});const component=app.mount(element);return {show:()=>component.show(),hide:()=>component.hide(),unmount:()=>app.unmount()};}
+
+import CommercialCockpit from "./CommercialCockpit.vue";
+export function mountCommercialCockpit(element) {
+	const app = createApp(CommercialCockpit);
+	const component = app.mount(element);
+	return {
+		show: () => component.show(),
+		hide: () => component.hide(),
+		unmount: () => app.unmount(),
+	};
+}

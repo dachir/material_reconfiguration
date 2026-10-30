@@ -392,6 +392,7 @@ override_doctype_class = {
     'Stock Reservation Entry': 'mat_reco.overrides.stock_reservation_entry.UGStockReservationEntry'
 }
 after_migrate.append('mat_reco.material_reconfiguration.services.production_reservations.install')
+after_migrate.append('mat_reco.material_reconfiguration.services.commercial_cockpit_setup.install')
 _ug_previous = doc_events['Stock Entry']['before_cancel']
 doc_events['Stock Entry']['before_cancel'] = [
     _ug_previous, 'mat_reco.material_reconfiguration.services.production_reservations.before_cancel_production'

@@ -1,0 +1,12 @@
+{
+ "doctype": "Page",
+ "name": "commercial-cockpit",
+ "page_name": "commercial-cockpit",
+ "title": "Cockpit commercial",
+ "module": "Material Reconfiguration",
+ "standard": "Yes",
+ "roles": [
+  {"role": "System Manager"},
+  {"role": "UG COMMANDES B"}
+ ]
+}

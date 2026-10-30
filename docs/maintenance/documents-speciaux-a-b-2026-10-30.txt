@@ -1,5 +1,6 @@
 Univers Glass — Bordereaux et règlements spéciaux communs à A et B
-État au 30/10/2026 : code préparé en développement ; recette finale production en attente.
+État au 30/10/2026 : déploiement effectué par l'utilisateur ; recette production terminée,
+94 contrôles distincts réussis. Voir docs/recettes-production/REC-SP-AB-20261030/rapport.html.
 
 Règle d'accès retenue
 
@@ -107,7 +108,7 @@ mixte et solde initial B, refus des taux historiques incompatibles.
 Contrôles finaux locaux : syntaxe Python et JSON, node --check, git diff --check,
 build Vue réussis. Aucun test métier supplémentaire en DEV après la consigne.
 
-Recette production à effectuer avec un client et des articles dédiés et identifiés :
+Programme de référence pour la recette avec un client et des articles dédiés :
   1. Photographier quantités et séries initiales du périmètre de test.
   2. Créer deux commandes A et B ; valider les FT nécessaires à leur fabrication.
   3. Tester livraison A complète et partielle : DN + facture, une seule sortie.
@@ -124,9 +125,25 @@ la suite brute sur la base de production ; adapter la recette à sa société d�
 
 État production
 
-Aucun déploiement ni mouvement de recette de cette évolution effectué depuis
-cette session. La vérification API du 30/10/2026 renvoie HTTP 401 AuthenticationError.
-Le déploiement et le rétablissement de l'accès sont nécessaires pour poursuivre.
+L'utilisateur a déployé puis rétabli l'accès API. La recette a été effectuée sur
+fimaci.f.frappe.cloud, sans e_def ni fisc_sync installés, avec le client QA
+CUST-2026-00023, les commandes A SAL-ORD-2026-00051 et B SAL-ORD-B-2026-00015.
+Deux plaques QA ont produit douze découpes par deux Repack directs dans Stores - UG.
+Tous les mouvements de recette concernent seulement les deux nouveaux articles QA.
+Quatre BL actifs et deux BL annulés, trois règlements actifs et un annulé,
+trois PE actifs et deux annulés sont conservés pour vérification.
+Les règlements actifs totalisent 130 800 XOF : 70 800 comptabilisés A et
+60 000 HT suivis B. Soldes A/B, compte client natif, stock et réservations
+restants du jeu QA sont tous nuls. La TVA A totale est de 10 800 XOF.
+Les permissions ont été vérifiées côté serveur avec l'utilisateur autorisé
+et un utilisateur standard existant, sans création ni changement de rôle.
+Les 8 tâches ToDo encore ouvertes sont conservées à la demande explicite
+de l'utilisateur. La revue automatique a refusé leur clôture avant exécution :
+aucune tâche n'a été modifiée par le script de fin de recette.
+Le rapport PDF, le classeur Excel et les preuves sont rattachés au client de
+test en fichiers privés Frappe Cloud ; les deux commandes comportent un commentaire
+de synthèse avec les liens. Aucun document de recette n'a été supprimé.
+Cette recette n'exerce pas les MCP, l'import Sage, les remises fixes ou AIRSI.
 
 Données de test DEV conservées, selon instruction explicite de l'utilisateur
 

@@ -1,0 +1,110 @@
+UNIVERS GLASS — COCKPIT COMMERCIAL
+30 octobre 2026
+
+Écran
+------
+Route Desk : /app/commercial-cockpit.
+Entrée « Cockpit commercial » dans le workspace Univers Glass.
+La maquette validée est conservée dans docs/mockups/cockpit-commercial/.
+L’aperçu de l’implémentation utilise exclusivement des données fictives :
+  docs/mockups/cockpit-commercial/apercu-implementation-donnees-fictives.png
+La page reste dans le cadre ERPNext habituel.
+
+Filtres client, recherche, période, circuit A/B, état, société et devise.
+Clients à gauche ; parcours commercial au centre ; document sélectionné à droite.
+Arbre et liste, repli, déplacement, zoom initial 65 %, ajustement au contenu.
+Chantier -> devis -> commande -> bordereaux spéciaux -> règlements spéciaux.
+La fiche technique est une branche parallèle de la commande.
+Un règlement partagé A/B apparaît une seule fois ; ses liens portent les
+montants affectés à chaque bordereau. Les documents natifs restent accessibles
+depuis les documents associés lorsque l'utilisateur peut les lire.
+
+Actions et règles métier
+-----------------------
+Les actions de création appellent special_b.make_delivery / make_payment,
+puis ouvrent le document prérempli dans son formulaire standard. Le cockpit
+ne sauvegarde et ne valide aucun document automatiquement. Les contrôleurs
+existants continuent de gérer stocks, séries, réservations, factures et paiements.
+L'impression produit un récapitulatif du périmètre consulté.
+Les rafraîchissements de fond préservent la sélection et le positionnement.
+
+Les montants A sont TTC et les montants B HT. Les sociétés et devises sont
+présentées séparément. Un indicateur indisponible pour cause de permissions
+ou de données incomplètes est laissé indisponible, sans être remplacé par zéro.
+Le solde des bordereaux reste distinct du solde global et des avances.
+
+Accès
+-----
+Lecture native de Bordereau Special OU Reglement Special obligatoire.
+Chaque type de document conserve ses propres permissions de lecture et ses
+restrictions de société, de propriétaire et d'utilisateur. Les droits de création
+sont contrôlés séparément. Les commandes A et B restent visibles uniquement
+dans le périmètre autorisé de ces documents.
+
+Le GET ne crée aucun document, aucune session, aucune sortie de stock et aucune
+écriture comptable ; il n'utilise pas les helpers financiers qui verrouillent
+les documents. Parents via get_list, enfants limités aux parents visibles.
+Les listes sont bornées et signalent une consultation tronquée.
+
+Fichiers
+--------
+frontend/workshop-vue/src/CommercialCockpit.vue
+frontend/workshop-vue/src/commercial-cockpit.css
+frontend/workshop-vue/src/commercial-icon.vue
+frontend/workshop-vue/src/commercial-layout.js
+frontend/workshop-vue/src/main.js
+frontend/workshop-vue/tests/commercial-cockpit.test.mjs
+frontend/workshop-vue/tests/commercial-browser.cjs
+mat_reco/material_reconfiguration/page/commercial_cockpit/*
+mat_reco/material_reconfiguration/services/commercial_cockpit.py
+mat_reco/material_reconfiguration/services/commercial_cockpit_setup.py
+mat_reco/hooks.py
+mat_reco/material_reconfiguration/workspace/univers_glass/univers_glass.json
+mat_reco/public/js/workshop_vue_dist/workshop.js et workshop.css (build suivi).
+mat_reco/material_reconfiguration/tests/test_commercial_cockpit.py
+
+Déploiement
+-----------
+Aucun nouveau DocType métier ou champ personnalisé n'est nécessaire.
+Après publication du code et du build, exécuter la migration du site. Le hook
+commercial_cockpit_setup.install installe la Page et le raccourci sans attribuer
+de nouvelles permissions sur les documents.
+
+Les rôles ayant explicitement la lecture des modules spéciaux sont ajoutés aux
+rôles de la Page à l'installation. Pour un nouveau rôle configuré après migration,
+exécuter de nouveau cet installateur, ou autoriser la Page dans l'écran standard
+« Role Permission for Page and Report ». Révoquer les droits des modules bloque
+immédiatement l'API, même si l'ancien raccourci est encore présent en cache.
+
+Vérification
+------------
+Build Vite réussi. Les 44 tests JavaScript passent, dont 12 tests du graphe
+commercial (règlement mixte unique, allocations, repli, devises, routes et accès).
+Le test navigateur isolé utilise exclusivement des documents fictifs en mémoire :
+actions vers les formulaires natifs, routes Vue, arbre/liste, zoom, impression,
+affichage mobile et effacement des documents après refus d'accès.
+
+Les lectures de la base de développement ont vérifié les requêtes réelles et la
+lecture des tables enfants. Aucune transaction métier n'est créée pour ces tests.
+Les 21 tests Python du read model passent : soldes A/B, avances, arrondis, facture
+partagée, règlements mixtes, droits manquants, champs cachés et troncature.
+Les consultations réelles all/A/B en développement passent également : documents
+et arêtes cohérents, refus pour un utilisateur sans accès aux modules spéciaux,
+et compteurs Stock Ledger Entry, GL Entry, Bordereau Special, Reglement Special
+et ToDo inchangés après consultation. Un index de 22 clients a été vérifié.
+Aucune donnée réelle du cockpit n’est exportée pour ces contrôles.
+
+Commandes reproductibles :
+  cd frontend/workshop-vue
+  npm run build
+  npm test
+  node tests/commercial-browser.cjs
+  # Depuis la racine du bench, sans site ni écriture BDD :
+  env/bin/python -m unittest mat_reco.material_reconfiguration.tests.test_commercial_cockpit
+
+Limite de vérification : la revue automatique a refusé la création d'une session
+Administrateur de test hors authentification normale, puis l'export local du
+payload complet. Ces actions n'ont pas été exécutées. La vérification visuelle
+reste isolée, avec données fictives, et les lectures réelles restent en base.
+Aucun nouveau déploiement ou test transactionnel de production n'est effectué
+pour ce cockpit. Les documents et ToDo de la recette A/B précédente sont conservés.
