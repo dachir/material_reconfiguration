@@ -21,8 +21,8 @@ TITLES = {
     'Quotation': 'Devis', 'Sales Order': 'Commande client',
     'Stock Entry': 'Mouvement de stock', 'Quality Inspection': 'Contrôle qualité',
     'Serial No': 'Fiche de traçabilité du verre',
-    'Bordereau Special': 'Bordereau Spécial B',
-    'Reglement Special': 'Reçu de Règlement Spécial B',
+    'Bordereau Special': 'Bordereau Spécial',
+    'Reglement Special': 'Reçu de Règlement Spécial',
     'Solde Initial Client B': 'Reprise du solde initial client B',
 }
 LAYOUT_FIELDS = {'Section Break', 'Column Break', 'Tab Break', 'HTML', 'Button', 'Password', 'Fold'}
@@ -219,7 +219,9 @@ def render_mat_reco_a4(doc):
         field = doc.meta.get_field('result_json')
         if field and not field.get('print_hide') and (not field.get('permlevel') or doc.has_permlevel_access_to(field.fieldname, field)):
             out.append('<h2>Résultat de fabrication</h2>' + detail(structured(doc.get('result_json'))))
-    footer='Document enregistré · Circuit commercial B.' if doc.doctype in ('Bordereau Special','Reglement Special','Solde Initial Client B') else 'Document enregistré · Dimensions indiquées en mm ; schémas sans échelle.'
+    footer=('Document enregistré.' if doc.doctype in ('Bordereau Special','Reglement Special') else
+            'Document enregistré · Circuit commercial B.' if doc.doctype=='Solde Initial Client B' else
+            'Document enregistré · Dimensions indiquées en mm ; schémas sans échelle.')
     out.append('<footer>'+footer+'</footer></article>')
     return ''.join(out)
 

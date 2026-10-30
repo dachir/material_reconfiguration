@@ -21,11 +21,21 @@
   },
   {
    "fieldname": "sales_order",
-   "label": "Commande B",
+   "label": "Commande client",
    "fieldtype": "Link",
    "options": "Sales Order",
    "reqd": 1,
    "in_list_view": 1
+  },
+  {
+   "fieldname": "order_type",
+   "label": "Type de commande",
+   "fieldtype": "Select",
+   "options": "A\nB",
+   "default": "B",
+   "read_only": 1,
+   "hidden": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "account_column",
@@ -78,11 +88,11 @@
    "fieldtype": "Currency",
    "read_only": 1,
    "options": "currency",
-   "hidden": 1
+   "depends_on": "eval:doc.order_type == \"A\""
   },
   {
    "fieldname": "grand_total",
-   "label": "Montant du BL HT",
+   "label": "Montant du BL",
    "fieldtype": "Currency",
    "read_only": 1,
    "in_list_view": 1,
@@ -95,6 +105,24 @@
    "read_only": 1,
    "no_copy": 1,
    "options": "Stock Entry"
+  },
+  {
+   "fieldname": "delivery_note",
+   "label": "Bon de livraison ERPNext",
+   "fieldtype": "Link",
+   "options": "Delivery Note",
+   "read_only": 1,
+   "no_copy": 1,
+   "depends_on": "eval:doc.order_type == \"A\""
+  },
+  {
+   "fieldname": "sales_invoice",
+   "label": "Facture ERPNext",
+   "fieldtype": "Link",
+   "options": "Sales Invoice",
+   "read_only": 1,
+   "no_copy": 1,
+   "depends_on": "eval:doc.order_type == \"A\""
   },
   {
    "fieldname": "adopt_existing_stock",
@@ -137,6 +165,7 @@
   "company",
   "customer",
   "sales_order",
+  "order_type",
   "account_column",
   "posting_date",
   "currency",
@@ -147,6 +176,8 @@
   "tax_amount",
   "grand_total",
   "stock_entry",
+  "delivery_note",
+  "sales_invoice",
   "adopt_existing_stock",
   "accounting_dimensions_json",
   "status",
@@ -154,7 +185,7 @@
   "billing_basis"
  ],
  "track_changes": 1,
- "autoname": "UG-BL-B-.YYYY.-.#####",
+ "autoname": "UG-BL-.YYYY.-.#####",
  "is_submittable": 1,
  "permissions": [
   {

@@ -98,8 +98,8 @@ class SpecialBTests(unittest.TestCase):
 
     def test_same_client_multiple_orders_and_a_order_are_excluded_from_b_ledger(self):
         other=self.new_order();a_order=self.new_order('A')
-        with self.assertRaises(frappe.ValidationError):b.make_delivery(a_order.name)
-        with self.assertRaises(frappe.ValidationError):b.make_payment(a_order.name)
+        self.assertEqual(b.make_delivery(a_order.name)['order_type'],'A')
+        self.assertEqual(b.make_payment(a_order.name)['order_type'],'A')
         first=self.delivery(1);second=self.delivery(1,order=other)
         p=self.payment(150,[(first,75),(second,75)],order=False)
         self.assertEqual(self.balance(),50)

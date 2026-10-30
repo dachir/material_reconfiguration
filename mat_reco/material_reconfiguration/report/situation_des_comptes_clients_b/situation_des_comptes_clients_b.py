@@ -15,15 +15,23 @@ def execute(filters=None):
         if f.get(field):base[field]=f[field]
     groups=defaultdict(list)
     for dt,sign in ((b.OPENING,1),(b.DELIVERY,1),(b.PAYMENT,-1)):
-        for name in frappe.get_list(dt,filters=base,pluck='name',limit_page_length=0):
+        scoped=dict(base,order_type=['in',['B','Mixte']]) if dt==b.PAYMENT else dict(base,order_type='B') if dt==b.DELIVERY else base
+        for name in frappe.get_list(dt,filters=scoped,pluck='name',limit_page_length=0):
             doc=frappe.get_doc(dt,name)
             if dt==b.PAYMENT:amount=b.payment_share(doc,f.sales_order)
             elif f.sales_order and doc.sales_order!=f.sales_order:continue
             else:amount=flt(doc.amount if dt==b.OPENING else doc.net_total)
             if not amount and dt!=b.DELIVERY:continue
+            related_order=doc.sales_order
+            if dt==b.PAYMENT:
+                b_orders={frappe.db.get_value(b.DELIVERY,r.bordereau,'sales_order') for r in doc.allocations
+                          if (frappe.db.get_value(b.DELIVERY,r.bordereau,'order_type') or 'B')=='B'}
+                if related_order and frappe.db.get_value('Sales Order',related_order,'custom_ug_order_type')=='B':
+                    b_orders.add(related_order)
+                related_order=f.sales_order or (next(iter(b_orders)) if len(b_orders)==1 else None)
             key=(doc.company,doc.customer,doc.currency)
             groups[key].append(dict(posting_date=doc.posting_date,reference_doctype=dt,reference_name=doc.name,
-                sales_order=doc.sales_order,description='Reprise du solde initial' if dt==b.OPENING else 'BL validé' if dt==b.DELIVERY else 'Règlement reçu',
+                sales_order=related_order,description='Reprise du solde initial' if dt==b.OPENING else 'BL validé' if dt==b.DELIVERY else 'Règlement reçu',
                 debit=max(0,sign*amount),credit=max(0,-sign*amount),delta=sign*amount,creation=doc.creation))
     # Accounts with no movement in the selected period are still shown, including zero balances.
     orders={'custom_ug_order_type':'B','docstatus':1}

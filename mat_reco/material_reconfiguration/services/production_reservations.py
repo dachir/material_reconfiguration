@@ -150,11 +150,11 @@ def fill_delivery(doc):
                or row.serial_no == row.get('auto_serial_no')]
     if not pending:
         return
-    from .order_b_stock import get_issue_data
-    from .order_b_stock import get_order
+    from .order_b_stock import issue_data
+    from .special_b import get_order
     order = get_order(doc.sales_order)
     sources = {r.name: r for r in order.items}
-    data = get_issue_data(order.name)
+    data = issue_data(order)
     available = {r['sales_order_item']: r for r in data['rows']}
     pending_names = {id(row) for row in pending}
     used = {n.strip() for r in doc.items if id(r) not in pending_names

@@ -329,9 +329,16 @@ def get_quotation_usage(dossier):
 
 
 @frappe.whitelist()
+def get_commercial_permissions():
+    """Expose current-user capabilities without requiring access to chantier data."""
+    from .order_b import can_access
+    return dict(can_access_b=bool(can_access()))
+
+
+@frappe.whitelist()
 def get_dossier(chantier=None):
     dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status', 'docstatus'], order_by='modified desc', limit_page_length=0)
-    permissions = dict(section_template=frappe.has_permission('Chantier Section Template','create'),chantier=frappe.has_permission('Chantier','create'), section=frappe.has_permission('Chantier Section','create'), quotation=frappe.has_permission('Quotation','create'), mpp=frappe.has_permission('Material Production Plan','create'))
+    permissions = dict(get_commercial_permissions(),section_template=frappe.has_permission('Chantier Section Template','create'),chantier=frappe.has_permission('Chantier','create'), section=frappe.has_permission('Chantier Section','create'), quotation=frappe.has_permission('Quotation','create'), mpp=frappe.has_permission('Material Production Plan','create'))
     if not chantier:
         return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], sales_orders=[], lines=[], summary={})
     dossier = chantier_doc(chantier)

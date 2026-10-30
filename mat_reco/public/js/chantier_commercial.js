@@ -15,9 +15,16 @@ frappe.ui.form.on('Sales Order', {
  custom_ug_order_type(frm) {
   if(frm.is_new())frm.set_value('naming_series',frm.doc.custom_ug_order_type==='B'?'SAL-ORD-B-.YYYY.-.#####':'SAL-ORD-.YYYY.-.#####');
  },
- refresh(frm) {
+ async refresh(frm) {
   frm.set_df_property('custom_ug_order_type','read_only',!frm.is_new());
-  frm.set_df_property('custom_ug_order_type','options',(frappe.session.user==='Administrator'||frappe.user.has_role('UG COMMANDES B'))?'A\nB':'A');
   frm.set_df_property('naming_series','read_only',true);
+  try {
+   frm._ug_commercial_permissions ||= frappe.call({method:'mat_reco.material_reconfiguration.services.chantier_service.get_commercial_permissions',type:'GET'}).then(r=>r.message||{});
+   const permissions=await frm._ug_commercial_permissions;
+   frm.set_df_property('custom_ug_order_type','options',permissions.can_access_b?'A\nB':'A');
+  } catch {
+   frm._ug_commercial_permissions=null;
+   frm.set_df_property('custom_ug_order_type','options','A');
+  }
  }
 });

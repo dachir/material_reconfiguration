@@ -5,6 +5,12 @@ class ReglementSpecial(Document):
     def validate(self):
         special_b.payment_validate(self)
 
+    def on_submit(self):
+        special_b.payment_on_submit(self)
+
+    def on_update_after_submit(self):
+        special_b.payment_after_update_after_submit(self)
+
     def before_cancel(self):
         special_b.payment_before_cancel(self)
 

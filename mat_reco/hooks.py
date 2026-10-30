@@ -369,6 +369,15 @@ for _ug_special_dt in ('Bordereau Special','Reglement Special','Solde Initial Cl
     permission_query_conditions[_ug_special_dt]='mat_reco.material_reconfiguration.services.special_b.query_conditions'
     has_permission[_ug_special_dt]='mat_reco.material_reconfiguration.services.special_b.permission'
     doctype_js[_ug_special_dt]='public/js/special_b_forms.js'
+permission_query_conditions['Bordereau Special']='mat_reco.material_reconfiguration.services.special_b.delivery_query_conditions'
+permission_query_conditions['Reglement Special']='mat_reco.material_reconfiguration.services.special_b.payment_query_conditions'
+
+# A special documents own their native delivery/invoice/payment lifecycle.
+for _ug_dt in ('Delivery Note','Sales Invoice','Payment Entry'):
+    for _ug_event in ('validate','before_submit','before_cancel','on_cancel','before_update_after_submit'):
+        _ug_previous=doc_events.setdefault(_ug_dt,{}).get(_ug_event,[])
+        if isinstance(_ug_previous,str):_ug_previous=[_ug_previous]
+        doc_events[_ug_dt][_ug_event]=_ug_previous+['mat_reco.material_reconfiguration.services.special_a.guard_native']
 
 # Prefill the operational warehouse for glass without restricting manual choices.
 for _ug_warehouse_dt in ('Item', 'Quotation', 'Sales Order', 'Material Cutting Plan', 'Bordereau Special'):

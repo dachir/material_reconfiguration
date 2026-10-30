@@ -21,11 +21,22 @@
   },
   {
    "fieldname": "sales_order",
-   "label": "Commande B",
+   "label": "Commande client",
    "fieldtype": "Link",
    "options": "Sales Order",
    "in_list_view": 1,
-   "description": "Facultative : laisser vide pour couvrir plusieurs commandes B. Une avance sans commande reste au niveau du client B."
+   "description": "Commande source facultative de l’avance ; les affectations peuvent concerner plusieurs commandes."
+  },
+  {
+   "fieldname": "order_type",
+   "label": "Type de commande",
+   "fieldtype": "Select",
+   "options": "A\nB\nMixte",
+   "default": "B",
+   "read_only": 1,
+   "hidden": 1,
+   "print_hide": 1,
+   "allow_on_submit": 1
   },
   {
    "fieldname": "account_column",
@@ -100,7 +111,16 @@
    "read_only": 1,
    "allow_on_submit": 1,
    "options": "currency",
-   "description": "Conservé au compte client B : avance éventuelle ou règlement du solde historique non détaillé en BL."
+   "description": "Avance ou montant restant à affecter au client."
+  },
+  {
+   "fieldname": "payment_entry",
+   "label": "Encaissement ERPNext",
+   "fieldtype": "Link",
+   "options": "Payment Entry",
+   "read_only": 1,
+   "no_copy": 1,
+   "depends_on": "eval:doc.order_type == \"A\" || doc.order_type == \"Mixte\""
   },
   {
    "fieldname": "status",
@@ -120,6 +140,7 @@
   "company",
   "customer",
   "sales_order",
+  "order_type",
   "account_column",
   "posting_date",
   "currency",
@@ -131,11 +152,12 @@
   "allocations",
   "allocated_amount",
   "unallocated_amount",
+  "payment_entry",
   "status",
   "remarks"
  ],
  "track_changes": 1,
- "autoname": "UG-REG-B-.YYYY.-.#####",
+ "autoname": "UG-REG-.YYYY.-.#####",
  "is_submittable": 1,
  "permissions": [
   {

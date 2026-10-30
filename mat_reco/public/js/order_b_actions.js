@@ -1,13 +1,12 @@
-/* Circuit B actions stay on the native Sales Order form. */
+/* Special delivery/payment actions stay on the native Sales Order form. */
 frappe.ui.form.on('Sales Order', {
  setup(frm) {
-  if(frappe.session.user==='Administrator'||frappe.user_roles.includes('UG COMMANDES B'))return;
   // Filter in the user's browser: dashboard metadata is cached across users on the server.
   const dashboard=frm.meta.__dashboard;
   if(!dashboard)return;
   const restricted=new Set(['Bordereau Special','Reglement Special']);
   dashboard.transactions=(dashboard.transactions||[])
-   .map(group=>({...group,items:group.items.filter(doctype=>!restricted.has(doctype))}))
+   .map(group=>({...group,items:group.items.filter(doctype=>!restricted.has(doctype)||frappe.model.can_read(doctype))}))
    .filter(group=>group.items.length);
  },
  refresh(frm) {
@@ -26,11 +25,12 @@ frappe.ui.form.on('Sales Order', {
 
 frappe.ui.form.on('Sales Order',{
  refresh(frm){
-  if(frm.doc.custom_ug_order_type!=='B'||frm.doc.docstatus!==1)return;
+  if(frm.doc.docstatus!==1)return;
   const api='mat_reco.material_reconfiguration.services.special_b.';
   const create=async(method,args)=>{const r=await frappe.call({method:api+method,args});await frappe.model.with_doctype(r.message.doctype);const doc=frappe.model.sync(r.message)[0];frappe.set_route('Form',doc.doctype,doc.name);};
-  frm.add_custom_button(__('Bordereau Spécial'),()=>create('make_delivery',{sales_order:frm.doc.name}),__('Create'));
-  frm.add_custom_button(__('Règlement Spécial'),()=>create('make_payment',{sales_order:frm.doc.name}),__('Create'));
+  if(frappe.model.can_create('Bordereau Special'))frm.add_custom_button(__('Bordereau Spécial'),()=>create('make_delivery',{sales_order:frm.doc.name}),__('Create'));
+  if(frappe.model.can_create('Reglement Special'))frm.add_custom_button(__('Règlement Spécial'),()=>create('make_payment',{sales_order:frm.doc.name}),__('Create'));
+  if(frm.doc.custom_ug_order_type!=='B')return;
   frm.add_custom_button(__('Situation client B'),()=>frappe.set_route('query-report','Situation des comptes clients B',{company:frm.doc.company,customer:frm.doc.customer,currency:frm.doc.currency}),__('Rapport'));
   frm.add_custom_button(__('Livraisons et règlements B'),async()=>{
    const r=await frappe.call({method:api+'get_order_summary',args:{sales_order:frm.doc.name}});const data=r.message,esc=frappe.utils.escape_html;

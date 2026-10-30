@@ -23,7 +23,12 @@ def can_read_cockpit(user=None):
 
 def can_access(user=None):
     user=user or frappe.session.user
-    return user=='Administrator' or ROLE in frappe.get_roles(user)
+    if user=='Administrator' or ROLE in frappe.get_roles(user):return True
+    # Access deliberately granted to either special module includes both A and B.
+    # Read role permissions directly to avoid recursively calling its permission hook.
+    from frappe.permissions import get_role_permissions
+    return any(get_role_permissions(frappe.get_meta(dt),user=user).get('read')
+               for dt in ('Bordereau Special','Reglement Special') if frappe.db.exists('DocType',dt))
 
 
 def query_conditions(user=None):

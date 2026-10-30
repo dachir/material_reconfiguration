@@ -1,0 +1,139 @@
+Univers Glass — Bordereaux et règlements spéciaux communs à A et B
+État au 30/10/2026 : code préparé en développement ; recette finale production en attente.
+
+Règle d'accès retenue
+
+Les utilisateurs autorisés aux DocTypes Bordereau Special / Reglement Special
+consultent les pièces A et B dans ces modules. Les rôles livrés restent
+UG COMMANDES B et System Manager. Aucun droit sur les modules spéciaux n'est
+ajouté aux rôles commerciaux, comptables ou stock standards.
+Les contrôles natifs de société, de client et de document restent applicables.
+Les utilisateurs sans ces droits conservent les écrans ERPNext standards.
+Créer les documents comptables A exige aussi les permissions natives concernées.
+
+Comportement
+
+- Bordereau A validé : Delivery Note soumis, puis Sales Invoice soumise depuis
+  ce Delivery Note. La facture a update_stock=0 ; une seule sortie physique.
+  Taxes, remises, quantités livrées et montants reposent sur les calculs natifs.
+- Bordereau B validé : réutilisation du Material Issue existant du circuit B.
+  Montants HT ; aucune Sales Invoice ni écriture client générée.
+  La valorisation et les éventuelles écritures de stock natives ne sont pas supprimées.
+- Règlement A/B : un document peut répartir son montant sur plusieurs BL A et B
+  du même client, de la même société et de la même devise, même de commandes distinctes.
+  Un seul Payment Entry actif porte exclusivement la part A, lettrée aux factures.
+  Le registre B reprend exclusivement la part B, une seule fois par règlement.
+- Avance : la commande source détermine le circuit du montant non affecté.
+  Un règlement mixte avec un reliquat exige cette commande pour éviter l'ambiguïté.
+  Une avance A devient un montant non affecté natif, sans deuxième encaissement.
+- Modification des affectations : délettrage/lettrage natif sur le même PE si la
+  part A reste identique. Si elle change, annulation du PE précédent et création
+  transactionnelle du remplaçant ; l'historique annulé reste consultable.
+- Annulation : retirer les affectations ou annuler le règlement avant le BL.
+  Le BL A annule sa facture puis son DN ; le BL B annule sa sortie existante.
+  Les réservations et séries restent gérées par ERPNext et le service existant.
+- Les pièces natives générées sont protégées contre les modifications directes :
+  utiliser le document spécial propriétaire pour les corriger ou les annuler.
+
+Remises, frais fixes et limites
+
+Les livraisons partielles répartissent les montants fixes cumulativement et
+déduisent ceux réellement appliqués sur les DN précédents, y compris standards.
+Un ancien DN regroupant plusieurs commandes avec des frais/remises fixes
+impossibles à attribuer doit être vérifié avant de poursuivre en spécial.
+Un règlement multifacture dont la devise diffère du compte client exige le même
+taux historique pour ses factures ; sinon, créer des règlements séparés par taux.
+Cette restriction ne concerne pas les comptes et factures tous en XOF.
+
+Fichiers et mécanismes
+
+Nouveau service :
+  mat_reco/material_reconfiguration/services/special_a.py
+  Mappers natifs SO -> DN -> SI, get_payment_entry, Payment Reconciliation,
+  Unreconcile Payment, liens inverses et garde transactionnel before_commit.
+
+Services adaptés :
+  services/special_b.py : documents communs, parts A/B, avances, annulations,
+    reprises historiques B et suivi des commandes.
+  services/order_b.py : capacité B issue des droits aux modules spéciaux.
+  services/order_b_stock.py : extraction interne de la sélection de stock ;
+    l'API de sortie directe publique reste réservée aux commandes B.
+  services/production_reservations.py : sélection commune ; A utilise les SRE
+    via le DN natif, B conserve la libération pour son Material Issue.
+  services/chantier_service.py : capacité serveur utilisée par les sélecteurs A/B.
+  doctype/reglement_special/reglement_special.py : événements submit/update/cancel.
+  report/situation_des_comptes_clients_b : exclusion A et quote-part B des mixtes.
+  hooks.py : protections natives et conditions d'accès des documents communs.
+
+Métadonnées et écrans adaptés :
+  doctype/bordereau_special/bordereau_special.json
+  doctype/reglement_special/reglement_special.json
+  JSON des rapports Situation des comptes clients B et Suivi commandes B
+  public/js/{special_b_forms,order_b_actions,chantier_commercial}.js
+  frontend/workshop-vue/src/Chantiers.vue et son bundle public/js/workshop_vue_dist
+  printing.py : titres et mentions communs aux deux circuits.
+
+Déploiement et migration
+
+Publier mat_reco puis lancer la migration normale du site et redémarrer les
+processus. special_b.install est déjà appelé par after_migrate. Il ajoute :
+  - order_type A/B caché et calculé sur le BL ; A/B/Mixte sur le règlement ;
+  - liens delivery_note/sales_invoice sur le BL et payment_entry sur le règlement ;
+  - Delivery Note / Sales Invoice.custom_ug_special_delivery ;
+  - Payment Entry.custom_ug_special_payment, avec index de recherche.
+Les anciennes pièces B conservent leurs noms. Les nouvelles utilisent les séries
+neutres UG-BL-AAAA-NNNNN et UG-REG-AAAA-NNNNN.
+Le bundle Vue a été reconstruit par npm run build (frontend/workshop-vue).
+Configurer le compte de banque/caisse du mode de règlement pour la société A.
+
+Application tierce fisc_sync, si installée sur le site :
+  fisc_sync/services/sync_manager.py : suppression du commit au milieu du hook
+  d'insertion de facture. Sa file fiscale partage désormais la transaction appelante.
+  Déployer aussi cette correction si nécessaire. Le nouveau garde dans mat_reco
+  refuse un commit intermédiaire même si une ancienne version du hook subsiste.
+
+Vérifications et recette
+
+Avant la consigne de réserver la recette finale à la production, trois exécutions
+ciblées en DEV ont réussi : 13 tests (dont 4 d'accès), puis 3 tests stock/rollback/FX,
+puis 2 reprises de tests avance/annulation et séries/réservations. Ces groupes se
+recouvrent ; ils ne constituent pas une suite finale complète sur le dernier code.
+
+Tests livrés : tests/test_special_a.py, tests/test_special_access.py ; adaptation
+de tests/test_special_b.py. Couverture ajoutée sans exécution finale : succession
+DN standard/spécial, frais multi-commandes ambigus, garde anti-commit, règlement
+mixte et solde initial B, refus des taux historiques incompatibles.
+
+Contrôles finaux locaux : syntaxe Python et JSON, node --check, git diff --check,
+build Vue réussis. Aucun test métier supplémentaire en DEV après la consigne.
+
+Recette production à effectuer avec un client et des articles dédiés et identifiés :
+  1. Photographier quantités et séries initiales du périmètre de test.
+  2. Créer deux commandes A et B ; valider les FT nécessaires à leur fabrication.
+  3. Tester livraison A complète et partielle : DN + facture, une seule sortie.
+  4. Livrer B partiellement : Material Issue, HT, aucune facture client.
+  5. Tester avance, plusieurs règlements, multifacture et règlement mixte.
+  6. Réaffecter sans changer puis en changeant la part A ; vérifier le PE actif.
+  7. Annuler règlement puis BL ; vérifier soldes, stock et réservations restaurés.
+  8. Vérifier séries exactes, surlivraison refusée, échec de facture sans sortie.
+  9. Vérifier accès autorisé A/B et absence des modules pour un utilisateur standard.
+  10. Contrôler que Situation B exclut A et compte les mixtes une seule fois.
+Conserver les références et les états avant/après dans le compte rendu de recette.
+Les fixtures automatisées existantes utilisent Marsavco SA en DEV : ne pas lancer
+la suite brute sur la base de production ; adapter la recette à sa société dédiée.
+
+État production
+
+Aucun déploiement ni mouvement de recette de cette évolution effectué depuis
+cette session. La vérification API du 30/10/2026 renvoie HTTP 401 AuthenticationError.
+Le déploiement et le rétablissement de l'accès sont nécessaires pour poursuivre.
+
+Données de test DEV conservées, selon instruction explicite de l'utilisateur
+
+Les premiers essais ont révélé le commit prématuré de fisc_sync. Six jeux QA
+ont alors persisté (13 commandes, 9 BL, 3 règlements, 8 DN, 8 factures, 3 PE,
+7 Stock Entries et dépendances), avec 8 tentatives fiscales vers edef-test,
+toutes en erreur HTTP 500. Les reprises de ces files ont été arrêtées.
+Le nettoyage ciblé a été contrôlé à blanc sans commit, puis refusé par la revue
+automatique sans accord explicite. L'utilisateur a choisi de conserver ces données :
+aucune suppression appliquée. Ne pas exécuter le script de nettoyage préparé.

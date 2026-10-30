@@ -111,7 +111,13 @@ def before_cancel(doc,method=None):
 @frappe.whitelist()
 def get_issue_data(sales_order):
     order=get_order(sales_order)
-    quantities=issued_quantities(order,include_drafts=True)
+    return issue_data(order)
+
+
+def issue_data(order):
+    """Shared stock selection, after the caller has checked the source order access."""
+    quantities=(issued_quantities(order,include_drafts=True) if order.custom_ug_order_type=='B'
+                else {r.name:flt(r.delivered_qty)*(flt(r.conversion_factor) or 1) for r in order.items})
     _,_,_,owners=_receipts([order])
     warehouses=frappe.get_list('Warehouse',filters={'company':order.company,'is_group':0,'disabled':0},pluck='name',limit_page_length=0)
     result=[]
