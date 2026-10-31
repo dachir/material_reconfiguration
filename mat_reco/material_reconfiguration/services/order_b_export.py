@@ -69,7 +69,8 @@ def export_order(sales_order):
     if order.custom_ug_b_export_file:
         file=frappe.get_doc('File',order.custom_ug_b_export_file);file.check_permission('read')
         return dict(file=file.name,file_url=file.file_url)
-    if not order.custom_technical_study or frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'docstatus')!=1:
+    from .order_technical import requires_study
+    if requires_study(order) and (not order.custom_technical_study or frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'docstatus')!=1):
         frappe.throw('Valider la fiche technique avant l’export commercial B.')
     if not is_complete(order):frappe.throw('Terminer les sorties physiques avant l’export commercial B.')
     content=package(order)

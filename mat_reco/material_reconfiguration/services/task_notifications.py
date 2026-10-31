@@ -87,8 +87,12 @@ def handoff_study(chantier, request_key, study=None):
 
 
 def order_created(doc, method=None):
-    from .order_technical import prepare
-    return prepare(doc)
+    from .order_technical import prepare, requires_study
+    name=prepare(doc)
+    if doc.docstatus==1 and doc.get('custom_ug_order_type')=='B' and not requires_study(doc):
+        from .order_b_stock import refresh_tasks
+        refresh_tasks(doc.name,'order-created')
+    return name
 
 
 def close_tasks(doc, stage):

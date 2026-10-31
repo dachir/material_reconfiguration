@@ -71,7 +71,9 @@ class SpecialATests(unittest.TestCase):
         order=frappe.copy_doc(self.order);order.amended_from=None;order.docstatus=0
         order.custom_technical_study=None
         order.append('taxes',dict(charge_type='On Net Total',account_head=tax,description='TVA',rate=18))
-        order.insert();order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.insert();order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         self.order=order
         first=self.delivery(1);second=self.delivery(2)
         self.assertEqual(first.net_total+second.net_total,order.net_total)
@@ -175,7 +177,9 @@ class SpecialATests(unittest.TestCase):
         order.apply_discount_on='Net Total';order.discount_amount=180
         order.append('taxes',dict(charge_type='Actual',account_head=tax,description='Frais fixes',tax_amount=30))
         order.append('taxes',dict(charge_type='On Net Total',account_head=tax,description='TVA',rate=18))
-        order.insert();order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.insert();order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         first=self.delivery(1,order=order);second=self.delivery(2,order=order)
         self.assertAlmostEqual(first.net_total+second.net_total,order.net_total)
         self.assertAlmostEqual(first.grand_total+second.grand_total,order.grand_total,places=2)
@@ -185,7 +189,9 @@ class SpecialATests(unittest.TestCase):
         order=frappe.copy_doc(self.order);order.docstatus=0;order.amended_from=None;order.custom_technical_study=None
         order.currency='XOF';order.conversion_rate=.0016
         order.price_list_currency='USD';order.plc_conversion_rate=1
-        order.insert();order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.insert();order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         self.order=order
         bl=self.delivery(1)
         receipt=self.payment(bl.grand_total,[(bl,bl.grand_total)])
@@ -203,7 +209,9 @@ class SpecialATests(unittest.TestCase):
         order.apply_discount_on='Net Total';order.discount_amount=180
         order.append('taxes',dict(charge_type='Actual',account_head=tax,description='Frais fixes standard',tax_amount=30))
         order.append('taxes',dict(charge_type='On Net Total',account_head=tax,description='TVA',rate=18))
-        order.insert();order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.insert();order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         standard=make_delivery_note(order.name)
         standard.items[0].qty=2
         standard.calculate_taxes_and_totals()
@@ -227,7 +235,9 @@ class SpecialATests(unittest.TestCase):
             order.currency='XOF';order.conversion_rate=conversion_rate
             order.price_list_currency='USD';order.plc_conversion_rate=1
             order.items[0].rate=100000
-            order.insert();order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+            order.insert();order.submit()
+            if order.custom_technical_study:
+                frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
             deliveries.append(self.delivery(1,order=order))
         self.order=order
         if frappe.get_doc('Sales Invoice',deliveries[0].sales_invoice).party_account_currency=='XOF':
@@ -244,7 +254,9 @@ class SpecialATests(unittest.TestCase):
         order=frappe.copy_doc(self.order);order.docstatus=0;order.amended_from=None;order.custom_technical_study=None
         order.apply_discount_on='Net Total';order.discount_amount=30
         order.append('taxes',dict(charge_type='Actual',account_head=tax,description='Frais fixes communs',tax_amount=10))
-        order.insert();order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.insert();order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         other=self.new_order('A')
         standard=make_delivery_note(order.name)
         standard.items[0].qty=1

@@ -249,6 +249,7 @@ def _snapshot(filters, capabilities):
         ['name', 'parent', 'qty', 'stock_qty', 'ordered_qty', 'conversion_factor', 'uom',
          'custom_chantier_line', 'custom_repere', 'is_alternative'])
     project_filters = _base(filters)
+    project_filters['docstatus'] = 1
     _period(project_filters, 'creation', filters)
     project_or = [[field, 'like', '%' + search + '%'] for field in ('name', 'customer', 'designation')] if search else []
     _parents(data, 'project', ['name', 'company', 'customer', 'currency', 'creation', 'designation', 'status',
@@ -336,8 +337,11 @@ def _add_visible_sources(snapshot, kind, names, fields):
     remaining = sorted(names - known)
     if not remaining or not snapshot['capabilities'].get('can_read_' + CAP[kind]):
         return
+    filters = {'name': ['in', remaining]}
+    if kind == 'project':
+        filters['docstatus'] = 1
     rows = frappe.get_list(DT[kind], fields=_read_fields(DT[kind], list(dict.fromkeys(fields + ['modified']))),
-        filters={'name': ['in', remaining]}, limit_page_length=MAX_PARENTS + 1)
+        filters=filters, limit_page_length=MAX_PARENTS + 1)
     snapshot[kind].extend(dict(row) for row in rows[:max(0, MAX_PARENTS - len(snapshot[kind]))])
     if len(rows) + len(known) > MAX_PARENTS:
         snapshot['truncated'] = True
@@ -546,6 +550,8 @@ def project(snapshot, filters):
     """Pure projection, separately testable without ERPNext or transaction writes."""
     caps = snapshot['capabilities']
     rows = {kind: {row['name']: row for row in snapshot.get(kind, [])} for kind in DT}
+    # The commercial handoff starts after chantier validation for every user.
+    rows['project'] = {name: row for name, row in rows['project'].items() if row.get('docstatus') == 1}
     items = _group(snapshot.get('order_items', []))
     delivery_items = _group(snapshot.get('delivery_items', []))
     allocations = _group(snapshot.get('allocations', []))

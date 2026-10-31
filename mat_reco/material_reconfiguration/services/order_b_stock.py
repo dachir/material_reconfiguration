@@ -64,8 +64,6 @@ def validate_issue(doc,method=None):
     if doc.company!=order.company or doc.stock_entry_type!='Material Issue':frappe.throw('La sortie B doit être un Material Issue de la société de la commande.')
     if order.status in ('Closed','On Hold'):frappe.throw('Cette commande B est clôturée ou suspendue.')
     if order.get('custom_ug_b_export_file'):frappe.throw('La commande est déjà exportée. Traiter son export avant de modifier les sorties.')
-    if not order.custom_technical_study or frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'docstatus')!=1:
-        frappe.throw('Valider la fiche technique avant la sortie B.')
     expected={r.name:r for r in physical_rows(order)}
     booked=issued_quantities(order,exclude=doc.name,include_drafts=True,lock=True)
     _,_,_,owners=_receipts([order],lock=True)
@@ -85,6 +83,8 @@ def validate_issue(doc,method=None):
         if len(serials)!=len(set(serials)) or selected.intersection(serials):frappe.throw('Une série ne peut être sortie qu’une seule fois.')
         selected.update(serials)
         manufacturing=frappe.get_cached_value('Item',row.item_code,'custom_item_types') in ('OUVRAGE','DECOUPE')
+        if manufacturing and (not order.custom_technical_study or frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'docstatus')!=1):
+            frappe.throw('Valider la fiche technique avant la sortie B.')
         if manufacturing and not serials:frappe.throw('Sélectionner les séries produites pour les découpes et ouvrages B.')
         if serials and len(serials)!=quantity:frappe.throw('Le nombre de séries doit correspondre à la quantité de sortie.')
         for serial in serials:
@@ -201,10 +201,11 @@ def install():
 
 def refresh_tasks(sales_order,event_key):
     from .task_notifications import send_tasks,close_tasks
+    from .order_technical import requires_study
     order=frappe.get_doc('Sales Order',sales_order)
     if order.docstatus!=1 or order.custom_ug_order_type!='B':return
     sheet=frappe.db.get_value('Chantier Technical Study',order.custom_technical_study,'docstatus') if order.custom_technical_study else None
-    if sheet!=1:return
+    if sheet!=1 and requires_study(order):return
     if is_complete(order):
         close_tasks(order,'b_issue')
         if not order.get('custom_ug_b_sage_reference'):send_tasks(order,'b_export','ready:'+event_key)

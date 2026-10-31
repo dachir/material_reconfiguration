@@ -132,7 +132,9 @@ class SpecialBTests(unittest.TestCase):
             item_group=self.item.item_group,stock_uom='PC',is_stock_item=0,is_sales_item=1,custom_item_types='SERVICE')).insert()
         order=frappe.get_doc(dict(doctype='Sales Order',company=self.order.company,customer=self.order.customer,custom_ug_order_type='B',branch=self.branch,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=self.item.name,qty=3,rate=100,warehouse=self.warehouse),dict(item_code=service.name,qty=2,rate=50)])).insert()
-        order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         doc=frappe.get_doc(b.make_delivery(order.name));doc.items[0].qty=1;doc.items[1].qty=1;doc.accounting_dimensions_json=frappe.as_json({'branch':self.branch});doc.insert();doc.submit()
         self.assertEqual(doc.grand_total,150);self.assertEqual(len(frappe.get_doc('Stock Entry',doc.stock_entry).items),1)
         last=self.delivery(order=order);self.assertEqual(last.grand_total,250)
@@ -147,7 +149,8 @@ class SpecialBTests(unittest.TestCase):
                         serial_no=serial,use_serial_batch_fields=1)])).insert();receipt.submit()
         order=frappe.get_doc(dict(doctype='Sales Order',company=self.order.company,customer=self.order.customer,custom_ug_order_type='B',branch=self.branch,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=item.name,qty=1,rate=50,warehouse=self.warehouse)])).insert();order.submit()
-        frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         doc=frappe.get_doc(b.make_delivery(order.name));doc.items[0].serial_no=serial;doc.accounting_dimensions_json=frappe.as_json({'branch':self.branch});doc.insert();doc.submit()
         self.assertEqual(frappe.get_doc('Stock Entry',doc.stock_entry).items[0].basic_rate,0)
         self.assertFalse(frappe.db.get_value('Serial No',serial,'warehouse'))
@@ -166,7 +169,9 @@ class SpecialBTests(unittest.TestCase):
         order=frappe.get_doc(dict(doctype='Sales Order',company=self.order.company,customer=self.order.customer,custom_ug_order_type='B',branch=self.branch,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=self.item.name,qty=3,rate=.333333,warehouse=self.warehouse)],
             taxes=[dict(charge_type='On Net Total',account_head=tax,description='TVA 18',rate=18)] if tax else [])).insert()
-        order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         deliveries=[self.delivery(1,order=order) for _ in range(3)]
         self.assertAlmostEqual(sum(d.net_total for d in deliveries),order.net_total)
         self.assertAlmostEqual(sum(d.grand_total for d in deliveries),order.net_total)
@@ -199,7 +204,9 @@ class SpecialBTests(unittest.TestCase):
             currency='XOF',conversion_rate=.0016,price_list_currency='USD',plc_conversion_rate=1,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=self.item.name,qty=1,rate=.45,warehouse=self.warehouse)],
             taxes=[dict(charge_type='On Net Total',account_head=tax,description='TVA 18',rate=18)] if tax else [])).insert()
-        order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         bl=self.delivery(order=order)
         self.assertEqual(bl.grand_total,b.money(order.net_total,'XOF'))
         self.assertEqual(bl.grand_total,int(bl.grand_total))

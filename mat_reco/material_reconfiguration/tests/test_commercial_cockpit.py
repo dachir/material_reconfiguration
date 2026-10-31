@@ -261,7 +261,7 @@ class CommercialCockpitTests(unittest.TestCase):
     def test_proposal_only_clients_are_discoverable_and_overview_has_no_graph(self):
         data = snapshot()
         data['quotation'] = [dict(name='Q', party_name='C', company='UG', currency='XOF', customer_name='Commercial', grand_total=1180, docstatus=0)]
-        data['project'] = [dict(name='CH', customer='OTHER', designation='Maison', docstatus=0)]
+        data['project'] = [dict(name='CH', customer='OTHER', designation='Maison', docstatus=1)]
         result = self.result(data, customer='')
         self.assertEqual({row['customer'] for row in result['clients']}, {'C', 'OTHER'})
         self.assertEqual(result['documents'], [])
@@ -324,9 +324,9 @@ class CommercialCockpitTests(unittest.TestCase):
 
     def test_focused_api_preserves_global_client_index(self):
         focus = snapshot()
-        focus['project'] = [dict(name='CH', customer='C', docstatus=0)]
+        focus['project'] = [dict(name='CH', customer='C', docstatus=1)]
         index = deepcopy(focus)
-        index['project'].append(dict(name='OTHER-CH', customer='OTHER', docstatus=0))
+        index['project'].append(dict(name='OTHER-CH', customer='OTHER', docstatus=1))
         with patch.object(cockpit, '_capabilities', return_value=focus['capabilities']), \
                 patch.object(cockpit, '_snapshot', side_effect=[focus, index]), \
                 patch.object(cockpit.frappe, 'has_permission', return_value=False):

@@ -225,13 +225,13 @@ class IndependentChantierTests(unittest.TestCase):
         self.assertTrue(primary)
         self.doc.append('lines',dict(line_kind='Vente directe',sale_item=primary,qty=1,rate=100))
 
-    def test_standalone_plates_accessories_and_services_have_review_ft_without_manufacturing(self):
+    def test_standalone_plates_accessories_and_services_need_no_ft(self):
         self.doc.set('lines',[]);self.doc.set('work_types',[]);self.direct_lines();self.doc.save()
         quote=self.quote();quote.submit()
         order=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'Vente directe QA',add_days(nowdate(),7),uuid.uuid4().hex))
         self.assertEqual(len(order.items),3);self.assertEqual(order.docstatus,1)
-        sheet=frappe.get_doc('Chantier Technical Study',order.custom_technical_study)
-        self.assertFalse(sheet.lines);self.assertEqual(sheet.sales_order,order.name)
+        self.assertFalse(order.custom_technical_study)
+        self.assertFalse(frappe.db.exists('Chantier Technical Study',{'sales_order':order.name}))
         self.assertTrue(all(not r.custom_technical_snapshot and not r.custom_ug_work_type for r in order.items))
         self.assertAlmostEqual(order.net_total,200)
         self.assertFalse(frappe.db.exists('ToDo',{'reference_type':'Sales Order','reference_name':order.name,'description':['like','[Univers Glass — Atelier]%']}))
@@ -242,7 +242,8 @@ class IndependentChantierTests(unittest.TestCase):
         self.direct_lines();self.doc.save();quote=self.quote();quote.submit()
         direct=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'Direct QA',add_days(nowdate(),7),uuid.uuid4().hex,direct_only=1))
         self.assertEqual(len(direct.items),3)
-        self.assertFalse(frappe.get_doc('Chantier Technical Study',direct.custom_technical_study).lines)
+        self.assertFalse(direct.custom_technical_study)
+        self.assertFalse(frappe.db.exists('Chantier Technical Study',{'sales_order':direct.name}))
         rest=frappe.get_doc('Sales Order',technical.confirm_order(quote.name,'Fabrication QA',add_days(nowdate(),7),uuid.uuid4().hex))
         self.assertEqual(len(rest.items),2);self.assertTrue(all(r.custom_ug_work_type==self.typeid for r in rest.items))
 

@@ -6,6 +6,12 @@ import frappe
 from frappe.utils import flt
 
 
+def requires_study(order):
+    """Whole plates, accessories and services are sold without a technical sheet."""
+    return any(frappe.get_cached_value('Item', row.item_code, 'custom_item_types')
+        in ('OUVRAGE', 'DECOUPE') for row in order.items)
+
+
 def context(study, check_permission=True):
     """Return the order's commercial scope without modifying its source chantier."""
     from .chantier_work_types import is_v2, technical_source_hash
@@ -55,7 +61,7 @@ def prepare(order):
     from .chantier_work_types import is_v2, prepare_type_rows
     from .technical_study_service import seed_item
     from .task_notifications import send_tasks
-    if order.docstatus!=1:return
+    if order.docstatus!=1 or not requires_study(order):return
     if order.custom_chantier and not is_v2(frappe.get_doc('Chantier',order.custom_chantier)):
         # Submitted legacy orders already carry their approved technical definition.
         if any(frappe.get_cached_value('Item',r.item_code,'custom_item_types') in ('OUVRAGE','DECOUPE') for r in order.items):
@@ -69,8 +75,10 @@ def prepare(order):
         study=frappe.get_doc(dict(doctype='Chantier Technical Study',sales_order=order.name,
             chantier=order.custom_chantier,loose_link=1))
         _,dossier,signature=context(study,check_permission=False)
+        rows=prepare_type_rows(dossier)
+        if not rows:return
         study.source_hash=signature
-        for row in prepare_type_rows(dossier):
+        for row in rows:
             tree=seed_item(row.proposed_item) if row.proposed_item else dict(mode='new',proposed_code='',item_name=row.designation,
                 item_type='OUVRAGE',stock_uom=row.uom,item_group='',qty_factor=1,children=[])
             study.append('lines',dict(line_id=row.line_id,repere=row.repere,thickness_mm=row.thickness_mm,tree_json=json.dumps(tree,ensure_ascii=False)))

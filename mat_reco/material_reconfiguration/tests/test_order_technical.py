@@ -41,7 +41,7 @@ class OrderTechnicalTests(unittest.TestCase):
                 self.assertEqual(len(self.todos(order,'workshop')),1)
                 frappe.db.rollback(save_point='qa_each_circuit');self.doc.reload()
 
-    def test_native_draft_has_no_technical_task_and_service_order_has_review_ft(self):
+    def test_native_service_order_has_no_technical_study_or_task(self):
         group=frappe.db.get_value('Item Group',{'is_group':0},'name')
         item=frappe.get_doc(dict(doctype='Item',item_code='QA-FT-'+uuid.uuid4().hex[:10],item_name='QA Service',
             item_group=group,stock_uom='PC',is_stock_item=0,is_sales_item=1,custom_item_types='SERVICE')).insert()
@@ -49,10 +49,10 @@ class OrderTechnicalTests(unittest.TestCase):
             items=[dict(item_code=item.name,qty=1,rate=100,delivery_date=add_days(nowdate(),7))])).insert()
         self.assertFalse(order.custom_technical_study)
         self.assertFalse(frappe.db.exists('Chantier Technical Study',{'sales_order':order.name}))
-        order.submit();study=frappe.get_doc('Chantier Technical Study',order.custom_technical_study)
-        self.assertFalse(study.chantier);self.assertFalse(study.lines);self.assertTrue(self.todos(study,'technical'))
-        self.assertFalse(technical.get_study(study.name)['stale'])
-        study.submit();self.assertFalse(self.todos(order,'workshop'))
+        order.submit()
+        self.assertFalse(order.custom_technical_study)
+        self.assertFalse(frappe.db.exists('Chantier Technical Study',{'sales_order':order.name}))
+        self.assertFalse(self.todos(order,'technical'));self.assertFalse(self.todos(order,'workshop'))
 
     def test_partial_orders_keep_separate_ft_and_their_own_quantities(self):
         self.doc.submit()

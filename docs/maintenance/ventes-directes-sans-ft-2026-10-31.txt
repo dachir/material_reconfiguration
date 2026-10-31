@@ -1,0 +1,41 @@
+Ventes directes sans fiche technique — 31 octobre 2026
+
+Constat
+Le chantier identifie déjà les lignes « Vente directe », sans type d’ouvrage,
+et accepte les plaques entières (PRIMAIRE), accessoires et services. Toutefois,
+la validation de leur commande créait encore une FT vide avec tâche technique.
+La sortie et l’export B exigeaient également la validation de cette FT vide.
+
+Comportement corrigé
+- order_technical.requires_study ne retient que les articles OUVRAGE/DECOUPE.
+- Une commande A ou B entièrement directe ne crée plus de FT ni de tâche FT.
+- Une commande mixte conserve une FT limitée à ses types utilisés.
+- Une sortie B ne requiert la FT validée que pour les lignes à fabriquer.
+  Les lignes directes d’une commande mixte peuvent donc sortir sans attendre la FT.
+- L’export B conserve le contrôle de fin des sorties physiques et exige une FT
+  seulement lorsqu’il y a des articles à fabriquer.
+- Les tâches B de sortie/export restent déclenchées pour les commandes directes,
+  sans passage artificiel par la validation d’une FT vide.
+- Les contrôles existants de stock, séries, dimensions, réservations et quantités
+  sont conservés. Les circuits comptables et les montants ne changent pas.
+
+Fichiers métier
+mat_reco/material_reconfiguration/services/order_technical.py
+mat_reco/material_reconfiguration/services/order_b_stock.py
+mat_reco/material_reconfiguration/services/order_b_export.py
+mat_reco/material_reconfiguration/services/task_notifications.py
+
+Validation
+28 nouveaux tests unitaires sans base : test_direct_sales_technical (11),
+test_direct_b_issue (13), test_direct_sales_export (4).
+Suite exécutée avec les régressions cockpit, actions, clôture B et rapports :
+195 tests réussis. Vérification git diff --check réussie.
+Les attentes/fixtures d’intégration order_technical, independent_chantier,
+order_b_stock, special_a et special_b sont adaptées ; ces tests transactionnels
+n’ont pas été exécutés dans cette intervention.
+
+Déploiement
+Correctif Python à déployer ; aucun nouveau DocType, aucune migration de schéma
+ni reconstruction Vue nécessaire. Aucune donnée de production modifiée.
+Les anciennes FT vides et leurs ToDo sont conservés : pas de suppression ou
+de clôture automatique de l’historique dans ce correctif.

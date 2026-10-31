@@ -41,7 +41,9 @@ class OrderBStockTests(unittest.TestCase):
         order=frappe.get_doc(dict(doctype='Sales Order',company=self.company,customer=self.customer,custom_ug_order_type=kind,branch=self.branch,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=self.item.name,qty=3,rate=100,warehouse=self.warehouse,
             delivery_date=add_days(nowdate(),7))])).insert()
-        order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         return order
 
     def selection(self,qty=1):
@@ -229,7 +231,9 @@ class OrderBStockTests(unittest.TestCase):
             items=[dict(item_code=item.name,t_warehouse=self.warehouse,qty=2,allow_zero_valuation_rate=1)])).insert();receipt.submit()
         order=frappe.get_doc(dict(doctype='Sales Order',company=self.company,customer=self.customer,custom_ug_order_type='B',branch=self.branch,
             delivery_date=add_days(nowdate(),7),items=[dict(item_code=item.name,qty=2,rate=100,warehouse=self.warehouse,delivery_date=add_days(nowdate(),7))])).insert()
-        order.submit();frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
+        order.submit()
+        if order.custom_technical_study:
+            frappe.get_doc('Chantier Technical Study',order.custom_technical_study).submit()
         name=stock.create_issue(order.name,[dict(sales_order_item=order.items[0].name,qty=2,warehouse=self.warehouse,serials=[])],uuid.uuid4().hex)
         entry=frappe.get_doc('Stock Entry',name)
         self.assertEqual(flt(entry.items[0].basic_rate),0);self.assertTrue(stock.is_complete(order))

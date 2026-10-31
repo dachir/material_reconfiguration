@@ -1,0 +1,28 @@
+Cockpit commercial : entrée par les chantiers validés — 31 octobre 2026
+
+Règle retenue
+Tout utilisateur du cockpit commercial commence avec les chantiers validés
+(docstatus=1). Les chantiers brouillons ou annulés restent consultables dans
+leur écran habituel, mais ne figurent pas dans ce cockpit.
+Les étapes suivantes conservent leurs brouillons et actions de préparation.
+
+Implémentation
+services/commercial_cockpit.py applique docstatus=1 dans la requête initiale
+Chantier ainsi que dans le chargement des sources liées à un devis/une commande.
+La projection vérifie également ce périmètre pour le graphe et l’index clients.
+Les droits natifs get_list sont conservés. Aucun rôle ou droit n’est modifié.
+Les commandes A/B, les livraisons, les règlements et les soldes sont inchangés.
+
+Vérifications
+Lecture de production et projection locale sans mutation : pour CACI,
+26CHANT1000081 (validé) apparaît ; 26CHANT1000080 (brouillon) est masqué.
+tests/test_commercial_validated_projects.py ajoute 10 tests sans base ;
+les fixtures de test_commercial_cockpit.py utilisent des chantiers validés.
+Suite de régression exécutée avec les ventes directes et le cockpit :
+205 tests unitaires réussis. git diff --check réussi.
+
+Déploiement
+Correctif Python à publier en production. Aucun changement de schéma,
+de configuration utilisateur ou de build Vue n’est nécessaire.
+Les modifications exploratoires d’affichage des brouillons ont été retirées.
+Aucune donnée métier de production n’a été modifiée.
