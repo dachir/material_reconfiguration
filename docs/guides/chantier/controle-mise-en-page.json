@@ -1,0 +1,78 @@
+{
+  "captured_at": "2026-10-31T10:25:59.160Z",
+  "chapters": 13,
+  "expected_pdf_pages": 14,
+  "missingImages": [],
+  "pages": [
+    {
+      "index": 0,
+      "title": "Utiliser\nl’écran Chantier",
+      "height": 779
+    },
+    {
+      "index": 1,
+      "title": "Repérer les zones de travail",
+      "height": 914
+    },
+    {
+      "index": 2,
+      "title": "Créer ou retrouver un chantier",
+      "height": 882
+    },
+    {
+      "index": 3,
+      "title": "Compléter les informations commerciales",
+      "height": 819
+    },
+    {
+      "index": 4,
+      "title": "Définir un type d’ouvrage",
+      "height": 770
+    },
+    {
+      "index": 5,
+      "title": "Saisir les lignes et choisir PC ou M2",
+      "height": 832
+    },
+    {
+      "index": 6,
+      "title": "Appliquer les services et accessoires du type",
+      "height": 534
+    },
+    {
+      "index": 7,
+      "title": "Consulter et ajuster une prestation de ligne",
+      "height": 665
+    },
+    {
+      "index": 8,
+      "title": "Organiser le chantier avec des sections",
+      "height": 716
+    },
+    {
+      "index": 9,
+      "title": "Traiter une vente directe",
+      "height": 714
+    },
+    {
+      "index": 10,
+      "title": "Gérer les remises",
+      "height": 772
+    },
+    {
+      "index": 11,
+      "title": "Enregistrer et valider le chantier",
+      "height": 555
+    },
+    {
+      "index": 12,
+      "title": "Préparer le devis puis la commande",
+      "height": 685
+    },
+    {
+      "index": 13,
+      "title": "Dupliquer, actualiser ou amender",
+      "height": 759
+    }
+  ]
+}

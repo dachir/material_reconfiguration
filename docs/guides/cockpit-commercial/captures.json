@@ -1,0 +1,207 @@
+{
+  "site": "https://fimaci.f.frappe.cloud",
+  "captured_at": "2026-10-31T10:41:42.631Z",
+  "screens": [
+    {
+      "file": "images/01-accueil.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Vue générale réelle du cockpit commercial.",
+      "unsaved": false,
+      "sha256": "dee565664ae014646c7d951721b40b2f6d7406bb69b75b670e650dcb72ed39a2"
+    },
+    {
+      "file": "images/02-filtres.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Filtres, actualisation et impression.",
+      "unsaved": false,
+      "sha256": "808e0ad56a06b537e0701e339b5dea14054530f53107871e0b7001a81ae91f30"
+    },
+    {
+      "file": "images/03-clients.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Liste réelle des clients et onglets Tous / À suivre.",
+      "unsaved": false,
+      "sha256": "0ed9bdf42997ddfdb7d6819275abffb2f10f9dd7fd2bb356a4bc6506f12837bb"
+    },
+    {
+      "file": "images/04-parcours-client.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Parcours réel du client CIA avec commandes A et B.",
+      "unsaved": false,
+      "sha256": "bebd8de7395dcb6c210edbb6022a3e8ff6125b8dbe748345dedcfd5c1a26efff"
+    },
+    {
+      "file": "images/05-detail-commande-b.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Montants HT et suivi de livraison d’une commande B existante.",
+      "unsaved": false,
+      "sha256": "c3e8d6ec6b434fd32f43f9b7bdb46154fce064b38e5f9f252ba7a4ca497f8c6e"
+    },
+    {
+      "file": "images/06-detail-commande-a.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Montants TTC et suivi d’une commande A existante.",
+      "unsaved": false,
+      "sha256": "0a2a7e904395e71d1c0afbc340761e604ec5371beeacc5583a8b9741b41a3729"
+    },
+    {
+      "file": "images/07-mode-liste.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Les mêmes documents dans l’affichage Liste.",
+      "unsaved": false,
+      "sha256": "ba98c4dcfbd1b87167a970a76c524581d17ca6825f0972436f32356d1479160f"
+    },
+    {
+      "file": "images/08-preparer-devis.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Fenêtre réelle de préparation d’un devis depuis un chantier validé.",
+      "unsaved": false,
+      "sha256": "6af47598833b87ff74785f829cfa3fd0170ea6de75341e418cf61c70355bb245"
+    },
+    {
+      "file": "images/09-selection-partielle.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Sélection partielle préparée dans la fenêtre, sans enregistrement.",
+      "unsaved": true,
+      "sha256": "4cd4968dd8e9e41ff9b0d47c2e22b1b5ff1ad24a1882acc3c1492ae1aa873ffc"
+    },
+    {
+      "file": "images/10-preparer-commande.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Choix du circuit B dans une préparation de commande non enregistrée.",
+      "unsaved": true,
+      "sha256": "fbedc56547732213025cf58eb4749d056d3609c2de07ba0af7985ea68ff52d0f"
+    },
+    {
+      "file": "images/11-preparer-livraison.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Choix des lignes, quantités et dépôt pour un bordereau spécial, sans validation.",
+      "unsaved": false,
+      "sha256": "7d3f28d1a7e083606fc2a4ddbd0c98c6e08e2b60fd908f8e7f7b9cd888d20995"
+    },
+    {
+      "file": "images/12-depot-series.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Dépôt et séries d’une ligne : les séries doivent être disponibles pour livrer.",
+      "unsaved": false,
+      "sha256": "b3a56f34a3a5e6ef0d445e40c4fef55e2e3ec7ac4a128893b68eaedd53688c70"
+    },
+    {
+      "file": "images/13-preparer-reglement.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Règlement et affectation aux bordereaux réellement disponibles de CIA.",
+      "unsaved": false,
+      "sha256": "694037d78a6b0109afce2f6f48a8b140e03c2d4c1b58291e2d4074de8c301187"
+    },
+    {
+      "file": "images/14-affecter-reglement.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Table réelle d’affectation des montants aux bordereaux.",
+      "unsaved": false,
+      "sha256": "3b54045a6b5644046e83b6ead41704ee16a421fc8a90cc798c7d2ad204e054d8"
+    },
+    {
+      "file": "images/15-avance.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Exemple de saisie d’une avance sans BL disponible ; règlement non enregistré.",
+      "unsaved": true,
+      "sha256": "d33184e51f42f654244a1e3f8b9d5ccf7ca64efeb62a808e039b5618b9cc8492"
+    },
+    {
+      "file": "images/16-bordereau-brouillon.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Un bordereau existant en brouillon propose Modifier et Valider selon les droits.",
+      "unsaved": false,
+      "sha256": "8e1f85ea99ad2f1d8ee1715780eafbcd6caefa940cc0eeccf7179d967a2d80dd"
+    },
+    {
+      "file": "images/17-solde-zero.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Commande B réellement livrée et soldée HT, visible dans Tous les états.",
+      "unsaved": false,
+      "sha256": "52b2366213a2cd9aa942c6f781443061e0dc3cd337139a501d4561fa6d4ba1ec"
+    },
+    {
+      "file": "images/18-reglement-existant.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Règlement validé réel et documents associés.",
+      "unsaved": false,
+      "sha256": "e69f060950601c59d30d33ff8008d391eb097476b2c21a5d315fb3282ca51654"
+    },
+    {
+      "file": "images/19-reaffectation.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Affectation d’un règlement validé : fenêtre ouverte sans modification enregistrée.",
+      "unsaved": false,
+      "sha256": "30a896918845e5e4cd9edbbc821474eb435ca371f7fac7e5d41478a1c6a971a6"
+    },
+    {
+      "file": "images/20-impression.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Récapitulatif produit par le style d’impression réel du cockpit.",
+      "unsaved": false,
+      "sha256": "a6a9ed7824c262d22a1c02e66651d2d675b4e0427ca25331b5603408aa9dfe9a"
+    }
+  ],
+  "checks": {
+    "before": {
+      "Chantier": {
+        "count": 11,
+        "sha256": "246dc461dc28768f1ab2e93a7a3e671b901a551a302d63a2a4e23eb0878a7be7"
+      },
+      "Quotation": {
+        "count": 8,
+        "sha256": "cce6cb3f9396dd0b3ce0333456266f720a6a38b57cb202d43048e588844df07e"
+      },
+      "Sales Order": {
+        "count": 9,
+        "sha256": "fadfebad7287791e9ab4a6334d083fb2b4c7fed0c162800e1770c517b41d47f1"
+      },
+      "Bordereau Special": {
+        "count": 12,
+        "sha256": "dacaefe32a056dd0c48f3d166b600bc28770e0dcfab5f885edba661ded6a059f"
+      },
+      "Reglement Special": {
+        "count": 7,
+        "sha256": "3fb79c73fe6c4b3ddd4a342c8c877c414963c54a0de1efd8098e516a4bb214c6"
+      },
+      "Commercial Operation": {
+        "count": 7,
+        "sha256": "53c15a5229ebd933e70041f6c4501cf1a6cfa1811852fe16d39326ea9379f85a"
+      }
+    },
+    "after": {
+      "Chantier": {
+        "count": 11,
+        "sha256": "246dc461dc28768f1ab2e93a7a3e671b901a551a302d63a2a4e23eb0878a7be7"
+      },
+      "Quotation": {
+        "count": 8,
+        "sha256": "cce6cb3f9396dd0b3ce0333456266f720a6a38b57cb202d43048e588844df07e"
+      },
+      "Sales Order": {
+        "count": 9,
+        "sha256": "fadfebad7287791e9ab4a6334d083fb2b4c7fed0c162800e1770c517b41d47f1"
+      },
+      "Bordereau Special": {
+        "count": 12,
+        "sha256": "dacaefe32a056dd0c48f3d166b600bc28770e0dcfab5f885edba661ded6a059f"
+      },
+      "Reglement Special": {
+        "count": 7,
+        "sha256": "3fb79c73fe6c4b3ddd4a342c8c877c414963c54a0de1efd8098e516a4bb214c6"
+      },
+      "Commercial Operation": {
+        "count": 7,
+        "sha256": "53c15a5229ebd933e70041f6c4501cf1a6cfa1811852fe16d39326ea9379f85a"
+      }
+    },
+    "unchanged": true,
+    "preparations": 6,
+    "business_operations_executed": 0,
+    "authentication_material_saved": false
+  },
+  "blocked_requests": [
+    "/api/method/frappe.integrations.frappe_providers.frappecloud_billing.current_site_info"
+  ]
+}

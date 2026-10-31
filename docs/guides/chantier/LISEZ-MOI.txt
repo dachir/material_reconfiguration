@@ -1,0 +1,32 @@
+Guide utilisateur de l’écran Chantier — Univers Glass
+Édition du 31 octobre 2026
+
+Livrables
+- Guide-utilisation-Chantier.pdf : guide de lecture et d’impression.
+- Guide-utilisation-Chantier.html : version navigable, avec liens vers les captures.
+- images/ : captures PNG réelles du site fimaci.f.frappe.cloud.
+- captures.json : origine, légende et empreinte SHA-256 de chaque capture.
+- controle-mise-en-page.json : présence des images et dimensions des chapitres.
+
+Les vues proviennent de vrais écrans et de vrais dossiers en production.
+Les formulaires montrant des exemples de saisie ont été manipulés uniquement
+dans la mémoire du navigateur. Aucun nouveau chantier, devis, commande,
+article ou mouvement de stock n’a été enregistré pour ce guide.
+L’état du brouillon source est contrôlé avant et après les captures.
+Aucun identifiant d’authentification n’est enregistré dans ce dossier.
+
+Régénération depuis apps/mat_reco
+1. Fournir un fichier d’authentification externe au dépôt via
+   UG_PRODUCTION_AUTH_FILE (configuration : base_url et token).
+2. node docs/guides/chantier/capture-production.cjs
+3. node docs/guides/chantier/build-guide.cjs
+
+Le module Playwright peut être indiqué via UG_PLAYWRIGHT_MODULE.
+Les scripts de capture bloquent les requêtes d’écriture métier et utilisent
+les API de lecture pour charger les écrans. Les requêtes d’historique de route
+et les connexions temps réel sont également bloquées pendant la capture.
+Ne pas ajouter de clic d’enregistrement métier ou de validation à ces scripts.
+
+La génération documentaire n’ajoute aucune dépendance métier à mat_reco.
+Le guide et ses captures restent dans docs/ ; ils ne sont pas automatiquement
+publiés dans les ressources publiques du site ERPNext.

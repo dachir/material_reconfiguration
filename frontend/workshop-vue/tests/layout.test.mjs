@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { layout, flatten, routeFor } from "../src/layout.js";
+import { layout, flatten, routeFor, studyRouteFor } from "../src/layout.js";
 const roots = [
   {
     id: "SO-1",
@@ -67,4 +67,43 @@ test('server stock paths preserve links when order children have not been loaded
  scene=layout([{id:'SO',children:[{id:'CUT',children:[]}]}],new Set(['SO']),false,[plan]);
  assert.equal(scene.edges.filter(e=>e.mcp).length,1);
  assert.equal(scene.edges.find(e=>e.mcp).from.id,'CUT');
+});
+
+test('validated technical sheets remain attached to collapsed orders without entering manufacturing nodes', () => {
+ const roots=[{id:'SO',technical_studies:[{name:'FT',docstatus:1}],children:[{id:'CUT',children:[]}]}];
+ const scene=layout(roots,new Set());
+ assert.equal(scene.studies.length,1);
+ assert.equal(scene.studies[0].sales_order,'SO');
+ assert.equal(scene.nodes.length,1);
+ assert.equal(flatten(roots).size,2);
+ const link=scene.edges.find(edge=>edge.study);
+ assert.equal(link.from.id,'SO');
+ assert.equal(link.to.name,'FT');
+ assert(scene.studies[0].y>=scene.nodes[0].y+100);
+ assert(scene.height>scene.studies[0].y+76);
+});
+
+test('technical sheets reserve space before the next order and keep compatible-stock MCP links', () => {
+ const graph=[{id:'SO-1',technical_studies:[{name:'FT-1',docstatus:1}],children:[{id:'STOCK'}]},
+  {id:'SO-2',technical_studies:[{name:'FT-2',docstatus:1}],children:[]}];
+ const plan={id:'mcp:A',name:'A',creation:'2026-10-31',stock_ids:['STOCK']};
+ const scene=layout(graph,new Set(),false,[plan]);
+ assert(scene.nodes.find(n=>n.id==='SO-2').y>scene.studies[0].y+76);
+ assert.equal(scene.edges.filter(e=>e.study).length,2);
+ assert.equal(scene.edges.find(e=>e.mcp).from.id,'SO-1');
+ assert(scene.mcps[0].x>Math.max(...scene.studies.map(n=>n.x)));
+});
+
+test('duplicate, missing and unvalidated technical sheets create no extra cards', () => {
+ const scene=layout([{id:'SO',technical_studies:[{name:'FT',docstatus:1},{name:'FT',docstatus:1},
+  {name:'DRAFT',docstatus:0},{name:'CANCELLED',docstatus:2},{docstatus:1}]}],new Set());
+ assert.deepEqual(scene.studies.map(study=>study.name),['FT']);
+ assert.equal(scene.edges.filter(edge=>edge.study).length,1);
+});
+
+test('technical sheet links open the existing Vue page and reject invalid targets', () => {
+ assert.deepEqual(studyRouteFor({name:'FT',docstatus:1}),['technical-study','FT']);
+ assert.equal(studyRouteFor({name:'FT',docstatus:0}),null);
+ assert.equal(studyRouteFor({docstatus:1}),null);
+ assert.equal(studyRouteFor(null),null);
 });

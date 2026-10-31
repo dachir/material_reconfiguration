@@ -944,3 +944,8 @@
 .ug-workshop .ug-mcp-node{display:flex;align-items:center;gap:8px;padding:10px;text-align:left;border-color:#b28adf;background:#241d39;color:var(--text);cursor:pointer;min-height:70px;}
 .ug-links .ug-mcp-link path{stroke:#b28adf;stroke-width:2;}
 .ug-links .ug-mcp-link circle{fill:#b28adf;}
+.ug-workshop .ug-study-node{display:flex;align-items:center;gap:8px;padding:10px;text-align:left;border-color:#4faccb;background:#082c3c;color:var(--text);cursor:pointer;min-height:76px;}
+.ug-links .ug-study-link path{stroke:#55c7ec;stroke-width:1.8;filter:none;}
+.ug-links .ug-study-link circle{fill:#55c7ec;stroke:#15495e;}
+.ug-study-links{margin:8px 0 14px;display:flex;gap:8px;flex-wrap:wrap;}
+.ug-study-shortcut{margin-left:12px;}

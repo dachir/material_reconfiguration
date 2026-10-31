@@ -1,7 +1,7 @@
 <script setup>
 import {printDocument} from "./printing.js";
 import { ref, shallowRef, reactive, computed, onBeforeUnmount } from "vue";
-import { flatten, layout, routeFor } from "./layout.js";
+import { flatten, layout, routeFor, studyRouteFor } from "./layout.js";
 import { defaultQuantity } from "./quantity.js";
 const api = "mat_reco.material_reconfiguration.services.workshop_service.";
 const mcps = shallowRef([]);
@@ -46,6 +46,7 @@ const loadedOrders = new Set();
 let hasLoaded = false, refreshing = false, rootsSnapshot = "", mcpsSnapshot = "";
 const index = computed(() => flatten(roots.value));
 const selected = computed(() => index.value.get(selectedId.value));
+const selectedStudies = computed(() => roots.value.find(root => root.id === selected.value?.sales_order)?.technical_studies || []);
 const scene = computed(() => layout(roots.value, expanded.value, false, mcps.value));
 const actionLabel = computed(() => {
 	const node = selected.value;
@@ -166,6 +167,7 @@ async function setMode(value) {
 	}
 }
 function openMcp(name) { frappe.set_route('Form', 'Material Cutting Plan', name); }
+function openStudy(study) { const route=studyRouteFor(study); if(route) frappe.set_route(...route); }
 function mcpStatus(plan) { return ({Draft:'Brouillon',Simulated:'Simulé',Approved:'Approuvé',Executed:'Exécuté',Cancelled:'Annulé'})[plan.status] || plan.status; }
 function progress(n) {
 	return Math.min(100, (100 * (n.produced_qty || 0)) / (n.required_qty || n.remaining_qty || 1));
@@ -448,14 +450,14 @@ function wheel(e) {
 									<g
 										v-for="edge in scene.edges"
 										:key="edge.id"
-										:class="{ satisfied: edge.ready, 'ug-mcp-link': edge.mcp }"
+										:class="{ satisfied: edge.ready, 'ug-mcp-link': edge.mcp, 'ug-study-link': edge.study }"
 									>
 										<path
-											:d="`M ${edge.from.x + 218} ${edge.from.y + 35} H ${
+											:d="edge.study ? `M ${edge.from.x + 109} ${edge.from.y + 80} V ${edge.to.y - 12} H ${edge.to.x + 109} V ${edge.to.y}` : `M ${edge.from.x + 218} ${edge.from.y + 35} H ${
 												edge.from.x + 234
 											} V ${edge.to.y + 35} H ${edge.to.x}`"
 										/>
-										<circle :cx="edge.to.x" :cy="edge.to.y + 35" r="4" />
+										<circle :cx="edge.study ? edge.to.x + 109 : edge.to.x" :cy="edge.study ? edge.to.y : edge.to.y + 35" r="4" />
 										<text
 											:x="edge.to.x - 5"
 											:y="edge.to.y + 24"
@@ -534,6 +536,12 @@ function wheel(e) {
 										></span>
 									</button>
 								</div>
+                                <button v-for="study in scene.studies" :key="study.id" class="ug-node ug-study-node"
+                                    :style="{left:study.x+'px',top:study.y+'px'}" :title="'Ouvrir la fiche technique '+study.name"
+                                    :aria-label="'Ouvrir la fiche technique '+study.name+' de '+study.sales_order" @click="openStudy(study)">
+                                    <span class="ug-node-icon" aria-hidden="true">⚙</span>
+                                    <span class="ug-node-text"><strong>Fiche technique</strong><small>{{study.name}}</small><small>Validée ↗</small></span>
+                                </button>
                                 <button v-for="plan in scene.mcps" :key="plan.id" class="ug-node ug-mcp-node"
                                     :style="{left:plan.x+'px',top:plan.y+'px'}" :title="'Ouvrir '+plan.name"
                                     @click="openMcp(plan.name)">
@@ -563,6 +571,8 @@ function wheel(e) {
 									><tr class="ug-order-row">
 										<th colspan="6">
 											{{ root.label }} <small>{{ root.customer }}</small>
+                                            <button v-for="study in root.technical_studies" :key="study.name" class="ug-text-button ug-study-shortcut"
+                                                :aria-label="'Ouvrir la fiche technique '+study.name+' de '+root.id" @click="openStudy(study)">⚙ Fiche technique ↗</button>
 										</th>
 									</tr>
 									<tr v-for="n in root.children" :key="n.id">
@@ -604,6 +614,10 @@ function wheel(e) {
 						</div>
 					</div>
 					<p class="ug-detail-reference">{{ selected.sales_order }}</p>
+                    <div v-if="selectedStudies.length" class="ug-study-links">
+                        <button v-for="study in selectedStudies" :key="study.name" class="ug-text-button"
+                            :title="study.name" @click="openStudy(study)">⚙ Fiche technique ↗</button>
+                    </div>
 					<p class="ug-state-badge" :class="selected.state">
 						{{ selected.state_label }}
 					</p>

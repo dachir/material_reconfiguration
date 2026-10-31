@@ -10,7 +10,7 @@ export function flatten(roots) {
 }
 export function layout(roots, expanded, compact = false, plans = []) {
 	const nodes = [],
-		edges = [];
+		edges = [], studies = [];
 	let nextRow = 0;
 	function visit(node, depth) {
 		const children = expanded.has(node.id) ? node.children || [] : [];
@@ -40,7 +40,17 @@ export function layout(roots, expanded, compact = false, plans = []) {
 		return point;
 	}
 	roots.forEach((root) => {
-		visit(root, 0);
+		const order = visit(root, 0);
+		const known = new Set();
+		for (const study of root.technical_studies || []) {
+			if (!study.name || study.docstatus !== 1 || known.has(study.name)) continue;
+			known.add(study.name);
+			const point = {...study, id:`${root.id}/study/${study.name}`, sales_order:root.id,
+				x:order.x + 20, y:order.y + 100 + (known.size - 1) * 90};
+			studies.push(point);
+			edges.push({id:`${root.id}/${point.id}`, from:order, to:point, study:true, ready:true, label:''});
+			nextRow = Math.max(nextRow, Math.ceil((point.y + 90 - 35) / 100));
+		}
 		nextRow += compact ? 0 : 0.35;
 	});
 	const visible = new Map(nodes.map(n => [n.id, n]));
@@ -77,11 +87,15 @@ export function layout(roots, expanded, compact = false, plans = []) {
 	}
 	return {
 		nodes,
+		studies,
 		mcps,
 		edges,
-		width: Math.max(700, ...[...nodes, ...mcps].map((n) => n.x + 245)),
+		width: Math.max(700, ...[...nodes, ...studies, ...mcps].map((n) => n.x + 245)),
 		height: Math.max(450, nextRow * 100 + 40, mcps.length * 100 + 70),
 	};
+}
+export function studyRouteFor(study) {
+	return study?.name && study.docstatus === 1 ? ['technical-study', study.name] : null;
 }
 export function routeFor(result) {
 	if (result.action === "mcp" && result.mcps?.length === 1)

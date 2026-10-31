@@ -1,0 +1,177 @@
+{
+  "site": "https://fimaci.f.frappe.cloud",
+  "captured_at": "2026-10-31T10:25:59.160Z",
+  "screens": [
+    {
+      "file": "images/01-vue-ensemble.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000087",
+      "caption": "Chantier existant validé : vue générale.",
+      "unsaved": false,
+      "sha256": "b9e6bfce2f38fdb31626557aeab86dc5eddcedc95e21fcbbff8084cca626c8e2"
+    },
+    {
+      "file": "images/02-types.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000087",
+      "caption": "Plusieurs types d’ouvrage dans un même chantier.",
+      "unsaved": false,
+      "sha256": "0c722a36d1cbc7ecc743f44ba59fe15fc56b9cacf39339605a6fa5b892191d7f"
+    },
+    {
+      "file": "images/03-sections.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000087",
+      "caption": "Sections et nombres de lignes associés.",
+      "unsaved": false,
+      "sha256": "a2db165b5b783c0bf1931678786593a12a7ac04b8a4600bef465fceeb2c54a54"
+    },
+    {
+      "file": "images/04-prix-m2.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000085",
+      "caption": "Dimensions en millimètres et unité de prix M2 sur un chantier existant.",
+      "unsaved": false,
+      "sha256": "003191644e832af9094e63b5a2311d265b91f74a8010cf4d1966167e3b7d0902"
+    },
+    {
+      "file": "images/05-prestations-existantes.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000078",
+      "caption": "Prestation associée à une ligne existante, affichée avec le triangle.",
+      "unsaved": false,
+      "sha256": "1790ed2aa2122e72200481296e1b584964296ea08e240007686eeeafe121cba0"
+    },
+    {
+      "file": "images/06-actions.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000078",
+      "caption": "Menu des actions du chantier validé.",
+      "unsaved": false,
+      "sha256": "cc15857ddbaa1ff8b770a57d779a8ede5b61424b46c3d48515f6ed72b870de85"
+    },
+    {
+      "file": "images/07-generation-devis.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000078",
+      "caption": "Fenêtre réelle de génération du devis, sans exécuter la génération.",
+      "unsaved": false,
+      "sha256": "c2fa9a8e767cd626b5f215926891544fe36873a2a2bdb685c988b542024ddc4b"
+    },
+    {
+      "file": "images/08-entete.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "En-tête du brouillon existant : client, remises, devise et taxes.",
+      "unsaved": false,
+      "sha256": "75ed1b1ead67c5bf9e0749c0f281b41f2094cbb39c592fa6b09d9087d0e8f4e3"
+    },
+    {
+      "file": "images/08a-identification.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Client, nom du chantier, responsable et remise.",
+      "unsaved": false,
+      "sha256": "4afdb565a49eef48514983cd45ce5cbb4a702eb94e802f3b4a5892b87dfacc87"
+    },
+    {
+      "file": "images/08b-conditions.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Devise, liste de prix, modèle de taxes et dates.",
+      "unsaved": false,
+      "sha256": "e16e2bf41ce8e71b06db3917de9f9e0255e0255fc2b6981b4a0a49494fa78ce7"
+    },
+    {
+      "file": "images/09-nouveau-chantier.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Formulaire réel de création ; aucun chantier n’a été enregistré.",
+      "unsaved": false,
+      "sha256": "dc3a8a11de9486b9bdccbb8631cf22bf9e4057adc3ea8d93ac4bb9aa2e2c4f35"
+    },
+    {
+      "file": "images/10-nouveau-type.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Exemple de saisie dans le formulaire de production, non enregistré.",
+      "unsaved": true,
+      "sha256": "f694f9b6ac8e25c94a4c6a569dba7caa4a1222cd1994bd1a8d187832a4fc92f4"
+    },
+    {
+      "file": "images/11-saisie-ligne.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Exemple réel de saisie non enregistrée : 2 pièces de 1 500 × 1 000 mm, prix M2.",
+      "unsaved": true,
+      "sha256": "c382cd3851fdae29fdc061c2fe69011bb3b2716bf94e29a978c9b7a14e8943fb"
+    },
+    {
+      "file": "images/12-prestations-type.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Catalogue réel et valeurs par défaut du type, dans une saisie non enregistrée.",
+      "unsaved": true,
+      "sha256": "f0278a90503994d4d8c2afdf6369463b6561895b49739510769ae1a3d07fbc05"
+    },
+    {
+      "file": "images/12a-prestation-type.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Détail de la prestation commune sélectionnée ; saisie non enregistrée.",
+      "unsaved": true,
+      "sha256": "4877098fc72602be7e25860a1f7b495c05dbe9d82b1390e14936444006ce8ba2"
+    },
+    {
+      "file": "images/13-heritage-type.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Prestation héritée du type : calcul affiché sur la ligne, non enregistré.",
+      "unsaved": true,
+      "sha256": "01c143931903a417cadb5665da9c63403291360347ad4e2973df572e1c549f6d"
+    },
+    {
+      "file": "images/14-ajuster-prestation.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Quantité, prix, remise et montant ajustables pour la ligne ; aucune affectation envoyée.",
+      "unsaved": true,
+      "sha256": "4ea2f9633c969c636cd823330ffb9ed98d5baf608b75f85cb9e82a8d06a47b3d"
+    },
+    {
+      "file": "images/14a-ajuster-prestation.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Détail des quantités, prix et remise d’une prestation de ligne ; saisie non enregistrée.",
+      "unsaved": true,
+      "sha256": "b7439865e141806e498d65885ebc460d6a1b6f0ee161b806a545cd4a7de10744"
+    },
+    {
+      "file": "images/15-affecter-section.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Sélecteur de section de la ligne en cours ; brouillon sans section.",
+      "unsaved": true,
+      "sha256": "c8fad6a520fc656a12a22101b4f7998bff0ed8d9c71d30da5075b8e9a615e219"
+    },
+    {
+      "file": "images/16-nouvelle-section.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Formulaire réel de section, non soumis.",
+      "unsaved": false,
+      "sha256": "e92a00628a3a2ad42aef606a84483be1322d9ea60d86c844cc8e77a60423ee95"
+    },
+    {
+      "file": "images/17-vente-directe.png",
+      "source": "https://fimaci.f.frappe.cloud/app/chantiers/26CHANT1000080",
+      "caption": "Formulaire de vente directe : plaque entière, accessoire ou service.",
+      "unsaved": false,
+      "sha256": "d4bc3abcb881dd19e7457d7f178072518685a074d8ad116c481917642d73803e"
+    }
+  ],
+  "blocked_requests": [
+    "/api/method/frappe.integrations.frappe_providers.frappecloud_billing.current_site_info",
+    "/api/method/frappe.desk.doctype.route_history.route_history.deferred_insert"
+  ],
+  "checks": {
+    "source_draft": "26CHANT1000080",
+    "before": {
+      "modified": "2026-10-29 11:23:14.086846",
+      "docstatus": 0,
+      "lines": 0,
+      "types": 0,
+      "extras": 0
+    },
+    "after": {
+      "modified": "2026-10-29 11:23:14.086846",
+      "docstatus": 0,
+      "lines": 0,
+      "types": 0,
+      "extras": 0
+    },
+    "unchanged": true,
+    "business_writes_executed": 0,
+    "authentication_material_saved": false
+  }
+}

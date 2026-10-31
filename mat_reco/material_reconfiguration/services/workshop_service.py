@@ -342,13 +342,36 @@ def _inventory(nodes, company, ownership, *, lock=False):
     return Pool(free), physical
 
 
-def _has_validated_study(order, row, *, lock=False):
+def _study_reference(order, row):
     study = order.get('custom_technical_study') or _json(row.get('custom_technical_snapshot')).get('technical_study')
     if not study and order.get('custom_chantier'):
         study = frappe.db.get_value('Chantier', order.custom_chantier, 'technical_study')
+    return study
+
+
+def _has_validated_study(order, row, *, lock=False):
+    study = _study_reference(order, row)
     if not study:
         return False
     return frappe.db.get_value('Chantier Technical Study', study, 'docstatus', for_update=lock) == 1
+
+
+def _attach_technical_studies(roots):
+    """Expose only readable, submitted sheets actually used by these orders."""
+    sources = {root['id']: set(root.pop('_technical_study_names', [])) for root in roots}
+    for root in roots:
+        root['technical_studies'] = []
+    names = sorted(set().union(*sources.values()) - {None, ''}) if sources else []
+    if not names or not frappe.has_permission('Chantier Technical Study', 'read'):
+        return
+    studies = frappe.get_list('Chantier Technical Study',
+        filters={'name': ['in', names], 'docstatus': 1},
+        fields=['name', 'docstatus', 'sales_order', 'chantier'], order_by='name', limit_page_length=0)
+    for root in roots:
+        root['technical_studies'] = [dict(name=study.name, docstatus=study.docstatus)
+            for study in studies if study.name in sources[root['id']] and
+            (study.get('sales_order') == root['id'] or
+             not study.get('sales_order') and root.get('chantier') and study.get('chantier') == root['chantier'])]
 
 
 def _load(company=None, *, lock=False):
@@ -366,7 +389,8 @@ def _load(company=None, *, lock=False):
     for order in orders:
         root = dict(id=order.name,label=order.name,item_type='ORDER',sales_order=order.name,
                     company=order.company,customer=order.customer,status=order.status,chantier=order.get('custom_chantier'),delivery_date=str(order.delivery_date or ''),
-                    transaction_date=str(order.transaction_date),children=[],required_qty=0,produced_qty=0,remaining_qty=0)
+                    transaction_date=str(order.transaction_date),children=[],required_qty=0,produced_qty=0,remaining_qty=0,
+                    _technical_study_names=[])
         for row in order.items:
             kind = _json(row.get('custom_technical_snapshot')).get('item_type') if row.get('custom_technical_snapshot') else frappe.get_cached_value('Item',row.item_code,'custom_item_types')
             if kind not in ('OUVRAGE','DECOUPE'):
@@ -380,6 +404,9 @@ def _load(company=None, *, lock=False):
             root['remaining_qty'] += remaining
             if not remaining:
                 continue
+            study = _study_reference(order, row)
+            if study and study not in root['_technical_study_names']:
+                root['_technical_study_names'].append(study)
             node=None
             try:
                 node = _tree(order,row,allow_invalid=True)
@@ -460,6 +487,7 @@ def _validated_dimensions(value):
 def get_dashboard(filters=None,expanded_orders=None):
     filters = _json(filters)
     roots,errors,_ = _load(filters.get('company'))
+    _attach_technical_studies(roots)
     primary = filters.get('primary_item')
     # Apply filters after global allocation so narrowing a view never promises
     # resources already allocated to an earlier, hidden order.
