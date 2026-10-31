@@ -4,6 +4,7 @@ Parent documents are always selected with get_list. Child rows are read only
 inside those visible parents. No controller, lockful financial helper or stock
 operation is invoked while rendering this dashboard.
 """
+
 from collections import defaultdict
 
 import frappe
