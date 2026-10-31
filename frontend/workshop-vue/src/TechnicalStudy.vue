@@ -26,19 +26,19 @@ function nodeEditable(entry){
 }
 function nodeWritable(entry){return nodeEditable(entry)&&entry.node.mode==='new';}
 function addComponent(entry,kind='OUVRAGE'){
- if(kind==='Lame d’air'?!canWrite.value:!nodeEditable(entry))return;
+ if(kind==='ESPACE'?!canWrite.value:!nodeEditable(entry))return;
  const lineId=activeId.value,target=entry.node,targetPath=[...entry.path];
  const dialog=new frappe.ui.Dialog({title:'Ajouter un composant à '+(target.item_name||displayCode(target)),fields:[
-  {fieldname:'kind',label:'Type de composant',fieldtype:'Select',options:'OUVRAGE\nDECOUPE\nLame d’air',default:kind,reqd:1,onchange:()=>dialog.set_value('item','')},
-  {fieldname:'item',label:'Article existant (facultatif)',fieldtype:'Link',options:'Item',description:'Laisser vide pour définir un nouvel article.',depends_on:'eval:doc.kind !== "Lame d’air"',get_query:()=>({filters:{custom_item_types:dialog.get_value('kind'),has_serial_no:1,disabled:0}})},
-  {fieldname:'air_thickness',label:'Épaisseur de la lame d’air (mm)',fieldtype:'Float',depends_on:'eval:doc.kind === "Lame d’air"',mandatory_depends_on:'eval:doc.kind === "Lame d’air"'},
+  {fieldname:'kind',label:'Type de composant',fieldtype:'Select',options:'OUVRAGE\nDECOUPE\nESPACE',default:kind,reqd:1,onchange:()=>dialog.set_value('item','')},
+  {fieldname:'item',label:'Article existant (facultatif)',fieldtype:'Link',options:'Item',description:'Laisser vide pour définir un nouvel article.',depends_on:'eval:doc.kind !== "ESPACE"',get_query:()=>({filters:{custom_item_types:dialog.get_value('kind'),has_serial_no:1,disabled:0}})},
+  {fieldname:'air_thickness',label:'Épaisseur de l’ESPACE (mm)',fieldtype:'Float',depends_on:'eval:doc.kind === "ESPACE"',mandatory_depends_on:'eval:doc.kind === "ESPACE"'},
   {fieldname:'qty',label:'Quantité par ouvrage parent',fieldtype:'Int',default:1,reqd:1}
  ],primary_action_label:'Ajouter',primary_action:async function applyComponent(v){
   if(!Number.isInteger(Number(v.qty))||Number(v.qty)<=0){frappe.msgprint('Saisir une quantité entière positive.');return;}
-  if(v.kind==='Lame d’air'){
-   if(!(Number(v.air_thickness)>0)||!Number.isFinite(Number(v.air_thickness))){frappe.msgprint('Saisir une épaisseur de lame d’air positive.');return;}
+  if(v.kind==='ESPACE'){
+   if(!(Number(v.air_thickness)>0)||!Number.isFinite(Number(v.air_thickness))){frappe.msgprint('Saisir une épaisseur d’ESPACE positive.');return;}
    if(activeId.value!==lineId||!canWrite.value||!nodes.value.some(e=>e.node===target)){dialog.hide();return;}
-   target.children||=[];target.children.push({mode:'air',item_type:'AIR',item_name:'Lame d’air',thickness_mm:Number(v.air_thickness),qty_factor:Number(v.qty),children:[]});path.value=[...targetPath,target.children.length-1];mark();dialog.hide();return;
+   target.children||=[];target.children.push({mode:'air',item_type:'AIR',item_name:'ESPACE',thickness_mm:Number(v.air_thickness),qty_factor:Number(v.qty),children:[]});path.value=[...targetPath,target.children.length-1];mark();dialog.hide();return;
   }
   if(target.mode==='existing'){
    frappe.confirm('Créer une variante de cet ouvrage pour modifier ses articles ?',()=>{if(activeId.value!==lineId||!nodeEditable(entry))return;path.value=[...targetPath];variant();applyComponent(v);});return;
@@ -63,11 +63,11 @@ const commonOperations=id=>JSON.parse(commercialType(id)?.common_extras||'[]');
 const commercialType=id=>dossier.value?.work_types?.find(t=>t.type_id===id);
 const typeQty=id=>(dossier.value?.lines||[]).filter(r=>r.work_type===id).reduce((n,r)=>n+Number(r.qty||0),0);
 const macro=computed(()=>loose.value?{qty:typeQty(activeId.value)}:dossier.value?.lines?.find(l=>l.line_id===activeId.value));
-const displayCode=(n)=>n?.item_type==='AIR'?'Lame d’air':n?.mode==='existing'?n.item_code:(n?.proposed_code||'Code à définir');
+const displayCode=(n)=>n?.item_type==='AIR'?'ESPACE':n?.mode==='existing'?n.item_code:(n?.proposed_code||'Code à définir');
 const sectionName=(id)=>data.value.sections?.find(s=>s.name===id)?.section_name||'Sans section';
 async function call(method,args={},write=false){return(await frappe.call({method:api+method,args,type:write?'POST':'GET'})).message;}
 function describe(e){try{return JSON.parse(JSON.parse(e._server_messages)[0]).message;}catch{return e.message||'Opération impossible.';}}
-function migrateAir(node){if(dossier.value?.company==='Univers Glass'&&study.value?.docstatus===0&&node.mode==='new'&&!node.warehouse&&['PRIMAIRE','DECOUPE','OUVRAGE'].includes(node.item_type))node.warehouse='Stores - UG';for(const child of node.children||[])migrateAir(child);if(node.item_type==='OUVRAGE'&&Number(node.air_gap_mm)>0){node.children||=[];node.children.push({mode:'air',item_type:'AIR',item_name:'Lame d’air',thickness_mm:Number(node.air_gap_mm),qty_factor:1,children:[]});delete node.air_gap_mm;}return node;}
+function migrateAir(node){if(dossier.value?.company==='Univers Glass'&&study.value?.docstatus===0&&node.mode==='new'&&!node.warehouse&&['PRIMAIRE','DECOUPE','OUVRAGE'].includes(node.item_type))node.warehouse='Stores - UG';for(const child of node.children||[])migrateAir(child);if(node.item_type==='OUVRAGE'&&Number(node.air_gap_mm)>0){node.children||=[];node.children.push({mode:'air',item_type:'AIR',item_name:'ESPACE',thickness_mm:Number(node.air_gap_mm),qty_factor:1,children:[]});delete node.air_gap_mm;}return node;}
 function apply(value){const sameStudy=data.value.study?.name===value.study?.name;checkedLineIds.value=sameStudy?checkedLineIds.value.filter(id=>(value.study?.lines||[]).some(line=>line.line_id===id)):[];batchNotice.value='';data.value=value;lines.value=(value.study?.lines||[]).map(l=>({...l,tree:migrateAir(JSON.parse(l.tree_json||'{}'))}));if(!lines.value.some(l=>l.line_id===activeId.value))activeId.value=lines.value[0]?.line_id||'';path.value=[];dirty.value=false;}
 async function refresh(){busy.value=true;error.value='';try{apply(await call('get_study',{name:name.value||null}));}catch(e){error.value=describe(e);}finally{busy.value=false;}}
 function mark(){batchNotice.value='';dirty.value=true;}
@@ -85,7 +85,7 @@ function removeEntry(entry){if(!canWrite.value||busy.value)return;path.value=[..
 function remove(){
  if(!canWrite.value||!path.value.length)return;
  const target=selected.value,line=active.value,indices=[...path.value];
- frappe.confirm(target.item_type==='AIR'?'Retirer cette lame d’air ?':'Retirer cet article et tous ses enfants ? Les parents existants concernés deviendront des variantes à compléter avec de nouveaux codes.',()=>{
+ frappe.confirm(target.item_type==='AIR'?'Retirer cet ESPACE ?':'Retirer cet article et tous ses enfants ? Les parents existants concernés deviendront des variantes à compléter avec de nouveaux codes.',()=>{
   if(!canWrite.value||active.value!==line||selected.value!==target)return;
   const p=[...indices],index=p.pop();let parent=line.tree;
   for(const i of [...p,null]){
@@ -116,14 +116,14 @@ defineExpose({show,hide});
  <div v-if="loose&&commonOperations(active.line_id).length" class="thickness-check"><strong>Services / accessoires commerciaux communs :</strong><span v-for="extra in commonOperations(active.line_id)" :key="extra.key"> {{extra.item_code}} · coefficient {{extra.factor||1}} ; </span></div>
  <h3>Composition de fabrication</h3><button v-if="canWrite" class="danger" :disabled="busy" @click="resetComposition">Reprendre toute la composition</button>
  <div class="tree"><template v-for="entry in nodes" :key="entry.key"><div class="tree-node" :style="{marginLeft:entry.path.length*16+'px'}">
- <div class="node-card" :class="{selected:path.join('.')===entry.path.join('.'),'air-layer':entry.node.item_type==='AIR'}"><button class="node-select" :class="{selected:path.join('.')===entry.path.join('.')}" @click="path=entry.path"><span class="icon">{{entry.node.item_type==='AIR'?'≋':entry.node.item_type==='PRIMAIRE'?'▱':entry.node.item_type==='DECOUPE'?'▯':'◇'}}</span><span><strong>{{entry.node.item_name||displayCode(entry.node)}}</strong><small>{{displayCode(entry.node)}} · {{entry.node.item_type==='AIR'?entry.node.thickness_mm+' mm':entry.node.item_type}} <template v-if="entry.path.length">· × {{entry.node.qty_factor||1}}</template></small></span><span v-if="entry.node.item_type==='OUVRAGE'" class="component-count">{{entry.node.children?.length||0}} composant(s)</span><span class="tag" :class="entry.node.mode==='existing'?'valid':'new'">{{entry.node.item_type==='AIR'?'Lame d’air':entry.node.mode==='existing'?'Item existant':'À créer'}}</span></button>
- <button v-if="canWrite" :disabled="busy" class="node-delete" :aria-label="'Supprimer '+(entry.node.item_name||displayCode(entry.node))+' et ses enfants'" title="Supprimer ce composant et ses enfants" @click="removeEntry(entry)"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></button>
- <button v-if="canWrite&&entry.node.item_type==='OUVRAGE'" :disabled="!nodeEditable(entry)" class="node-add" :aria-label="'Ajouter un composant à '+(entry.node.item_name||displayCode(entry.node))" title="Ajouter un composant" @click="addComponent(entry)">+</button></div>
+ <div class="node-card" :class="{selected:path.join('.')===entry.path.join('.'),'air-layer':entry.node.item_type==='AIR'}"><button class="node-select" :class="{selected:path.join('.')===entry.path.join('.')}" @click="path=entry.path"><span class="icon">{{entry.node.item_type==='AIR'?'≋':entry.node.item_type==='PRIMAIRE'?'▱':entry.node.item_type==='DECOUPE'?'▯':'◇'}}</span><span><strong>{{entry.node.item_type==='AIR'?'ESPACE':entry.node.item_name||displayCode(entry.node)}}</strong><small>{{displayCode(entry.node)}} · {{entry.node.item_type==='AIR'?entry.node.thickness_mm+' mm':entry.node.item_type}} <template v-if="entry.path.length">· × {{entry.node.qty_factor||1}}</template></small></span><span v-if="entry.node.item_type==='OUVRAGE'" class="component-count">{{entry.node.children?.length||0}} composant(s)</span><span class="tag" :class="entry.node.mode==='existing'?'valid':'new'">{{entry.node.item_type==='AIR'?'ESPACE':entry.node.mode==='existing'?'Item existant':'À créer'}}</span></button>
+ <button v-if="canWrite" :disabled="busy" class="node-delete" :aria-label="'Supprimer '+(entry.node.item_type==='AIR'?'ESPACE':entry.node.item_name||displayCode(entry.node))+' et ses enfants'" title="Supprimer ce composant et ses enfants" @click="removeEntry(entry)"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></button>
+ <button v-if="canWrite&&entry.node.item_type==='OUVRAGE'" :disabled="!nodeEditable(entry)" class="node-add" :aria-label="'Ajouter un composant à '+(entry.node.item_type==='AIR'?'ESPACE':entry.node.item_name||displayCode(entry.node))" title="Ajouter un composant" @click="addComponent(entry)">+</button></div>
  </div></template></div>
  <div v-if="editable&&selected?.mode==='new'&&selected.item_type==='DECOUPE'&&!selected.children?.length" class="actions"><button @click="add('PRIMAIRE')">+ Matière primaire</button></div>
  <label class="notes">Notes techniques<textarea v-model="study.notes" :disabled="!canWrite" @input="mark"></textarea></label></main>
  <aside v-if="selected" class="panel inspector"><h2>Article et contrôles</h2><div class="actions" v-if="editable&&selected.item_type!=='AIR'"><button @click="chooseItem">Rechercher un Item existant</button><button v-if="selected.mode==='existing'" @click="variant">Définir un nouvel article</button></div>
- <template v-if="selected.item_type==='AIR'"><label>Type de composant<input value="Lame d’air" disabled /></label><label>Épaisseur de la lame d’air (mm)<input v-model.number="selected.thickness_mm" type="number" min="0.01" step="any" :disabled="!canWrite" @input="mark" /></label><label>Quantité par parent<input v-model.number="selected.qty_factor" type="number" min="1" step="1" :disabled="!canWrite" @input="mark" /></label></template><template v-else>
+ <template v-if="selected.item_type==='AIR'"><label>Type de composant<input value="ESPACE" disabled /></label><label>Épaisseur de l’ESPACE (mm)<input v-model.number="selected.thickness_mm" type="number" min="0.01" step="any" :disabled="!canWrite" @input="mark" /></label><label>Quantité par parent<input v-model.number="selected.qty_factor" type="number" min="1" step="1" :disabled="!canWrite" @input="mark" /></label></template><template v-else>
  <label>Type d’article<select v-model="selected.item_type" :disabled="!editable||selected.mode==='existing'" @change="mark"><option>OUVRAGE</option><option>DECOUPE</option><option v-if="path.length">PRIMAIRE</option><option v-if="selected.mode==='existing'&&selected.item_type==='ACCESSOIRE'">ACCESSOIRE</option></select></label>
  <label>{{selected.mode==='existing'?'Code article existant':'Code article proposé'}}<input v-if="selected.mode==='new'" v-model="selected.proposed_code" :disabled="!editable" @input="mark" /><input v-else :value="selected.item_code" disabled /></label><label>Désignation<input v-model="selected.item_name" :disabled="!editable||selected.mode==='existing'" @input="mark" /></label>
  <div class="fields"><label>Unité<button :disabled="!editable||selected.mode==='existing'" @click="pick('stock_uom','UOM')">{{selected.stock_uom||'Choisir'}}</button></label><label>Groupe d’articles<button :disabled="!editable||selected.mode==='existing'" @click="pick('item_group','Item Group',{is_group:0})">{{selected.item_group||'Choisir'}}</button></label></div>

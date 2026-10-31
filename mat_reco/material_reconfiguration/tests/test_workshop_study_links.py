@@ -25,7 +25,7 @@ class WorkshopStudyLinksTests(unittest.TestCase):
         self.assertEqual((order['required_qty'], order['remaining_qty'], order['children']), (5, 3, []))
         self.assertNotIn('_technical_study_names', order)
         self.assertEqual(query.call_args.args, ('Chantier Technical Study',))
-        self.assertEqual(query.call_args.kwargs['filters'], {'name': ['in', ['FT']], 'docstatus': 1})
+        self.assertEqual(query.call_args.kwargs['filters'], {'docstatus': 1})
 
     def test_unreadable_sheet_leaks_no_reference(self):
         order = root()
@@ -58,12 +58,14 @@ class WorkshopStudyLinksTests(unittest.TestCase):
         _, query = self.attach(orders, [dict(name='FT-1', docstatus=1, sales_order='SO-1'),
             dict(name='FT-2', docstatus=1, sales_order='SO-2')])
         query.assert_called_once()
-        self.assertEqual(query.call_args.kwargs['filters']['name'], ['in', ['FT-1', 'FT-2']])
+        self.assertEqual(query.call_args.kwargs['or_filters']['name'], ['in', ['FT-1', 'FT-2']])
         self.assertEqual([order['technical_studies'][0]['name'] for order in orders], ['FT-1', 'FT-2'])
         self.assertTrue(all(not order['children'] for order in orders))
 
-    def test_no_reference_requires_no_extra_permission_or_query(self):
+    def test_order_relation_survives_refresh_without_line_references(self):
         order = dict(id='SO', children=[])
-        permission, query = self.attach([order], [])
-        permission.assert_not_called(); query.assert_not_called()
-        self.assertEqual(order['technical_studies'], [])
+        visible=[dict(name='FT',docstatus=1,sales_order='SO')]
+        for _ in range(2):
+            _, query = self.attach([order], visible)
+            self.assertEqual(order['technical_studies'], [dict(name='FT',docstatus=1)])
+            self.assertEqual(query.call_args.kwargs['or_filters']['sales_order'], ['in',['SO']])

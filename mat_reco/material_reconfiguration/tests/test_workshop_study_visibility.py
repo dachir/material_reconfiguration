@@ -19,6 +19,18 @@ class WorkshopStudyVisibilityTests(unittest.TestCase):
                 self.assertEqual(service._has_validated_study(frappe._dict(custom_technical_study='FT'),row,lock=True),status==1)
                 db.get_value.assert_called_once_with('Chantier Technical Study','FT','docstatus',for_update=True)
 
+    def test_repeated_lines_share_reads_but_next_request_sees_cancellation(self):
+        order=frappe._dict(custom_chantier='CH')
+        with patch.object(frappe,'db',new=MagicMock()) as db:
+            db.get_value.side_effect=['FT',1,'FT',2]
+            cache={}
+            for _ in range(100):
+                self.assertTrue(service._has_validated_study(order,frappe._dict(),cache=cache))
+                self.assertEqual(service._study_reference(order,frappe._dict(),cache=cache),'FT')
+            self.assertEqual(db.get_value.call_count,2)
+            self.assertFalse(service._has_validated_study(order,frappe._dict(),cache={}))
+            self.assertEqual(db.get_value.call_count,4)
+
     def test_current_draft_takes_precedence_over_old_frozen_study(self):
         order=frappe._dict(custom_technical_study='DRAFT')
         row=frappe._dict(custom_technical_snapshot='{"technical_study":"OLD"}')

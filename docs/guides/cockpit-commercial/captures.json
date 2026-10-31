@@ -1,13 +1,13 @@
 {
   "site": "https://fimaci.f.frappe.cloud",
-  "captured_at": "2026-10-31T10:41:42.631Z",
+  "captured_at": "2026-10-31T10:46:13.281Z",
   "screens": [
     {
       "file": "images/01-accueil.png",
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Vue générale réelle du cockpit commercial.",
       "unsaved": false,
-      "sha256": "dee565664ae014646c7d951721b40b2f6d7406bb69b75b670e650dcb72ed39a2"
+      "sha256": "4d6e19ed7f843b3d6aba02fc672a09ea51593cbf6a4677a4e5709d9c5397b8b0"
     },
     {
       "file": "images/02-filtres.png",
@@ -28,7 +28,7 @@
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Parcours réel du client CIA avec commandes A et B.",
       "unsaved": false,
-      "sha256": "bebd8de7395dcb6c210edbb6022a3e8ff6125b8dbe748345dedcfd5c1a26efff"
+      "sha256": "d51871aea19037186f81b0e6d8021fca952aecc9bf6f8c8711efcff2760f93c5"
     },
     {
       "file": "images/05-detail-commande-b.png",
@@ -56,7 +56,7 @@
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Fenêtre réelle de préparation d’un devis depuis un chantier validé.",
       "unsaved": false,
-      "sha256": "6af47598833b87ff74785f829cfa3fd0170ea6de75341e418cf61c70355bb245"
+      "sha256": "40786d9d31aa8be086c14b0b161b3a6fabad931e341ead0f7ada30b63848ecf0"
     },
     {
       "file": "images/09-selection-partielle.png",
@@ -70,7 +70,14 @@
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Choix du circuit B dans une préparation de commande non enregistrée.",
       "unsaved": true,
-      "sha256": "fbedc56547732213025cf58eb4749d056d3609c2de07ba0af7985ea68ff52d0f"
+      "sha256": "9e60ea6490555ba7ce05a3e5d23473b343507e3e793111b876037e675df8e36a"
+    },
+    {
+      "file": "images/10a-type-commande.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Champ réel de choix A/B ; aucune commande créée.",
+      "unsaved": true,
+      "sha256": "1fcf68f7387a781b81f0043606844d6b43849d6d90487a56b8ddb4566caf27c8"
     },
     {
       "file": "images/11-preparer-livraison.png",
@@ -94,6 +101,13 @@
       "sha256": "694037d78a6b0109afce2f6f48a8b140e03c2d4c1b58291e2d4074de8c301187"
     },
     {
+      "file": "images/13a-informations-reglement.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Date, montant encaissé, mode et référence du règlement.",
+      "unsaved": false,
+      "sha256": "04f4c947986395873b47ec23eb78584577ad1f9f855752800e17bc5942a2119b"
+    },
+    {
       "file": "images/14-affecter-reglement.png",
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Table réelle d’affectation des montants aux bordereaux.",
@@ -108,6 +122,13 @@
       "sha256": "d33184e51f42f654244a1e3f8b9d5ccf7ca64efeb62a808e039b5618b9cc8492"
     },
     {
+      "file": "images/15a-montant-avance.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Montant non affecté de l’exemple d’avance ; aucune écriture enregistrée.",
+      "unsaved": true,
+      "sha256": "6c16eaa1ee02873fcf24de3b6cafe75729867712fce6c61cfcac24110f9a8927"
+    },
+    {
       "file": "images/16-bordereau-brouillon.png",
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Un bordereau existant en brouillon propose Modifier et Valider selon les droits.",
@@ -120,6 +141,13 @@
       "caption": "Commande B réellement livrée et soldée HT, visible dans Tous les états.",
       "unsaved": false,
       "sha256": "52b2366213a2cd9aa942c6f781443061e0dc3cd337139a501d4561fa6d4ba1ec"
+    },
+    {
+      "file": "images/17a-montants-soldes.png",
+      "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
+      "caption": "Montants réels de la commande B soldée : solde des BL égal à zéro.",
+      "unsaved": false,
+      "sha256": "395cae6b596f16f20df0be1370260a018a93bf84a15f86373bece2b80892bebe"
     },
     {
       "file": "images/18-reglement-existant.png",
@@ -140,7 +168,7 @@
       "source": "https://fimaci.f.frappe.cloud/app/commercial-cockpit",
       "caption": "Récapitulatif produit par le style d’impression réel du cockpit.",
       "unsaved": false,
-      "sha256": "a6a9ed7824c262d22a1c02e66651d2d675b4e0427ca25331b5603408aa9dfe9a"
+      "sha256": "b626178e73372513c825c11ef14c0314e47bbbacddc8ea67efc7b98960ea83b1"
     }
   ],
   "checks": {

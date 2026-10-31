@@ -205,7 +205,7 @@ def validate_node(node, depth=0, ancestors=(), budget=None):
     if node.get('item_type')=='AIR':
         thickness=flt(node.get('thickness_mm'))
         if depth==0 or node.get('children') or not math.isfinite(thickness) or thickness<=0:
-            frappe.throw('La lame d’air doit avoir une épaisseur strictement positive et aucun enfant.')
+            frappe.throw('L’ESPACE doit avoir une épaisseur strictement positive et aucun enfant.')
         return
     code=node.get('item_code') if node.get('mode')=='existing' else node.get('proposed_code')
     if not code or code in ancestors:
@@ -314,13 +314,13 @@ def validate_study(doc):
                 frappe.throw('L’ouvrage final doit être un OUVRAGE ou une DECOUPE.')
             air_gap=flt(node.get('air_gap_mm'))
             if not math.isfinite(air_gap) or air_gap<0 or air_gap>=flt(row.thickness_mm):
-                frappe.throw(f'{row.repere} : la lame d’air doit être positive ou nulle et inférieure à l’épaisseur totale.')
+                frappe.throw(f'{row.repere} : l’ESPACE doit être positive ou nulle et inférieure à l’épaisseur totale.')
             if air_gap and node.get('item_type')!='OUVRAGE':
-                frappe.throw(f'{row.repere} : utiliser un OUVRAGE pour un vitrage avec lame d’air.')
+                frappe.throw(f'{row.repere} : utiliser un OUVRAGE pour un vitrage avec ESPACE.')
             validate_node(node)
             calculated=composition_thickness(node)
             if not math.isfinite(calculated) or abs(calculated-flt(row.thickness_mm))>0.001:
-                frappe.throw(f'{row.repere} : épaisseur totale incompatible : {flt(row.thickness_mm):g} mm saisis, {calculated:g} mm calculés (verres et lame d’air).')
+                frappe.throw(f'{row.repere} : épaisseur totale incompatible : {flt(row.thickness_mm):g} mm saisis, {calculated:g} mm calculés (verres et ESPACE).')
             if expected[row.line_id].uom and expected[row.line_id].uom!=node['stock_uom']:
                 frappe.throw('L’unité technique doit correspondre à l’unité de prix commerciale.')
 

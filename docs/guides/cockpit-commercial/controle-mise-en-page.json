@@ -1,0 +1,71 @@
+{
+  "expected_pdf_pages": 13,
+  "missingImages": [],
+  "pages": [
+    {
+      "index": 0,
+      "title": "Le cockpit\ncommercial",
+      "height": 769
+    },
+    {
+      "index": 1,
+      "title": "Ouvrir le cockpit commercial",
+      "height": 791
+    },
+    {
+      "index": 2,
+      "title": "Retrouver le bon dossier",
+      "height": 563
+    },
+    {
+      "index": 3,
+      "title": "Lire le parcours et les documents liés",
+      "height": 873
+    },
+    {
+      "index": 4,
+      "title": "Préparer un devis, en totalité ou en partie",
+      "height": 580
+    },
+    {
+      "index": 5,
+      "title": "Préparer la commande et choisir A ou B",
+      "height": 613
+    },
+    {
+      "index": 6,
+      "title": "Préparer une livraison partielle",
+      "height": 585
+    },
+    {
+      "index": 7,
+      "title": "Enregistrer ou valider un bordereau",
+      "height": 572
+    },
+    {
+      "index": 8,
+      "title": "Enregistrer un règlement et ses affectations",
+      "height": 552
+    },
+    {
+      "index": 9,
+      "title": "Gérer une avance et l’affecter ensuite",
+      "height": 613
+    },
+    {
+      "index": 10,
+      "title": "Comprendre les montants et les soldes",
+      "height": 681
+    },
+    {
+      "index": 11,
+      "title": "Consulter les tâches et imprimer",
+      "height": 686
+    },
+    {
+      "index": 12,
+      "title": "Contrôles quotidiens et résolution des blocages",
+      "height": 696
+    }
+  ]
+}

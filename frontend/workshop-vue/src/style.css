@@ -949,3 +949,5 @@
 .ug-links .ug-study-link circle{fill:#55c7ec;stroke:#15495e;}
 .ug-study-links{margin:8px 0 14px;display:flex;gap:8px;flex-wrap:wrap;}
 .ug-study-shortcut{margin-left:12px;}
+
+.ug-ft-toggle{display:flex!important;flex-direction:row!important;align-items:center;gap:6px;margin:0;white-space:nowrap;cursor:pointer}.ug-ft-toggle input[type="checkbox"]{appearance:auto;width:16px;height:16px;margin:0;accent-color:#22b9cf}

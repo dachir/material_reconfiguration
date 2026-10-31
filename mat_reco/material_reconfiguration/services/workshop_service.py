@@ -342,18 +342,28 @@ def _inventory(nodes, company, ownership, *, lock=False):
     return Pool(free), physical
 
 
-def _study_reference(order, row):
+def _study_reference(order, row, *, cache=None):
     study = order.get('custom_technical_study') or _json(row.get('custom_technical_snapshot')).get('technical_study')
     if not study and order.get('custom_chantier'):
-        study = frappe.db.get_value('Chantier', order.custom_chantier, 'technical_study')
+        key = ('chantier', order.custom_chantier)
+        if cache is None or key not in cache:
+            value = frappe.db.get_value('Chantier', order.custom_chantier, 'technical_study')
+            if cache is not None:
+                cache[key] = value
+        study = value if cache is None else cache[key]
     return study
 
 
-def _has_validated_study(order, row, *, lock=False):
-    study = _study_reference(order, row)
+def _has_validated_study(order, row, *, lock=False, cache=None):
+    study = _study_reference(order, row, cache=cache)
     if not study:
         return False
-    return frappe.db.get_value('Chantier Technical Study', study, 'docstatus', for_update=lock) == 1
+    key = ('study', study, lock)
+    if cache is None or key not in cache:
+        value = frappe.db.get_value('Chantier Technical Study', study, 'docstatus', for_update=lock) == 1
+        if cache is not None:
+            cache[key] = value
+    return value if cache is None else cache[key]
 
 
 def _attach_technical_studies(roots):
@@ -362,16 +372,24 @@ def _attach_technical_studies(roots):
     for root in roots:
         root['technical_studies'] = []
     names = sorted(set().union(*sources.values()) - {None, ''}) if sources else []
-    if not names or not frappe.has_permission('Chantier Technical Study', 'read'):
+    if not roots or not frappe.has_permission('Chantier Technical Study', 'read'):
         return
     studies = frappe.get_list('Chantier Technical Study',
-        filters={'name': ['in', names], 'docstatus': 1},
+        filters={'docstatus': 1},
+        or_filters={'sales_order': ['in', list(sources)], **({'name': ['in', names]} if names else {})},
         fields=['name', 'docstatus', 'sales_order', 'chantier'], order_by='name', limit_page_length=0)
+    by_order = defaultdict(list)
+    legacy = {}
+    for study in studies:
+        if study.get('sales_order'):
+            by_order[study.sales_order].append(dict(name=study.name, docstatus=study.docstatus))
+        else:
+            legacy[study.name] = study
     for root in roots:
-        root['technical_studies'] = [dict(name=study.name, docstatus=study.docstatus)
-            for study in studies if study.name in sources[root['id']] and
-            (study.get('sales_order') == root['id'] or
-             not study.get('sales_order') and root.get('chantier') and study.get('chantier') == root['chantier'])]
+        root['technical_studies'] = list(by_order[root['id']])
+        root['technical_studies'].extend(dict(name=study.name, docstatus=study.docstatus)
+            for name in sorted(sources[root['id']]) if (study := legacy.get(name)) and
+            root.get('chantier') and study.get('chantier') == root['chantier'])
 
 
 def _load(company=None, *, lock=False):
@@ -386,6 +404,7 @@ def _load(company=None, *, lock=False):
     for r in frappe.db.get_values('Workshop Refabrication', filters={'docstatus':1},fieldname=['sales_order_item','qty'],as_dict=True,for_update=lock):
         extra[r.sales_order_item] += r.qty
     roots, errors = [], []
+    study_cache = {}  # Request-local: never retain validation state across refreshes.
     for order in orders:
         root = dict(id=order.name,label=order.name,item_type='ORDER',sales_order=order.name,
                     company=order.company,customer=order.customer,status=order.status,chantier=order.get('custom_chantier'),delivery_date=str(order.delivery_date or ''),
@@ -395,7 +414,7 @@ def _load(company=None, *, lock=False):
             kind = _json(row.get('custom_technical_snapshot')).get('item_type') if row.get('custom_technical_snapshot') else frappe.get_cached_value('Item',row.item_code,'custom_item_types')
             if kind not in ('OUVRAGE','DECOUPE'):
                 continue
-            if not _has_validated_study(order, row, lock=lock):
+            if not _has_validated_study(order, row, lock=lock, cache=study_cache):
                 continue
             total = flt(row.qty) + extra[row.name]
             remaining = max(0,total-accepted[row.name])
@@ -404,7 +423,7 @@ def _load(company=None, *, lock=False):
             root['remaining_qty'] += remaining
             if not remaining:
                 continue
-            study = _study_reference(order, row)
+            study = _study_reference(order, row, cache=study_cache)
             if study and study not in root['_technical_study_names']:
                 root['_technical_study_names'].append(study)
             node=None

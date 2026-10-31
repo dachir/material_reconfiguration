@@ -27,6 +27,7 @@ const filters = reactive({
 	from_date: "",
 	to_date: "",
 });
+const showStudies = ref(true);
 const mode = ref("tree"),
 	zoom = ref(0.65),
 	quantity = ref(1),
@@ -47,7 +48,9 @@ let hasLoaded = false, refreshing = false, rootsSnapshot = "", mcpsSnapshot = ""
 const index = computed(() => flatten(roots.value));
 const selected = computed(() => index.value.get(selectedId.value));
 const selectedStudies = computed(() => roots.value.find(root => root.id === selected.value?.sales_order)?.technical_studies || []);
-const scene = computed(() => layout(roots.value, expanded.value, false, mcps.value));
+const sceneWithStudies = computed(() => layout(roots.value, expanded.value, false, mcps.value, true));
+const sceneWithoutStudies = computed(() => layout(roots.value, expanded.value, false, mcps.value, false));
+const scene = computed(() => showStudies.value ? sceneWithStudies.value : sceneWithoutStudies.value);
 const actionLabel = computed(() => {
 	const node = selected.value;
 	if (!node) return "Fabriquer";
@@ -109,6 +112,11 @@ async function refresh({ background = false } = {}) {
 		});
 		if (current !== requestId) return;
 		if (background && drag) { stale.value = true; return; }
+        // Apply orders and sheet links as one complete snapshot. An older worker or
+        // partial response must not silently erase links from the current graph.
+        if (!Array.isArray(data?.roots) || data.roots.some(root => !Array.isArray(root.technical_studies))) {
+            throw new Error('Actualisation incomplète des fiches techniques. Affichage précédent conservé ; actualiser à nouveau.');
+        }
 		// Keep the graph and its layout untouched when the server data has not changed.
 		const nextRoots = JSON.stringify(data.roots);
 		const nextMcps = JSON.stringify(data.mcps || []);
@@ -350,6 +358,7 @@ function wheel(e) {
 				<label>Du<input v-model="filters.from_date" type="date" @change="refresh" /></label
 				><label>Au<input v-model="filters.to_date" type="date" @change="refresh" /></label>
 				<div class="ug-filter-actions">
+                    <label class="ug-ft-toggle" title="Afficher les fiches techniques"><input v-model="showStudies" type="checkbox" /> FT</label>
 					<button :disabled="busy || acting" @click="refresh">
 						↻ {{ busy ? "Actualisation…" : "Actualiser" }}
 					</button>
@@ -571,7 +580,7 @@ function wheel(e) {
 									><tr class="ug-order-row">
 										<th colspan="6">
 											{{ root.label }} <small>{{ root.customer }}</small>
-                                            <button v-for="study in root.technical_studies" :key="study.name" class="ug-text-button ug-study-shortcut"
+                                            <button v-for="study in (showStudies ? root.technical_studies : [])" :key="study.name" class="ug-text-button ug-study-shortcut"
                                                 :aria-label="'Ouvrir la fiche technique '+study.name+' de '+root.id" @click="openStudy(study)">⚙ Fiche technique ↗</button>
 										</th>
 									</tr>
@@ -614,7 +623,7 @@ function wheel(e) {
 						</div>
 					</div>
 					<p class="ug-detail-reference">{{ selected.sales_order }}</p>
-                    <div v-if="selectedStudies.length" class="ug-study-links">
+                    <div v-if="showStudies && selectedStudies.length" class="ug-study-links">
                         <button v-for="study in selectedStudies" :key="study.name" class="ug-text-button"
                             :title="study.name" @click="openStudy(study)">⚙ Fiche technique ↗</button>
                     </div>

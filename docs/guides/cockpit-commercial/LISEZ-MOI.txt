@@ -1,0 +1,11 @@
+GUIDE UTILISATEUR DU COCKPIT COMMERCIAL — UNIVERS GLASS
+Édition du 31 octobre 2026
+
+Ouvrir Guide-utilisation-Cockpit-commercial.pdf pour imprimer (13 pages).
+Ouvrir Guide-utilisation-Cockpit-commercial.html pour consulter le guide avec des liens vers les captures originales. Conserver le dossier images à côté.
+
+Les 24 images sont des captures réelles de fimaci.f.frappe.cloud. Les préparations ont été ouvertes sans enregistrement ni validation. Aucun mouvement métier ou encaissement n’a été créé pour le guide. Les contrôles avant/après et empreintes des images sont dans captures.json. Aucun identifiant d’authentification n’est inclus.
+
+Les dossiers réels et montants illustrent la situation au moment des captures. Les écrans et actions dépendent des droits et des évolutions du logiciel.
+
+Reconstruction technique : node build-guide.cjs (Playwright/Chromium requis). capture-production.cjs utilise une authentification externe, non fournie dans cette archive.

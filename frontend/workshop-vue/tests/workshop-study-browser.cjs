@@ -25,12 +25,14 @@ catch{({chromium}=require(path.join(appRoot,'../crm/node_modules/playwright')));
    window.payload={roots:[order('SO-A','FT-A'),order('SO-B','FT-B'),order('SO-HIDDEN',null)],
     errors:[],counters:{orders:3,works:1},primary_items:[],companies:[],chantiers:[],sections:[],
     dimension_fields:[],as_of:'2026-10-31 12:00:00',mcps:[]};
-   window.routes=[];window.calls=[];
-   window.frappe={router:{on(){}},realtime:{on(){},off(){}},get_route:()=>['workshop-cockpit'],
+   window.routes=[];window.calls=[];window.handlers={};
+   window.frappe={router:{on(){}},realtime:{on(event,callback){window.handlers[event]=callback;},off(){}},get_route:()=>['workshop-cockpit'],
     set_route:(...args)=>window.routes.push(args),call:async options=>{
      window.calls.push(options.method);
      if(!options.method.endsWith('.get_dashboard'))throw new Error('Unexpected operation');
-     return {message:JSON.parse(JSON.stringify(window.payload))};
+     const snapshot=JSON.parse(JSON.stringify(window.payload));
+     if(window.responseDelay)await new Promise(resolve=>setTimeout(resolve,window.responseDelay));
+     return {message:snapshot};
     }};
   });
   await page.addScriptTag({path:path.join(appRoot,'mat_reco/public/js/workshop_vue_dist/workshop.js')});
@@ -39,6 +41,37 @@ catch{({chromium}=require(path.join(appRoot,'../crm/node_modules/playwright')));
   assert.equal(await page.locator('.ug-study-node').count(),2);
   assert.equal(await page.locator('.ug-study-link').count(),2);
   assert.equal(await page.locator('.ug-node.order').count(),3);
+  const callsBeforeToggle=await page.evaluate(()=>window.calls.length);
+  const ftToggle=page.getByRole('checkbox',{name:'FT',exact:true});
+  for(let i=0;i<3;i++){
+   await ftToggle.uncheck();
+   assert.equal(await page.locator('.ug-study-node').count(),0);
+   assert.equal(await page.locator('.ug-study-link').count(),0);
+   await ftToggle.check();
+   assert.equal(await page.locator('.ug-study-node').count(),2);
+  }
+  assert.equal(await page.evaluate(()=>window.calls.length),callsBeforeToggle);
+  for(let i=0;i<2;i++){
+   await page.getByRole('button',{name:'↻ Actualiser',exact:true}).click();
+   await page.getByRole('button',{name:'↻ Actualiser',exact:true}).waitFor();
+   assert.equal(await ftToggle.isChecked(),true);
+   assert.equal(await page.locator('.ug-study-node').count(),2);
+   assert.equal(await page.locator('.ug-study-link').count(),2);
+  }
+  // Automatic refresh keeps the existing cards throughout a delayed response.
+  await page.evaluate(()=>{window.responseDelay=800;window.handlers.workshop_updated();});
+  await page.waitForTimeout(600);
+  assert.equal(await page.locator('.ug-study-node').count(),2);
+  await page.waitForTimeout(900);
+  assert.equal(await page.locator('.ug-study-node').count(),2);
+  // Missing metadata is an incomplete snapshot, not an instruction to hide FT.
+  await page.evaluate(()=>{window.responseDelay=0;delete window.payload.roots[0].technical_studies;window.handlers.workshop_updated();});
+  await page.getByText('Actualisation incomplète des fiches techniques.',{exact:false}).waitFor();
+  assert.equal(await ftToggle.isChecked(),true);
+  assert.equal(await page.locator('.ug-study-node').count(),2);
+  await page.evaluate(()=>{window.payload.roots[0].technical_studies=[{name:'FT-A',docstatus:1}];});
+  await page.getByRole('button',{name:'↻ Actualiser',exact:true}).click();
+  await page.getByRole('button',{name:'↻ Actualiser',exact:true}).waitFor();
   const study=page.getByRole('button',{name:'Ouvrir la fiche technique FT-A de SO-A',exact:true});
   await study.click();
   assert.deepEqual(await page.evaluate(()=>window.routes.at(-1)),['technical-study','FT-A']);
@@ -55,6 +88,11 @@ catch{({chromium}=require(path.join(appRoot,'../crm/node_modules/playwright')));
   await page.getByRole('button',{name:'Réduire',exact:true}).click();
   assert.equal(await page.locator('.ug-study-node').count(),2);
   assert.equal(await page.locator('.ug-study-link').count(),2);
+  await page.evaluate(()=>{window.payload.roots[0].technical_studies=[];});
+  await page.getByRole('button',{name:'↻ Actualiser',exact:true}).click();
+  await page.getByRole('button',{name:'↻ Actualiser',exact:true}).waitFor();
+  assert.equal(await page.locator('.ug-study-node').count(),1);
+  assert.equal(await ftToggle.isChecked(),true);
   await page.screenshot({path:'/tmp/ug-workshop-study-links.png',fullPage:true});
   await page.evaluate(()=>{component.hide();component.unmount();});
   assert.deepEqual(errors,[]);

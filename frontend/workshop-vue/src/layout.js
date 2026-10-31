@@ -8,7 +8,7 @@ export function flatten(roots) {
 	roots.forEach(visit);
 	return result;
 }
-export function layout(roots, expanded, compact = false, plans = []) {
+export function layout(roots, expanded, compact = false, plans = [], showStudies = true) {
 	const nodes = [],
 		edges = [], studies = [];
 	let nextRow = 0;
@@ -42,7 +42,7 @@ export function layout(roots, expanded, compact = false, plans = []) {
 	roots.forEach((root) => {
 		const order = visit(root, 0);
 		const known = new Set();
-		for (const study of root.technical_studies || []) {
+		for (const study of (showStudies ? root.technical_studies || [] : [])) {
 			if (!study.name || study.docstatus !== 1 || known.has(study.name)) continue;
 			known.add(study.name);
 			const point = {...study, id:`${root.id}/study/${study.name}`, sales_order:root.id,
