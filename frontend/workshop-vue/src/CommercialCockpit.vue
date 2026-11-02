@@ -2,7 +2,7 @@
 import {ref,shallowRef,reactive,computed,nextTick,watch,onBeforeUnmount} from 'vue';
 import Icon from './commercial-icon.vue';
 import CommercialActionModal from './CommercialActionModal.vue';
-import {COMMERCIAL_COLUMNS,buildCommercialLayout,formatCommercialAmount,periodRange,connectedPath,nodeCanOpen,commercialRouteFor,commercialStatus,commercialKindLabel} from './commercial-layout.js';
+import {COMMERCIAL_COLUMNS,buildCommercialLayout,formatCommercialAmount,periodRange,connectedPath,nodeCanOpen,commercialRouteFor,commercialStatus,commercialKindLabel,groupCommercialTasks} from './commercial-layout.js';
 import './commercial-cockpit.css';
 
 const frappe=window.frappe;
@@ -34,7 +34,7 @@ const detailLinks=computed(()=>{
  const linked=detail.value.linked_documents||[];
  return linked.map(link=>({...link,kind:link.kind||kindForDoctype(link.doctype)})).filter(link=>link.name&&nodeCanOpen(link,capabilities.value));
 });
-const tasks=computed(()=>(detail.value.tasks||[]).filter(task=>task.status==='Open'||task.status==='Overdue'));
+const tasks=computed(()=>groupCommercialTasks(detail.value.tasks||[]));
 const canCreateClient=computed(()=>canCreate('Customer','can_create_customers','can_create_customer'));
 const isOrder=computed(()=>selected.value?.kind==='order');
 const selectedA=computed(()=>selected.value?.order_type==='A');

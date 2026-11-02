@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
- buildCommercialLayout, commercialRouteFor, nodeCanOpen,
+ buildCommercialLayout, commercialRouteFor, nodeCanOpen, groupCommercialTasks,
  formatCommercialAmount, periodRange, connectedPath,
 } from '../src/commercial-layout.js';
 
@@ -179,4 +179,14 @@ test('collapsed allocation links never add different currencies together',()=>{
  const proxies=scene.edges.filter(edge=>edge.from.id===a.id&&edge.to.id===shared.id);
  assert.equal(proxies.length,2);
  assert.deepEqual(proxies.map(edge=>[edge.currency,edge.amount]).sort(),[['EUR',50],['XOF',100]]);
+});
+
+
+test('À faire groups personal assignments per document and UG action type',()=>{
+ const task=(name,stage='Fiche technique',reference_name='FT-1',status='Open')=>({name,status,reference_type:'Chantier Technical Study',reference_name,description:`[Univers Glass — ${stage}] ${reference_name}`});
+ const rows=[task('closed','Fiche technique','FT-1','Closed'),task('one'),task('two'),task('three'),
+  task('other','Atelier'),task('different','Fiche technique','FT-2'),
+  {name:'manual',status:'Open',description:'Vérifier le dossier'}];
+ assert.deepEqual(groupCommercialTasks(rows).map(row=>row.name),['one','other','different','manual']);
+ assert.equal(rows.length,7);
 });

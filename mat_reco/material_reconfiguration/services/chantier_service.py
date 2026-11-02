@@ -371,6 +371,12 @@ def get_commercial_permissions():
     return dict(can_access_b=bool(can_access()))
 
 
+def _chantier_study_stale(study, current_hash):
+    # Order sheets describe their own order snapshot, not the upstream chantier.
+    # order_technical.source_hash validates them against that source on the FT.
+    return bool(study and not study.get('sales_order') and study.get('source_hash') != current_hash)
+
+
 @frappe.whitelist()
 def get_dossier(chantier=None):
     dossiers = frappe.get_list('Chantier', fields=['name', 'designation', 'customer', 'status', 'docstatus'], order_by='modified desc', limit_page_length=0)
@@ -378,7 +384,7 @@ def get_dossier(chantier=None):
     if not chantier:
         return dict(permissions=permissions,chantiers=dossiers, sections=[], quotations=[], sales_orders=[], lines=[], summary={})
     dossier = chantier_doc(chantier)
-    studies = frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash','technical_hash'],order_by='modified desc',limit_page_length=0) if frappe.has_permission('Chantier Technical Study','read') else []
+    studies = frappe.get_list('Chantier Technical Study',filters={'chantier':chantier,'docstatus':['<',2]},fields=['name','docstatus','source_hash','technical_hash','sales_order'],order_by='modified desc',limit_page_length=0) if frappe.has_permission('Chantier Technical Study','read') else []
     from .ft_activation import has_study
     from .chantier_work_types import is_v2, is_direct
     permissions['ft_locked'] = not is_v2(dossier) and has_study(chantier)
@@ -396,7 +402,7 @@ def get_dossier(chantier=None):
     # Financial roles may read dossiers and quotes without access to stock operations.
     production_visible = frappe.has_permission('Stock Entry','read')
     if not production_visible:
-        return dict(technical=technical,technical_stale=bool(relevant and relevant.source_hash!=current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,sales_orders=sales_orders,lines=[],summary={},production_visible=False)
+        return dict(technical=technical,technical_stale=_chantier_study_stale(relevant,current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,sales_orders=sales_orders,lines=[],summary={},production_visible=False)
     accepted, pending, _, _ = _receipts(orders)
     roots, errors, _ = _load(dossier.company)
     live = {b['sales_order_item']:b for root in roots for b in root['children']}
@@ -427,7 +433,7 @@ def get_dossier(chantier=None):
     for section in sections:
         descendants = section_scope(section.name,chantier)
         by_section[section.name] = summarize([r for r in lines if r['section'] in descendants])
-    return dict(technical=technical,technical_stale=bool(relevant and relevant.source_hash!=current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,sales_orders=sales_orders,lines=lines,
+    return dict(technical=technical,technical_stale=_chantier_study_stale(relevant,current_hash),quote_usage=quote_usage,studies=studies,permissions=permissions,chantiers=dossiers,chantier=dossier.as_dict(),sections=sections,quotations=quotations,sales_orders=sales_orders,lines=lines,
         summary=summary,by_section=by_section,production_visible=True,errors=[e for e in errors if e['sales_order'] in {o.name for o in orders}])
 
 

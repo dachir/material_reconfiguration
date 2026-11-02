@@ -151,3 +151,18 @@ export function buildCommercialLayout(documents=[],inputEdges=[],options={}){
  }
  return {nodes:[...nodes.values()],edges:connections,width:5*STRIDE+MARGIN,height:Math.max(610,...[...nodes.values()].map(node=>node.y+node.height+50)),card_width:CARD_WIDTH,column_stride:STRIDE};
 }
+
+
+// Personal ToDos for the same UG action represent one job in the cockpit.
+export function groupCommercialTasks(tasks = []) {
+ const result = [], seen = new Set();
+ for (const task of tasks) {
+  if (!['Open', 'Overdue'].includes(task.status)) continue;
+  const stage = (task.description || '').match(/^\[Univers Glass — ([^\]]+)\]/)?.[1];
+  const key = stage ? JSON.stringify([task.reference_type, task.reference_name, stage]) : null;
+  if (key && seen.has(key)) continue;
+  if (key) seen.add(key);
+  result.push(task);
+ }
+ return result;
+}
