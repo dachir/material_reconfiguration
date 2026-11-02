@@ -94,7 +94,7 @@ export function actionTotals(rows,values={},payment=false){
   if(value===null)unknownAmount=true;else{byCurrency.set(currency,(byCurrency.get(currency)||0)+value);if(payment){allocated+=value;if(row.order_type==='A')amountA+=value;if(row.order_type==='B')amountB+=value;}}
   if(!payment){const unit=row.uom||'';byUnit.set(unit,(byUnit.get(unit)||0)+(number(row.qty)??0));}
  }
- return {count:selected.length,parent_count:selected.filter(row=>!row._derived).length,quantities:[...byUnit].map(([uom,qty])=>({uom,qty})),amounts:[...byCurrency].map(([currency,amount])=>({currency,amount})),allocated,amount_a:amountA,amount_b:amountB,unallocated:(number(values.amount)??0)-allocated,unknown_amount:unknownAmount};
+ return {count:selected.length,parent_count:selected.filter(row=>!row._derived).length,quantities:[...byUnit].map(([uom,qty])=>({uom,qty})),amounts:[...byCurrency].map(([currency,amount])=>({currency,amount})),allocated,amount_a:amountA,amount_b:amountB,refunded:number(values.refunded_amount)??0,unallocated:(number(values.amount)??0)-allocated-(number(values.refunded_amount)??0),unknown_amount:unknownAmount};
 }
 export function actionSubmissionButtons(submission={}){
  const result=[];
@@ -135,7 +135,7 @@ export function validateActionEditor(preparation,rows,values={}){
  if(payment){
   const amount=number(values.amount),allocated=actionTotals(rows,values,true).allocated;
   if(amount===null||amount<=0)errors.push('Saisir un montant encaissé supérieur à zéro.');
-  else if(allocated>amount+EPSILON)errors.push('Les affectations dépassent le montant encaissé.');
+  else if(allocated>amount-(number(preparation.refunded_amount)??0)+EPSILON)errors.push('Les affectations dépassent le montant encaissé disponible après remboursement.');
  }
  return [...new Set(errors)];
 }

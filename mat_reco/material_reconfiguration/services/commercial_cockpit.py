@@ -174,7 +174,8 @@ def _snapshot(filters, capabilities):
             _period(values, 'posting_date', filters)
         fields = ['name', 'company', 'customer', 'currency', 'posting_date', 'status', 'docstatus', 'order_type', 'sales_order']
         fields += ['net_total', 'grand_total', 'delivery_note', 'sales_invoice'] if kind == 'delivery' else [
-            'amount', 'allocated_amount', 'unallocated_amount', 'payment_entry', 'reference', 'mode_of_payment']
+            'amount', 'allocated_amount', 'unallocated_amount', 'payment_entry', 'reference', 'mode_of_payment',
+            'payment_kind', 'refund_of', 'refunded_amount']
         _parents(data, kind, fields, values)
     _children(data, 'delivery_items', 'Bordereau Special Item', 'delivery', 'items',
         ['name', 'parent', 'idx', 'sales_order_item', 'item_code', 'item_name', 'qty', 'uom', 'amount'])
@@ -387,6 +388,14 @@ def _receipt_parts(receipt, allocations, deliveries, orders):
         return dict(A=None, B=None, by_order={}, allocations_by_order={}, advances_by_order={}, incomplete=True)
     parts = dict(A=0., B=0., by_order=defaultdict(float), allocations_by_order=defaultdict(float),
         advances_by_order=defaultdict(float), incomplete=False)
+    if receipt.get('payment_kind') == 'Remboursement':
+        if kind not in ('A', 'B'):
+            parts['incomplete'] = True
+            return parts
+        parts[kind] = -flt(amount)
+        if receipt.get('sales_order') in orders:
+            parts['by_order'][receipt['sales_order']] = -flt(amount)
+        return parts
     total = 0
     for allocation in allocations:
         if allocation.get('amount') is None:
@@ -406,9 +415,10 @@ def _receipt_parts(receipt, allocations, deliveries, orders):
     source = orders.get(receipt.get('sales_order'))
     source_kind = _kind(source) if source else kind
     if source_kind in ('A', 'B'):
-        parts[source_kind] += remainder
+        cash_remainder = flt(amount) - total
+        parts[source_kind] += cash_remainder
         if source:
-            parts['by_order'][source['name']] += remainder
+            parts['by_order'][source['name']] += cash_remainder
             parts['advances_by_order'][source['name']] += remainder
     elif abs(remainder) > EPS:
         parts['incomplete'] = True
@@ -500,7 +510,8 @@ def _order_finances(name, order, active, invoices, rows, allocations, pe_referen
                 elif receipt.get('currency') == order.get('currency'):
                     # The PE amount is in its receivable currency; this ratio
                     # recovers the receipt's recorded (not today's) conversion.
-                    advances += flt(pe['unallocated_amount']) * part_a / flt(pe['paid_amount'])
+                    advances += min(flt(pe['unallocated_amount']) * part_a / flt(pe['paid_amount']),
+                        parts[receipt['name']]['advances_by_order'].get(name, 0)) if flt(receipt.get('refunded_amount')) else flt(pe['unallocated_amount']) * part_a / flt(pe['paid_amount'])
                 else:
                     account_known = False
             for ref in pe_references[pe['name']]:
@@ -610,6 +621,13 @@ def project(snapshot, filters):
             continue
         selected_orders[name] = order
 
+    orphan_advances = {name for name, row in rows['payment'].items()
+        if row.get('docstatus') == 1 and flt(row.get('unallocated_amount')) > EPS
+        and row.get('sales_order') not in selected_orders
+        and (not filters.get('sales_order') or row.get('sales_order') == filters['sales_order'])
+        and (not filters.get('from_date') or str(row.get('posting_date') or '') >= filters['from_date'])
+        and (not filters.get('to_date') or str(row.get('posting_date') or '') <= filters['to_date'])
+        and (filters.get('circuit') in ('all', None) or parts[name].get(filters['circuit']))}
     clients = {}
     visible_labels = {row['name']: row.get('customer_name') for row in snapshot.get('customers', [])}
     def client(customer, label=None):
@@ -734,6 +752,18 @@ def project(snapshot, filters):
                 account['_unknown_account_b'].add(key)
             elif _kind(row) == 'B':
                 account['_advance_b'][key] += flt(unallocated)
+    for name in orphan_advances:
+        row = rows['payment'][name]
+        if not row.get('currency') or not row.get('sales_order'):
+            continue  # Account-wide B advances are handled above.
+        account = client(row.get('customer'))
+        if account is None:
+            continue
+        source = rows['order'].get(row['sales_order'])
+        kind = _kind(source) if source else _kind(row)
+        key = row.get('company'), row['currency']
+        if kind in ('A', 'B'):
+            account['_advance_' + kind.lower()][key] += flt(row['unallocated_amount'])
     client_rows = []
     total_a, total_b = defaultdict(float), defaultdict(float)
     unknown_a, unknown_b = set(), set()
@@ -785,7 +815,7 @@ def project(snapshot, filters):
             return None
         name = row['name']; identity = _id(doctype, name)
         amount = _amount(row, kind)
-        document = dict(id=identity, doctype=doctype, name=name, kind=kind, title=row.get('designation') or name,
+        document = dict(id=identity, doctype=doctype, name=name, kind=kind, title=row.get('title') or row.get('designation') or name,
             subtitle=row.get('customer_name') or customer or '', customer=customer, company=row.get('company'),
             currency=row.get('currency') or row.get('paid_from_account_currency'), amount=amount,
             basis=('HT' if _kind(row) == 'B' else 'TTC') if kind in ('delivery', 'order') else
@@ -830,13 +860,16 @@ def project(snapshot, filters):
             add('delivery', row, dict(received=paid, balance=due, delivery_balance=due, basis='HT' if _kind(row) == 'B' else 'TTC'))
     payment_names = set()
     for name, row in rows['payment'].items():
-        if row.get('sales_order') in active_order_names or any(a.get('bordereau') in delivery_names for a in allocations[name]) or not caps.get('can_read_orders'):
+        if name in orphan_advances or row.get('refund_of') in orphan_advances or row.get('sales_order') in active_order_names or any(a.get('bordereau') in delivery_names for a in allocations[name]) or not caps.get('can_read_orders'):
             if filters.get('circuit') not in ('all', None) and not parts[name].get(filters['circuit']) and not any(
                     a.get('bordereau') in delivery_names for a in allocations[name]):
                 continue
             payment_names.add(name)
+            if row.get('payment_kind') == 'Remboursement':
+                row = dict(row, title='Remboursement · '+row['name'])
             add('payment', row, dict(amount_a=parts[name]['A'], amount_b=parts[name]['B'], allocated_amount=row.get('allocated_amount'),
-                unallocated_amount=row.get('unallocated_amount'), allocations_complete=not parts[name]['incomplete']))
+                unallocated_amount=row.get('unallocated_amount'), refunded_amount=row.get('refunded_amount'),
+                payment_kind=row.get('payment_kind') or 'Encaissement', refund_of=row.get('refund_of'), allocations_complete=not parts[name]['incomplete']))
     project_names = {row.get('custom_chantier') for row in selected_orders.values()}
     for kind in ('quotation', 'project'):
         for row in rows[kind].values():
@@ -905,6 +938,8 @@ def project(snapshot, filters):
         edge('delivery', row.get('bordereau'), 'payment', row.get('parent'), 'allocation',
             flt(row['amount']) if row.get('amount') is not None else None, receipt.get('currency'))
     for row in rows['payment'].values():
+        if row.get('payment_kind') == 'Remboursement':
+            edge('payment', row.get('refund_of'), 'payment', row['name'], 'refund', flt(row.get('amount')), row.get('currency'))
         edge('payment', row['name'], 'native_payment', row.get('payment_entry'), 'accounting')
         if row.get('docstatus') == 1 and flt(row.get('unallocated_amount')) > EPS:
             edge('order', row.get('sales_order'), 'payment', row['name'], 'advance', flt(row['unallocated_amount']), row.get('currency'))

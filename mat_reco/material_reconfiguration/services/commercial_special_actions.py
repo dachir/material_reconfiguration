@@ -154,7 +154,7 @@ def _action(source, action):
         if source.docstatus != 0:
             _fail('Modifier ou valider uniquement un document en brouillon.')
         return 'delivery' if source.doctype == DELIVERY else 'payment'
-    if action == 'allocate' and source.doctype == PAYMENT and source.docstatus == 1:
+    if action == 'allocate' and source.doctype == PAYMENT and source.docstatus == 1 and source.get('payment_kind') != 'Remboursement':
         return 'payment'
     _fail('Cette action ne correspond pas au document source.')
 
@@ -346,6 +346,9 @@ def _payment_rows(doc, warnings=None):
 
 
 def prepare_special(source, action):
+    from . import special_refunds
+    if action == 'refund' or special_refunds.is_refund(source):
+        return special_refunds.prepare(source, action)
     kind, existing, order = _context(source, action)
     if kind == 'delivery':
         rows, stock, warehouse = _delivery_data(order, existing)
@@ -376,7 +379,7 @@ def prepare_special(source, action):
         dict(fieldname='reference', label='Référence du règlement', fieldtype='Data', reqd=1, read_only=int(locked)),
         dict(fieldname='sales_order', label='Commande source de l’avance', fieldtype='Link', options='Sales Order', read_only=int(locked))]
     return dict(target_doctype=PAYMENT, fields=fields, rows=rows, values=values, action=action,
-        company=doc.company, customer=doc.customer, currency=doc.currency, unavailable_count=len(warnings),
+        company=doc.company, customer=doc.customer, currency=doc.currency, refunded_amount=flt(doc.get('refunded_amount')), unavailable_count=len(warnings),
         notice=(str(len(warnings)) + ' bordereau(x) à vérifier, indisponible(s) pour cette affectation.') if warnings else '')
 
 
@@ -495,13 +498,16 @@ def _apply_payment(source, existing, selections, values, action):
             _fail('L’affectation dépasse le solde actuel du bordereau.')
         total += amount
         doc.append('allocations', dict(bordereau=identity, amount=amount))
-    if total > _number(doc.get('amount'), positive=True) + EPS:
+    if total > _number(doc.get('amount'), positive=True) - flt(doc.get('refunded_amount')) + EPS:
         _fail('Les affectations dépassent le montant encaissé.')
     return doc
 
 
 def build_special(source, action, selections, values):
     """Return an unsaved document; the facade alone performs the native action."""
+    from . import special_refunds
+    if action == 'refund' or special_refunds.is_refund(source):
+        return special_refunds.build(source, action, selections, values)
     kind, existing, order = _context(source, action)
     if not isinstance(values, dict) or set(values) - (DELIVERY_VALUES if kind == 'delivery' else PAYMENT_VALUES):
         _fail('Les champs du formulaire ne sont pas autorisés.')

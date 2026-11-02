@@ -61,6 +61,9 @@ def _collect_b(filters, groups):
             doc = _read(doctype, name)
             _require_fields(doc, ('company', 'customer', 'currency', 'posting_date', 'sales_order',
                 'order_type', 'amount' if doctype != b.DELIVERY else 'net_total'))
+            refund = doctype == b.PAYMENT and doc.get('payment_kind') == 'Remboursement'
+            if refund:
+                _require_fields(doc, ('payment_kind', 'refund_of'))
             related_order = doc.sales_order
             if doctype == b.PAYMENT:
                 _require_fields(doc, (), 'allocations', ('bordereau', 'amount'))
@@ -85,13 +88,13 @@ def _collect_b(filters, groups):
             if not amount and doctype != b.DELIVERY:
                 continue
             description = ('Reprise du solde initial' if doctype == b.OPENING else
-                'BL validé HT' if doctype == b.DELIVERY else 'Règlement reçu')
+                'BL validé HT' if doctype == b.DELIVERY else 'Remboursement d’avance' if refund else 'Règlement reçu')
             key = (doc.company, doc.customer, doc.currency, 'B')
-            groups[key].append(_event(doc, sign * amount, description, related_order, doctype == b.OPENING))
+            groups[key].append(_event(doc, (-sign if refund else sign) * amount, description, related_order, doctype == b.OPENING))
 
 
 def _order_rows(filters, kind):
-    scope = {'docstatus': 1}
+    scope = {'docstatus': ['in', [1, 2]]}
     for field in ('company', 'customer', 'currency'):
         if filters.get(field):
             scope[field] = filters[field]
@@ -211,13 +214,19 @@ def _collect_a(filters, groups):
     # Source special receipts identify native unallocated advances without adding
     # their amount a second time. They are metadata only in the A ledger.
     receipt_sources = {}
+    refund_sources = {}
     if frappe.has_permission(b.PAYMENT, 'read'):
-        for name in frappe.get_list(b.PAYMENT, filters=dict(_scope(filters), order_type=['in', ['A', 'Mixte']]),
+        receipt_scope = dict(_scope(filters), order_type=['in', ['A', 'Mixte']])
+        receipt_scope.pop('posting_date', None)  # Later refunds classify original cash without moving its date.
+        for name in frappe.get_list(b.PAYMENT, filters=receipt_scope,
                 pluck='name', limit_page_length=0):
             receipt = _read(b.PAYMENT, name)
             _require_fields(receipt, ('sales_order', 'payment_entry', 'currency', 'order_type'))
             if receipt.get('payment_entry') and receipt.get('sales_order') in orders:
                 receipt_sources[receipt.payment_entry] = receipt.sales_order
+                if receipt.get('payment_kind') == 'Remboursement':
+                    _require_fields(receipt, ('payment_kind', 'amount', 'refund_of'))
+                    refund_sources[receipt.payment_entry] = receipt
 
     payment_scope = {'docstatus': 1, 'party_type': 'Customer', 'posting_date': ['<=', filters.to_date]}
     if filters.company:
@@ -232,6 +241,12 @@ def _collect_a(filters, groups):
         _require_fields(doc, ('company', 'party', 'posting_date', 'payment_type', 'paid_amount', 'received_amount',
             'paid_from_account_currency', 'paid_to_account_currency', 'unallocated_amount'),
             'references', ('reference_doctype', 'reference_name', 'allocated_amount'))
+        if doc.name in refund_sources:
+            receipt = refund_sources[doc.name]
+            if (not filters.sales_order or receipt.sales_order == filters.sales_order) and (not filters.currency or receipt.currency == filters.currency):
+                groups[(receipt.company, receipt.customer, receipt.currency, 'A')].append(
+                    _event(doc, flt(receipt.amount), 'Remboursement d’avance', receipt.sales_order))
+            continue
         party_currency = doc.paid_from_account_currency if doc.payment_type == 'Receive' else doc.paid_to_account_currency
         sign = -1 if doc.payment_type == 'Receive' else 1
         parts, related = defaultdict(float), defaultdict(set)
@@ -254,6 +269,14 @@ def _collect_a(filters, groups):
                     _require_fields(target, ('company', 'customer', 'currency', 'conversion_rate'))
                     native_order_cache[reference.reference_name] = target
                 target = native_order_cache[reference.reference_name]
+            elif reference.reference_doctype == 'Payment Entry' and reference.reference_name in refund_sources:
+                refund = refund_sources[reference.reference_name]
+                order_names = {refund.sales_order}
+                if refund.sales_order not in native_order_cache:
+                    target = _read('Sales Order', refund.sales_order)
+                    _require_fields(target, ('company', 'customer', 'currency', 'conversion_rate'))
+                    native_order_cache[refund.sales_order] = target
+                target = native_order_cache[refund.sales_order]
             if target is None:
                 unknown_references = True
                 continue

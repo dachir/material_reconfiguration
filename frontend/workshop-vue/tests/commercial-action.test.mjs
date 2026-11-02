@@ -117,3 +117,13 @@ test('serial suggestions exclude every other selected line and preserve manual c
  rows[0]._serials_manual=true;rows[0].qty=1;proposeActionSerials(rows,rows[0]);assert.equal(rows[0].serial_no,'S1\nS2\nS3');
  rows[0]._serials_manual=false;rows[0].warehouse='Other - UG';proposeActionSerials(rows,rows[0]);assert.equal(rows[0].serial_no,'');
 });
+
+
+test('refunded advances cannot be allocated again and reduce the available amount',()=>{
+ const rows=normaliseActionRows([{id:'BL',selected:true,amount:80,remaining_amount:200,remaining_qty:200}],true);
+ assert.equal(actionTotals(rows,{amount:120,refunded_amount:50},true).unallocated,-10);
+ assert(validateActionEditor({target_doctype:'Reglement Special',refunded_amount:50},rows,{amount:120}).length);
+ rows[0].amount=70;
+ assert.equal(actionTotals(rows,{amount:120,refunded_amount:50},true).unallocated,0);
+ assert.deepEqual(validateActionEditor({target_doctype:'Reglement Special',refunded_amount:50},rows,{amount:120}),[]);
+});

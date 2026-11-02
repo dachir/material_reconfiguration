@@ -337,3 +337,19 @@ class CommercialCockpitTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ClosedOrderAdvanceTests(unittest.TestCase):
+    def test_open_cockpit_keeps_unused_advance_after_order_cancellation(self):
+        data=snapshot()
+        closed=order('CANCELLED','B');closed.update(docstatus=2,status='Cancelled')
+        data['order']=[closed]
+        data['payment']=[payment('ADV',120,sales_order='CANCELLED',unallocated_amount=70,refunded_amount=50),
+            payment('REFUND',50,sales_order='CANCELLED',unallocated_amount=0,payment_kind='Remboursement',refund_of='ADV')]
+        values=filters();values['state']='open'
+        result=cockpit.project(data,values)
+        names={doc['name'] for doc in result['documents']}
+        self.assertIn('ADV',names)
+        self.assertIn('REFUND',names)
+        self.assertNotIn('CANCELLED',names)
+        self.assertEqual(result['clients'][0]['advances_b'][0]['amount'],70)

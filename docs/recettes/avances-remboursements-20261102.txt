@@ -1,0 +1,66 @@
+Cockpit commercial — Avances et remboursements
+2 novembre 2026
+
+Utilisation
+1. Depuis une commande : Enregistrer un règlement ; ne sélectionner aucun BL
+   pour conserver le montant en avance. Valider.
+2. Depuis ce règlement : Affecter le règlement pour utiliser tout ou partie
+   de l'avance sur des bordereaux du même compte.
+3. Depuis ce règlement : Rembourser l'avance ; saisir le montant, le mode,
+   la date et une nouvelle référence. Enregistrer ou valider dans la fenêtre.
+4. Une annulation du remboursement depuis ERPNext rétablit le disponible.
+   Annuler une commande ne rembourse pas automatiquement l'argent.
+   Un encaissement ayant des remboursements actifs ne peut pas être annulé.
+
+Données et transaction
+Réutilisation de Reglement Special, de ses permissions, états et contrôleurs.
+Nouveaux champs : payment_kind, refund_of, refunded_amount.
+Un remboursement est un document séparé, positif, sans affectations aux BL.
+Seule sa contribution au solde est inversée. L'encaissement initial reste intact.
+Disponible = montant encaissé - affectations - remboursements validés.
+Verrou de société commun aux livraisons, affectations et remboursements.
+Le journal Commercial Operation assure l'idempotence des actions du cockpit.
+L'annulation d'un remboursement et son écriture native restent transactionnelles.
+Le lien vers une commande annulée n'est accepté que pour un remboursement
+reprenant exactement la commande de son encaissement validé. Tous les autres
+contrôles de liens Frappe sont conservés.
+
+Comptabilité et rapports
+A : Payment Entry Pay puis Payment Reconciliation avec l'encaissement Receive
+    d'origine. Réutilisation des comptes, devises et dimensions ERPNext.
+B : suivi spécial, sans Payment Entry ni nouvelle facture.
+Mixte : remboursement du seul reliquat non affecté, dans le circuit de la
+commande source de l'avance. Les affectations déjà faites restent inchangées.
+Situation des comptes clients et Suivi commandes utilisent le nouveau solde.
+Les remboursements sont liés à leur règlement d'origine dans le cockpit.
+Une avance disponible sur commande fermée/annulée reste consultable en vue ouverte.
+
+Migration et déploiement
+Déployer mat_reco, les assets Vue construits, puis bench --site SITE migrate.
+La synchronisation standard du DocType ajoute les champs.
+Patch post_model_sync : mat_reco.patches.initialize_receipt_kinds
+- les règlements existants restent des encaissements ;
+- index refund_of/docstatus ;
+- aucun solde initial ou ancien mouvement n'est recréé.
+Schéma et patch appliqués uniquement en développement pendant cette réalisation.
+Aucun remboursement ni écriture commerciale créé en production par cette tâche.
+
+Validation
+12 tests transactionnels sur erpv15dev.marsavco.com, données rollback :
+- B : remboursements partiels multiples, annulations et solde du rapport ;
+- dépassement et deux brouillons concurrents ;
+- argent déjà affecté non remboursable ;
+- A : décaissement, GL, rapprochement et annulation ;
+- remboursement total ;
+- affectation du reliquat après remboursement ;
+- mixte A/B sans impact sur la partie B affectée ;
+- encaissement d'origine non annulable tant qu'un remboursement est actif ;
+- date future sans modification du solde de la période antérieure ;
+- requête cockpit répétée sans doublon ;
+- erreur après GL avec rollback complet via le cockpit ;
+- commande source historiquement annulée et formulaire sans affectation BL.
+120 tests unitaires des actions, rapports et projections : PASS.
+70 tests JavaScript : PASS.
+Build Vite et recette Chromium des modales (dont remboursement) : PASS.
+La recette comptable utilise les comptes de test du développement ; pas de
+validation spécifique des écarts de change à ce stade.

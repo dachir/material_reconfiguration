@@ -277,6 +277,11 @@ def guard_stock(doc,method=None):
 
 def payment_validate(doc):
     if doc.docstatus==2:return
+    from . import special_refunds
+    if special_refunds.is_refund(doc):
+        return special_refunds.validate(doc)
+    if doc.get('payment_kind') not in (None, '', 'Encaissement') or doc.get('refund_of'):
+        frappe.throw('Nature de règlement ou avance d’origine invalide.')
     account(doc);cutover(doc)
     doc.amount=money(number(doc.amount,positive=True),doc.currency)
     if doc.amount<=0:frappe.throw('Montant encaissé supérieur à zéro requis.')
@@ -305,15 +310,17 @@ def payment_validate(doc):
         else:available=flt(bl.net_total)-allocated(bl.name,doc.name,lock=True)
         if row.amount<=0 or row.amount>available+EPS:frappe.throw('L’affectation dépasse le solde du BL.')
         total+=row.amount
-    if total>doc.amount+EPS:frappe.throw('Les affectations dépassent le montant encaissé.')
-    doc.allocated_amount=money(total,doc.currency);doc.unallocated_amount=money(doc.amount-total,doc.currency)
+    repaid=special_refunds.refunded(doc.name) if not doc.is_new() else 0
+    if total+repaid>doc.amount+EPS:frappe.throw('Les affectations dépassent le montant encaissé restant après remboursement.')
+    doc.refunded_amount=money(repaid,doc.currency)
+    doc.allocated_amount=money(total,doc.currency);doc.unallocated_amount=money(doc.amount-total-repaid,doc.currency)
     doc.status='Validé' if doc.docstatus==1 else 'Brouillon'
 
 
 def payment_before_update_after_submit(doc):
     # Only allocations may change after receipt validation. The receipt header is immutable.
     old=doc.get_doc_before_save()
-    for field in ('company','customer','currency','sales_order','posting_date','amount','mode_of_payment','reference','payment_entry'):
+    for field in ('company','customer','currency','sales_order','posting_date','amount','mode_of_payment','reference','payment_entry','payment_kind','refund_of'):
         before,after=old.get(field),doc.get(field)
         equal=(getdate(before)==getdate(after)) if field=='posting_date' else (flt(before)==flt(after)) if field=='amount' else (before or '')==(after or '')
         if not equal:frappe.throw('Les données du règlement validé sont immuables. Annuler avant correction.')
@@ -321,7 +328,13 @@ def payment_before_update_after_submit(doc):
 
 
 def payment_before_cancel(doc):
-    account(doc)
+    from . import special_refunds
+    if special_refunds.is_refund(doc):
+        special_refunds.validate(doc)
+    else:
+        account(doc)
+        if special_refunds.refunded(doc.name)>EPS:
+            frappe.throw('Annuler les remboursements avant d’annuler cet encaissement.')
     if doc.get('payment_entry'):
         from . import special_a
         special_a.payment_before_cancel(doc)
@@ -329,12 +342,18 @@ def payment_before_cancel(doc):
 
 
 def payment_on_submit(doc):
+    from . import special_refunds
+    if special_refunds.is_refund(doc):
+        return special_refunds.on_submit(doc)
     if doc.get('order_type') in ('A','Mixte'):
         from . import special_a
         special_a.payment_on_submit(doc)
 
 
 def payment_after_update_after_submit(doc):
+    from . import special_refunds
+    if special_refunds.is_refund(doc):
+        frappe.throw('Un remboursement validé est immuable ; annuler avant correction.')
     if doc.get('order_type') in ('A','Mixte') or doc.get('payment_entry'):
         from . import special_a
         special_a.payment_after_update_after_submit(doc)
@@ -472,7 +491,10 @@ def get_order_summary(sales_order):
     payments=[]
     for record in frappe.get_list(PAYMENT,filters=dict(company=order.company,customer=order.customer,currency=order.currency,docstatus=1,order_type=['in',[order.custom_ug_order_type,'Mixte']]),pluck='name',limit_page_length=0):
         p=frappe.get_doc(PAYMENT,record);share=payment_share(p,order.name,circuit=order.custom_ug_order_type)
-        if share:payments.append(dict(name=p.name,posting_date=p.posting_date,amount=share,unallocated_amount=p.unallocated_amount if p.sales_order==order.name else 0))
+        if share:payments.append(dict(name=p.name,posting_date=p.posting_date,
+            amount=-share if p.get('payment_kind')=='Remboursement' else share,
+            payment_kind=p.get('payment_kind') or 'Encaissement',
+            unallocated_amount=p.unallocated_amount if p.sales_order==order.name else 0))
     opening=sum(flt(r.amount) for r in frappe.get_list(OPENING,filters={'sales_order':order.name,'docstatus':1},fields=['amount'],limit_page_length=0))
     amounts=sum(flt(b.grand_total) for b in deliveries if b.docstatus==1)
     receipts=sum(p['amount'] for p in payments)

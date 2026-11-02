@@ -67,8 +67,12 @@ def _source(doctype, name, lock=False, allow_cancelled=False):
 
 
 def _target(source, action, check_state=True):
-    if not isinstance(action, str) or action not in ('quotation', 'order', 'delivery', 'payment', 'edit', 'validate', 'allocate'):
+    if not isinstance(action, str) or action not in ('quotation', 'order', 'delivery', 'payment', 'edit', 'validate', 'allocate', 'refund'):
         frappe.throw('Action commerciale inconnue.')
+    if action == 'refund' and source.doctype == 'Reglement Special' and source.get('payment_kind') != 'Remboursement' and (not check_state or source.docstatus == 1):
+        return source.doctype
+    if action == 'allocate' and source.get('payment_kind') == 'Remboursement':
+        frappe.throw('Un remboursement ne peut pas être affecté.')
     if action == 'allocate' and source.doctype == 'Reglement Special' and (not check_state or source.docstatus == 1):
         return source.doctype
     if action in ('edit', 'validate') and (not check_state or source.docstatus == 0):
@@ -125,7 +129,7 @@ def _fields(doctype):
             _field('acceptance_reference', 'Référence de l’acceptation client'),
             _field('order_type', 'Type de commande', 'Select', options='A\nB', reqd=1),
             _field('po_no', 'Commande du client'), _field('po_date', 'Date de commande du client', 'Date')]
-    if doctype in ('Quotation', 'Sales Order'):
+    if doctype == 'Quotation':
         fields.append(_field('terms', 'Conditions', 'Text Editor'))
     meta = frappe.get_meta(doctype)
     readable = set(meta.get_permitted_fieldnames(permission_type='read'))
@@ -476,8 +480,11 @@ def get_actions(source_doctype, source_name):
         if permissions['can_submit'] or permissions['workflow_actions']:
             result.append(dict(action='validate', label='Valider' if permissions['can_submit'] else 'Faire évoluer'))
     elif source.docstatus == 1:
-        if source.doctype == 'Reglement Special' and source.has_permission('write'):
-            result.append(dict(action='allocate', label='Affecter le règlement'))
+        if source.doctype == 'Reglement Special' and source.get('payment_kind') != 'Remboursement':
+            if source.has_permission('write'):
+                result.append(dict(action='allocate', label='Affecter le règlement'))
+            if flt(source.get('unallocated_amount')) > EPS and frappe.has_permission('Reglement Special', 'create'):
+                result.append(dict(action='refund', label='Rembourser l’avance'))
         for action, target, label in [('quotation', 'Quotation', 'Créer un devis'),
                 ('order', 'Sales Order', 'Créer une commande'), ('delivery', 'Bordereau Special', 'Livrer'),
                 ('payment', 'Reglement Special', 'Enregistrer un règlement')]:
@@ -497,7 +504,7 @@ def prepare_action(source_doctype, source_name, action):
     doc = source if action in ('edit', 'validate', 'allocate') else frappe.new_doc(target)
     prepared.update(action=action, title={'quotation':'Créer un devis', 'order':'Créer une commande',
         'delivery':'Préparer une livraison', 'payment':'Enregistrer un règlement', 'edit':'Modifier le brouillon',
-        'validate':'Faire évoluer le document', 'allocate':'Affecter le règlement'}.get(action, action),
+        'validate':'Faire évoluer le document', 'allocate':'Affecter le règlement', 'refund':'Rembourser l’avance'}.get(action, action),
         source=dict(doctype=source.doctype, name=source.name, modified=str(source.modified)),
         submission=submission(doc))
     if action == 'allocate':

@@ -78,7 +78,7 @@
   },
   {
    "fieldname": "amount",
-   "label": "Montant encaissé",
+   "label": "Montant du règlement",
    "fieldtype": "Currency",
    "reqd": 1,
    "in_list_view": 1,
@@ -115,7 +115,7 @@
   },
   {
    "fieldname": "payment_entry",
-   "label": "Encaissement ERPNext",
+   "label": "Écriture de paiement ERPNext",
    "fieldtype": "Link",
    "options": "Payment Entry",
    "read_only": 1,
@@ -134,6 +134,33 @@
    "fieldname": "remarks",
    "label": "Observations",
    "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "payment_kind",
+   "label": "Nature du règlement",
+   "fieldtype": "Select",
+   "options": "Encaissement\nRemboursement",
+   "default": "Encaissement",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "refund_of",
+   "label": "Avance remboursée",
+   "fieldtype": "Link",
+   "options": "Reglement Special",
+   "depends_on": "eval:doc.payment_kind == \"Remboursement\"",
+   "mandatory_depends_on": "eval:doc.payment_kind == \"Remboursement\"",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "refunded_amount",
+   "label": "Avances remboursées",
+   "fieldtype": "Currency",
+   "options": "currency",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1
   }
  ],
  "field_order": [
@@ -145,12 +172,15 @@
   "posting_date",
   "currency",
   "mode_of_payment_section",
+  "payment_kind",
+  "refund_of",
   "mode_of_payment",
   "reference",
   "amount",
   "allocations_section",
   "allocations",
   "allocated_amount",
+  "refunded_amount",
   "unallocated_amount",
   "payment_entry",
   "status",

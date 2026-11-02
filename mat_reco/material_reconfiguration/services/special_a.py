@@ -485,6 +485,8 @@ def payment_after_update_after_submit(doc):
         if new_amount > EPS:
             payment_on_submit(doc)
         return
+    if flt(doc.get('refunded_amount')) and abs(new_amount - old_amount) > EPS:
+        frappe.throw('Annuler les remboursements avant de modifier la répartition comptable A/B de cette avance.')
     if abs(new_amount - old_amount) > EPS:
         # Reclassifying part of a receipt between A and B changes its accounting
         # amount. Reverse the old native entry and create one replacement for A.
@@ -506,7 +508,9 @@ def payment_after_update_after_submit(doc):
     # An external reconciliation would make this form's allocations misleading.
     # Generated PEs are guarded against direct edits; also verify persisted data.
     allowed = {frappe.db.get_value(DELIVERY, row.bordereau, 'sales_invoice') for row in previous.allocations}
-    active_refs = [row for row in payment.references if flt(row.allocated_amount) > EPS]
+    refunds = set(frappe.db.get_values(PAYMENT, filters={'refund_of': doc.name, 'payment_kind': 'Remboursement', 'docstatus': 1}, fieldname='payment_entry', pluck=True)) if flt(doc.get('refunded_amount')) else set()
+    active_refs = [row for row in payment.references if flt(row.allocated_amount) > EPS and
+        not (row.reference_doctype == 'Payment Entry' and row.reference_name in refunds)]
     if any(row.reference_doctype != 'Sales Invoice' or row.reference_name not in allowed for row in active_refs):
         frappe.throw('Le règlement ERPNext a été rapproché hors de ce formulaire. Vérifier ses références.')
     with operation(PAYMENT, doc.name):
@@ -516,6 +520,7 @@ def payment_after_update_after_submit(doc):
             undo.voucher_type = 'Payment Entry'
             undo.voucher_no = payment.name
             undo.add_references()
+            undo.set('allocations', [row for row in undo.allocations if row.reference_doctype == 'Sales Invoice' and row.reference_name in allowed])
             if not undo.allocations:
                 frappe.throw('Le lettrage existant est introuvable. Vérifier le règlement ERPNext.')
             undo.insert()
@@ -583,7 +588,7 @@ def guard_native(doc, method=None):
     if not allowed_circuit or parent.company != doc.company:
         frappe.throw('Le document spécial associé doit appartenir au circuit A et à la même société.')
     if doc.doctype == 'Payment Entry':
-        if doc.party_type != 'Customer' or doc.party != parent.customer or doc.payment_type != 'Receive':
+        if doc.party_type != 'Customer' or doc.party != parent.customer or doc.payment_type != ('Pay' if parent.get('payment_kind') == 'Remboursement' else 'Receive'):
             frappe.throw('Le règlement ERPNext doit encaisser le client du règlement spécial.')
     else:
         if doc.customer != parent.customer:
