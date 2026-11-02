@@ -1,0 +1,197 @@
+{
+  "site": "https://fimaci.f.frappe.cloud",
+  "captured_at": "2026-10-31T11:20:01.035Z",
+  "screens": [
+    {
+      "file": "images/01-vue-ensemble.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Fiche technique réelle en brouillon de la commande SAL-ORD-2026-00052.",
+      "unsaved": false,
+      "sha256": "4ebb4f27b4d7b0356b2f364645ef13d5dda490fdbf4d21e70fce4cfdac09db70"
+    },
+    {
+      "file": "images/02-commandes-actions.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Sélecteur de fiche et actions disponibles sur un brouillon.",
+      "unsaved": false,
+      "sha256": "610f00c95a72da41cabd5baa7a1d58339132d0a28131b81bca689b85133822ed"
+    },
+    {
+      "file": "images/03-indicateurs.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Indicateurs réels : types, pièces, nouveaux articles et éléments à compléter.",
+      "unsaved": false,
+      "sha256": "b0b961a79def28023f73204551f953ad098be3e70b9e8724e5a105ba346a2a34"
+    },
+    {
+      "file": "images/04-types.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Types de la commande et quantités de pièces liées.",
+      "unsaved": false,
+      "sha256": "3c1651536f2150889d05022325395f735942ac2aed8f4a111943a186a531796c"
+    },
+    {
+      "file": "images/05-definition-existante.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Découpe existante avec sa matière primaire et contrôle d’épaisseur.",
+      "unsaved": false,
+      "sha256": "2ab0d37212195b8df2e02fb11061c86bda0464f87bea09dd320885a56de4ccf6"
+    },
+    {
+      "file": "images/06-article-existant.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Un article existant conserve sa définition et ses champs protégés.",
+      "unsaved": false,
+      "sha256": "d30a10f4e7b33d94f4718f0e86c2a11c2957e702daad420ff9509414fd04bf29"
+    },
+    {
+      "file": "images/07-format-plaque.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Format nominal de la plaque primaire, distinct des dimensions à découper.",
+      "unsaved": false,
+      "sha256": "adba5988439ff746b1421f882b5dc8b16f2fba7d79f861130ad9e31aa922235b"
+    },
+    {
+      "file": "images/08-rechercher-article.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Recherche d’un article existant du type sélectionné ; aucun choix enregistré.",
+      "unsaved": false,
+      "sha256": "fcbd66d56bec2be40fdcc752fd82133214a815f79712a1338a22e4a38444de19"
+    },
+    {
+      "file": "images/09-selection-commune.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Deux types de 6 mm cochés pour une définition commune ; aucun enregistrement.",
+      "unsaved": true,
+      "sha256": "ebfd4ab8a3921534f92fce684a019705a52a8ab4deb514ca10557dea9dbc51bc"
+    },
+    {
+      "file": "images/10-appliquer-definition.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Action de partage de la composition entre les types cochés.",
+      "unsaved": false,
+      "sha256": "466dff2d1f7fdb272c848b6792ad283f3720758fbfabfc55d8ff26f7ff47c61f"
+    },
+    {
+      "file": "images/11-definition-appliquee.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Confirmation locale : la composition a été recopiée sans enregistrement serveur.",
+      "unsaved": true,
+      "sha256": "e14c788774e9c5d891558269707b3dade04164de937f23f493a43525d2e5c0ed"
+    },
+    {
+      "file": "images/12-nouvel-article.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Champs à compléter pour un nouvel article : code, désignation, unité, groupe et dépôt.",
+      "unsaved": false,
+      "sha256": "323c9d7ae3c43662c03e715bf26c4fb4e9369daa24a5ef3e2cc3275e436fd977"
+    },
+    {
+      "file": "images/13-ajouter-composant.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Fenêtre réelle d’ajout d’un ouvrage, d’une découpe ou d’un ESPACE.",
+      "unsaved": false,
+      "sha256": "ae937586335aa1a1813f96d076e9e0abd3abce98335d40b9f3121db68d042bf4"
+    },
+    {
+      "file": "images/14-espace.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "Exemple non soumis d’ESPACE de 2 mm : aucune matière stockée n’est consommée par ce composant.",
+      "unsaved": true,
+      "sha256": "0d9e4557ba66e2730a3185b3a3e92dd34b6082d6b3152afcde8556eb88e0d16e"
+    },
+    {
+      "file": "images/15-reprendre-composition.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/eqt5ui8inr",
+      "caption": "La reprise de composition demande confirmation ; cette confirmation n’a pas été donnée.",
+      "unsaved": false,
+      "sha256": "5ddbc8935ffe2af18dbab4f40e5ac220f35448686620dfd79b771b372ce4627b"
+    },
+    {
+      "file": "images/16-epaisseur-incoherente.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/1sqkkdug0f",
+      "caption": "Exemple local : une seule découpe de 6 mm ne correspond pas au type de 12 mm.",
+      "unsaved": true,
+      "sha256": "acb06c2e96349ddddb95331d2bf7db5c700793fdc77a74ad5d2c5bba5fd18a0c"
+    },
+    {
+      "file": "images/17-epaisseur-coherente.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/1sqkkdug0f",
+      "caption": "Exemple local : deux découpes de 6 mm donnent une épaisseur cohérente de 12 mm. Rien n’est enregistré.",
+      "unsaved": true,
+      "sha256": "3aa0ad61c2fcd681875486a960d01b717d4001b024236b01ea4ad7ba8056c224"
+    },
+    {
+      "file": "images/18-fiche-validee.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/3pb5gpdipi",
+      "caption": "Fiche réellement validée : ouvrage de 16 mm composé de deux découpes de 8 mm.",
+      "unsaved": false,
+      "sha256": "d23bcabf8caac833de981f7e69e12e369f7f767789ed37b8ceaada979d53d896"
+    },
+    {
+      "file": "images/19-composition-validee.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/3pb5gpdipi",
+      "caption": "Composition validée réelle ; la fiche est consultable sans modification.",
+      "unsaved": false,
+      "sha256": "7b84714e385bac27317d5dfdde126979c67e4ff5ee3c9a17c13e48c95a024b4b"
+    },
+    {
+      "file": "images/20-actions-fiche-validee.png",
+      "source": "https://fimaci.f.frappe.cloud/app/technical-study/3pb5gpdipi",
+      "caption": "Actions de consultation, impression, actualisation et annulation selon les droits.",
+      "unsaved": false,
+      "sha256": "d84c8a18caa6d01e380aa4aae0ee488a0b76eb1e9ebd39efb111793bdccb779f"
+    }
+  ],
+  "checks": {
+    "before": {
+      "Chantier Technical Study": {
+        "count": 9,
+        "sha256": "45bd2d928f2a6656383219be484675e8d0a7259d869215d3dfce15e6639ce508"
+      },
+      "Chantier": {
+        "count": 11,
+        "sha256": "246dc461dc28768f1ab2e93a7a3e671b901a551a302d63a2a4e23eb0878a7be7"
+      },
+      "Sales Order": {
+        "count": 9,
+        "sha256": "fadfebad7287791e9ab4a6334d083fb2b4c7fed0c162800e1770c517b41d47f1"
+      },
+      "Item": {
+        "count": 1821,
+        "sha256": "fcee797dcaa69b57525adaeed8aa8abd6854d16c95fbad6e96d964e8042033d1"
+      },
+      "Stock Entry": {
+        "count": 61,
+        "sha256": "9e8457fbe7e891d5437397bd63287cadc2054ee78599322695d2e048147504af"
+      }
+    },
+    "after": {
+      "Chantier Technical Study": {
+        "count": 9,
+        "sha256": "45bd2d928f2a6656383219be484675e8d0a7259d869215d3dfce15e6639ce508"
+      },
+      "Chantier": {
+        "count": 11,
+        "sha256": "246dc461dc28768f1ab2e93a7a3e671b901a551a302d63a2a4e23eb0878a7be7"
+      },
+      "Sales Order": {
+        "count": 9,
+        "sha256": "fadfebad7287791e9ab4a6334d083fb2b4c7fed0c162800e1770c517b41d47f1"
+      },
+      "Item": {
+        "count": 1821,
+        "sha256": "fcee797dcaa69b57525adaeed8aa8abd6854d16c95fbad6e96d964e8042033d1"
+      },
+      "Stock Entry": {
+        "count": 61,
+        "sha256": "9e8457fbe7e891d5437397bd63287cadc2054ee78599322695d2e048147504af"
+      }
+    },
+    "unchanged": true,
+    "business_operations_executed": 0
+  },
+  "blocked_requests": [
+    "/api/method/frappe.integrations.frappe_providers.frappecloud_billing.current_site_info"
+  ]
+}

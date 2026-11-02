@@ -1,0 +1,185 @@
+{
+  "site": "https://fimaci.f.frappe.cloud",
+  "captured_at": "2026-10-31T11:33:05.451Z",
+  "screens": [
+    {
+      "file": "images/01-vue-ensemble.png",
+      "source": "https://fimaci.f.frappe.cloud/app/workshop-cockpit",
+      "caption": "Vue réelle du cockpit atelier sur le site de production.",
+      "unsaved": false,
+      "sha256": "f130316cf6799e90322c286bb4ff84d901d57343c65ff2e5effc5e8177955f79"
+    },
+    {
+      "file": "images/02-filtres.png",
+      "source": "https://fimaci.f.frappe.cloud/app/workshop-cockpit",
+      "caption": "Filtres de fabrication et accès au rapport de stock.",
+      "unsaved": false,
+      "sha256": "aa37872d5a82d5a5f996c53d405d39bcbbe93c2b7a7d09907abb8318154900c4"
+    },
+    {
+      "file": "images/03-indicateurs.png",
+      "source": "https://fimaci.f.frappe.cloud/app/workshop-cockpit",
+      "caption": "Indicateurs du cockpit au moment de la capture : aucune fabrication en attente.",
+      "unsaved": false,
+      "sha256": "4bc7361885017872836e9f4e64174df0b2f8750ec9ca6eae0c17fa2aba93f7ec"
+    },
+    {
+      "file": "images/04-navigation.png",
+      "source": "https://fimaci.f.frappe.cloud/app/workshop-cockpit",
+      "caption": "Zoom initial de 65 %, développement et repli des branches.",
+      "unsaved": false,
+      "sha256": "dd074c5e654d2920d5bf415a9acc6cfbc648977da18341b9c103a35c96f9167f"
+    },
+    {
+      "file": "images/05-legende.png",
+      "source": "https://fimaci.f.frappe.cloud/app/workshop-cockpit",
+      "caption": "Légende réelle des états de fabrication.",
+      "unsaved": false,
+      "sha256": "df34b4fa27c5ce0a7dceced7cbfdf6527e8601858fbc83fc8c23010d975539ba"
+    },
+    {
+      "file": "images/06-vue-liste.png",
+      "source": "https://fimaci.f.frappe.cloud/app/workshop-cockpit",
+      "caption": "Colonnes réelles de la vue Liste ; aucun besoin en attente à cette date.",
+      "unsaved": false,
+      "sha256": "cd2a4015959f8d0c62d7b2a31fe9c8511ee5a5e678c33d4d774512ea355166af"
+    },
+    {
+      "file": "images/07-rapport-stock.png",
+      "source": "https://fimaci.f.frappe.cloud/app/query-report/UG%20-%20Stock%20de%20Vitres?stock_type=Les+deux&detail=Synth%C3%A8se",
+      "caption": "Rapport réel UG - Stock de Vitres ouvert depuis le bouton d’impression du cockpit.",
+      "unsaved": false,
+      "sha256": "0dd8343cb2dc76b4affd895c1fa31a88fcceec338ab34f20d5faeac202d42880"
+    },
+    {
+      "file": "images/08-filtres-stock.png",
+      "source": "https://fimaci.f.frappe.cloud/app/query-report/UG%20-%20Stock%20de%20Vitres?stock_type=Les+deux&detail=Synth%C3%A8se",
+      "caption": "Filtres directement sur le rapport : plaques, chutes ou les deux, matière, société, dépôt et présentation.",
+      "unsaved": false,
+      "sha256": "738845afe596fc8aac18eb55f40218dce53a1e3d3976c7f4a90bc62189bf56b6"
+    },
+    {
+      "file": "images/09-tableau-stock.png",
+      "source": "https://fimaci.f.frappe.cloud/app/query-report/UG%20-%20Stock%20de%20Vitres?stock_type=Les+deux&detail=Synth%C3%A8se",
+      "caption": "Extrait des premières lignes du stock réel affiché en synthèse.",
+      "unsaved": false,
+      "sha256": "6c5efad1b86a9d0c599d606dbd3be15e5775b01480c6d71adc6c62db9fa15b6e"
+    },
+    {
+      "file": "images/10-stock-chutes.png",
+      "source": "https://fimaci.f.frappe.cloud/app/query-report/UG%20-%20Stock%20de%20Vitres?stock_type=Chutes&detail=Synth%C3%A8se",
+      "caption": "Extrait du rapport réel filtré sur les chutes ; ce filtre ne modifie pas le stock.",
+      "unsaved": false,
+      "sha256": "34bf9d0bea6359eee4015af596b03bd0ec43b8404b6987e9a2113ef32eea774d"
+    },
+    {
+      "file": "images/11-mcp-execute.png",
+      "source": "https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000172",
+      "caption": "MCP existant 26MCP1000172 validé et exécuté ; aucune action de production lancée.",
+      "unsaved": false,
+      "sha256": "6f3e3f26968b4f3002e69dd18d12138231efe839bb089583f605b84d4d58d6ae"
+    },
+    {
+      "file": "images/12-source-mcp.png",
+      "source": "https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000172",
+      "caption": "Société, dépôt source, matière et état Executed du MCP existant.",
+      "unsaved": false,
+      "sha256": "5ab3dc66b64459dca8ce212ef018b186a215d35651851b91929b1c5fbed1f657"
+    },
+    {
+      "file": "images/13-commandes-mcp.png",
+      "source": "https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000172",
+      "caption": "Commande affectée au MCP existant. Un plan peut regrouper plusieurs commandes de même matière.",
+      "unsaved": false,
+      "sha256": "5180c01347dcacc280a505518bd25c5f23b027aba07c425527c9155b160b5ded"
+    },
+    {
+      "file": "images/14-pieces-planifiees.png",
+      "source": "https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000172",
+      "caption": "Une pièce de 1 000 × 800 × 8 mm effectivement planifiée dans ce MCP.",
+      "unsaved": false,
+      "sha256": "ba83c3b5a9e6c4f89e8981ccb8d1cd2ece3bf574af9be9d5ebeb842b9b247c73"
+    },
+    {
+      "file": "images/15-plan-decoupe.png",
+      "source": "https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000172",
+      "caption": "Aperçu réel du plan de découpe exécuté, consulté sans modification.",
+      "unsaved": false,
+      "sha256": "9e2892637bf99f36afa052a394626da08171eb018cd8eb6b8005dd8ccec9b88c"
+    },
+    {
+      "file": "images/16-resume-plan.png",
+      "source": "https://fimaci.f.frappe.cloud/app/material-cutting-plan/26MCP1000172",
+      "caption": "Résumé réel du plan exécuté : pièces, surfaces et chutes.",
+      "unsaved": false,
+      "sha256": "1bc22490d46d99e4c483accc7ee36106127ad7e095338960ec10ab04fbd75af3"
+    },
+    {
+      "file": "images/17-repack-lie.png",
+      "source": "https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00180",
+      "caption": "Repack réel validé MAT-STE-2026-00180 lié au MCP 26MCP1000172.",
+      "unsaved": false,
+      "sha256": "6d54c4139b0a6a8a2d048584a712d0ad83142ee16893f8c96f5f3e29aede9743"
+    },
+    {
+      "file": "images/18-mouvements-repack.png",
+      "source": "https://fimaci.f.frappe.cloud/app/stock-entry/MAT-STE-2026-00180",
+      "caption": "Lignes réelles du mouvement de stock : matière consommée et sorties produites.",
+      "unsaved": false,
+      "sha256": "f6a33c841e39cc849e1ad2c34e081a7a6b91d158a7dca3daac7504b484c4af69"
+    }
+  ],
+  "checks": {
+    "before": {
+      "Chantier Technical Study": {
+        "count": 9,
+        "sha256": "45bd2d928f2a6656383219be484675e8d0a7259d869215d3dfce15e6639ce508"
+      },
+      "Sales Order": {
+        "count": 9,
+        "sha256": "fadfebad7287791e9ab4a6334d083fb2b4c7fed0c162800e1770c517b41d47f1"
+      },
+      "Material Cutting Plan": {
+        "count": 5,
+        "sha256": "6f2cb352aa78e3eaab8b40f2e60aff21f276111c22cf216a6f5ccc42674ee40b"
+      },
+      "Stock Entry": {
+        "count": 61,
+        "sha256": "9e8457fbe7e891d5437397bd63287cadc2054ee78599322695d2e048147504af"
+      },
+      "Workshop Operation": {
+        "count": 7,
+        "sha256": "024c0482ab359fc0f47b0f336992267cd75b9e2c935a9778951d3f52ae0ac734"
+      }
+    },
+    "after": {
+      "Chantier Technical Study": {
+        "count": 9,
+        "sha256": "45bd2d928f2a6656383219be484675e8d0a7259d869215d3dfce15e6639ce508"
+      },
+      "Sales Order": {
+        "count": 9,
+        "sha256": "fadfebad7287791e9ab4a6334d083fb2b4c7fed0c162800e1770c517b41d47f1"
+      },
+      "Material Cutting Plan": {
+        "count": 5,
+        "sha256": "6f2cb352aa78e3eaab8b40f2e60aff21f276111c22cf216a6f5ccc42674ee40b"
+      },
+      "Stock Entry": {
+        "count": 61,
+        "sha256": "9e8457fbe7e891d5437397bd63287cadc2054ee78599322695d2e048147504af"
+      },
+      "Workshop Operation": {
+        "count": 7,
+        "sha256": "024c0482ab359fc0f47b0f336992267cd75b9e2c935a9778951d3f52ae0ac734"
+      }
+    },
+    "unchanged": true,
+    "business_operations_executed": 0
+  },
+  "blocked_requests": [
+    "/api/method/frappe.integrations.frappe_providers.frappecloud_billing.current_site_info",
+    "/api/method/mat_reco.material_reconfiguration.services.mcp_action_preview.load_mcp_effective_plan",
+    "/api/method/erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions"
+  ]
+}

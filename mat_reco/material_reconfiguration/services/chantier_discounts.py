@@ -33,7 +33,7 @@ def signature(doc):
 
 def rate_matches(doc,macro,row):
     pct=percentage(doc,macro);expected=flt(unit_rate(macro)*(1-pct/100),row.precision('rate'))
-    return matches(row,macro) and abs(flt(row.rate)-expected)<.000001 and abs(flt(row.discount_percentage)-pct)<.000001 and (not pct or abs(flt(row.price_list_rate)-unit_rate(macro))<.000001)
+    return matches(row,macro) and abs(flt(row.rate)-expected)<.000001 and abs(flt(row.discount_percentage)-pct)<.000001 and (not pct or abs(flt(row.price_list_rate)-flt(unit_rate(macro),row.precision('price_list_rate')))<.000001)
 
 
 def apply_quote(quote,doc):

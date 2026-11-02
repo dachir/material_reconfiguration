@@ -1,0 +1,71 @@
+{
+  "expected_pdf_pages": 13,
+  "missingImages": [],
+  "pages": [
+    {
+      "index": 0,
+      "title": "Le cockpit\natelier",
+      "height": 862
+    },
+    {
+      "index": 1,
+      "title": "Accéder au cockpit et comprendre son périmètre",
+      "height": 594
+    },
+    {
+      "index": 2,
+      "title": "Filtrer les besoins de fabrication",
+      "height": 588
+    },
+    {
+      "index": 3,
+      "title": "Naviguer dans l’arbre et les liens",
+      "height": 762
+    },
+    {
+      "index": 4,
+      "title": "Lire les états, quantités et disponibilités",
+      "height": 623
+    },
+    {
+      "index": 5,
+      "title": "Choisir la quantité et préparer l’action",
+      "height": 611
+    },
+    {
+      "index": 6,
+      "title": "Préparer un MCP et contrôler les commandes",
+      "height": 576
+    },
+    {
+      "index": 7,
+      "title": "Lire et vérifier le plan de découpe",
+      "height": 743
+    },
+    {
+      "index": 8,
+      "title": "Valider le MCP et vérifier son Repack",
+      "height": 657
+    },
+    {
+      "index": 9,
+      "title": "Assembler les ouvrages après découpe",
+      "height": 677
+    },
+    {
+      "index": 10,
+      "title": "Consulter le stock de plaques et de chutes",
+      "height": 613
+    },
+    {
+      "index": 11,
+      "title": "Imprimer et conserver les documents de suivi",
+      "height": 691
+    },
+    {
+      "index": 12,
+      "title": "Suivre les tâches et résoudre les blocages",
+      "height": 709
+    }
+  ]
+}
